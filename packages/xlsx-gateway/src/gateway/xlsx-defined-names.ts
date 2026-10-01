@@ -29,17 +29,26 @@ const CELL_REF_PATTERN = /^(?:[A-Za-z]{1,3}[0-9]+|[Rr][0-9]*[Cc][0-9]*)$/
 
 export function applyDefinedNamesState(workbookXml: string, state: DefinedNamesState): string {
   const preserved = new Set(state.preserveNames)
+  // A name may repeat across scopes: resolve each preserved name to the
+  // scopes it occupies in the file so same-name entries elsewhere pass.
+  const preservedKeys = new Set<string>()
+  for (const match of workbookXml.matchAll(/<definedName\b[^>]*>/g)) {
+    const name = /\bname="([^"]*)"/.exec(match[0])?.[1]
+    if (name === undefined || !preserved.has(unescapeXml(name))) continue
+    const scope = /\blocalSheetId="(\d+)"/.exec(match[0])?.[1]
+    preservedKeys.add(`${unescapeXml(name)}\u0000${scope === undefined ? -1 : Number(scope)}`)
+  }
   const seen = new Set<string>()
   for (const entry of state.names) {
     validateName(entry.name)
-    if (preserved.has(entry.name)) {
+    // Same name may repeat across different scopes, never within one.
+    const key = `${entry.name}\u0000${entry.sheetIndex ?? -1}`
+    if (preservedKeys.has(key)) {
       throw new DefinedNameError(
         `The name "${entry.name}" also exists in a form the editor cannot model — ` +
           'saving would duplicate it.',
       )
     }
-    // Same name may repeat across different scopes, never within one.
-    const key = `${entry.name}\u0000${entry.sheetIndex ?? -1}`
     if (seen.has(key)) {
       throw new DefinedNameError(`The name "${entry.name}" is defined twice.`)
     }
