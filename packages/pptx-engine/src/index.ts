@@ -4115,9 +4115,15 @@ export function pasteElements(
         rid = `rId${++maxRid}`
         const target = rel.external ? rel.target : relTargetFromSlide(landed)
         const mode = rel.external ? ' TargetMode="External"' : ''
+        // Replacement must be a function: a string replacement expands $&, $`,
+        // $' and $$, and an external target is a user-supplied URL, so a $& in
+        // it substituted the matched </Relationships> into the middle of the
+        // Target attribute and left the part malformed. Several other
+        // relationship writers here already pass a function.
         relsXml = relsXml.replace(
           '</Relationships>',
-          `<Relationship Id="${rid}" Type="${rel.type}" Target="${escapeXmlAttr(target)}"${mode}/></Relationships>`,
+          () =>
+            `<Relationship Id="${rid}" Type="${rel.type}" Target="${escapeXmlAttr(target)}"${mode}/></Relationships>`,
         )
         relsDirty = true
         byKey.set(key, rid)
