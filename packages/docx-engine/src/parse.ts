@@ -375,7 +375,9 @@ export async function parseDocx(
   const noteNumbers = noteNumbersOf(documentXml, footnotes, endnotes, footnoteProps, endnoteProps)
 
   const rangedCommentIds = new Set(
-    [...documentXml.matchAll(/<w:commentRangeStart [^>]*w:id="([^"]+)"/g)].map((m) => m[1]),
+    [...documentXml.matchAll(/<w:commentRangeStart\b[^>]*\bw:id\s*=\s*["']([^"']+)["']/g)].map(
+      (m) => m[1],
+    ),
   )
   const referenceOnlyComments = new Set(
     comments.map((c) => c.id).filter((id) => !rangedCommentIds.has(id)),

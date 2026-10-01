@@ -76,8 +76,8 @@ export function crossParaCommentMarkers(xml: string): {
   commentEnds: string[] | undefined
 } {
   const ids = (re: RegExp) => [...xml.matchAll(re)].map((m) => m[1])
-  const starts = ids(/<w:commentRangeStart [^>]*w:id="([^"]+)"/g)
-  const ends = ids(/<w:commentRangeEnd [^>]*w:id="([^"]+)"/g)
+  const starts = ids(/<w:commentRangeStart\b[^>]*\bw:id\s*=\s*["']([^"']+)["']/g)
+  const ends = ids(/<w:commentRangeEnd\b[^>]*\bw:id\s*=\s*["']([^"']+)["']/g)
   const onlyStarts = starts.filter((id) => !ends.includes(id))
   const onlyEnds = ends.filter((id) => !starts.includes(id))
   return {
