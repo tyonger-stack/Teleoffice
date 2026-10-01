@@ -442,8 +442,18 @@ function serializeCfvo(value: unknown, extra = ''): string {
     throw new CfEditError(`Unsupported threshold type "${type}".`)
   }
   const raw = config?.value
-  const val = type === 'formula' ? String(raw ?? '0') : String(Number(raw ?? 0))
-  return `<cfvo type="${type}" val="${escapeXmlAttribute(val)}"${extra}/>`
+  if (type === 'formula') {
+    return `<cfvo type="formula" val="${escapeXmlAttribute(String(raw ?? '0'))}"${extra}/>`
+  }
+  // A non-numeric or non-finite threshold stringifies to "NaN"/"Infinity",
+  // which Excel cannot evaluate, so the rule silently stops applying. The
+  // sibling highlight path already rejects this input; fail the same way here
+  // instead of writing an unusable threshold.
+  const numeric = Number(raw ?? 0)
+  if (!Number.isFinite(numeric)) {
+    throw new CfEditError(`A ${type} threshold needs a finite value.`)
+  }
+  return `<cfvo type="${type}" val="${escapeXmlAttribute(String(numeric))}"${extra}/>`
 }
 
 /// Univer IStyleBase highlight style → dxf XML (font + solid fill).
