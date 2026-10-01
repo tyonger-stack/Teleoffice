@@ -82,11 +82,17 @@ export function applyDefinedNamesState(workbookXml: string, state: DefinedNamesS
   // Schema order: definedNames follows sheets (and functionGroups/externalReferences).
   const anchor = /<\/sheets>|<sheets\b[^>]*\/>/.exec(xml)
   if (!anchor) throw new DefinedNameError('workbook.xml has no sheets element.')
+  const groups = /<functionGroups\b[^>]*>[\s\S]*?<\/functionGroups>|<functionGroups\b[^>]*\/>/.exec(
+    xml,
+  )
   const externals =
     /<externalReferences\b[^>]*>[\s\S]*?<\/externalReferences>|<externalReferences\b[^>]*\/>/.exec(
       xml,
     )
-  const at = externals ? externals.index + externals[0].length : anchor.index + anchor[0].length
+  let at = externals ? externals.index + externals[0].length : anchor.index + anchor[0].length
+  // functionGroups only counts when externalReferences is absent: the later
+  // element is the one the section must follow
+  if (!externals && groups) at = groups.index + groups[0].length
   return `${xml.slice(0, at)}<definedNames>${additions}</definedNames>${xml.slice(at)}`
 }
 
