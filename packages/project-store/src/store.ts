@@ -866,12 +866,18 @@ export class ProjectStore {
       )
     }
     const now = nowIso()
-    // Generate a stable yet unique id
-    const hash = createHash('sha256')
-      .update(trimmed + now)
-      .digest('hex')
-      .slice(0, 12)
-    const id = `proj-${hash}`
+    // Generate a stable yet unique id: retry with a nonce when the same name
+    // and millisecond would otherwise collide
+    let id: string
+    let attempt = 0
+    do {
+      const hash = createHash('sha256')
+        .update(attempt === 0 ? trimmed + now : `${trimmed}:${now}:${attempt}`)
+        .digest('hex')
+        .slice(0, 12)
+      id = `proj-${hash}`
+      attempt++
+    } while (this.readIndex().projects.some((p) => p.id === id))
     const data: ProjectData = {
       id,
       name: trimmed,

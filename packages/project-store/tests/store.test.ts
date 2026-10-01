@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -768,6 +768,18 @@ describe('createProject', () => {
     const a = store.createProject('Project A')
     const b = store.createProject('Project B')
     expect(a.id).not.toBe(b.id)
+  })
+
+  it('produces unique ids when two creates share a millisecond', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+    try {
+      const a = store.createProject('Same Name')
+      const b = store.createProject('Same Name')
+      expect(a.id).not.toBe(b.id)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
 
