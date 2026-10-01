@@ -115,7 +115,7 @@ export const ru = {
   aiNetworkError:
     'Проблема с сетью: не удалось подключиться к сервису ИИ. Проверьте подключение и повторите попытку',
   aiCreditsExhausted:
-    'Кредиты Genspark исчерпаны. Пополните баланс на genspark.ai/pricing и повторите попытку',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiSumReadAttachment: 'Чтение вложения',
   aiSumImageAttachment: 'Вложенное изображение {name}',
   aiSumRead: 'Чтение {name}',

@@ -199,7 +199,6 @@ export interface AiChatMessage {
   readonly undelivered?: boolean | undefined
   /** this user message was written to the project-store chat log (Retry re-persists when it wasn't) */
   readonly persisted?: boolean | undefined
-  /** the run failed because Genspark is signed out — render an inline sign-in button */
   /** Set when this message reflects an auto-applied plan; renders an inline [Undo] button. */
   readonly autoApplied?: { readonly opCount: number; readonly undoSteps: number } | undefined
   /** attachments consumed from the composer by this user message (read-only echo chips) */
@@ -509,7 +508,7 @@ export function AiChatPanel({
         onPointerDown={startResize}
         role="separator"
         aria-orientation="vertical"
-        aria-label={t('aiGensparkAccount')}
+        aria-label={t('aiResizePanel')}
       />
       <header className="ai-panel-header">
         <span className="ai-panel-title">

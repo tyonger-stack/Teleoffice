@@ -317,7 +317,7 @@ export const strings = {
     setAiCodexHint:
       '自动查找并使用当前 Codex CLI，更新后无需重新选择；也可填写自定义路径。无需 API Key。',
     setAiByokNote:
-      '对话使用你自己的 key；生图与媒体解析按「生图与媒体」设置；网页搜索仍走 Genspark 登录或免费来源。',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: '保存',
     setAiSaved: '已保存',
     setAiTest: '测试连接',
@@ -354,7 +354,7 @@ export const strings = {
     setAiSharedKeyHint: '同一服务商的 key 与 Base URL 在各项能力间共用，只需填一次。',
     setAiGskTools: 'Genspark 云工具',
     setAiGskToolsDesc:
-      '服务商选择 Genspark 时，网页搜索、生图与媒体解析经 Genspark 云端并消耗积分；关闭后搜索改用免费来源，Genspark 生图工具不可用。',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: '开源项目',
     starOnGitHub: '去 GitHub 点 Star',
     starPromptTitle: '喜欢 TeleOffice 吗？',
@@ -720,7 +720,7 @@ export const strings = {
     setAiCodexHint:
       'Automatically finds the current signed-in Codex CLI after updates; a custom path is optional. No API key is needed.',
     setAiByokNote:
-      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search still uses the Genspark sign-in or free sources.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Save',
     setAiSaved: 'Saved',
     setAiTest: 'Test connection',
@@ -761,7 +761,7 @@ export const strings = {
       "A vendor's key and base URL are shared across capabilities; enter them once.",
     setAiGskTools: 'Genspark cloud tools',
     setAiGskToolsDesc:
-      'Web search, image generation and media analysis run through Genspark and use credits while their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Open Source',
     starOnGitHub: 'Star on GitHub',
     starPromptTitle: 'Enjoying TeleOffice?',
@@ -1130,7 +1130,7 @@ export const strings = {
     setAiCodexHint:
       'Tự động tìm CLI Codex đã đăng nhập hiện tại sau các bản cập nhật; đường dẫn tùy chỉnh là không bắt buộc. Không cần khóa API.',
     setAiByokNote:
-      'Các cuộc trò chuyện sử dụng khóa của riêng bạn. Việc tạo hình ảnh và phân tích phương tiện tuân theo phần Phương tiện AI; tìm kiếm web vẫn sử dụng đăng nhập Genspark hoặc các nguồn miễn phí.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Lưu',
     setAiSaved: 'Đã lưu',
     setAiTest: 'Kiểm tra kết nối',
@@ -1171,7 +1171,7 @@ export const strings = {
       'Khóa và URL cơ sở của nhà cung cấp được dùng chung cho các chức năng; chỉ cần nhập một lần.',
     setAiGskTools: 'Công cụ đám mây Genspark',
     setAiGskToolsDesc:
-      'Tìm kiếm web, tạo hình ảnh và phân tích phương tiện được xử lý qua Genspark và tiêu tốn credit khi nhà cung cấp được đặt là Genspark; khi tắt, tìm kiếm sẽ dùng các nguồn miễn phí và công cụ hình ảnh Genspark sẽ không khả dụng.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Mã nguồn mở',
     starOnGitHub: 'Gắn sao trên GitHub',
     starPromptTitle: 'Bạn thích TeleOffice chứ?',
@@ -1552,7 +1552,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: '自動検出（推奨）',
     setAiCodexHint: 'ローカルでサインイン済みの Codex CLI を使用します。API キーは不要です。',
     setAiByokNote:
-      'チャットは自分のキーを使用します。画像生成とメディア解析は「AI メディア」の設定に従い、Web 検索は引き続き Genspark のサインインまたは無料ソースを使用します。',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: '保存',
     setAiSaved: '保存しました',
     setAiTest: '接続テスト',
@@ -1593,7 +1593,7 @@ export const strings = {
       '同じプロバイダーのキーと Base URL は各機能で共有されます。一度入力すれば済みます。',
     setAiGskTools: 'Genspark クラウドツール',
     setAiGskToolsDesc:
-      'プロバイダーが Genspark のとき、Web 検索・画像生成・メディア解析は Genspark 経由でクレジットを消費します。オフにすると検索は無料ソースを使い、Genspark の画像ツールは利用できません。',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'オープンソース',
     starOnGitHub: 'GitHub でスターを付ける',
     starPromptTitle: 'TeleOffice はいかがですか？',
@@ -1966,7 +1966,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: '자동 감지(권장)',
     setAiCodexHint: '로컬에서 로그인된 Codex CLI를 사용하므로 API 키가 필요 없습니다.',
     setAiByokNote:
-      '채팅은 내 키를 사용합니다. 이미지 생성과 미디어 분석은 「AI 미디어」 설정을 따르며, 웹 검색은 여전히 Genspark 로그인 또는 무료 소스를 사용합니다.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: '저장',
     setAiSaved: '저장됨',
     setAiTest: '연결 테스트',
@@ -2007,7 +2007,7 @@ export const strings = {
       '같은 제공자의 키와 Base URL은 모든 기능에서 공유되므로 한 번만 입력하면 됩니다.',
     setAiGskTools: 'Genspark 클라우드 도구',
     setAiGskToolsDesc:
-      '제공자가 Genspark일 때 웹 검색, 이미지 생성, 미디어 분석은 Genspark를 거쳐 크레딧을 사용합니다. 끄면 검색은 무료 소스를 사용하고 Genspark 이미지 도구는 사용할 수 없습니다.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: '오픈 소스',
     starOnGitHub: 'GitHub에서 스타 누르기',
     starPromptTitle: 'TeleOffice가 마음에 드시나요?',
@@ -2393,7 +2393,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'Détection auto (recommandé)',
     setAiCodexHint: 'Utilise le CLI Codex connecté localement ; aucune clé API requise.',
     setAiByokNote:
-      "Les conversations utilisent votre propre clé. La génération d'images et l'analyse de médias suivent la section « Médias IA » ; la recherche web utilise toujours la connexion Genspark ou des sources gratuites.",
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Enregistrer',
     setAiSaved: 'Enregistré',
     setAiTest: 'Tester la connexion',
@@ -2436,7 +2436,7 @@ export const strings = {
       "La clé et l'URL de base d'un fournisseur sont partagées entre les capacités ; saisissez-les une seule fois.",
     setAiGskTools: 'Outils cloud Genspark',
     setAiGskToolsDesc:
-      "Lorsque leur fournisseur est Genspark, la recherche web, la génération d'images et l'analyse de médias passent par Genspark et consomment des crédits ; désactivé, la recherche utilise des sources gratuites et les outils d'image Genspark sont indisponibles.",
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Open source',
     starOnGitHub: 'Mettre une étoile sur GitHub',
     starPromptTitle: 'TeleOffice vous plaît ?',
@@ -2826,7 +2826,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'Automatisch erkennen (empfohlen)',
     setAiCodexHint: 'Verwendet die lokal angemeldete Codex CLI; kein API-Schlüssel nötig.',
     setAiByokNote:
-      'Chats nutzen deinen eigenen Schlüssel. Bildgenerierung und Medienanalyse folgen dem Abschnitt „KI-Medien“; die Websuche nutzt weiterhin die Genspark-Anmeldung oder kostenlose Quellen.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Speichern',
     setAiSaved: 'Gespeichert',
     setAiTest: 'Verbindung testen',
@@ -2867,7 +2867,7 @@ export const strings = {
       'Schlüssel und Base URL eines Anbieters gelten für alle Fähigkeiten; einmal eintragen genügt.',
     setAiGskTools: 'Genspark-Cloud-Tools',
     setAiGskToolsDesc:
-      'Steht ihr Anbieter auf Genspark, laufen Websuche, Bildgenerierung und Medienanalyse über Genspark und verbrauchen Credits; ausgeschaltet nutzt die Suche kostenlose Quellen und die Genspark-Bildwerkzeuge sind nicht verfügbar.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Open Source',
     starOnGitHub: 'Auf GitHub Stern geben',
     starPromptTitle: 'Gefällt Ihnen TeleOffice?',
@@ -3254,7 +3254,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'Detección automática (recomendado)',
     setAiCodexHint: 'Usa la CLI de Codex con sesión local; no se necesita clave de API.',
     setAiByokNote:
-      'Los chats usan tu propia clave. La generación de imágenes y el análisis de medios siguen la sección «Medios de IA»; la búsqueda web sigue usando el inicio de sesión de Genspark o fuentes gratuitas.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Guardar',
     setAiSaved: 'Guardado',
     setAiTest: 'Probar conexión',
@@ -3295,7 +3295,7 @@ export const strings = {
       'La clave y la URL base de un proveedor se comparten entre capacidades; introdúcelas una sola vez.',
     setAiGskTools: 'Herramientas en la nube de Genspark',
     setAiGskToolsDesc:
-      'Cuando su proveedor es Genspark, la búsqueda web, la generación de imágenes y el análisis de medios pasan por Genspark y consumen créditos; desactivado, la búsqueda usa fuentes gratuitas y las herramientas de imagen de Genspark no están disponibles.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Código abierto',
     starOnGitHub: 'Dar una estrella en GitHub',
     starPromptTitle: '¿Te gusta TeleOffice?',
@@ -3665,7 +3665,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'ค้นหาอัตโนมัติ (แนะนำ)',
     setAiCodexHint: 'ใช้ Codex CLI ที่เข้าสู่ระบบไว้ในเครื่อง โดยไม่ต้องใช้คีย์ API',
     setAiByokNote:
-      'การแชทใช้คีย์ของคุณเอง การสร้างภาพและการวิเคราะห์สื่อเป็นไปตามส่วน "สื่อ AI" ส่วนการค้นหาเว็บยังใช้การลงชื่อเข้าใช้ Genspark หรือแหล่งข้อมูลฟรี',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'บันทึก',
     setAiSaved: 'บันทึกแล้ว',
     setAiTest: 'ทดสอบการเชื่อมต่อ',
@@ -3706,7 +3706,7 @@ export const strings = {
       'คีย์และ Base URL ของผู้ให้บริการเดียวกันใช้ร่วมกันทุกความสามารถ กรอกครั้งเดียวพอ',
     setAiGskTools: 'เครื่องมือคลาวด์ Genspark',
     setAiGskToolsDesc:
-      'เมื่อผู้ให้บริการตั้งเป็น Genspark การค้นหาเว็บ การสร้างภาพ และการวิเคราะห์สื่อจะผ่าน Genspark และใช้เครดิต เมื่อปิด การค้นหาจะใช้แหล่งข้อมูลฟรีและเครื่องมือภาพของ Genspark จะใช้ไม่ได้',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'โอเพนซอร์ส',
     starOnGitHub: 'กดดาวบน GitHub',
     starPromptTitle: 'ชอบ TeleOffice ไหม?',
@@ -4086,7 +4086,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'Deteksi otomatis (disarankan)',
     setAiCodexHint: 'Menggunakan Codex CLI yang sudah login secara lokal; tanpa kunci API.',
     setAiByokNote:
-      'Chat memakai kunci Anda sendiri. Pembuatan gambar dan analisis media mengikuti bagian "Media AI"; pencarian web tetap memakai login Genspark atau sumber gratis.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Simpan',
     setAiSaved: 'Tersimpan',
     setAiTest: 'Uji koneksi',
@@ -4127,7 +4127,7 @@ export const strings = {
       'Kunci dan Base URL satu penyedia dipakai bersama oleh semua kemampuan; cukup isi sekali.',
     setAiGskTools: 'Alat cloud Genspark',
     setAiGskToolsDesc:
-      'Saat penyedianya disetel ke Genspark, pencarian web, pembuatan gambar, dan analisis media berjalan lewat Genspark dan memakai kredit; jika dimatikan, pencarian memakai sumber gratis dan alat gambar Genspark tidak tersedia.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Sumber Terbuka',
     starOnGitHub: 'Beri Bintang di GitHub',
     starPromptTitle: 'Suka TeleOffice?',
@@ -4505,7 +4505,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'Автоопределение (рекомендуется)',
     setAiCodexHint: 'Использует локально авторизованный Codex CLI; ключ API не нужен.',
     setAiByokNote:
-      'Чаты используют ваш собственный ключ. Генерация изображений и анализ медиа настраиваются в разделе «Медиа ИИ»; веб-поиск по-прежнему использует вход в Genspark или бесплатные источники.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Сохранить',
     setAiSaved: 'Сохранено',
     setAiTest: 'Проверить подключение',
@@ -4546,7 +4546,7 @@ export const strings = {
       'Ключ и базовый URL провайдера общие для всех функций; введите их один раз.',
     setAiGskTools: 'Облачные инструменты Genspark',
     setAiGskToolsDesc:
-      'Когда провайдером выбран Genspark, веб-поиск, генерация изображений и анализ медиа идут через Genspark и расходуют кредиты; при выключении поиск использует бесплатные источники, а инструменты изображений Genspark недоступны.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Открытый код',
     starOnGitHub: 'Поставить звезду на GitHub',
     starPromptTitle: 'Нравится TeleOffice?',
@@ -4918,7 +4918,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'اكتشاف تلقائي (موصى به)',
     setAiCodexHint: 'يستخدم Codex CLI المسجل محليًا؛ لا حاجة إلى مفتاح API.',
     setAiByokNote:
-      'تستخدم المحادثات مفتاحك الخاص. يتبع توليد الصور وتحليل الوسائط قسم «وسائط الذكاء الاصطناعي»؛ ولا يزال البحث في الويب يستخدم تسجيل دخول Genspark أو مصادر مجانية.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'حفظ',
     setAiSaved: 'تم الحفظ',
     setAiTest: 'اختبار الاتصال',
@@ -4959,7 +4959,7 @@ export const strings = {
       'مفتاح المزوّد وعنوان Base URL مشتركان بين جميع القدرات؛ أدخلهما مرة واحدة فقط.',
     setAiGskTools: 'أدوات Genspark السحابية',
     setAiGskToolsDesc:
-      'عندما يكون المزوّد Genspark، يمر البحث في الويب وتوليد الصور وتحليل الوسائط عبر Genspark ويستهلك الرصيد؛ عند الإيقاف يستخدم البحث مصادر مجانية وتصبح أدوات صور Genspark غير متاحة.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'مفتوح المصدر',
     starOnGitHub: 'ضع نجمة على GitHub',
     starPromptTitle: 'هل أعجبك TeleOffice؟',
@@ -5335,7 +5335,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'Detectar automaticamente (recomendado)',
     setAiCodexHint: 'Usa o Codex CLI conectado localmente; nenhuma chave de API é necessária.',
     setAiByokNote:
-      'Os chats usam a sua própria chave. A geração de imagens e a análise de mídia seguem a seção «Mídia de IA»; a busca na web continua usando o login do Genspark ou fontes gratuitas.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Salvar',
     setAiSaved: 'Salvo',
     setAiTest: 'Testar conexão',
@@ -5376,7 +5376,7 @@ export const strings = {
       'A chave e a URL base de um provedor são compartilhadas entre as capacidades; insira-as uma só vez.',
     setAiGskTools: 'Ferramentas na nuvem Genspark',
     setAiGskToolsDesc:
-      'Quando o provedor é o Genspark, a busca na web, a geração de imagens e a análise de mídia passam pelo Genspark e consomem créditos; desativado, a busca usa fontes gratuitas e as ferramentas de imagem do Genspark ficam indisponíveis.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Código aberto',
     starOnGitHub: 'Dar uma estrela no GitHub',
     starPromptTitle: 'Gostando do TeleOffice?',
@@ -5750,7 +5750,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'Rilevamento automatico (consigliato)',
     setAiCodexHint: 'Usa Codex CLI con accesso locale; non è richiesta alcuna chiave API.',
     setAiByokNote:
-      "Le chat usano la tua chiave. La generazione di immagini e l'analisi dei media seguono la sezione «Media IA»; la ricerca web usa ancora l'accesso Genspark o fonti gratuite.",
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Salva',
     setAiSaved: 'Salvato',
     setAiTest: 'Prova connessione',
@@ -5791,7 +5791,7 @@ export const strings = {
       "La chiave e l'URL base di un provider sono condivisi tra le capacità; inseriscili una volta sola.",
     setAiGskTools: 'Strumenti cloud Genspark',
     setAiGskToolsDesc:
-      "Quando il provider è Genspark, la ricerca web, la generazione di immagini e l'analisi dei media passano da Genspark e consumano crediti; se disattivato, la ricerca usa fonti gratuite e gli strumenti immagine di Genspark non sono disponibili.",
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Open source',
     starOnGitHub: 'Metti una stella su GitHub',
     starPromptTitle: 'Ti piace TeleOffice?',
@@ -6162,7 +6162,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'Wykryj automatycznie (zalecane)',
     setAiCodexHint: 'Używa lokalnie zalogowanego Codex CLI; klucz API nie jest potrzebny.',
     setAiByokNote:
-      'Czaty używają Twojego klucza. Generowanie obrazów i analiza mediów zależą od sekcji „Media AI”; wyszukiwanie w sieci nadal korzysta z logowania Genspark lub darmowych źródeł.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Zapisz',
     setAiSaved: 'Zapisano',
     setAiTest: 'Testuj połączenie',
@@ -6203,7 +6203,7 @@ export const strings = {
       'Klucz i bazowy URL dostawcy są wspólne dla wszystkich funkcji; wpisz je raz.',
     setAiGskTools: 'Narzędzia chmurowe Genspark',
     setAiGskToolsDesc:
-      'Gdy dostawcą jest Genspark, wyszukiwanie w sieci, generowanie obrazów i analiza mediów przechodzą przez Genspark i zużywają kredyty; po wyłączeniu wyszukiwanie używa darmowych źródeł, a narzędzia obrazów Genspark są niedostępne.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Open source',
     starOnGitHub: 'Gwiazdka na GitHubie',
     starPromptTitle: 'Podoba Ci się TeleOffice?',
@@ -6543,7 +6543,7 @@ export const strings = {
     setAiCodexHint:
       'Automaticky najde a použije aktuální Codex CLI, po aktualizaci není třeba nic měnit; lze zadat i vlastní cestu. API klíč není potřeba.',
     setAiByokNote:
-      'Chaty používají váš vlastní klíč. Generování obrázků a analýza médií se řídí sekcí AI média; webové vyhledávání dál používá přihlášení ke Genspark nebo bezplatné zdroje.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Uložit',
     setAiSaved: 'Uloženo',
     setAiTest: 'Otestovat připojení',
@@ -6584,7 +6584,7 @@ export const strings = {
       'Klíč a základní URL jednoho poskytovatele se sdílejí mezi funkcemi; zadejte je jen jednou.',
     setAiGskTools: 'Cloudové nástroje Genspark',
     setAiGskToolsDesc:
-      'Webové vyhledávání, generování obrázků a analýza médií běží přes Genspark a čerpají kredity, pokud je jejich poskytovatel nastaven na Genspark; při vypnutí vyhledávání používá bezplatné zdroje a obrázkové nástroje Genspark nejsou dostupné.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Open source',
     starOnGitHub: 'Dát hvězdičku na GitHubu',
     starPromptTitle: 'Líbí se vám TeleOffice?',
@@ -6985,7 +6985,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'Automatisch detecteren (aanbevolen)',
     setAiCodexHint: 'Gebruikt de lokaal aangemelde Codex CLI; geen API-sleutel nodig.',
     setAiByokNote:
-      'Chats gebruiken je eigen sleutel. Afbeeldingen genereren en media-analyse volgen de sectie "AI-media"; zoeken op het web gebruikt nog steeds de Genspark-aanmelding of gratis bronnen.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Opslaan',
     setAiSaved: 'Opgeslagen',
     setAiTest: 'Verbinding testen',
@@ -7026,7 +7026,7 @@ export const strings = {
       'De sleutel en basis-URL van een provider gelden voor alle functies; één keer invoeren volstaat.',
     setAiGskTools: 'Genspark-cloudtools',
     setAiGskToolsDesc:
-      'Staat de provider op Genspark, dan lopen zoeken op het web, afbeeldingen genereren en media-analyse via Genspark en kosten ze credits; uitgeschakeld gebruikt zoeken gratis bronnen en zijn de Genspark-afbeeldingstools niet beschikbaar.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Open source',
     starOnGitHub: 'Geef een ster op GitHub',
     starPromptTitle: 'Bevalt TeleOffice?',
@@ -7401,7 +7401,7 @@ export const strings = {
     setAiCodexHint:
       'Menggunakan Codex CLI yang telah log masuk secara setempat; tiada kunci API diperlukan.',
     setAiByokNote:
-      'Sembang menggunakan kunci anda sendiri. Penjanaan imej dan analisis media mengikut bahagian "Media AI"; carian web masih menggunakan log masuk Genspark atau sumber percuma.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'Simpan',
     setAiSaved: 'Disimpan',
     setAiTest: 'Uji sambungan',
@@ -7442,7 +7442,7 @@ export const strings = {
       'Kunci dan Base URL pembekal dikongsi oleh semua keupayaan; isi sekali sahaja.',
     setAiGskTools: 'Alat awan Genspark',
     setAiGskToolsDesc:
-      'Apabila pembekalnya ditetapkan kepada Genspark, carian web, penjanaan imej dan analisis media melalui Genspark dan menggunakan kredit; apabila dimatikan, carian menggunakan sumber percuma dan alat imej Genspark tidak tersedia.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'Sumber Terbuka',
     starOnGitHub: 'Beri Bintang di GitHub',
     starPromptTitle: 'Suka TeleOffice?',
@@ -7801,7 +7801,7 @@ export const strings = {
     setAiCodexAutoPlaceholder: 'זיהוי אוטומטי (מומלץ)',
     setAiCodexHint: 'משתמש ב-Codex CLI המחובר מקומית; אין צורך במפתח API.',
     setAiByokNote:
-      'הצ׳אטים משתמשים במפתח שלך. יצירת תמונות וניתוח מדיה נקבעים בקטע "מדיה AI"; חיפוש באינטרנט עדיין משתמש בהתחברות Genspark או במקורות חינמיים.',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'שמירה',
     setAiSaved: 'נשמר',
     setAiTest: 'בדיקת חיבור',
@@ -7842,7 +7842,7 @@ export const strings = {
       'המפתח וכתובת ה-Base URL של ספק משותפים לכל היכולות; יש להזין אותם פעם אחת בלבד.',
     setAiGskTools: 'כלי הענן של Genspark',
     setAiGskToolsDesc:
-      'כשהספק מוגדר ל-Genspark, חיפוש באינטרנט, יצירת תמונות וניתוח מדיה עוברים דרך Genspark וצורכים קרדיטים; כשהוא כבוי החיפוש משתמש במקורות חינמיים וכלי התמונות של Genspark אינם זמינים.',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'קוד פתוח',
     starOnGitHub: 'תנו כוכב ב-GitHub',
     starPromptTitle: 'נהנים מ-TeleOffice?',
@@ -8209,7 +8209,7 @@ export const strings = {
     setAiCodexHint:
       'स्थानीय रूप से साइन-इन किए गए Codex CLI का उपयोग करता है; API कुंजी की आवश्यकता नहीं।',
     setAiByokNote:
-      'चैट आपकी अपनी कुंजी का उपयोग करती हैं। इमेज जनरेशन और मीडिया विश्लेषण "AI मीडिया" अनुभाग के अनुसार होते हैं; वेब खोज अभी भी Genspark साइन-इन या मुफ़्त स्रोतों का उपयोग करती है।',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: 'सहेजें',
     setAiSaved: 'सहेजा गया',
     setAiTest: 'कनेक्शन परखें',
@@ -8250,7 +8250,7 @@ export const strings = {
       'एक प्रदाता की कुंजी और Base URL सभी क्षमताओं में साझा होते हैं; एक बार ही दर्ज करें।',
     setAiGskTools: 'Genspark क्लाउड टूल',
     setAiGskToolsDesc:
-      'जब प्रदाता Genspark हो, वेब खोज, इमेज जनरेशन और मीडिया विश्लेषण Genspark से होकर चलते हैं और क्रेडिट खर्च करते हैं; बंद होने पर खोज मुफ़्त स्रोत उपयोग करती है और Genspark इमेज टूल उपलब्ध नहीं रहते।',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: 'ओपन सोर्स',
     starOnGitHub: 'GitHub पर स्टार दें',
     starPromptTitle: 'TeleOffice पसंद आ रहा है?',
@@ -8605,7 +8605,7 @@ export const strings = {
     setAiCodexHint:
       '自動尋找目前的 Codex CLI，更新後無需重新選擇；也可填寫自訂路徑。無需 API Key。',
     setAiByokNote:
-      '對話使用你自己的 key；生圖與媒體解析依「生圖與媒體」設定；網頁搜尋仍走 Genspark 登入或免費來源。',
+      'Chats use your own key. Image generation and media analysis follow the AI Media section; web search uses free sources unless a Genspark key (GSK_API_KEY) is configured.',
     setAiSave: '儲存',
     setAiSaved: '已儲存',
     setAiTest: '測試連線',
@@ -8643,7 +8643,7 @@ export const strings = {
     setAiSharedKeyHint: '同一服務商的 key 與 Base URL 在各項能力間共用，只需填一次。',
     setAiGskTools: 'Genspark 雲端工具',
     setAiGskToolsDesc:
-      '服務商選擇 Genspark 時，網頁搜尋、生圖與媒體解析經 Genspark 雲端並消耗點數；關閉後搜尋改用免費來源，Genspark 生圖工具不可用。',
+      'Web search, image generation and media analysis can use a Genspark key (GSK_API_KEY) when their provider is set to Genspark; when off, search uses free sources and the Genspark image tools are unavailable.',
     setGithub: '開源專案',
     starOnGitHub: '到 GitHub 給我們一顆星',
     starPromptTitle: '喜歡 TeleOffice 嗎？',

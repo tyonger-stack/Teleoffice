@@ -222,7 +222,7 @@ interface ChatEntry {
   text: string
   error?: string
   streaming?: boolean
-  /** the run failed because Genspark is signed out — render an inline sign-in button */
+  /** tool executions performed during this assistant turn */
   tools?: ToolActivity[]
   /** Generation progress card (only one per turn, replaced in real time) */
   deckProgress?: DeckProgressSnapshot
@@ -501,7 +501,7 @@ export function AiPanel({
   const settingsRef = useRef(settings)
   settingsRef.current = settings
 
-  /** gsk login state for the cloud-tools gate (refreshed on mount and window focus) */
+  /** gsk key availability for the cloud-tools gate (refreshed on mount and window focus) */
   const gskLoggedInRef = useRef(false)
   useEffect(() => {
     let alive = true
@@ -1468,21 +1468,6 @@ export function AiPanel({
             }
             return next
           })
-          // Signed-out failures get an inline sign-in button; detected via
-          // gsk status rather than matching the localized error text
-          void window.slidesApi
-            .aiGskStatus()
-            .then((status) => {
-              if (status.loggedIn) return
-              setChat((prev) => {
-                const next = [...prev]
-                const last = next.at(-1)
-                if (last?.role === 'assistant' && last.error) {
-                }
-                return next
-              })
-            })
-            .catch(() => {})
           void finishHistoryBatch().finally(() => {
             setBusy(false)
             const resolveQueueRun = queueRunResolverRef.current

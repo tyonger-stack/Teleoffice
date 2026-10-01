@@ -50,7 +50,7 @@ import {
 } from './local-cli'
 
 export const GSK_NOT_LOGGED_IN_ERROR =
-  'Genspark account is not logged in on this machine; ask the user to log in first'
+  'No Genspark API key configured; set GSK_API_KEY or choose another provider in Settings'
 export const GSK_TOOLS_OFF_ERROR =
   'Genspark cloud tools are turned off in Settings (AI Model); enable them or configure an image provider under Settings (AI Media) to use this tool'
 

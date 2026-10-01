@@ -47,13 +47,7 @@ export const ar = {
   aiFileTooltip:
     'SHA-256 {sha}\nعند الحفظ تتم إعادة كتابة الإدخالات المحرَّرة فقط؛ ويُحتفظ بكل ما عداها كما هو.',
   aiFileMeta: '{sheets} أوراق · {entries} إدخالات',
-  aiGensparkAccount: 'حساب Genspark',
-  aiAccountChecking: 'جارٍ التحقق…',
-  aiLoggedIn: 'تم تسجيل الدخول',
-  aiLoggedInAs: 'تم تسجيل الدخول: {email}',
-  aiNotLoggedIn: 'لم يتم تسجيل الدخول (تتطلب ميزات الذكاء الاصطناعي حساب Genspark)',
-  aiWaitingBrowserLogin: 'في انتظار تسجيل الدخول من المتصفح…',
-  aiLoginGenspark: 'تسجيل الدخول إلى Genspark',
+  aiResizePanel: 'Resize AI panel',
   aiModel: 'النموذج',
   aiCancel: 'إلغاء',
   aiSave: 'حفظ',
@@ -64,7 +58,7 @@ export const ar = {
   aiNetworkError:
     'مشكلة في الشبكة: تعذّر الوصول إلى خدمة الذكاء الاصطناعي. تحقق من الاتصال وحاول مجددًا',
   aiCreditsExhausted:
-    'نفدت أرصدة Genspark لديك. يرجى إعادة الشحن عبر genspark.ai/pricing ثم المحاولة مجددًا',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiToolWorkbookContext: 'قراءة معلومات المصنف',
   aiToolReadRange: 'قراءة النطاق',
   aiToolReadRangeOf: 'قراءة النطاق {range}',

@@ -113,7 +113,7 @@ export const hi = {
   aiErrNetwork:
     'नेटवर्क समस्या: AI सेवा से कनेक्ट नहीं हो सका। कनेक्शन जांचें और फिर से प्रयास करें',
   aiCreditsExhausted:
-    'आपके Genspark क्रेडिट समाप्त हो गए हैं। genspark.ai/pricing पर रिचार्ज करें और फिर से प्रयास करें',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiErrRequestFailed: 'अनुरोध भेजने में विफल: {msg}',
   aiErrGenerateFailed: 'जनरेशन विफल',
   aiErrRegenFailed: 'स्लाइड फिर से बनाने में विफल',

@@ -3771,7 +3771,7 @@ export function registerAiIpc(): void {
     return settings
   })
 
-  // Genspark account (gsk login state): auth source for AI features; the frontend uses it to prompt login when logged out
+  // Genspark key availability (GSK_API_KEY / residual auth.json): capability probe for AI features
   ipcMain.handle(
     'ai:gsk-status',
     async (_event, withEmail?: boolean): Promise<GenSparkAccountStatus> => {

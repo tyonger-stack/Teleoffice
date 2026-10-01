@@ -115,7 +115,7 @@ export const cs = {
   aiNetworkError:
     'Problém se sítí: nepodařilo se připojit ke službě AI. Zkontrolujte připojení a zkuste to znovu',
   aiCreditsExhausted:
-    'Vaše kredity Genspark byly vyčerpány. Navštivte genspark.ai/pricing pro dobití a zkuste to znovu',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiSumReadAttachment: 'Přečtena příloha',
   aiSumImageAttachment: 'Obrázková příloha {name}',
   aiSumRead: 'Přečteno {name}',

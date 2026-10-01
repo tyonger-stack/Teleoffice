@@ -48,13 +48,7 @@ export const ru = {
   aiFileTooltip:
     'SHA-256 {sha}\nПри сохранении перезаписываются только изменённые элементы; всё остальное сохраняется без изменений.',
   aiFileMeta: 'Листов: {sheets} · элементов: {entries}',
-  aiGensparkAccount: 'Учётная запись Genspark',
-  aiAccountChecking: 'Проверка…',
-  aiLoggedIn: 'Вход выполнен',
-  aiLoggedInAs: 'Вход выполнен: {email}',
-  aiNotLoggedIn: 'Вход не выполнен (для функций ИИ требуется учётная запись Genspark)',
-  aiWaitingBrowserLogin: 'Ожидание входа в браузере…',
-  aiLoginGenspark: 'Войти в Genspark',
+  aiResizePanel: 'Resize AI panel',
   aiModel: 'Модель',
   aiCancel: 'Отмена',
   aiSave: 'Сохранить',
@@ -65,7 +59,7 @@ export const ru = {
   aiNetworkError:
     'Проблема с сетью: не удалось подключиться к сервису ИИ. Проверьте подключение и повторите попытку',
   aiCreditsExhausted:
-    'Кредиты Genspark исчерпаны. Пополните баланс на genspark.ai/pricing и повторите попытку',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiToolWorkbookContext: 'Чтение сведений о книге',
   aiToolReadRange: 'Чтение диапазона',
   aiToolReadRangeOf: 'Чтение диапазона {range}',

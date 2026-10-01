@@ -105,7 +105,7 @@ export const zh = {
   aiErrStreamTimeout: 'AI 请求超时：网络长时间无响应，已停止。请检查网络后重试',
   aiErrOverloaded: 'AI 服务当前繁忙，请稍后重试',
   aiErrNetwork: '网络有问题，无法连接 AI 服务。请检查网络后重试',
-  aiCreditsExhausted: 'Genspark 积分已用完，请前往 genspark.ai/pricing 充值后重试',
+  aiCreditsExhausted: 'Genspark 额度已用尽。请在设置中配置 GSK_API_KEY 或其它 AI 提供商后重试。',
   aiErrRequestFailed: '请求发送失败: {msg}',
   aiErrGenerateFailed: '生成失败',
   aiErrRegenFailed: '重做页面失败',

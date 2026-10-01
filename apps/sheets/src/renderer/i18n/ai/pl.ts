@@ -47,13 +47,7 @@ export const pl = {
   aiFileTooltip:
     'SHA-256 {sha}\nZapis nadpisuje tylko edytowane wpisy; cała reszta pozostaje bez zmian.',
   aiFileMeta: 'Arkusze: {sheets} · wpisy: {entries}',
-  aiGensparkAccount: 'Konto Genspark',
-  aiAccountChecking: 'Sprawdzanie…',
-  aiLoggedIn: 'Zalogowano',
-  aiLoggedInAs: 'Zalogowano: {email}',
-  aiNotLoggedIn: 'Nie zalogowano (funkcje AI wymagają konta Genspark)',
-  aiWaitingBrowserLogin: 'Oczekiwanie na logowanie w przeglądarce…',
-  aiLoginGenspark: 'Zaloguj się do Genspark',
+  aiResizePanel: 'Resize AI panel',
   aiModel: 'Model',
   aiCancel: 'Anuluj',
   aiSave: 'Zapisz',
@@ -64,7 +58,7 @@ export const pl = {
   aiNetworkError:
     'Problem z siecią: nie można połączyć się z usługą AI. Sprawdź połączenie i spróbuj ponownie',
   aiCreditsExhausted:
-    'Twoje kredyty Genspark wyczerpały się. Doładuj konto na genspark.ai/pricing i spróbuj ponownie',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiToolWorkbookContext: 'Odczyt informacji o skoroszycie',
   aiToolReadRange: 'Odczyt zakresu',
   aiToolReadRangeOf: 'Odczyt zakresu {range}',
