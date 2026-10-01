@@ -103,8 +103,9 @@ export function resolveStroke(stroke: Stroke | undefined, vp: Viewport): RenderS
     }
     color = rf.stops[0]!.color
   } else if (rf.type === 'none') return undefined
-  const widthPx = Math.max(emuToPx(stroke.width || 12700, vp.scale), 0.5)
-  const widthPt = (stroke.width || 12700) / EMU_PER_PT
+  const widthEmu = stroke.width ?? 12700
+  const widthPx = Math.max(emuToPx(widthEmu, vp.scale), 0.5)
+  const widthPt = widthEmu / EMU_PER_PT
   const dash = dashPreset(stroke.dash, widthPx)
   const capMap = { flat: 'butt', round: 'round', square: 'square' } as const
   return {
