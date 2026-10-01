@@ -370,6 +370,7 @@ export async function gskWebSearch(
 
 /** Parses the `gsk img-search` response shape data[{image_url,title,source,link,width,height}] (exported for tests) */
 export function parseGskImageSearch(raw: unknown, maxResults: number): ImageSearchResult[] {
+  const bounded = normalizeMaxResults(maxResults)
   const dataRaw = asRecord(raw).data
   const data: unknown[] = Array.isArray(dataRaw) ? dataRaw : []
   const images: ImageSearchResult[] = []
@@ -389,7 +390,7 @@ export function parseGskImageSearch(raw: unknown, maxResults: number): ImageSear
     if (Number.isFinite(width) && width > 0) entry.width = width
     if (Number.isFinite(height) && height > 0) entry.height = height
     images.push(entry)
-    if (images.length >= maxResults) break
+    if (images.length >= bounded) break
   }
   return images
 }

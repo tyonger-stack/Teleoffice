@@ -223,6 +223,18 @@ describe('parseGskImageSearch', () => {
     expect(images.map((i) => i.title)).toEqual(['ok'])
   })
 
+  it('clamps maxResults like the web parser', () => {
+    const entries = Array.from({ length: 25 }, (_, i) => ({
+      image_url: `https://ok.com/${i}.jpg`,
+      title: `t${i}`,
+    }))
+    const raw = { data: entries }
+    expect(parseGskImageSearch(raw, NaN)).toHaveLength(6)
+    expect(parseGskImageSearch(raw, 1e9)).toHaveLength(20)
+    expect(parseGskImageSearch(raw, 0)).toHaveLength(1)
+    expect(parseGskImageSearch(raw, -3)).toHaveLength(1)
+  })
+
   it('keeps benign images whose path or query merely mentions a stock host', () => {
     const raw = {
       data: [
