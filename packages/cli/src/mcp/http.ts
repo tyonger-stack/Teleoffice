@@ -253,7 +253,7 @@ export async function startHttp(opts: HttpServeOptions): Promise<HttpHandle> {
     }
     // no token and a loopback bind: refuse Host headers a rebound DNS name would carry
     if (!opts.token && LOOPBACK_HOSTS.has(host)) {
-      const hostname = new URL(`http://${header(req.headers.host) ?? ''}`).hostname
+      const hostname = hostnameOf(header(req.headers.host) ?? '')
       if (!LOOPBACK_HOSTS.has(hostname)) {
         json(res, 403, { error: 'host not allowed' })
         return
@@ -354,6 +354,20 @@ export async function serveHttp(opts: HttpServeOptions): Promise<void> {
 
 function header(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value
+}
+
+/**
+ * The host a `Host` authority names, or '' when the header is absent or malformed.
+ * `new URL` throws on an empty authority, on whitespace, on a non-numeric port and
+ * on a bare `::1`; none of those name a loopback peer, so they must read as
+ * "not allowed" rather than escape as a 500.
+ */
+function hostnameOf(hostHeader: string): string {
+  try {
+    return new URL(`http://${hostHeader}`).hostname
+  } catch {
+    return ''
+  }
 }
 
 function isInitialize(body: unknown): boolean {
