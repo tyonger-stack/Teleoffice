@@ -749,6 +749,8 @@ export class ProjectStore {
     if (fromProjectId === toProjectId && fromId === toId) return
     // The source may still have buffered opening messages: materialize them first (once the file is saved, they should be kept)
     this.flushPending(fromProjectId, fromId)
+    // The target may also have buffered opening messages: materialize them too so the merge accounts for their seqs instead of leaving duplicates in memory
+    this.flushPending(toProjectId, toId)
     const oldPath = this.chatPath(fromProjectId, fromId)
     const newPath = this.chatPath(toProjectId, toId)
     let mergedMaxSeq: number | undefined

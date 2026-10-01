@@ -297,6 +297,22 @@ describe('rebindChat', () => {
     expect(store.loadChat('default', newId).map((m) => m.seq)).toEqual([0, 1, 2, 3])
   })
 
+  it('flushes the target pending buffer before merge to avoid duplicate seq', () => {
+    const targetId = 'target-pending'
+    const sourceId = 'source-rebind'
+    store.appendChatMessage('default', targetId, { role: 'user', text: 'target-q0' })
+    store.appendChatMessage('default', targetId, { role: 'user', text: 'target-q1' })
+    store.appendChatMessage('default', sourceId, { role: 'user', text: 'source-q0' })
+    store.appendChatMessage('default', sourceId, { role: 'assistant', text: 'source-a0' })
+
+    store.rebindChat('default', sourceId, targetId)
+    store.appendChatMessage('default', targetId, { role: 'assistant', text: 'after' })
+
+    const msgs = store.loadChat('default', targetId)
+    const seqs = msgs.map((m) => m.seq)
+    expect(new Set(seqs).size).toBe(seqs.length)
+  })
+
   it('keeps target and source records separate when the target has no final newline', () => {
     const sourceId = 'unsaved-unterminated'
     const targetId = 'existing-unterminated'
@@ -329,6 +345,22 @@ describe('rebindChat', () => {
     expect(merged.map((message) => message.text)).toEqual(['target', 'source'])
     expect(merged.map((message) => message.seq)).toEqual([2, 3])
     expect(existsSync(sourcePath)).toBe(false)
+  })
+
+  it('flushes the target pending buffer before merge so seqs stay unique', () => {
+    const targetId = 'target-pending'
+    const sourceId = 'source-file'
+    store.appendChatMessage('default', targetId, { role: 'user', text: 'target-q0' })
+    store.appendChatMessage('default', targetId, { role: 'user', text: 'target-q1' })
+    store.appendChatMessage('default', sourceId, { role: 'user', text: 'source-q0' })
+    store.appendChatMessage('default', sourceId, { role: 'assistant', text: 'source-a0' })
+
+    store.rebindChat('default', sourceId, targetId)
+
+    const msgs = store.loadChat('default', targetId)
+    const seqs = msgs.map((m) => m.seq)
+    expect(new Set(seqs).size).toBe(seqs.length)
+    expect(msgs).toHaveLength(4)
   })
 
   it('preserves every source record when merging a chat longer than the display cap', () => {
