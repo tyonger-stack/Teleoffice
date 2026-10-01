@@ -311,9 +311,31 @@ export class AgentLoop<TSnapshot = unknown> {
     // Unanswered user messages (a failed or interrupted run persisted them without a
     // reply) must not re-enter the model context: trailing ones would pair with the
     // next instruction as one turn, adjacent ones read as a combined instruction
-    this.history = normalized.filter(
+    const answered = normalized.filter(
       (m, i) => m.role !== 'user' || (normalized[i + 1] && normalized[i + 1]!.role !== 'user'),
     )
+    // An assistant message whose tool calls never received results (a run interrupted
+    // between the model's tool call and its execution) would reach the provider as
+    // unpaired tool_calls and 400 the next turn. Pair each orphan call with an
+    // isError result — the same signal the cancel path synthesizes — so the
+    // transcript stays valid and the model can retry the call.
+    const paired: AgentMessage[] = []
+    for (let i = 0; i < answered.length; i++) {
+      const m = answered[i]!
+      paired.push(m)
+      if (m.role === 'assistant' && m.toolCalls?.length && answered[i + 1]?.role !== 'tool') {
+        paired.push({
+          role: 'tool',
+          results: m.toolCalls.map((call) => ({
+            id: call.id,
+            name: call.name,
+            output: TOOL_ABORTED_OUTPUT,
+            isError: true,
+          })),
+        })
+      }
+    }
+    this.history = paired
     if (this.history.length === 0) return
     if (this.compactionEnabled()) {
       const { maxBytes, keepRecentBytes } = this.compactBudget()
