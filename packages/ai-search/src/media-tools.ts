@@ -326,16 +326,15 @@ async function localGenerateImage(
     }
     for (const id of order) {
       try {
+        const imageInput = {
+          prompt: fullPrompt,
+          referenceImagePaths,
+          ...(op.aspectRatio !== undefined ? { aspectRatio: op.aspectRatio } : {}),
+        }
         const image =
           id === 'mmx'
-            ? await mmxGenerateImage(
-                { prompt: fullPrompt, aspectRatio: op.aspectRatio, referenceImagePaths },
-                settings,
-              )
-            : await agyGenerateImage(
-                { prompt: fullPrompt, aspectRatio: op.aspectRatio, referenceImagePaths },
-                settings,
-              )
+            ? await mmxGenerateImage(imageInput, settings)
+            : await agyGenerateImage(imageInput, settings)
         return { url: storeGeneratedImage(image.bytes, image.mime), provider: id, attempts }
       } catch (err) {
         attempts.push({ provider: id, error: errorText(err) })

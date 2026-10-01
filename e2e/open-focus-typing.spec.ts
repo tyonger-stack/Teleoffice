@@ -270,22 +270,38 @@ test.describe('sheets spare-view focus', () => {
       // settles on A1 the poll fails and names what it settled on instead, so a
       // broken adoption cannot pass by typing into nothing.
       await expect.poll(() => activeRangeNotation(sheets), { timeout: 30_000 }).toBe('A1')
-      // Product code must hand keyboard ownership to Univer's sheet input host
-      // (ILayoutService.focus after focusUnit). Do not steal focus onto the
-      // docs-normal contenteditable — that element accepts DOM focus without
-      // FOCUSING_SHEET, so printable keys never open the cell editor while
-      // Enter still navigates.
+      // Ask the product to re-assert sheet keyboard ownership after spare adoption
+      // (focusUnit + layout focus). The docs-normal contenteditable can hold DOM
+      // focus without FOCUSING_SHEET; never focus that node from the test.
+      await sheets.evaluate(() => {
+        ;(
+          window as unknown as { __teleofficeDebug?: { focusSheetGrid?: () => void } }
+        ).__teleofficeDebug?.focusSheetGrid?.()
+      })
       const before = await domState(sheets)
-      // Character key simulation can omit input events in an adopted Electron
-      // view. Prefer the text-input channel once the sheet input host is
-      // focused; fall back to typed keys if empty.
+      // insertText can open the cell editor through Univer's hidden input without
+      // updating the docs-normal contenteditable textContent we inspect — so do
+      // NOT fall back to type() based on empty editorText (that double-commits
+      // 42424242). Try insertText once, commit, and only then type if A1 is still Old.
       await sheets.keyboard.insertText('4242')
-      let afterInsert = await domState(sheets)
-      if (!afterInsert.editorText) {
-        await sheets.keyboard.type('4242', { delay: 40 })
-        afterInsert = await domState(sheets)
-      }
       await sheets.keyboard.press('Enter')
+      const afterInsert = await domState(sheets)
+      let value = await cellA1Value(sheets)
+      if (value !== 4242) {
+        // Enter may have moved to A2 without committing text; return to A1.
+        if ((await activeRangeNotation(sheets)) !== 'A1') {
+          await sheets.keyboard.press('ArrowUp')
+          await expect.poll(() => activeRangeNotation(sheets), { timeout: 5_000 }).toBe('A1')
+        }
+        await sheets.evaluate(() => {
+          ;(
+            window as unknown as { __teleofficeDebug?: { focusSheetGrid?: () => void } }
+          ).__teleofficeDebug?.focusSheetGrid?.()
+        })
+        await sheets.keyboard.type('4242', { delay: 40 })
+        await sheets.keyboard.press('Enter')
+        value = await cellA1Value(sheets)
+      }
       const afterEnter = await domState(sheets)
       // A bare Expected/Received says nothing about which layer dropped the
       // text, and this case only fails on CI, so every layer goes into the
@@ -301,7 +317,8 @@ test.describe('sheets spare-view focus', () => {
             `${JSON.stringify(afterInsert.activeClass)}, ` +
             `connected: ${JSON.stringify(afterInsert.activeIsConnected)}); ` +
             `active range: ${JSON.stringify(await activeRangeNotation(sheets))}; ` +
-            `aria-busy: ${JSON.stringify(afterEnter.ariaBusy)}`,
+            `aria-busy: ${JSON.stringify(afterEnter.ariaBusy)}; ` +
+            `cell after first attempt: ${JSON.stringify(value)}`,
         })
         .toBe(4242)
     } finally {

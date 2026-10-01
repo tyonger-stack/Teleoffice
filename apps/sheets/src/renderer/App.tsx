@@ -488,6 +488,8 @@ export function App({
   const [findReplaceService, setFindReplaceService] = useState<IFindReplaceService | null>(null)
   /// True while Univer's in-cell editor is open (AutoSave must not save-reload then).
   const editingCellRef = useRef(false)
+  /// e2e spare-view drivers call this through __teleofficeDebug after adoption.
+  const focusSheetGridRef = useRef<() => void>(() => {})
   const visualDisposablesRef = useRef<{ dispose(): void }[]>([])
   const traceArrowsRef = useRef<{ disposables: { dispose(): void }[]; nextId: number }>({
     disposables: [],
@@ -4004,6 +4006,7 @@ export function App({
       ;(window as unknown as Record<string, unknown>).__teleofficeDebug = {
         univerAPI: univerRef.current?.univerAPI,
         findReplaceService: univerRef.current?.univer.__getInjector().get(IFindReplaceService),
+        focusSheetGrid: () => focusSheetGridRef.current(),
       }
     }
     setRevision(0)
@@ -4189,7 +4192,16 @@ export function App({
       const injector = runtime.univer.__getInjector()
       const instances = injector.get(IUniverInstanceService)
       const workbook = instances.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)
-      if (workbook) instances.focusUnit(workbook.getUnitId())
+      if (workbook) {
+        instances.focusUnit(workbook.getUnitId())
+        // Re-activate the current primary so EditorBridge parks its hidden
+        // input on a real cell after the unit swap (spare adoption).
+        try {
+          runtime.univerAPI.getActiveWorkbook()?.getActiveSheet()?.getActiveRange()?.activate()
+        } catch {
+          /* selection not ready yet */
+        }
+      }
       injector.get(ILayoutService).focus()
       return true
     }
@@ -4201,6 +4213,7 @@ export function App({
     window.addEventListener('focus', onFocus)
     window.setTimeout(() => window.removeEventListener('focus', onFocus), 5_000)
   }
+  focusSheetGridRef.current = focusSheetGrid
 
   async function handleInspectWorkbook(): Promise<void> {
     if (workbookOpeningRef.current) return
