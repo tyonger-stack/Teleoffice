@@ -348,7 +348,7 @@ export function parseGskWebSearch(
     const o = asRecord(item)
     return {
       title: clipField(o.title),
-      url: clipField(o.link),
+      url: String(o.link ?? ''),
       snippet: clipField(o.snippet),
     }
   })

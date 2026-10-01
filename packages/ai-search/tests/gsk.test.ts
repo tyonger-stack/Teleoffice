@@ -171,6 +171,13 @@ describe('parseGskWebSearch', () => {
     expect(parseGskWebSearch({ status: 'ok' }, 5).results).toEqual([])
   })
 
+  it('preserves full urls instead of clipping them to the snippet cap', () => {
+    const long = `https://a.com/${'x'.repeat(3000)}`
+    const raw = { data: { organic_results: [{ title: 'A', link: long, snippet: 's' }] } }
+    const r = parseGskWebSearch(raw, 5)
+    expect(r.results[0]!.url).toBe(long)
+  })
+
   it('clamps maxResults and truncates long fields', () => {
     const big = 'x'.repeat(5000)
     const raw = {
