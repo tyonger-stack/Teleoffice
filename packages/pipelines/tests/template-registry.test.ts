@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
-import { createBlankPptx } from '@genoffice/pptx-engine'
+import { createBlankPptx } from '@teleoffice/pptx-engine'
 import {
   addTemplate,
   listTemplates,
@@ -34,7 +34,7 @@ function track(dir: string): string {
 
 function freshEnv(): { env: NodeJS.ProcessEnv; dir: string } {
   const dir = track(mkdtempSync(join(tmpdir(), 'tmpl-reg-')))
-  return { env: { ...process.env, GENOFFICE_TEMPLATES_DIR: dir }, dir }
+  return { env: { ...process.env, TELEOFFICE_TEMPLATES_DIR: dir }, dir }
 }
 
 function srcDir(): string {
@@ -46,7 +46,7 @@ async function writeDeck(path: string): Promise<void> {
 }
 
 describe('template registry', () => {
-  it('honors GENOFFICE_TEMPLATES_DIR and starts empty', () => {
+  it('honors TELEOFFICE_TEMPLATES_DIR and starts empty', () => {
     const { env, dir } = freshEnv()
     expect(templatesDir(env)).toBe(dir)
     expect(listTemplates(env)).toEqual([])

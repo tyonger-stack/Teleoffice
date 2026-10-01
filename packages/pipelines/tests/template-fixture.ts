@@ -1,4 +1,4 @@
-import { createBlankPptx, insertSlideWithLayout, openPptx, savePptx } from '@genoffice/pptx-engine'
+import { createBlankPptx, insertSlideWithLayout, openPptx, savePptx } from '@teleoffice/pptx-engine'
 
 const NS_A = 'http://schemas.openxmlformats.org/drawingml/2006/main'
 const NS_R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
@@ -344,7 +344,7 @@ export async function makeTwoMasterTemplate(): Promise<Uint8Array> {
     'docProps/app.xml',
     XMLDECL +
       '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
-      '<Application>GenOffice</Application><Slides>3</Slides>' +
+      '<Application>TeleOffice</Application><Slides>3</Slides>' +
       '<HeadingPairs><vt:vector size="2" baseType="variant"><vt:variant><vt:lpstr>Slides</vt:lpstr></vt:variant><vt:variant><vt:i4>3</vt:i4></vt:variant></vt:vector></HeadingPairs>' +
       '<TitlesOfParts><vt:vector size="3" baseType="lpstr"><vt:lpstr>Old 1</vt:lpstr><vt:lpstr>Old 2</vt:lpstr><vt:lpstr>Old 3</vt:lpstr></vt:vector></TitlesOfParts>' +
       '</Properties>',

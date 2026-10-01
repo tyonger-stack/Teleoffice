@@ -3,14 +3,14 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { randomBytes } from 'node:crypto'
 import { basename, extname, join } from 'node:path'
-import { buildTemplateDeck, inspectTemplate, type SpecElement } from '@genoffice/pipelines/slides'
-import { PackageArchive } from '@genoffice/pptx-engine'
+import { buildTemplateDeck, inspectTemplate, type SpecElement } from '@teleoffice/pipelines/slides'
+import { PackageArchive } from '@teleoffice/pptx-engine'
 import {
   addTemplate,
   listTemplates,
   resolveRegisteredTemplate,
   templatesDir,
-} from '@genoffice/pipelines/slides/templates'
+} from '@teleoffice/pipelines/slides/templates'
 
 export interface SlideTemplateItem {
   name: string

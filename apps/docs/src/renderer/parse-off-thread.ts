@@ -1,4 +1,4 @@
-import { parseDocx } from '@genoffice/docx-engine'
+import { parseDocx } from '@teleoffice/docx-engine'
 
 type Parsed = Awaited<ReturnType<typeof parseDocx>>
 

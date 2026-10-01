@@ -1,6 +1,6 @@
 {
-  "name": "@genoffice/sheets",
-  "productName": "GenOffice Sheets",
+  "name": "@teleoffice/sheets",
+  "productName": "TeleOffice Sheets",
   "version": "0.1.0",
   "private": true,
   "description": "Cross-platform AI-native spreadsheet compatibility prototype",
@@ -24,16 +24,16 @@
   },
   "dependencies": {
     "@fluentui/react-icons": "^2.0.333",
-    "@genoffice/agent-core": "*",
-    "@genoffice/ai-provider": "*",
-    "@genoffice/ai-search": "*",
-    "@genoffice/docx-engine": "*",
-    "@genoffice/electron-utils": "*",
-    "@genoffice/file-parse": "*",
-    "@genoffice/i18n": "*",
-    "@genoffice/ui": "*",
-    "@genoffice/pptx-render": "*",
-    "@genoffice/xlsx-gateway": "*",
+    "@teleoffice/agent-core": "*",
+    "@teleoffice/ai-provider": "*",
+    "@teleoffice/ai-search": "*",
+    "@teleoffice/docx-engine": "*",
+    "@teleoffice/electron-utils": "*",
+    "@teleoffice/file-parse": "*",
+    "@teleoffice/i18n": "*",
+    "@teleoffice/ui": "*",
+    "@teleoffice/pptx-render": "*",
+    "@teleoffice/xlsx-gateway": "*",
     "@univerjs/core": "^0.25.1",
     "@univerjs/data-validation": "^0.25.1",
     "@univerjs/engine-render": "^0.25.1",
@@ -58,7 +58,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@genoffice/project-store": "*",
+    "@teleoffice/project-store": "*",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -70,5 +70,5 @@
     "vite": "^7.3.1",
     "vitest": "^4.1.11"
   },
-  "author": "GenOffice"
+  "author": "TeleOffice"
 }

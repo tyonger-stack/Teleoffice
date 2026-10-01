@@ -5,7 +5,7 @@ import type {
   RenderNode,
   RenderSlide,
   ShapeRenderNode,
-} from '@genoffice/pptx-render'
+} from '@teleoffice/pptx-render'
 
 /**
  * Deterministic layout audit (modeled on the Google Slides add-in review_google_slides_addin geometry-only checks):

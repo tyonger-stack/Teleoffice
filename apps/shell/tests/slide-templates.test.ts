@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
-import { openPptx, PackageArchive } from '@genoffice/pptx-engine'
-import { addTemplate } from '@genoffice/pipelines/slides/templates'
+import { openPptx, PackageArchive } from '@teleoffice/pptx-engine'
+import { addTemplate } from '@teleoffice/pipelines/slides/templates'
 import { makeTwoMasterTemplate } from '../../../packages/pipelines/tests/template-fixture'
 import {
   createDeckFromTemplate,
@@ -18,7 +18,7 @@ const tempDirs: string[] = []
 function freshEnv(): { env: NodeJS.ProcessEnv; dir: string } {
   const dir = mkdtempSync(join(tmpdir(), 'shell-tmpl-'))
   tempDirs.push(dir)
-  return { env: { ...process.env, GENOFFICE_TEMPLATES_DIR: dir }, dir }
+  return { env: { ...process.env, TELEOFFICE_TEMPLATES_DIR: dir }, dir }
 }
 
 function trackTemp(dir: string): void {
@@ -125,7 +125,7 @@ describe('slide-templates', () => {
       'ppt/presentation.xml',
       Buffer.from(pres.replace(/<p:sldIdLst>[\s\S]*?<\/p:sldIdLst>/, ''), 'utf8'),
     )
-    const { savePptx } = await import('@genoffice/pptx-engine')
+    const { savePptx } = await import('@teleoffice/pptx-engine')
     const empty = await savePptx(opened)
     const src = join(srcDir, 'Empty.pptx')
     writeFileSync(src, empty)

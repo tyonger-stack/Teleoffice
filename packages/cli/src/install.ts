@@ -12,10 +12,10 @@ import {
 import { basename, dirname, isAbsolute, join, resolve, win32 } from 'node:path'
 
 /**
- * Making `genoffice` reachable from a terminal. The launcher ships inside the app
- * (Resources/cli/genoffice, or genoffice.cmd on Windows); nothing at install time puts
+ * Making `teleoffice` reachable from a terminal. The launcher ships inside the app
+ * (Resources/cli/teleoffice, or teleoffice.cmd on Windows); nothing at install time puts
  * it on PATH for the dmg, so the app tries this on every launch until it
- * succeeds and `genoffice install-cli` repeats it on demand. Best effort
+ * succeeds and `teleoffice install-cli` repeats it on demand. Best effort
  * everywhere: no prompts, no elevation, never an error on the app's startup
  * path. `inspectCliLink` reports the same states without writing anything.
  */
@@ -62,13 +62,13 @@ export function installCliLink(opts: InstallOptions): InstallOutcome {
   const manual = manualCommand(opts.launcher)
   let occupied: string | undefined
   for (const dir of dirs) {
-    const link = join(dir, 'genoffice')
+    const link = join(dir, 'teleoffice')
     const state = linkState(link, opts.launcher)
     if (state === 'ours' && readlinkSync(link) === opts.launcher) {
       return { status: 'present', location: link }
     }
     if (state === 'file' || state === 'foreign') {
-      // somebody else's genoffice (a file, or npm's symlink): never clobber it
+      // somebody else's teleoffice (a file, or npm's symlink): never clobber it
       occupied = link
       continue
     }
@@ -83,7 +83,7 @@ export function installCliLink(opts: InstallOptions): InstallOutcome {
     }
   }
   if (occupied) return { status: 'occupied', location: occupied, manual }
-  return { status: 'unwritable', location: join(dirs[0] ?? '/usr/local/bin', 'genoffice'), manual }
+  return { status: 'unwritable', location: join(dirs[0] ?? '/usr/local/bin', 'teleoffice'), manual }
 }
 
 /** Read-only twin of `installCliLink`: what a fresh terminal would find, without changing anything. */
@@ -96,7 +96,7 @@ export function inspectCliLink(opts: InstallOptions): InstallOutcome {
   let occupied: string | undefined
   // same walk installCliLink does: an occupied name is skipped, the first free writable dir wins
   for (const dir of dirs) {
-    const link = join(dir, 'genoffice')
+    const link = join(dir, 'teleoffice')
     const state = linkState(link, opts.launcher)
     if (state === 'ours' && readlinkSync(link) === opts.launcher) {
       return { status: 'present', location: link }
@@ -108,11 +108,11 @@ export function inspectCliLink(opts: InstallOptions): InstallOutcome {
     if (writable(dir)) return { status: 'missing', location: link, manual }
   }
   if (occupied) return { status: 'occupied', location: occupied, manual }
-  return { status: 'unwritable', location: join(dirs[0] ?? '/usr/local/bin', 'genoffice'), manual }
+  return { status: 'unwritable', location: join(dirs[0] ?? '/usr/local/bin', 'teleoffice'), manual }
 }
 
 function manualCommand(launcher: string): string {
-  return `sudo mkdir -p /usr/local/bin && sudo ln -sf "${launcher}" /usr/local/bin/genoffice`
+  return `sudo mkdir -p /usr/local/bin && sudo ln -sf "${launcher}" /usr/local/bin/teleoffice`
 }
 
 function linkState(
@@ -134,9 +134,9 @@ function linkState(
 
 /**
  * A link is ours when it resolves to the launcher we are installing, or to a
- * `genoffice` launcher shipped by another copy of the app (an earlier version,
+ * `teleoffice` launcher shipped by another copy of the app (an earlier version,
  * a second install dir): one that has our CLI bundle or the Windows twin beside
- * it. A path that merely ends in `/cli/genoffice` belongs to whoever put it there.
+ * it. A path that merely ends in `/cli/teleoffice` belongs to whoever put it there.
  */
 export function isOurLauncher(target: string, launcher: string): boolean {
   let real: string
@@ -148,9 +148,9 @@ export function isOurLauncher(target: string, launcher: string): boolean {
   try {
     if (real === realpathSync(launcher)) return true
   } catch {}
-  if (basename(real) !== 'genoffice') return false
+  if (basename(real) !== 'teleoffice') return false
   const dir = dirname(real)
-  return existsSync(join(dir, 'genoffice.cjs')) || existsSync(join(dir, 'genoffice.cmd'))
+  return existsSync(join(dir, 'teleoffice.cjs')) || existsSync(join(dir, 'teleoffice.cmd'))
 }
 
 function writable(dir: string): boolean {
@@ -177,9 +177,9 @@ const WIN_PATH_READ =
 // best effort: a locked-down PowerShell may refuse Add-Type, the PATH edit still stands
 const WIN_BROADCAST =
   'try { ' +
-  'Add-Type -Namespace GenOfficePath -Name Native -MemberDefinition \'[DllImport("user32.dll", SetLastError=true, CharSet=CharSet.Auto)] public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);\'; ' +
+  'Add-Type -Namespace TeleOfficePath -Name Native -MemberDefinition \'[DllImport("user32.dll", SetLastError=true, CharSet=CharSet.Auto)] public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);\'; ' +
   '$r = [UIntPtr]::Zero; ' +
-  "[void][GenOfficePath.Native]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'Environment', 2, 5000, [ref]$r) " +
+  "[void][TeleOfficePath.Native]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'Environment', 2, 5000, [ref]$r) " +
   '} catch {}; '
 
 function psQuote(text: string): string {

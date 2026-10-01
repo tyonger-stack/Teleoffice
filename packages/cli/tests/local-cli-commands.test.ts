@@ -1,7 +1,7 @@
 import { rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import * as aiSearch from '@genoffice/ai-search'
+import * as aiSearch from '@teleoffice/ai-search'
 import { run, tempDir as makeTempDir } from './helpers'
 
 // Every temp dir a test makes is removed in afterEach (no /tmp leaks).
@@ -17,18 +17,18 @@ function tempDir(): string {
 const saved: Record<string, string | undefined> = {}
 beforeEach(() => {
   for (const k of [
-    'GENOFFICE_AUTH_DIR',
-    'GENOFFICE_AI_SETTINGS',
+    'TELEOFFICE_AUTH_DIR',
+    'TELEOFFICE_AI_SETTINGS',
     'AI_SEARCH_DISABLE_GSK',
-    'GENOFFICE_AGY_PATH',
-    'GENOFFICE_MMX_PATH',
+    'TELEOFFICE_AGY_PATH',
+    'TELEOFFICE_MMX_PATH',
     'MINIMAX_API_KEY',
   ])
     saved[k] = process.env[k]
-  process.env.GENOFFICE_AUTH_DIR = join(tempDir(), 'no-auth')
+  process.env.TELEOFFICE_AUTH_DIR = join(tempDir(), 'no-auth')
   process.env.AI_SEARCH_DISABLE_GSK = '1'
-  process.env.GENOFFICE_AGY_PATH = join(tempDir(), 'no-agy')
-  process.env.GENOFFICE_MMX_PATH = join(tempDir(), 'no-mmx')
+  process.env.TELEOFFICE_AGY_PATH = join(tempDir(), 'no-agy')
+  process.env.TELEOFFICE_MMX_PATH = join(tempDir(), 'no-mmx')
   delete process.env.MINIMAX_API_KEY
 })
 afterEach(() => {
@@ -52,14 +52,14 @@ function settingsFile(dir: string): string {
   return path
 }
 
-describe('genoffice search --via/--region', () => {
+describe('teleoffice search --via/--region', () => {
   it('passes the backend override through to web search', async () => {
     const dir = tempDir()
     const web = vi
       .spyOn(aiSearch, 'webSearchTool')
       .mockResolvedValue({ results: [], method: 'mmx', attempts: [] })
     const settings = settingsFile(dir)
-    const env = { ...process.env, GENOFFICE_AI_SETTINGS: settings }
+    const env = { ...process.env, TELEOFFICE_AI_SETTINGS: settings }
     const r = await run(['search', 'hello', '--via', 'agy', '--json'], { env })
     expect(r.code).toBe(0)
     expect(web).toHaveBeenCalledWith(settings, 'hello', 6, { via: 'agy' })
@@ -79,7 +79,7 @@ describe('genoffice search --via/--region', () => {
   })
 })
 
-describe('genoffice tts', () => {
+describe('teleoffice tts', () => {
   it('synthesizes to the requested file', async () => {
     const dir = tempDir()
     const out = join(dir, 'hello.mp3')
@@ -93,7 +93,7 @@ describe('genoffice tts', () => {
     const settings = settingsFile(dir)
     const r = await run(
       ['tts', 'hello', '--out', out, '--voice', 'v', '--format', 'mp3', '--json'],
-      { cwd: dir, env: { ...process.env, GENOFFICE_AI_SETTINGS: settings } },
+      { cwd: dir, env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings } },
     )
     expect(r.code).toBe(0)
     expect(synth).toHaveBeenCalledWith(
@@ -115,7 +115,7 @@ describe('genoffice tts', () => {
     const settings = settingsFile(dir)
     const r = await run(['tts', 'hello', '--out', out, '--format', 'mp3', '--json'], {
       cwd: dir,
-      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+      env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
     })
     expect(r.code).toBe(0)
     expect(r.json().warnings?.[0]?.code).toBe('format_mismatch')
@@ -129,7 +129,7 @@ describe('genoffice tts', () => {
   })
 })
 
-describe('genoffice asr', () => {
+describe('teleoffice asr', () => {
   it('prints the transcript with provider detail', async () => {
     const dir = tempDir()
     const audio = join(dir, 'a.wav')
@@ -141,7 +141,7 @@ describe('genoffice asr', () => {
     })
     const settings = settingsFile(dir)
     const r = await run(['asr', audio, '--json'], {
-      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+      env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
     })
     expect(r.code).toBe(0)
     expect(r.json().summary).toBe('hello world')
@@ -149,7 +149,7 @@ describe('genoffice asr', () => {
   })
 })
 
-describe('genoffice video', () => {
+describe('teleoffice video', () => {
   it('generates to a file and reports the task', async () => {
     const dir = tempDir()
     const out = join(dir, 'clip.mp4')
@@ -162,7 +162,7 @@ describe('genoffice video', () => {
     })
     const settings = settingsFile(dir)
     const r = await run(['video', 'waves', '--out', out, '--json'], {
-      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+      env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
     })
     expect(r.code).toBe(0)
     expect(gen).toHaveBeenCalledWith(settings, expect.objectContaining({ prompt: 'waves', out }))
@@ -173,7 +173,7 @@ describe('genoffice video', () => {
   it('queries a task and downloads a file', async () => {
     const dir = tempDir()
     const settings = settingsFile(dir)
-    const env = { ...process.env, GENOFFICE_AI_SETTINGS: settings }
+    const env = { ...process.env, TELEOFFICE_AI_SETTINGS: settings }
     vi.spyOn(aiSearch, 'videoTaskTool').mockResolvedValue({
       result: { task_id: 't-1', status: 'done' },
       provider: 'mmx',

@@ -47,7 +47,7 @@ import {
 } from '../src/media-tools'
 import { testSearchProvider } from '../src/search-tools'
 import { webSearch } from '../src/index'
-import { defaultAiLocalCliSettings } from '@genoffice/ai-provider'
+import { defaultAiLocalCliSettings } from '@teleoffice/ai-provider'
 import * as gsk from '../src/gsk'
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0])
@@ -89,8 +89,8 @@ function agyEnvelope(response: unknown, extra: Record<string, unknown> = {}): st
 
 beforeEach(() => {
   for (const k of [
-    'GENOFFICE_AGY_PATH',
-    'GENOFFICE_MMX_PATH',
+    'TELEOFFICE_AGY_PATH',
+    'TELEOFFICE_MMX_PATH',
     'MINIMAX_API_KEY',
     'MMX_CONFIG_DIR',
     'MINIMAX_REGION',
@@ -98,11 +98,11 @@ beforeEach(() => {
   ]) {
     savedEnv[k] = process.env[k]
   }
-  const dir = ownedDir('genoffice-localcli-')
+  const dir = ownedDir('teleoffice-localcli-')
   dummyBin = join(dir, 'dummy')
   writeFileSync(dummyBin, '')
-  process.env.GENOFFICE_AGY_PATH = dummyBin
-  process.env.GENOFFICE_MMX_PATH = dummyBin
+  process.env.TELEOFFICE_AGY_PATH = dummyBin
+  process.env.TELEOFFICE_MMX_PATH = dummyBin
   delete process.env.MINIMAX_API_KEY
   delete process.env.MMX_CONFIG_DIR
   delete process.env.MINIMAX_REGION
@@ -124,7 +124,7 @@ afterEach(() => {
 })
 
 function localSettingsFile(mediaProvider: string): string {
-  const dir = ownedDir('genoffice-localcli-settings-')
+  const dir = ownedDir('teleoffice-localcli-settings-')
   const path = join(dir, 'ai-settings.json')
   writeFileSync(
     path,
@@ -147,7 +147,7 @@ describe('isDomesticQuery', () => {
   it('treats Han characters as domestic', () => {
     expect(isDomesticQuery('深圳天气')).toBe(true)
     expect(isDomesticQuery('hello world')).toBe(false)
-    expect(isDomesticQuery('GenOffice 下载')).toBe(true)
+    expect(isDomesticQuery('TeleOffice 下载')).toBe(true)
   })
 
   it('matches Chinese sites by domain, suffix and site: operator', () => {
@@ -209,7 +209,7 @@ describe('agySearch', () => {
         agyEnvelope(FENCE + 'json\n[{"title":"T","url":"https://t.com","snippet":"s"}]\n' + FENCE),
       )
     })
-    const r = await agySearch('GenOffice', 6, null)
+    const r = await agySearch('TeleOffice', 6, null)
     expect(r.results).toEqual([{ title: 'T', url: 'https://t.com', snippet: 's' }])
     expect(r.answer).toBe(undefined)
   })
@@ -237,7 +237,7 @@ describe('agySearch', () => {
   })
 
   it('fails clearly when the binary is missing', async () => {
-    process.env.GENOFFICE_AGY_PATH = '/nonexistent/agy-binary'
+    process.env.TELEOFFICE_AGY_PATH = '/nonexistent/agy-binary'
     await expect(agySearch('q', 6, null)).rejects.toThrow(/not found/)
   })
 })
@@ -279,7 +279,7 @@ describe('local webSearch routing', () => {
         JSON.stringify({ organic: [{ title: 'T', link: 'https://t.com', snippet: 's' }] }),
       )
     })
-    const r = await webSearch('GenOffice', 3, {
+    const r = await webSearch('TeleOffice', 3, {
       useGsk: false,
       localCli: { provider: 'local-cli', settings: null },
     })
@@ -449,7 +449,7 @@ describe('analysis fallback', () => {
 
 describe('speech and video', () => {
   it('transcribes through agy, with mmx fallback on NO_SPEECH', async () => {
-    const dir = ownedDir('genoffice-asr-')
+    const dir = ownedDir('teleoffice-asr-')
     const audio = join(dir, 'a.wav')
     writeFileSync(audio, Buffer.from([0, 1, 2, 3]))
     setLocalCliRunner(async () => okResult(agyEnvelope('hello world')))
@@ -498,7 +498,7 @@ describe('speech and video', () => {
       writeFileSync(args[args.indexOf('--out') + 1] as string, Buffer.from([1, 2, 3, 4]))
       return okResult(JSON.stringify({ ok: true }))
     })
-    const out = join(ownedDir('genoffice-tts-'), 'out.mp3')
+    const out = join(ownedDir('teleoffice-tts-'), 'out.mp3')
     const r = await mmxSynthesize({ text: 'hello', out }, null)
     expect(r.bytes.length).toBe(4)
     expect(seenArgs).not.toContain('male-qn-qingse')
@@ -520,7 +520,7 @@ describe('binary resolution and status', () => {
     expect(resolveAgyPath(null)).toBe(dummyBin)
     expect(resolveMmxInvocation(null)?.cmd).toBe(dummyBin)
     expect(resolveMmxInvocation(null)?.via).toBe('mmx')
-    process.env.GENOFFICE_AGY_PATH = '/nonexistent/agy'
+    process.env.TELEOFFICE_AGY_PATH = '/nonexistent/agy'
     expect(resolveAgyPath(null)).toBe(null)
   })
 
@@ -529,7 +529,7 @@ describe('binary resolution and status', () => {
     process.env.MINIMAX_API_KEY = 'secret-key'
     expect(localCliStatus(null).mmx.credentials).toBe('env')
     delete process.env.MINIMAX_API_KEY
-    const dir = ownedDir('genoffice-mmxcfg-')
+    const dir = ownedDir('teleoffice-mmxcfg-')
     process.env.MMX_CONFIG_DIR = dir
     expect(localCliStatus(null).mmx.credentials).toBe('missing')
     writeFileSync(join(dir, 'config.json'), '{}')
@@ -538,7 +538,7 @@ describe('binary resolution and status', () => {
 
   it('cheap-checks the local media backends', () => {
     expect(testLocalCliMedia('antigravity', null)).toEqual({ ok: true })
-    process.env.GENOFFICE_AGY_PATH = '/nonexistent/agy'
+    process.env.TELEOFFICE_AGY_PATH = '/nonexistent/agy'
     expect(testLocalCliMedia('antigravity', null).ok).toBe(false)
     expect(testLocalCliMedia('mmx', null).ok).toBe(false)
   })
@@ -567,7 +567,7 @@ describe('agySearch denied retry', () => {
         agyEnvelope(JSON.stringify([{ title: 'T', url: 'https://t.com', snippet: 's' }])),
       )
     })
-    const r = await agySearch('GenOffice', 6, null)
+    const r = await agySearch('TeleOffice', 6, null)
     expect(calls).toBe(2)
     expect(r.results).toEqual([{ title: 'T', url: 'https://t.com', snippet: 's' }])
     expect(prompts[0]).toBe(prompts[1])
@@ -605,12 +605,12 @@ describe('agySearch denied retry', () => {
 describe('staging refs from the media dir', () => {
   it('strips the exact live analyze link and its leading space', () => {
     const live =
-      '[media-0.png](file:///tmp/genoffice-analyze-LWS36c/media-0.png) \u5c55\u793a\u4e86\u4e00\u4e2a…'
-    expect(stripAgyStagingRefs(live, [], ['/tmp/genoffice-analyze-LWS36c/media-0.png'])).toBe(
+      '[media-0.png](file:///tmp/teleoffice-analyze-LWS36c/media-0.png) \u5c55\u793a\u4e86\u4e00\u4e2a…'
+    expect(stripAgyStagingRefs(live, [], ['/tmp/teleoffice-analyze-LWS36c/media-0.png'])).toBe(
       '展示了一个…',
     )
     // the media dir itself works too, without the exact path
-    expect(stripAgyStagingRefs(live, ['/tmp/genoffice-analyze-LWS36c'])).toBe('展示了一个…')
+    expect(stripAgyStagingRefs(live, ['/tmp/teleoffice-analyze-LWS36c'])).toBe('展示了一个…')
   })
 
   it('strips leading punctuation left at the start', () => {
@@ -618,7 +618,7 @@ describe('staging refs from the media dir', () => {
     expect(stripAgyStagingRefs('， hello', [])).toBe('， hello')
     expect(stripAgyStagingRefs('  spaced  out  ', [])).toBe('spaced  out')
     expect(
-      stripAgyStagingRefs('， [x](/tmp/genoffice-agy-Z/img.png)  hello', ['/tmp/genoffice-agy-Z']),
+      stripAgyStagingRefs('， [x](/tmp/teleoffice-agy-Z/img.png)  hello', ['/tmp/teleoffice-agy-Z']),
     ).toBe('hello')
   })
 
@@ -639,7 +639,7 @@ describe('staging refs from the media dir', () => {
       prompts.push(String(args[args.indexOf('-p') + 1] ?? ''))
       return okResult(agyEnvelope('some text'))
     })
-    const dir = ownedDir('genoffice-agy-prompt-')
+    const dir = ownedDir('teleoffice-agy-prompt-')
     const file = join(dir, 'a.wav')
     writeFileSync(file, Buffer.from([0, 1, 2, 3]))
     await agyDescribe([file], 'describe', null)
@@ -738,7 +738,7 @@ describe('mmx condensed errors', () => {
 
 describe('agy staging-ref cleanup', () => {
   it('drops temp-dir markdown links, empty parens and media markers', () => {
-    const dir = '/tmp/genoffice-analyze-ABC123'
+    const dir = '/tmp/teleoffice-analyze-ABC123'
     const text =
       '[media: {"mime_type":"image/png"}] 一只猫矢量插画（[media-0.png](file://' +
       dir +
@@ -750,24 +750,24 @@ describe('agy staging-ref cleanup', () => {
 
   it('drops ascii empty parens left behind and collapses spaces', () => {
     expect(
-      stripAgyStagingRefs('a cat (file) ([x](/tmp/genoffice-agy-Z/img.png)) end', [
-        '/tmp/genoffice-agy-Z',
+      stripAgyStagingRefs('a cat (file) ([x](/tmp/teleoffice-agy-Z/img.png)) end', [
+        '/tmp/teleoffice-agy-Z',
       ]),
     ).toBe('a cat (file) end')
   })
 
   it('leaves text without staging refs alone', () => {
-    expect(stripAgyStagingRefs('  plain answer  ', ['/tmp/genoffice-agy-Z'])).toBe('plain answer')
+    expect(stripAgyStagingRefs('  plain answer  ', ['/tmp/teleoffice-agy-Z'])).toBe('plain answer')
   })
 })
 
 describe('temp-dir cleanup', () => {
   const helperPrefixes = [
-    'genoffice-agy-',
-    'genoffice-analyze-',
-    'genoffice-asr-',
-    'genoffice-mmx-',
-    'genoffice-imgref-',
+    'teleoffice-agy-',
+    'teleoffice-analyze-',
+    'teleoffice-asr-',
+    'teleoffice-mmx-',
+    'teleoffice-imgref-',
   ]
 
   function helperDirs(): string[] {
@@ -829,7 +829,7 @@ describe('transcribe language hint', () => {
       prompts.push(String(args[args.indexOf('-p') + 1] ?? ''))
       return okResult(agyEnvelope('text'))
     })
-    const dir = ownedDir('genoffice-agy-lang-')
+    const dir = ownedDir('teleoffice-agy-lang-')
     const file = join(dir, 'a.wav')
     writeFileSync(file, Buffer.from([0, 1, 2, 3]))
     await agyTranscribe(file, 'zh', null)
@@ -852,7 +852,7 @@ describe('leading cleanup limits', () => {
 
 describe('missing binaries read as not found', () => {
   it('says mmx is not found (not logged in) when the binary is missing', async () => {
-    process.env.GENOFFICE_MMX_PATH = '/nonexistent/mmx'
+    process.env.TELEOFFICE_MMX_PATH = '/nonexistent/mmx'
     delete process.env.MINIMAX_API_KEY
     try {
       await mmxSearch('q', 1, null)
@@ -887,8 +887,8 @@ describe('windows spawn', () => {
 
 describe('missing-binary Genspark fallback', () => {
   function noBinaries(): void {
-    process.env.GENOFFICE_AGY_PATH = '/nonexistent/agy'
-    process.env.GENOFFICE_MMX_PATH = '/nonexistent/mmx'
+    process.env.TELEOFFICE_AGY_PATH = '/nonexistent/agy'
+    process.env.TELEOFFICE_MMX_PATH = '/nonexistent/mmx'
     delete process.env.MINIMAX_API_KEY
   }
 
@@ -933,8 +933,8 @@ describe('missing-binary Genspark fallback', () => {
   it('does not fall web search over to gsk when a CLI binary exists', async () => {
     // agy is missing but mmx exists: its credential failure must not read as
     // missing binaries, so the gsk route stays off even when signed in.
-    process.env.GENOFFICE_AGY_PATH = '/nonexistent/agy'
-    process.env.GENOFFICE_MMX_PATH = dummyBin
+    process.env.TELEOFFICE_AGY_PATH = '/nonexistent/agy'
+    process.env.TELEOFFICE_MMX_PATH = dummyBin
     delete process.env.MINIMAX_API_KEY
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
     setLocalCliRunner(async () =>
@@ -960,7 +960,7 @@ describe('silent file-producing calls', () => {
       writeFileSync(out, Buffer.from([1, 2, 3, 4]))
       return { stdout: '', stderr: '', exitCode: 0, timedOut: false }
     })
-    const out = join(ownedDir('genoffice-tts-silent-'), 'out.mp3')
+    const out = join(ownedDir('teleoffice-tts-silent-'), 'out.mp3')
     const synth = await mmxSynthesize({ text: 'hello', out }, null)
     expect(synth.bytes.length).toBe(4)
     const image = await mmxGenerateImage({ prompt: 'apple' }, null)
@@ -969,7 +969,7 @@ describe('silent file-producing calls', () => {
 
   it('still fails when the --out file is missing or empty', async () => {
     setLocalCliRunner(async () => ({ stdout: '', stderr: '', exitCode: 0, timedOut: false }))
-    const out = join(ownedDir('genoffice-tts-empty-'), 'out.mp3')
+    const out = join(ownedDir('teleoffice-tts-empty-'), 'out.mp3')
     await expect(mmxSynthesize({ text: 'hello', out }, null)).rejects.toThrow(/did not write/)
     setLocalCliRunner(async () => okResult(JSON.stringify({ ok: true })))
     writeFileSync(out, Buffer.from([]))
@@ -1050,10 +1050,10 @@ describe('testSearchProvider settings', () => {
 
 describe('local CLI subprocess environment', () => {
   it('passes the settings mmx region to the mmx-env wrapper', () => {
-    const dir = ownedDir('genoffice-mmxenv-')
+    const dir = ownedDir('teleoffice-mmxenv-')
     const wrapper = join(dir, 'mmx-env')
     writeFileSync(wrapper, '')
-    process.env.GENOFFICE_MMX_PATH = wrapper
+    process.env.TELEOFFICE_MMX_PATH = wrapper
     const inv = resolveMmxInvocation({
       localCli: { ...defaultAiLocalCliSettings(), mmxRegion: 'global' },
     })
@@ -1065,7 +1065,7 @@ describe('local CLI subprocess environment', () => {
 
   it('lets MINIMAX_REGION win when no region is saved, and a saved region win over it', () => {
     process.env.MINIMAX_REGION = 'global'
-    process.env.GENOFFICE_MMX_PATH = dummyBin
+    process.env.TELEOFFICE_MMX_PATH = dummyBin
     const plain = resolveMmxInvocation(null)
     expect(plain?.via).toBe('mmx')
     expect(plain?.baseArgs).toEqual(['--non-interactive', '--region', 'global'])
@@ -1078,12 +1078,12 @@ describe('local CLI subprocess environment', () => {
   })
 
   it('passes the region to the ~/.local/bin/mmx-env wrapper', () => {
-    const home = ownedDir('genoffice-home-')
+    const home = ownedDir('teleoffice-home-')
     mkdirSync(join(home, '.local', 'bin'), { recursive: true })
     const wrapper = join(home, '.local', 'bin', 'mmx-env')
     writeFileSync(wrapper, '')
     osHome.fake = home
-    delete process.env.GENOFFICE_MMX_PATH
+    delete process.env.TELEOFFICE_MMX_PATH
     process.env.MINIMAX_API_KEY = 'k'
     process.env.MINIMAX_REGION = 'global'
     const fromEnv = resolveMmxInvocation(null)

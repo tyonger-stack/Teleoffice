@@ -13,7 +13,7 @@ import {
   mergeCells,
   splitCell,
 } from '@tiptap/pm/tables'
-import { platformShortcuts } from '@genoffice/i18n'
+import { platformShortcuts } from '@teleoffice/i18n'
 
 import { useI18n, type StringKey } from '../i18n/locale'
 import { wordRangeAtCaret } from '../editor/comments'

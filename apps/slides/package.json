@@ -1,6 +1,6 @@
 {
-  "name": "@genoffice/slides",
-  "productName": "GenOffice Slides",
+  "name": "@teleoffice/slides",
+  "productName": "TeleOffice Slides",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
@@ -18,16 +18,16 @@
     "dist:dir": "electron-vite build && electron-builder --dir"
   },
   "devDependencies": {
-    "@genoffice/agent-core": "*",
-    "@genoffice/ai-provider": "*",
-    "@genoffice/ai-search": "*",
-    "@genoffice/file-parse": "*",
-    "@genoffice/i18n": "*",
-    "@genoffice/pptx-engine": "*",
-    "@genoffice/pptx-ops": "*",
-    "@genoffice/pptx-render": "*",
-    "@genoffice/project-store": "*",
-    "@genoffice/ui": "*",
+    "@teleoffice/agent-core": "*",
+    "@teleoffice/ai-provider": "*",
+    "@teleoffice/ai-search": "*",
+    "@teleoffice/file-parse": "*",
+    "@teleoffice/i18n": "*",
+    "@teleoffice/pptx-engine": "*",
+    "@teleoffice/pptx-ops": "*",
+    "@teleoffice/pptx-render": "*",
+    "@teleoffice/project-store": "*",
+    "@teleoffice/ui": "*",
     "@types/opentype.js": "^1.3.8",
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19.2.14",
@@ -46,10 +46,10 @@
     "vite": "^7.3.1",
     "vitest": "^4.1.11"
   },
-  "author": "GenOffice",
+  "author": "TeleOffice",
   "build": {
-    "appId": "com.genoffice.slides",
-    "productName": "GenOffice Slides",
+    "appId": "com.teleoffice.slides",
+    "productName": "TeleOffice Slides",
     "electronVersion": "43.3.0",
     "directories": {
       "output": "release"
@@ -88,7 +88,7 @@
     }
   },
   "dependencies": {
-    "@genoffice/electron-utils": "*",
+    "@teleoffice/electron-utils": "*",
     "acorn": "^8.18.0",
     "harfbuzzjs": "^1.4.0",
     "pngjs": "^7.0.0",

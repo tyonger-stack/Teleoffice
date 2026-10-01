@@ -4,8 +4,8 @@ import {
   applyPlanToXlsx,
   inventoryXlsx,
   readBasicWorkbook,
-} from '@genoffice/xlsx-gateway/gateway/xlsx-gateway'
-import type { ChangePlan } from '@genoffice/xlsx-gateway/domain/workbook.types'
+} from '@teleoffice/xlsx-gateway/gateway/xlsx-gateway'
+import type { ChangePlan } from '@teleoffice/xlsx-gateway/domain/workbook.types'
 import { buildCompatibilityFixture } from './fixture-builder'
 
 describe('XLSX preservation gateway', () => {

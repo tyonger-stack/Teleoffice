@@ -1,12 +1,12 @@
 import { randomBytes } from 'node:crypto'
 import { extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { generateImageTool } from '@genoffice/ai-search'
+import { generateImageTool } from '@teleoffice/ai-search'
 import {
   MAX_REMOTE_IMAGE_BYTES,
   fetchRemoteImage,
   readBodyCapped,
-} from '@genoffice/electron-utils/remote-image'
+} from '@teleoffice/electron-utils/remote-image'
 import { flagBool, flagString } from '../args'
 import { aiSettingsPath, prepareCloud } from '../cloud'
 import { resolveInput, resolveOutput, writeOutput } from '../fs'
@@ -100,7 +100,7 @@ export const imageCommand: CommandDef = {
     if (!r.url)
       throw new CliError(EXIT.app, r.error ?? 'image generation failed', undefined, {
         suggestion:
-          'retry once later; if it persists, check the agy/mmx CLIs or the Genspark login in the GenOffice app, configure an image provider under Settings (AI Media & Search), or continue without generated images',
+          'retry once later; if it persists, check the agy/mmx CLIs or the Genspark login in the TeleOffice app, configure an image provider under Settings (AI Media & Search), or continue without generated images',
       })
     const image = await loadImage(r.url)
     const ext = EXTS_BY_MIME[image.mime]?.[0] ?? 'png'

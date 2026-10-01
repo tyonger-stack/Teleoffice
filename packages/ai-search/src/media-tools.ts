@@ -21,15 +21,15 @@ import {
   type AiSettings,
   type LegacyAiSettings,
   type MediaBlob,
-} from '@genoffice/ai-provider'
-// deep imports: the package root re-exports Electron-bound modules, and this file also runs in the genoffice CLI
-import { readGeneratedImage, storeGeneratedImage } from '@genoffice/electron-utils/generated-images'
+} from '@teleoffice/ai-provider'
+// deep imports: the package root re-exports Electron-bound modules, and this file also runs in the teleoffice CLI
+import { readGeneratedImage, storeGeneratedImage } from '@teleoffice/electron-utils/generated-images'
 import {
   ResponseTooLargeError,
   fetchRemoteImage,
   readBodyCapped,
-} from '@genoffice/electron-utils/remote-image'
-import { fetchWithSsrfGuard } from '@genoffice/electron-utils/safe-remote-url'
+} from '@teleoffice/electron-utils/remote-image'
+import { fetchWithSsrfGuard } from '@teleoffice/electron-utils/safe-remote-url'
 import { gskAnalyzeMedia, gskGenerateImage, hasGskAuth, type GskGenerateImageOptions } from './gsk'
 import {
   agyDescribe,
@@ -311,7 +311,7 @@ async function localGenerateImage(
   try {
     const references = await loadMediaReferences(op.referenceImageUrls ?? [])
     if (references.length) {
-      refDir = mkdtempSync(join(tmpdir(), 'genoffice-imgref-'))
+      refDir = mkdtempSync(join(tmpdir(), 'teleoffice-imgref-'))
       referenceImagePaths = references.map((blob, i) => {
         const target = join(
           refDir as string,
@@ -534,7 +534,7 @@ async function localAnalyzeMedia(
   const attempts: { provider: string; error: string }[] = []
   const staged: string[] = []
   const stageBlobs = (blobs: MediaBlob[]): string[] => {
-    const dir = mkdtempSync(join(tmpdir(), 'genoffice-analyze-'))
+    const dir = mkdtempSync(join(tmpdir(), 'teleoffice-analyze-'))
     staged.push(dir)
     return blobs.map((blob, i) => {
       const target = join(
@@ -553,7 +553,7 @@ async function localAnalyzeMedia(
             throw new Error('MiniMax CLI (mmx) vision reads images only, not audio/video')
           }
           // https URLs go straight to mmx; everything else is already-loaded bytes.
-          const dir = mkdtempSync(join(tmpdir(), 'genoffice-analyze-'))
+          const dir = mkdtempSync(join(tmpdir(), 'teleoffice-analyze-'))
           staged.push(dir)
           const inputs = media.map((blob, i) => {
             const ref = mediaUrls[i] as string
@@ -677,7 +677,7 @@ export async function transcribeAudioTool(
   if (!cli.fallback) {
     return { error: attempts.map((a) => a.provider + ': ' + a.error).join('; '), attempts }
   }
-  const staging = mkdtempSync(join(tmpdir(), 'genoffice-asr-'))
+  const staging = mkdtempSync(join(tmpdir(), 'teleoffice-asr-'))
   try {
     const local = await ensureLocalAudioFile(ref, staging)
     return { text: await mmxTranscribe(local, language, settings), provider: 'mmx', attempts }

@@ -5,14 +5,14 @@ import {
   imageGenerationAvailable,
   localCliSettingsOf,
   mediaAnalysisAvailable,
-} from '@genoffice/ai-provider'
-import { hasGskAuth, localCliStatus, readAiSettingsFile } from '@genoffice/ai-search'
+} from '@teleoffice/ai-provider'
+import { hasGskAuth, localCliStatus, readAiSettingsFile } from '@teleoffice/ai-search'
 import { aiSettingsPath, prepareCloud } from '../cloud'
 import type { CommandDef } from '../registry'
 import { appLaunch } from '../resources'
 
 /**
- * What the cloud commands can do on this machine, decided from GenOffice's
+ * What the cloud commands can do on this machine, decided from TeleOffice's
  * own settings without a network call: the local agy/mmx CLIs (the default
  * search, image and media backends), a Genspark login with cloud tools on,
  * or a BYOK key. Unkeyed fallbacks in the keyed chain (free Parallel MCP,
@@ -22,7 +22,7 @@ import { appLaunch } from '../resources'
 export const capabilitiesCommand: CommandDef = {
   name: 'capabilities',
   summary:
-    'Report which cloud features (search, image search, image generation, media analysis, speech, video) are configured in GenOffice, and whether the app is installed.',
+    'Report which cloud features (search, image search, image generation, media analysis, speech, video) are configured in TeleOffice, and whether the app is installed.',
   usage: 'capabilities',
   async run(_args, ctx) {
     await prepareCloud(ctx.env)

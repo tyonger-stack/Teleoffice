@@ -1,5 +1,5 @@
-; Keeps the genoffice command line (resources\cli, holding genoffice.cmd and the
-; extension-less genoffice for Git Bash) on the installing user's PATH for the
+; Keeps the teleoffice command line (resources\cli, holding teleoffice.cmd and the
+; extension-less teleoffice for Git Bash) on the installing user's PATH for the
 ; lifetime of the install. The value is read and written unexpanded
 ; (REG_EXPAND_SZ) so entries such as %USERPROFILE%\bin survive, and Explorer
 ; is told about the change so terminals opened afterwards see it.
@@ -9,16 +9,16 @@
 !include "WinMessages.nsh"
 !include "StrFunc.nsh"
 
-!define GENOFFICE_PATH_MAX 7900
+!define TELEOFFICE_PATH_MAX 7900
 
 ; Scope templates to our ProgIDs (electron-builder uses fileAssociations.name).
 ; A shared .ext\ShellNew would overwrite Office/WPS templates. OOXML files
 ; must be copied from valid packages, never created with NullFile.
-!macro GenOfficeRegisterShellNew EXT PROGID
+!macro TeleOfficeRegisterShellNew EXT PROGID
   WriteRegStr SHELL_CONTEXT "Software\Classes\.${EXT}\${PROGID}\ShellNew" "FileName" "$INSTDIR\resources\shell-new\blank.${EXT}"
 !macroend
 
-!macro GenOfficeUnregisterShellNew EXT PROGID
+!macro TeleOfficeUnregisterShellNew EXT PROGID
   ; Only remove our own registration, including when uninstalling for an update.
   ReadRegStr $0 SHELL_CONTEXT "Software\Classes\.${EXT}\${PROGID}\ShellNew" "FileName"
   ${If} $0 == "$INSTDIR\resources\shell-new\blank.${EXT}"
@@ -29,20 +29,20 @@
 
 !macro customInstall
   Push "$INSTDIR\resources\cli"
-  Call GenOfficeAddToUserPath
-  !insertmacro GenOfficeRegisterShellNew "docx" "Word Document"
-  !insertmacro GenOfficeRegisterShellNew "xlsx" "Excel Workbook"
-  !insertmacro GenOfficeRegisterShellNew "pptx" "PowerPoint Presentation"
+  Call TeleOfficeAddToUserPath
+  !insertmacro TeleOfficeRegisterShellNew "docx" "Word Document"
+  !insertmacro TeleOfficeRegisterShellNew "xlsx" "Excel Workbook"
+  !insertmacro TeleOfficeRegisterShellNew "pptx" "PowerPoint Presentation"
   !insertmacro UPDATEFILEASSOC
 !macroend
 
 !macro customUnInstall
   Push "$INSTDIR\resources\cli"
-  Call un.GenOfficeRemoveFromUserPath
+  Call un.TeleOfficeRemoveFromUserPath
   Push $0
-  !insertmacro GenOfficeUnregisterShellNew "docx" "Word Document"
-  !insertmacro GenOfficeUnregisterShellNew "xlsx" "Excel Workbook"
-  !insertmacro GenOfficeUnregisterShellNew "pptx" "PowerPoint Presentation"
+  !insertmacro TeleOfficeUnregisterShellNew "docx" "Word Document"
+  !insertmacro TeleOfficeUnregisterShellNew "xlsx" "Excel Workbook"
+  !insertmacro TeleOfficeUnregisterShellNew "pptx" "PowerPoint Presentation"
   Pop $0
   !insertmacro UPDATEFILEASSOC
 !macroend
@@ -50,7 +50,7 @@
 !ifndef BUILD_UNINSTALLER
 ${StrStr}
 
-Function GenOfficeAddToUserPath
+Function TeleOfficeAddToUserPath
   Exch $0 ; directory
   Push $1
   Push $2
@@ -58,7 +58,7 @@ Function GenOfficeAddToUserPath
   ReadRegStr $1 HKCU "Environment" "Path"
   StrLen $2 $1
   ; leave an already oversized PATH alone rather than truncate it
-  IntCmp $2 ${GENOFFICE_PATH_MAX} done 0 done
+  IntCmp $2 ${TELEOFFICE_PATH_MAX} done 0 done
   ${StrStr} $3 ";$1;" ";$0;"
   StrCmp $3 "" 0 done
   StrCmp $1 "" 0 +3
@@ -80,7 +80,7 @@ FunctionEnd
 ${UnStrStr}
 ${UnStrRep}
 
-Function un.GenOfficeRemoveFromUserPath
+Function un.TeleOfficeRemoveFromUserPath
   Exch $0 ; directory
   Push $1
   Push $2

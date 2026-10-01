@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import { extname } from 'node:path'
-import { generateVideoTool, videoDownloadTool, videoTaskTool } from '@genoffice/ai-search'
+import { generateVideoTool, videoDownloadTool, videoTaskTool } from '@teleoffice/ai-search'
 import { flagBool, flagString } from '../args'
 import { aiSettingsPath, prepareCloud } from '../cloud'
 import { resolveInput, resolveOutput } from '../fs'

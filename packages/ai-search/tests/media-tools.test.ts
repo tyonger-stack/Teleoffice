@@ -17,7 +17,7 @@ const gskAnalyze = vi.mocked(gskAnalyzeMedia)
 // Explicit Genspark media settings: the app defaults now select the local
 // CLIs, so the Genspark route needs its providers spelled out.
 function gensparkSettingsFile(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'genoffice-media-test-'))
+  const dir = mkdtempSync(join(tmpdir(), 'teleoffice-media-test-'))
   const path = join(dir, 'ai-settings.json')
   writeFileSync(
     path,

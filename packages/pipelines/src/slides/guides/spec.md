@@ -1,19 +1,19 @@
-# Deck spec for `genoffice create --type pptx --spec`
+# Deck spec for `teleoffice create --type pptx --spec`
 
-The designed-deck path (`genoffice guide slides design`) keeps one page per file:
+The designed-deck path (`teleoffice guide slides design`) keeps one page per file:
 
 ```
 deck/pages/01.json   { "title": "The 40% squeeze", "type": "cover", "layout": "cover_typography_hero", "background": "#0E1A2B", "elements": [ ... ] }
 deck/pages/02.json   { "title": "Where the margin went", "type": "content", "layout": "three_column_cards", "background": "#FFFFFF", "elements": [ ... ] }
 ```
 
-`title`, `type` and `layout` echo the page's outline entry; the builder ignores them, the checks compare them. `genoffice slides check deck/pages/01.json` builds and audits one file, then checks it against `outline.json` and `style.md` (looked up beside the file and one folder up, or `--outline <file>`): file `NN.json` is outline entry `pages[N-1]`; an echoed field that disagrees or placeholder copy exits 1, a missing title or a planned photo without an image is a warning, and colors the style sheet does not name are listed in `detail.style.offPalette`. `genoffice create --type pptx --spec deck/pages [--outline deck/outline.json] --out deck.pptx` takes every `*.json` in the folder in name order (`01`, `02`, … `10`), one slide each, runs the same checks on every file and refuses to build when the page count differs from the outline or a page disagrees with its entry. `genoffice slides replace deck.pptx --slide n --spec deck/pages/NN.json` rebuilds slide n from its file after checking it against entry n.
+`title`, `type` and `layout` echo the page's outline entry; the builder ignores them, the checks compare them. `teleoffice slides check deck/pages/01.json` builds and audits one file, then checks it against `outline.json` and `style.md` (looked up beside the file and one folder up, or `--outline <file>`): file `NN.json` is outline entry `pages[N-1]`; an echoed field that disagrees or placeholder copy exits 1, a missing title or a planned photo without an image is a warning, and colors the style sheet does not name are listed in `detail.style.offPalette`. `teleoffice create --type pptx --spec deck/pages [--outline deck/outline.json] --out deck.pptx` takes every `*.json` in the folder in name order (`01`, `02`, … `10`), one slide each, runs the same checks on every file and refuses to build when the page count differs from the outline or a page disagrees with its entry. `teleoffice slides replace deck.pptx --slide n --spec deck/pages/NN.json` rebuilds slide n from its file after checking it against entry n.
 
 `--spec` also accepts one file holding the whole deck, `{ "pages": [ {...}, {...} ] }`, a bare array of pages, or a single page object. Up to 60 pages. Every page becomes one 16:9 slide; the canvas is **1280 × 720 px**, origin top-left, all `x` `y` `w` `h` integers in px. Elements paint in array order (first = bottom). Colors are `#RRGGBB` or `#RRGGBBAA` (`AA` alpha, `00` transparent).
 
 ## Outline
 
-`deck/outline.json` is the plan the pages are written from; `genoffice slides check` validates it:
+`deck/outline.json` is the plan the pages are written from; `teleoffice slides check` validates it:
 
 ```json
 {
@@ -101,7 +101,7 @@ Run fields: `text` (required), `sizePt` (6 to 160), `bold`, `italic`, `color`, `
 { "type": "image", "url": "./assets/hero.jpg", "x": 660, "y": 80, "w": 540, "h": 560 }
 ```
 
-`url` is a local file path (absolute, or relative to the current directory and then to the spec file's folder), a `data:` URL, or an `http(s)` URL that genoffice downloads. The image is center-cropped to fill its box (object-fit: cover; `fit: "contain"` shrinks the box to the picture aspect instead, no crop: use it for charts), so give the box roughly the picture's aspect ratio: a box that keeps less than half of the picture (a portrait product shot in a flat strip) lands but is reported as a warning. Up to 8 images per page. An image that cannot be read is dropped and listed in `detail.imageFailures`.
+`url` is a local file path (absolute, or relative to the current directory and then to the spec file's folder), a `data:` URL, or an `http(s)` URL that teleoffice downloads. The image is center-cropped to fill its box (object-fit: cover; `fit: "contain"` shrinks the box to the picture aspect instead, no crop: use it for charts), so give the box roughly the picture's aspect ratio: a box that keeps less than half of the picture (a portrait product shot in a flat strip) lands but is reported as a warning. Up to 8 images per page. An image that cannot be read is dropped and listed in `detail.imageFailures`.
 
 ## Validation
 
@@ -109,7 +109,7 @@ Elements missing numeric geometry, lying fully outside the canvas, or of an unkn
 
 ## Template mode
 
-Build on a corporate `.pptx` instead of blank pages so slides use its masters, layouts and theme. `genoffice template inspect <file|name>` reports the slide size, the masters with theme colors and fonts, every layout in order with its placeholder slots, and one usage hint per layout (`layout "Name" (index N, master M): placeholders title(0) ...`). A template page fills the named layout:
+Build on a corporate `.pptx` instead of blank pages so slides use its masters, layouts and theme. `teleoffice template inspect <file|name>` reports the slide size, the masters with theme colors and fonts, every layout in order with its placeholder slots, and one usage hint per layout (`layout "Name" (index N, master M): placeholders title(0) ...`). A template page fills the named layout:
 
 ```json
 {
@@ -125,8 +125,8 @@ Build on a corporate `.pptx` instead of blank pages so slides use its masters, l
 
 `layout` is required: a layout name from `template inspect` (exact name in the page `master`, else any master, case-insensitive fallback; or `"1:Name"` for master 1, or a flat index). `title` fills the title/ctrTitle placeholder, `subtitle` the subTitle (or a spare body box), `body` the first body/obj placeholder as plain leveled bullets (nested arrays nest one level, `level` 0 to 8) in the layout own style. `placeholders[]` targets one slot by `idx` or `type` with `text`, `paragraphs`, `bullets` or `image` (`fit: cover|contain`); an entry for a slot the layout lacks is dropped with a warning, and so is a title on a title-less layout (the title stays only the outline echo then). `elements` are px-positioned exactly like plain specs but on the template own canvas (`template inspect` reports it) and may be empty; a page with neither fills nor elements is a blank layout page. `notes` is plain text. `type`, `brief` and friends are allowed (outline echo) and ignored by the builder.
 
-`genoffice slides check` validates an outline with `"template"` against the template layouts (repeat layouts across pages are fine there) and builds a template page on its template before auditing it; canvas is the template size. `genoffice create --type pptx --template <file|name> --spec <dir|file> [--outline f] --out deck.pptx [--font F] [--keep-template-slides]` builds the deck: `--font` (else the spec `font`, else the registry default) retypes the theme and every run without an explicit font, sample slides are removed unless kept, and metadata is scrubbed. `slides replace` only rebuilds pages of plain-spec decks; template decks rebuild with `create --template`. A registered template may carry `startLayout` (`template add --start-layout <name>`, a layout name optionally qualified as `1:Name`) for the GUI starter slide. Office default layouts that share names across masters (the stock Title Slide and Title Only layouts, often localized) may carry no brand decorations, so check `decorations` and `usedBySamples` in `template inspect` before choosing.
+`teleoffice slides check` validates an outline with `"template"` against the template layouts (repeat layouts across pages are fine there) and builds a template page on its template before auditing it; canvas is the template size. `teleoffice create --type pptx --template <file|name> --spec <dir|file> [--outline f] --out deck.pptx [--font F] [--keep-template-slides]` builds the deck: `--font` (else the spec `font`, else the registry default) retypes the theme and every run without an explicit font, sample slides are removed unless kept, and metadata is scrubbed. `slides replace` only rebuilds pages of plain-spec decks; template decks rebuild with `create --template`. A registered template may carry `startLayout` (`template add --start-layout <name>`, a layout name optionally qualified as `1:Name`) for the GUI starter slide. Office default layouts that share names across masters (the stock Title Slide and Title Only layouts, often localized) may carry no brand decorations, so check `decorations` and `usedBySamples` in `template inspect` before choosing.
 
 ## After building
 
-Elements get durable ids (`e_*`) and slides `s_<n>`; `genoffice slides read deck.pptx --json` lists them for follow-up `genoffice slides apply` ops. `genoffice slides audit` reports out-of-bounds, text overflow and overlap per slide with the same ids; `genoffice slides render` writes one PNG per slide for visual review; `genoffice slides replace --slide n --spec <page.json>` swaps one slide for a rebuilt page (its element ids are new).
+Elements get durable ids (`e_*`) and slides `s_<n>`; `teleoffice slides read deck.pptx --json` lists them for follow-up `teleoffice slides apply` ops. `teleoffice slides audit` reports out-of-bounds, text overflow and overlap per slide with the same ids; `teleoffice slides render` writes one PNG per slide for visual review; `teleoffice slides replace --slide n --spec <page.json>` swaps one slide for a rebuilt page (its element ids are new).

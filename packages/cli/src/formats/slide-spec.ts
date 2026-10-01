@@ -20,17 +20,17 @@ import {
   type PageSpec,
   type TemplateLayoutUsed,
   type TemplatePageSpec,
-} from '@genoffice/pipelines/slides'
-import { listTemplates, resolveTemplate } from '@genoffice/pipelines/slides/templates'
+} from '@teleoffice/pipelines/slides'
+import { listTemplates, resolveTemplate } from '@teleoffice/pipelines/slides/templates'
 import {
   deleteSlide,
   mergeSlideFromPptx,
   moveSlide,
   promoteSlideBackground,
   type OpenedPptx,
-} from '@genoffice/pptx-engine'
-import { HeuristicMetrics } from '@genoffice/pptx-render'
-import { extract } from '@genoffice/pdf2docx'
+} from '@teleoffice/pptx-engine'
+import { HeuristicMetrics } from '@teleoffice/pptx-render'
+import { extract } from '@teleoffice/pdf2docx'
 import { assertAllowed, readInput, resolveInput, type PathContext } from '../fs'
 import { CliError, EXIT, type ErrorHints } from '../result'
 
@@ -173,7 +173,7 @@ export function stageContext(
   if (outlineFile) out.outline = { file: outlineFile, outline: readOutline(outlineFile) }
   else {
     out.notes.push(
-      'no outline.json beside the page files or one folder up: the staged flow writes deck/outline.json first and checks every page against it (genoffice guide slides design)',
+      'no outline.json beside the page files or one folder up: the staged flow writes deck/outline.json first and checks every page against it (teleoffice guide slides design)',
     )
   }
   if (found.style) {
