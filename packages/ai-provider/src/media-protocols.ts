@@ -164,6 +164,23 @@ function asRecord(v: unknown): Record<string, unknown> {
   return v && typeof v === 'object' ? (v as Record<string, unknown>) : {}
 }
 
+/**
+ * A 200 carrying an HTML shell / empty / truncated body (gateway soft-failure) makes
+ * `resp.json()` throw, and that SyntaxError reached the user from a media call that
+ * already knows how to report a failure. Same guard the chat protocols use: read the
+ * text, parse it here, and shape a non-JSON body through httpBodyDetail. Read whole,
+ * as `json()` did — a valid body can carry a multi-megabyte base64 image, so this
+ * deliberately does not reuse the capped error-body read.
+ */
+async function readJson(label: string, resp: Response): Promise<Record<string, unknown>> {
+  const body = await resp.text()
+  try {
+    return asRecord(JSON.parse(body))
+  } catch {
+    throw new Error(`${label} the response was not JSON: ${httpBodyDetail(body)}`)
+  }
+}
+
 function withTimeout(signal: AbortSignal | undefined, ms: number): AbortSignal {
   const timeout = AbortSignal.timeout(ms)
   return signal ? AbortSignal.any([signal, timeout]) : timeout
@@ -278,7 +295,7 @@ async function openAiImageResult(
   signal: AbortSignal,
 ): Promise<MediaBlob> {
   if (!resp.ok) return failFrom(label, resp)
-  const json = asRecord(await resp.json())
+  const json = await readJson(label, resp)
   const first = asRecord((json.data as unknown[] | undefined)?.[0])
   if (typeof first.b64_json === 'string' && first.b64_json) return fromBase64(first.b64_json)
   if (typeof first.url === 'string' && first.url) return downloadImage(label, first.url, signal)
@@ -381,7 +398,7 @@ async function generateImageDashscope(
     },
   )
   if (!resp.ok) return failFrom('Image generation failed:', resp)
-  const json = asRecord(await resp.json())
+  const json = await readJson('Image generation failed:', resp)
   if (typeof json.code === 'string' && json.code) {
     throw new Error(`Image generation failed: ${json.code} ${String(json.message ?? '')}`)
   }
@@ -427,7 +444,7 @@ async function generateImageMinimax(
     signal,
   })
   if (!resp.ok) return failFrom('Image generation failed:', resp)
-  const json = asRecord(await resp.json())
+  const json = await readJson('Image generation failed:', resp)
   const status = asRecord(json.base_resp)
   if (typeof status.status_code === 'number' && status.status_code !== 0) {
     throw new Error(
@@ -473,7 +490,7 @@ async function analyzeMediaOpenAi(
     signal,
   })
   if (!resp.ok) return failFrom('Media analysis failed:', resp)
-  const json = asRecord(await resp.json())
+  const json = await readJson('Media analysis failed:', resp)
   const choice = asRecord((json.choices as unknown[] | undefined)?.[0])
   const text = openAiContentText(asRecord(choice.message).content).trim()
   if (!text) throw new Error('Media analysis returned an empty answer')
@@ -531,7 +548,7 @@ async function generateImageGemini(
       signal,
     })
     if (!resp.ok) return failFrom('Image generation failed:', resp)
-    const json = asRecord(await resp.json())
+    const json = await readJson('Image generation failed:', resp)
     const first = asRecord((json.predictions as unknown[] | undefined)?.[0])
     if (typeof first.bytesBase64Encoded !== 'string') {
       throw new Error(`Image generation returned no image: ${JSON.stringify(json).slice(0, 200)}`)
@@ -561,7 +578,7 @@ async function generateImageGemini(
     signal,
   })
   if (!resp.ok) return failFrom('Image generation failed:', resp)
-  const json = asRecord(await resp.json())
+  const json = await readJson('Image generation failed:', resp)
   const parts = geminiParts((json.candidates as unknown[] | undefined)?.[0])
   const image = parts
     .map((p) => asRecord(p.inlineData ?? p.inline_data))
@@ -616,7 +633,7 @@ async function geminiUploadFile(
     signal,
   })
   if (!upload.ok) return failFrom('Media upload failed:', upload)
-  let file = asRecord(asRecord(await upload.json()).file)
+  let file = asRecord((await readJson('Media upload failed:', upload)).file)
   const deadline = Date.now() + GEMINI_FILE_READY_TIMEOUT_MS
   // videos are transcoded server-side before they can be referenced
   while (file.state === 'PROCESSING') {
@@ -629,7 +646,7 @@ async function geminiUploadFile(
       signal,
     })
     if (!poll.ok) return failFrom('Media upload failed:', poll)
-    file = asRecord(await poll.json())
+    file = await readJson('Media upload failed:', poll)
   }
   if (file.state !== 'ACTIVE' || typeof file.uri !== 'string') {
     throw new Error(`Media upload failed: file state ${String(file.state ?? 'unknown')}`)
@@ -662,7 +679,7 @@ async function analyzeMediaGemini(
     signal,
   })
   if (!resp.ok) return failFrom('Media analysis failed:', resp)
-  const json = asRecord(await resp.json())
+  const json = await readJson('Media analysis failed:', resp)
   const text = geminiParts((json.candidates as unknown[] | undefined)?.[0])
     .map((p) => (typeof p.text === 'string' ? p.text : ''))
     .join('')
