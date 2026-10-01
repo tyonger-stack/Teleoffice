@@ -972,8 +972,9 @@ function groupChildNvId(child: any): string | undefined {
   return undefined
 }
 
-// Same tag matching style as scan.ts (tolerates '>' inside attribute values)
-const GROUP_TAG_RE = /<\/?(?:[^<>"']|"[^"]*"|'[^']*')*>/g
+// Same tag matching style as scan.ts (tolerates '>' inside attribute values);
+// the comment alternative comes first so a comment body containing '<' is skipped whole
+const GROUP_TAG_RE = /<!--[\s\S]*?-->|<\/?(?:[^<>"']|"[^"]*"|'[^']*')*>/g
 const GROUP_NAME_RE = /^<\/?\s*([A-Za-z_][\w:.-]*)/
 
 interface GroupChildSlice {
