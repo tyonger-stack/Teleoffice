@@ -79,6 +79,8 @@ function toolFieldText(value: unknown): string {
 const TEXT_MAX_CHARS = 32_000
 /** Max stored characters of a scope excerpt */
 const SCOPE_TEXT_MAX_CHARS = 400
+/** Max stored characters of a scope label */
+const SCOPE_LABEL_MAX_CHARS = 200
 const TEXT_TRUNCATED_MARK = '\n\n[truncated]'
 /**
  * Max opening messages buffered in memory per chat before the first
@@ -651,7 +653,7 @@ export class ProjectStore {
       }
       if (msg.scope !== undefined) {
         record.scope = {
-          label: msg.scope.label,
+          label: clampChatField(msg.scope.label, SCOPE_LABEL_MAX_CHARS),
           ...(msg.scope.text !== undefined
             ? { text: msg.scope.text.slice(0, SCOPE_TEXT_MAX_CHARS) }
             : {}),

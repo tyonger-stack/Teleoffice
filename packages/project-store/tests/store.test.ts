@@ -643,6 +643,16 @@ describe('appendChatMessage opening buffer', () => {
     expect(msgs[1].scope).toBeUndefined()
   })
 
+  it('scope label is capped at 200 chars on disk', () => {
+    store.appendChatMessage('default', 'scope-label-cap', {
+      role: 'user',
+      text: 'q',
+      scope: { label: 'L'.repeat(1_000) },
+    })
+    const msgs = store.loadChat('default', 'scope-label-cap')
+    expect(msgs[0].scope?.label).toHaveLength(200)
+  })
+
   it('user messages appended to a chat with an existing file are written directly, not buffered', () => {
     store.appendChatMessage('default', 'has-file', { role: 'user', text: 'q1' })
     store.appendChatMessage('default', 'has-file', { role: 'assistant', text: 'a1' })
