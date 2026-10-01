@@ -136,22 +136,35 @@ function normalizeBaseUrl(raw: string | undefined, fallback: string): string {
   return parsed.toString()
 }
 
+/** Strip trailing slashes and a trailing /v1 from the path (before any query) */
+function stripTrailingV1(base: string): string {
+  const q = base.indexOf('?')
+  const path = (q === -1 ? base : base.slice(0, q)).replace(/\/+$/, '').replace(/\/v1$/, '')
+  return q === -1 ? path : `${path}${base.slice(q)}`
+}
+
+/** Append a path segment before any query string so `?api-version=…` stays last */
+function appendPath(base: string, path: string): string {
+  const q = base.indexOf('?')
+  return q === -1 ? `${base}${path}` : `${base.slice(0, q)}${path}${base.slice(q)}`
+}
+
 function opencodeEndpoint(
   root: string,
   routes: { anthropic: RegExp; gemini?: RegExp },
 ): (config: AiProviderConfig) => ResolvedEndpoint {
   return (config) => {
     // a stored base URL replaces the gateway root; the documented `/v1` API base is tolerated
-    const base = normalizeBaseUrl(config.baseUrl, root).replace(/\/+$/, '').replace(/\/v1$/, '')
+    const base = stripTrailingV1(normalizeBaseUrl(config.baseUrl, root))
     const model = config.model ?? ''
     const omit =
       model !== '' && (modelHasFixedSampling(model) || model.toLowerCase().startsWith('kimi-'))
     const sampling = omit ? { omitTemperature: true as const } : {}
     if (routes.anthropic.test(model)) return { protocol: 'anthropic', baseUrl: base, ...sampling }
     if (routes.gemini?.test(model)) {
-      return { protocol: 'gemini', baseUrl: `${base}/v1`, ...sampling }
+      return { protocol: 'gemini', baseUrl: appendPath(base, '/v1'), ...sampling }
     }
-    return { protocol: 'openai-compatible', baseUrl: `${base}/v1`, ...sampling }
+    return { protocol: 'openai-compatible', baseUrl: appendPath(base, '/v1'), ...sampling }
   }
 }
 
