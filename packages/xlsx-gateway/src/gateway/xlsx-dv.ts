@@ -98,7 +98,9 @@ function appendDvRules(
     kept.push(
       remaining.length === areas.length
         ? entry
-        : entry.replace(/\bsqref="[^"]*"/, `sqref="${remaining.join(' ')}"`),
+        : // function replacer: a surviving area's text is document-controlled and a
+          // string replacement would expand $& / $1 / $` in it (xlsx-gateway.ts:2152)
+          entry.replace(/\bsqref="[^"]*"/, () => `sqref="${remaining.join(' ')}"`),
     )
   }
   const entries = [...kept, ...rules.map(serializeRule)]
