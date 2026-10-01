@@ -109,16 +109,15 @@ export function applyCfRules(
     },
   )
 
-  // x14 rules and preserved blocks keep their priorities; new rules take the
-  // free values.
-  const used = new Set<number>()
-  for (const match of xml.matchAll(/<(?:\w+:)?cfRule\b[^>]*?\spriority="(\d+)"/g)) {
-    used.add(Number(match[1]))
-  }
+  // x14 rules and preserved blocks keep their priorities; new rules take
+  // max+1 values.
   let priority = 0
+  for (const match of xml.matchAll(/<(?:\w+:)?cfRule\b[^>]*?\spriority="(\d+)"/g)) {
+    const seen = Number(match[1])
+    if (seen > priority) priority = seen
+  }
   const nextPriority = (): number => {
-    do priority += 1
-    while (used.has(priority))
+    priority += 1
     return priority
   }
 
@@ -161,14 +160,13 @@ const CF_BLOCK_RE =
 
 function appendCfRules(xml: string, rules: readonly CfWireRule[], dxfs: DxfSink): string {
   if (rules.length === 0) return xml
-  const used = new Set<number>()
-  for (const match of xml.matchAll(/<(?:\w+:)?cfRule\b[^>]*?\spriority="(\d+)"/g)) {
-    used.add(Number(match[1]))
-  }
   let priority = 0
+  for (const match of xml.matchAll(/<(?:\w+:)?cfRule\b[^>]*?\spriority="(\d+)"/g)) {
+    const seen = Number(match[1])
+    if (seen > priority) priority = seen
+  }
   const nextPriority = (): number => {
-    do priority += 1
-    while (used.has(priority))
+    priority += 1
     return priority
   }
   const body = rules.map((rule) => serializeRule(rule, nextPriority(), dxfs)).join('')
