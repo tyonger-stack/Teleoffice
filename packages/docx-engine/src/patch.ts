@@ -100,6 +100,30 @@ import {
   patchZoteroDocumentDataXml,
 } from './zotero-doc-props'
 
+/**
+ * Relationship attributes are read quote-agnostically and with any spacing
+ * around `=`, because a .rels part may legally spell them either way. An
+ * id read as "absent" is worse than no read at all: the counter that hands out
+ * new rIds restarts below one that is already taken, and the save emits a
+ * duplicate Id into the same part. Same rule as the pptx engine's reader.
+ */
+const RELATIONSHIP_ID_NUMBER = /\bId\s*=\s*(["'])rId(\d+)\1/g
+const RELATIONSHIP_ID = /\bId\s*=\s*(["'])([^"']*)\1/
+const RELATIONSHIP_TYPE = /\bType\s*=\s*(["'])([^"']*)\1/
+const RELATIONSHIP_TARGET = /\bTarget\s*=\s*(["'])([^"']*)\1/
+
+/** One <Relationship .../> empty tag, either quote style. */
+const RELATIONSHIP_TAG = /<Relationship\b[^>]*\/>/g
+
+/**
+ * The <Relationship> tag carrying a given Id, either quote style and with any
+ * spacing around `=`. Used both to reclaim the relationship a superseded
+ * watermark owned and to tell which ids the part already hands out, so the two
+ * stay consistent: an id the reclaim failed to free is never the one reissued.
+ */
+const relTagWithId = (id: string): RegExp =>
+  new RegExp(`<Relationship\\s[^>]*\\bId\\s*=\\s*(["'])${id}\\1[^>]*/>`)
+
 export type ParsedDocFull = ParsedDoc & { extras: ParseExtras }
 
 /** Body content in final editor order (hidden trailing elements are appended automatically). */
@@ -351,11 +375,15 @@ export async function findChartWorkbookPath(
     const relsFile = zip.file(relsPath)
     if (!relsFile) return null
     const relsXml = await relsFile.async('text')
-    // find Relationship with Type ending in /package
-    const m = relsXml.match(/Type="[^"]*\/package"[^/]*Target="([^"]+)"/)
-    if (!m) return null
-    const target = m[1]
-    return resolveRelationshipTargetPath(chartPath, target)
+    // find Relationship with Type ending in /package; attribute order is the
+    // producer's choice, so Type and Target are read off the tag separately
+    for (const tag of relsXml.match(RELATIONSHIP_TAG) ?? []) {
+      const type = RELATIONSHIP_TYPE.exec(tag)?.[2]
+      if (!type?.endsWith('/package')) continue
+      const target = RELATIONSHIP_TARGET.exec(tag)?.[2]
+      if (target) return resolveRelationshipTargetPath(chartPath, target)
+    }
+    return null
   } catch {
     return null
   }
@@ -709,9 +737,9 @@ export async function saveDocx(
   const trailingSectPr = sectBlock?.originalXml ?? ''
   const relTargets = new Map<string, string>()
   if (relsXml) {
-    for (const tag of relsXml.match(/<Relationship [^>]*\/>/g) ?? []) {
-      const id = /Id="([^"]+)"/.exec(tag)?.[1]
-      const target = /Target="([^"]+)"/.exec(tag)?.[1]
+    for (const tag of relsXml.match(RELATIONSHIP_TAG) ?? []) {
+      const id = RELATIONSHIP_ID.exec(tag)?.[2]
+      const target = RELATIONSHIP_TARGET.exec(tag)?.[2]
       if (id && target) relTargets.set(id, target)
     }
   }
@@ -766,9 +794,12 @@ export async function saveDocx(
         '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>'
     let relsChanged = false
     const old = originalXml ? readPictureWatermark(originalXml) : null
-    if (old && (originalXml!.match(new RegExp(`r:id="${old.rId}"`, 'g')) ?? []).length === 1) {
+    if (
+      old &&
+      (originalXml!.match(new RegExp(`r:id\\s*=\\s*(["'])${old.rId}\\1`, 'g')) ?? []).length === 1
+    ) {
       const before = relsXml
-      relsXml = relsXml.replace(new RegExp(`<Relationship\\s[^>]*\\bId="${old.rId}"[^>]*/>`), '')
+      relsXml = relsXml.replace(relTagWithId(old.rId), '')
       relsChanged = relsXml !== before
     }
     let xml: string
@@ -777,7 +808,7 @@ export async function saveDocx(
     else {
       const mediaPath = landMedia(watermark.image)
       let n = 1
-      while (relsXml.includes(`Id="rId${n}"`)) n++
+      while (relTagWithId(`rId${n}`).test(relsXml)) n++
       const rId = `rId${n}`
       relsXml = relsXml.replace(
         '</Relationships>',
@@ -979,8 +1010,8 @@ export async function saveDocx(
         ? await relsFile.async('string')
         : '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>'
       let relNum = 1
-      for (const m of relsXml.matchAll(/Id="rId(\d+)"/g))
-        relNum = Math.max(relNum, parseInt(m[1], 10) + 1)
+      for (const m of relsXml.matchAll(RELATIONSHIP_ID_NUMBER))
+        relNum = Math.max(relNum, parseInt(m[2], 10) + 1)
       const picXmls: string[] = []
       for (const pic of options.numbering?.picBullets ?? []) {
         const mediaPath = landMedia(pic)
@@ -2252,13 +2283,16 @@ function applyPageColor(documentXml: string, color: string | null): string {
   return xml
 }
 
+/**
+ * Highest rIdN already present in a .rels part, or 1000 when the part is
+ * absent (so a generated document starts well clear of Word's own ids).
+ */
 function maxRelId(relsXml: string | null): number {
   if (!relsXml) return 1000
   let max = 0
-  const re = /Id="rId(\d+)"/g
-  let m: RegExpExecArray | null
-  while ((m = re.exec(relsXml)) !== null) {
-    max = Math.max(max, parseInt(m[1], 10))
+  for (const match of relsXml.matchAll(RELATIONSHIP_ID_NUMBER)) {
+    const n = parseInt(match[2], 10)
+    if (n > max) max = n
   }
   return max
 }
