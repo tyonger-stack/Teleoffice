@@ -25,6 +25,7 @@
     "@teleoffice/ai-provider": "*",
     "@teleoffice/ai-search": "*",
     "@teleoffice/docx-engine": "*",
+    "@teleoffice/electron-utils": "*",
     "@teleoffice/pdf2docx": "*",
     "@teleoffice/pipelines": "*",
     "@teleoffice/pptx-engine": "*",

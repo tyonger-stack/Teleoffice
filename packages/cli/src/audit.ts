@@ -1,6 +1,6 @@
 import { appendFileSync, mkdirSync, renameSync, statSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
+import { envValue, teleofficeHomeDir } from '@teleoffice/electron-utils/teleoffice-home'
 
 /**
  * One JSON line per executed command, so the person who let an agent loose
@@ -21,10 +21,10 @@ export interface AuditRecord {
 const MAX_BYTES = 2_000_000
 
 export function auditLogPath(env: NodeJS.ProcessEnv): string | null {
-  const raw = env.TELEOFFICE_AUDIT_LOG?.trim()
+  const raw = envValue(env, 'TELEOFFICE_AUDIT_LOG', 'GENOFFICE_AUDIT_LOG')?.trim()
   if (raw?.toLowerCase() === 'off') return null
   if (raw) return raw
-  return join(env.TELEOFFICE_AUTH_DIR || join(homedir(), '.teleoffice'), 'cli-audit.jsonl')
+  return join(teleofficeHomeDir(env), 'cli-audit.jsonl')
 }
 
 export function appendAudit(env: NodeJS.ProcessEnv, record: AuditRecord): void {

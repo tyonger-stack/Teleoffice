@@ -97,3 +97,27 @@ describe.skipIf(process.platform === 'win32')('linux cli link scripts (teleoffic
     expect(existsSync(t.link)).toBe(false)
   })
 })
+
+describe.skipIf(process.platform === 'win32')(
+  'linux cli link scripts: the old genoffice name',
+  () => {
+    it('drops our genoffice link on install and remove, but not a foreign one', () => {
+      const t = makeRoot()
+      const legacy = join(t.link, '..', 'genoffice')
+      symlinkSync(join(t.launcher, '..', 'genoffice'), legacy)
+      expect(t.install()).toEqual({ code: 0, stderr: '' })
+      expect(lstatSync(legacy, { throwIfNoEntry: false })).toBeUndefined()
+      expect(readlinkSync(t.link)).toBe(t.launcher)
+
+      symlinkSync(join(t.launcher, '..', 'genoffice'), legacy)
+      expect(t.remove('remove').code).toBe(0)
+      expect(lstatSync(legacy, { throwIfNoEntry: false })).toBeUndefined()
+
+      symlinkSync('/usr/lib/node_modules/genoffice/bin/genoffice', legacy)
+      expect(t.install().code).toBe(0)
+      expect(readlinkSync(legacy)).toBe('/usr/lib/node_modules/genoffice/bin/genoffice')
+      expect(t.remove('remove').code).toBe(0)
+      expect(readlinkSync(legacy)).toBe('/usr/lib/node_modules/genoffice/bin/genoffice')
+    })
+  },
+)

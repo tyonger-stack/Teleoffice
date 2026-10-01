@@ -10,13 +10,13 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { teleofficeHomeDir } from '@teleoffice/electron-utils/teleoffice-home'
 import { asRecord } from './shared'
 
-/** Override dir via TELEOFFICE_AUTH_DIR (test isolation). */
+/** Residual auth.json under the live TeleOffice home (or TELEOFFICE_AUTH_DIR). */
 export function teleofficeAuthPath(): string {
-  return join(process.env.TELEOFFICE_AUTH_DIR || join(homedir(), '.teleoffice'), 'auth.json')
+  return join(teleofficeHomeDir(), 'auth.json')
 }
 
 export interface TeleofficeAuth {

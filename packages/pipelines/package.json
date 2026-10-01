@@ -17,6 +17,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@teleoffice/electron-utils": "*",
     "@teleoffice/pptx-engine": "*",
     "@teleoffice/pptx-render": "*"
   },

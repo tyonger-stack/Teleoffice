@@ -1,25 +1,9 @@
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { app } from 'electron'
 import { installCliLink } from '@teleoffice/cli/install'
+import { teleofficeHomeDir } from '@teleoffice/electron-utils/teleoffice-home'
 import { readAppSettings, writeAppSetting } from './app-settings'
-
-/** Copy ~/.genoffice → ~/.teleoffice once so launcher/auth survive the rebrand. */
-function migrateHomeConfigDir(): void {
-  const next = join(homedir(), '.teleoffice')
-  const prev = join(homedir(), '.genoffice')
-  if (existsSync(next) && readdirSync(next).length > 0) return
-  if (!existsSync(prev)) return
-  try {
-    cpSync(prev, next, { recursive: true })
-  } catch (err) {
-    console.warn(
-      '[teleoffice] ~/.genoffice migration failed:',
-      err instanceof Error ? err.message : err,
-    )
-  }
-}
 
 const SETTING_KEY = 'cliLink'
 
@@ -36,11 +20,13 @@ interface CliLinkRecord {
  * macOS retries on each start until a writable directory turns up; Windows
  * gets its PATH entry from the installer and only re-checks once per version
  * (the check spawns PowerShell). Silent and best effort.
+ *
+ * `~/.genoffice` → `~/.teleoffice` migration runs earlier in main via
+ * `migrateLegacyHome()` so this path always targets the live home dir.
  */
 export function installCliLinkBestEffort(settingsPath: string): void {
   if (!app.isPackaged) return
   try {
-    migrateHomeConfigDir()
     if (isEphemeralInstall(process.resourcesPath, process.env)) {
       // a DMG under /Volumes or an AppImage FUSE mount vanishes on exit; linking
       // to it would leave a dead command, so wait for a real install
@@ -72,7 +58,7 @@ export function isEphemeralInstall(resourcesPath: string, env: NodeJS.ProcessEnv
 
 /** Same directory the teleoffice CLI uses for auth.json and its audit log. */
 export function launcherFilePath(env: NodeJS.ProcessEnv): string {
-  return join(env.TELEOFFICE_AUTH_DIR || join(homedir(), '.teleoffice'), 'launcher')
+  return join(teleofficeHomeDir(env), 'launcher')
 }
 
 /** One line, the directory holding teleoffice / teleoffice.cmd; rewritten only when it changed. */

@@ -38,6 +38,7 @@ import {
   type Warning,
 } from './result'
 import { didYouMean } from './suggest'
+import { migrateLegacyHome } from '@teleoffice/electron-utils/teleoffice-home'
 
 declare const __TELEOFFICE_VERSION__: string | undefined
 
@@ -261,6 +262,13 @@ if (isMain) {
   // stdout is async on a pipe: exiting right after write() drops everything past the
   // 64 KiB pipe buffer, so a `--json` consumer would see a cut JSON object
   const exit = (code: number) => process.stdout.write('', () => process.exit(code))
+  // one-time move of ~/.genoffice (the pre-rename directory) to ~/.teleoffice
+  const moved = migrateLegacyHome()
+  if (moved.status === 'failed') {
+    process.stderr.write(
+      `teleoffice: could not move ${moved.from} to ${moved.to}, still using it (${moved.error})\n`,
+    )
+  }
   runCli(process.argv.slice(2)).then(exit, (err) => {
     process.stderr.write(
       `teleoffice: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}\n`,

@@ -1,10 +1,19 @@
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
+  builtinDefaultSaveDir,
   configuredDefaultSaveDir,
   readDefaultSaveDirSetting,
   resolveDefaultSaveDir,
@@ -13,7 +22,7 @@ import {
 let root: string
 
 beforeEach(() => {
-  root = mkdtempSync(join(tmpdir(), 'teleoffice-save-dir-'))
+  root = mkdtempSync(join(tmpdir(), 'genoffice-save-dir-'))
 })
 
 afterEach(() => {
@@ -90,14 +99,77 @@ describe('configuredDefaultSaveDir', () => {
     expect(configuredDefaultSaveDir(app)).toBe(custom)
   })
 
+  const appWith = (userData: string, documents: string) => ({
+    getPath: (name: 'userData' | 'documents') => (name === 'userData' ? userData : documents),
+  })
+
   it('falls back to <Documents>/TeleOffice without a setting', () => {
     const userData = join(root, 'userData')
     const documents = join(root, 'Documents')
     mkdirSync(userData, { recursive: true })
-    const app = {
-      getPath: (name: 'userData' | 'documents') => (name === 'userData' ? userData : documents),
-    }
-    expect(configuredDefaultSaveDir(app)).toBe(join(documents, 'TeleOffice'))
+    expect(configuredDefaultSaveDir(appWith(userData, documents))).toBe(
+      join(documents, 'TeleOffice'),
+    )
     expect(existsSync(join(documents, 'TeleOffice'))).toBe(true)
+    expect(existsSync(join(documents, 'GenOffice'))).toBe(false)
+  })
+
+  it('keeps using an existing legacy <Documents>/GenOffice in place', () => {
+    const userData = join(root, 'userData')
+    const documents = join(root, 'Documents')
+    const legacy = join(documents, 'GenOffice')
+    mkdirSync(userData, { recursive: true })
+    mkdirSync(legacy, { recursive: true })
+    writeFileSync(join(legacy, 'report.docx'), 'keep me')
+    expect(configuredDefaultSaveDir(appWith(userData, documents))).toBe(legacy)
+    // nothing is renamed, moved or created next to it
+    expect(readFileSync(join(legacy, 'report.docx'), 'utf8')).toBe('keep me')
+    expect(existsSync(join(documents, 'TeleOffice'))).toBe(false)
+  })
+
+  it('a configured folder still wins over the legacy folder', () => {
+    const userData = join(root, 'userData')
+    const documents = join(root, 'Documents')
+    mkdirSync(userData, { recursive: true })
+    mkdirSync(join(documents, 'GenOffice'), { recursive: true })
+    const custom = join(root, 'my-files')
+    writeFileSync(join(userData, 'app-settings.json'), JSON.stringify({ defaultSaveDir: custom }))
+    expect(configuredDefaultSaveDir(appWith(userData, documents))).toBe(custom)
+  })
+})
+
+describe('builtinDefaultSaveDir', () => {
+  it('returns <Documents>/TeleOffice when neither folder exists, without creating it', () => {
+    const documents = join(root, 'Documents')
+    expect(builtinDefaultSaveDir(documents)).toBe(join(documents, 'TeleOffice'))
+    expect(existsSync(join(documents, 'TeleOffice'))).toBe(false)
+  })
+
+  it('prefers TeleOffice once it exists, leaving the legacy folder untouched', () => {
+    const documents = join(root, 'Documents')
+    mkdirSync(join(documents, 'TeleOffice'), { recursive: true })
+    mkdirSync(join(documents, 'GenOffice'), { recursive: true })
+    writeFileSync(join(documents, 'GenOffice', 'old.xlsx'), 'old')
+    expect(builtinDefaultSaveDir(documents)).toBe(join(documents, 'TeleOffice'))
+    expect(readFileSync(join(documents, 'GenOffice', 'old.xlsx'), 'utf8')).toBe('old')
+  })
+
+  it('ignores a legacy GenOffice path that is a file, not a folder', () => {
+    const documents = join(root, 'Documents')
+    mkdirSync(documents, { recursive: true })
+    writeFileSync(join(documents, 'GenOffice'), 'not a folder')
+    expect(builtinDefaultSaveDir(documents)).toBe(join(documents, 'TeleOffice'))
+  })
+
+  it('skips a legacy folder that is not writable', () => {
+    const documents = join(root, 'Documents')
+    const legacy = join(documents, 'GenOffice')
+    mkdirSync(legacy, { recursive: true })
+    chmodSync(legacy, 0o500)
+    try {
+      expect(builtinDefaultSaveDir(documents)).toBe(join(documents, 'TeleOffice'))
+    } finally {
+      chmodSync(legacy, 0o700)
+    }
   })
 })

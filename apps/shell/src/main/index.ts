@@ -82,6 +82,7 @@ import { OPEN_DOCUMENTS_FILE, clearOpenDocuments, publishOpenDocuments } from '.
 import { startControlServer, type ControlServer } from './control-server'
 import { controlHandler } from './control-handlers'
 import { installCliLinkBestEffort } from './cli-link'
+import { migrateLegacyHome } from '@teleoffice/electron-utils/teleoffice-home'
 import { createDefaultAppService, execFileRunner } from './default-app'
 import { registerIntegrationsIpc } from './integrations-ipc'
 import {
@@ -389,6 +390,18 @@ if (app.isPackaged) {
         break
       }
     }
+  }
+}
+
+// The CLI rename from genoffice to teleoffice moved the per-user directory
+// (auth.json, launcher, audit log, templates) from ~/.genoffice to
+// ~/.teleoffice; move it once, before anything below reads or writes it
+{
+  const moved = migrateLegacyHome()
+  if (moved.status !== 'none' && moved.status !== 'current' && moved.status !== 'override') {
+    console.log(
+      `[teleoffice] home ${moved.from} -> ${moved.to}: ${moved.status}${moved.error ? ` (${moved.error})` : ''}`,
+    )
   }
 }
 
