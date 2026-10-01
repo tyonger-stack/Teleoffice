@@ -21,6 +21,13 @@ import {
 import { bookmarkName } from './bookmarks'
 import { mapFont } from './fonts'
 
+// Same finite >=1px floor renderImage applies: a 0/NaN inline measurement
+// would otherwise emit an invalid wp:extent (cx=0 or NaN).
+function finitePx(value) {
+  if (!Number.isFinite(value)) return 1
+  return Math.max(1, Math.round(value))
+}
+
 function makeRuns(context, runs, images: any = {}) {
   const out = []
   for (const r of runs) {
@@ -48,7 +55,7 @@ function makeRuns(context, runs, images: any = {}) {
           new ImageRun({
             type: 'png',
             data: image,
-            transformation: { width: r.width, height: r.height },
+            transformation: { width: finitePx(r.width), height: finitePx(r.height) },
           }),
         )
       }
