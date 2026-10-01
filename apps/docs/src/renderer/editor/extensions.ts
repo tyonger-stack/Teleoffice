@@ -149,6 +149,7 @@ import {
 } from './convert'
 import { inlineMathML } from './equation'
 import { constrainTableWidthAtCell } from './table-sizing'
+import { tableColumnDrag } from './table-column-drag'
 
 /**
  * Custom schema mirroring the docx-engine Block model 1:1.
@@ -3694,6 +3695,7 @@ export const NativeTableSupport = Extension.create({
           },
         },
       }),
+      tableColumnDrag(),
       columnResizing({ View: null, cellMinWidth: 40, lastColumnResizable: true }),
       tableEditing({ allowTableNodeSelection: true }),
       // Word never ends a body with a table: without a paragraph below it the
