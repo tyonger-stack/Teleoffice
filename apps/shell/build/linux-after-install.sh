@@ -6,6 +6,13 @@ set -e
 launcher="/opt/TeleOffice/resources/cli/teleoffice"
 link="/usr/bin/teleoffice"
 [ -x "$launcher" ] || exit 0
+# the command was called genoffice before; drop that name when it is our link
+legacy="/usr/bin/genoffice"
+if [ -L "$legacy" ]; then
+  case "$(readlink "$legacy")" in
+    /opt/TeleOffice/*) rm -f "$legacy" ;;
+  esac
+fi
 if [ -L "$link" ]; then
   case "$(readlink "$link")" in
     /opt/TeleOffice/*) ;;
