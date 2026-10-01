@@ -114,14 +114,17 @@ async function serperWebSearch(
         if (!resp.ok) return null
         const data = asRecord(await resp.json())
         const organic: unknown[] = Array.isArray(data.organic) ? data.organic : []
-        const results: WebSearchResult[] = organic.slice(0, maxResults).map((item) => {
+        const results: WebSearchResult[] = []
+        for (const item of organic) {
           const o = asRecord(item)
-          return {
+          if (typeof o.link !== 'string' || !/^https?:\/\//i.test(o.link)) continue
+          results.push({
             title: String(o.title ?? ''),
-            url: String(o.link ?? ''),
+            url: o.link,
             snippet: String(o.snippet ?? ''),
-          }
-        })
+          })
+          if (results.length >= maxResults) break
+        }
         const answerBox = asRecord(data.answerBox)
         const answerRaw =
           answerBox.answer || answerBox.snippet || asRecord(data.knowledgeGraph).description
@@ -198,14 +201,17 @@ async function tavilyWebSearch(
         if (!resp.ok) return null
         const data = asRecord(await resp.json())
         const raw: unknown[] = Array.isArray(data.results) ? data.results : []
-        const results: WebSearchResult[] = raw.slice(0, maxResults).map((item) => {
+        const results: WebSearchResult[] = []
+        for (const item of raw) {
           const o = asRecord(item)
-          return {
+          if (typeof o.url !== 'string' || !/^https?:\/\//i.test(o.url)) continue
+          results.push({
             title: String(o.title ?? ''),
-            url: String(o.url ?? ''),
+            url: o.url,
             snippet: String(o.content ?? ''),
-          }
-        })
+          })
+          if (results.length >= maxResults) break
+        }
         const answerRaw = data.answer
         const answer = typeof answerRaw === 'string' && answerRaw ? answerRaw : undefined
         if (!results.length) return null

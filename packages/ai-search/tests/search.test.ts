@@ -58,6 +58,40 @@ describe('webSearch (Serper)', () => {
     expect(r.results[0]).toEqual({ title: 'A', url: 'https://a.com', snippet: 'sa' })
   })
 
+  it('drops non-http(s) links like Serply/Parallel do', async () => {
+    process.env.SERPER_API_KEY = 'serper-key'
+    process.env.TAVILY_API_KEY = 'tavily-key'
+    mockFetch((url) => {
+      if (url === 'https://google.serper.dev/search') {
+        return {
+          ok: true,
+          json: {
+            organic: [
+              { title: 'js', link: 'javascript:alert(1)', snippet: 's' },
+              { title: 'ftp', link: 'ftp://files.example.com/a', snippet: 's' },
+              { title: 'ok', link: 'https://ok.com', snippet: 's' },
+            ],
+          },
+        }
+      }
+      return {
+        ok: true,
+        json: {
+          results: [
+            { title: 'ftp', url: 'ftp://files.example.com/b', content: 'c' },
+            { title: 'ok', url: 'https://ok.com/t', content: 'c' },
+          ],
+        },
+      }
+    })
+    const serper = await webSearch('q', 5, { useGsk: false, prefer: 'serper' })
+    expect(serper.method).toBe('serper')
+    expect(serper.results.map((r) => r.title)).toEqual(['ok'])
+    const tavily = await webSearch('q', 5, { useGsk: false, prefer: 'tavily' })
+    expect(tavily.method).toBe('tavily')
+    expect(tavily.results.map((r) => r.title)).toEqual(['ok'])
+  })
+
   it('falls back to DuckDuckGo when no key and the free Parallel MCP is down', async () => {
     const urls: string[] = []
     mockFetch((url) => {
