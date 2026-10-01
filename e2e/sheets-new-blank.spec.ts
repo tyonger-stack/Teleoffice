@@ -19,7 +19,7 @@ test.describe('sheets: new blank workbook', () => {
     const launched = await launchShell({ onboardingSeen: true, videoDir: 'sheets-new-blank' })
     try {
       const { app, page } = launched
-      // keep the auto-created workbook out of the real ~/Documents/GenOffice
+      // keep the auto-created workbook out of the real default save folder (~/Documents/TeleOffice)
       await app.evaluate(({ app: electronApp }, dir) => {
         electronApp.setPath('documents', dir)
       }, scratch)
