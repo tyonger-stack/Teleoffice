@@ -98,12 +98,16 @@ test.describe('home folders panel', () => {
       await draftsRow.locator('.more-btn').click()
       await page.locator('.folder-menu button', { hasText: 'Rename' }).click()
       const renameInput = page.locator('.recent-list .rename-input')
+      await expect(renameInput).toBeVisible()
       await renameInput.fill('Final')
       await renameInput.press('Enter')
+      // Disk rename commits async via IPC; wait for the folder before the row label.
+      await expect
+        .poll(() => existsSync(join(root, 'Clients', 'Contracts', 'Final')), { timeout: 15_000 })
+        .toBe(true)
       await expect(
         page.locator('.recent-list .folder-item .recent-name', { hasText: 'Final' }),
       ).toBeVisible()
-      expect(existsSync(join(root, 'Clients', 'Contracts', 'Final'))).toBe(true)
 
       // delete Final (confirm dialog → trash)
       const finalRow = page.locator('.recent-row', {
