@@ -206,3 +206,5 @@ export function createI18n<D extends Record<string, string>>(dicts: LangDicts<D>
     return format(platformShortcuts(text), params)
   }
 }
+
+export * from './font-names'
