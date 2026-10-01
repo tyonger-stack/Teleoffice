@@ -11,7 +11,7 @@ const DEFAULT_ASK = 'Describe this media in detail: subject, text, layout, notab
 export const mediaCommand: CommandDef = {
   name: 'media',
   summary:
-    'Describe or answer a question about an image, video or audio file (or URL) with the configured provider.',
+    'Describe or answer a question about an image, video or audio file (or URL) (default: Antigravity agy, fallback MiniMax mmx for images).',
   usage: 'media <file|url> [--ask <question>]',
   options: [
     { name: 'ask', value: 'question', description: `what to extract (default: "${DEFAULT_ASK}")` },
@@ -33,14 +33,20 @@ export const mediaCommand: CommandDef = {
     if (r.text === undefined)
       throw new CliError(EXIT.app, r.error ?? 'media analysis failed', undefined, {
         suggestion:
-          'retry once later; if it persists, check the Genspark login in the GenOffice app or configure a BYOK analysis provider under Settings (AI Media)',
+          'retry once later; if it persists, check the agy/mmx CLIs or the Genspark login in the GenOffice app, or configure an analysis provider under Settings (AI Media & Search)',
       })
     const failure = providerFailure(r.text)
     if (failure) throw new CliError(EXIT.conversion, `media analysis failed: ${failure}`)
     const text = analysisText(r.text)
     return {
       summary: text,
-      detail: { source: target, text, ...(text !== r.text ? { raw: r.text } : {}) },
+      detail: {
+        source: target,
+        text,
+        ...(text !== r.text ? { raw: r.text } : {}),
+        ...(r.provider ? { provider: r.provider } : {}),
+        ...(r.attempts?.length ? { attempts: r.attempts } : {}),
+      },
     }
   },
 }

@@ -324,6 +324,8 @@ export const strings = {
       '一次回合的输出预算。推理模型会先消耗预算用于思考，预算用完时回复可能变成空白，遇到这种情况请调大此项。',
     setSecAiMedia: '生图、媒体与搜索',
     setAiMediaGensparkHint: '生图与图片/视频解析使用 Genspark 账号登录。',
+    setAiMediaAgyHint: '生图与图片/视频/音频解析经由本机 Antigravity CLI（agy），使用你的 Google 账号，无需 API key。',
+    setAiMediaMmxHint: '图片解析与生图经由本机 MiniMax CLI（mmx），使用你的 MiniMax Token 套餐，无需 API key。',
     setAiImageModel: '生图模型',
     setAiAnalysisModel: '解析模型',
     setAiSearchGensparkHint:
@@ -333,6 +335,9 @@ export const strings = {
     setAiSearchTavilyHint: 'Tavily 用你的 key 提供网页搜索；图片搜索改用免费来源。',
     setAiSearchParallelHint:
       '留空 API key 即可免费使用 Parallel 搜索（用量有限）。填写 key 可使用你的 Parallel 账户。图片搜索使用其他来源。',
+    setAiSearchLocalCliHint: '中文查询或国内站点（.cn、百度、知乎等）走 mmx 国内搜索，其余走 Antigravity（agy）海外搜索；一方失败自动换另一方。',
+    setAiSearchMmxHint: 'MiniMax CLI（mmx）提供中文与国内站点搜索，无需 API key。',
+    setAiSearchAgyHint: 'Antigravity CLI（agy）提供海外搜索，无需 API key。',
     setAiCapImage: '生图',
     setAiCapAnalysis: '图片解析',
     setAiCapVideo: '视频解析',
@@ -712,6 +717,8 @@ export const strings = {
       'Output budget for one turn. Reasoning models spend part of it thinking, so an answer can come back empty once the budget runs out; raise this value if that happens.',
     setSecAiMedia: 'AI Media & Search',
     setAiMediaGensparkHint: 'Image generation and image/video analysis use your Genspark sign-in.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Image model',
     setAiAnalysisModel: 'Analysis model',
     setAiSearchGensparkHint:
@@ -722,6 +729,9 @@ export const strings = {
       'Tavily serves web search with your key; image search falls back to free sources.',
     setAiSearchParallelHint:
       'Leave the key blank for free Parallel search (limited usage). Add a key to use your Parallel account. Image search uses other sources.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Image generation',
     setAiCapAnalysis: 'Image analysis',
     setAiCapVideo: 'Video analysis',
@@ -1105,6 +1115,8 @@ export const strings = {
     setSecAiMedia: 'Phương tiện AI & Tìm kiếm',
     setAiMediaGensparkHint:
       'Tạo hình ảnh và phân tích hình ảnh/video sử dụng thông tin đăng nhập Genspark của bạn.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Mô hình hình ảnh',
     setAiAnalysisModel: 'Mô hình phân tích',
     setAiSearchGensparkHint:
@@ -1115,6 +1127,9 @@ export const strings = {
       'Tavily cung cấp tìm kiếm web bằng khóa của bạn; tìm kiếm hình ảnh sẽ chuyển sang dùng các nguồn miễn phí.',
     setAiSearchParallelHint:
       'Để trống khóa để dùng tìm kiếm Parallel miễn phí (giới hạn lượt dùng). Nhập khóa để dùng tài khoản Parallel của bạn. Tìm kiếm hình ảnh sử dụng các nguồn khác.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Tạo hình ảnh',
     setAiCapAnalysis: 'Phân tích hình ảnh',
     setAiCapVideo: 'Phân tích video',
@@ -1509,6 +1524,8 @@ export const strings = {
       '1 ターンの出力予算です。推論モデルは思考にも消費するため、使い切ると返信が空になることがあります。その場合は値を大きくしてください。',
     setSecAiMedia: 'AI メディアと検索',
     setAiMediaGensparkHint: '画像生成と画像/動画解析は Genspark のサインインを使用します。',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: '画像モデル',
     setAiAnalysisModel: '解析モデル',
     setAiSearchGensparkHint:
@@ -1519,6 +1536,9 @@ export const strings = {
       'Tavily はあなたのキーで Web 検索を提供します。画像検索は無料ソースにフォールバックします。',
     setAiSearchParallelHint:
       'キーを空欄にすると Parallel 検索を無料で使えます（利用制限あり）。キーを入力すると自分の Parallel アカウントを使用します。画像検索には他のソースを使用します。',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: '画像生成',
     setAiCapAnalysis: '画像解析',
     setAiCapVideo: '動画解析',
@@ -1905,6 +1925,8 @@ export const strings = {
       '한 턴의 출력 예산입니다. 추론 모델은 생각하는 데 소모하므로 예산이 떨어지면 응답이 비어 올 수 있습니다. 그럴 때 값을 키우세요.',
     setSecAiMedia: 'AI 미디어 및 검색',
     setAiMediaGensparkHint: '이미지 생성과 이미지/동영상 분석은 Genspark 로그인을 사용합니다.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: '이미지 모델',
     setAiAnalysisModel: '분석 모델',
     setAiSearchGensparkHint:
@@ -1915,6 +1937,9 @@ export const strings = {
       'Tavily는 내 키로 웹 검색을 제공합니다. 이미지 검색은 무료 소스로 대체됩니다.',
     setAiSearchParallelHint:
       '키를 비워 두면 Parallel 검색을 무료로 사용할 수 있습니다(사용량 제한). 키를 입력하면 자신의 Parallel 계정을 사용합니다. 이미지 검색은 다른 소스를 사용합니다.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: '이미지 생성',
     setAiCapAnalysis: '이미지 분석',
     setAiCapVideo: '동영상 분석',
@@ -2315,6 +2340,8 @@ export const strings = {
     setSecAiMedia: 'Médias IA et recherche',
     setAiMediaGensparkHint:
       "La génération d'images et l'analyse d'images/vidéos utilisent votre connexion Genspark.",
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: "Modèle d'image",
     setAiAnalysisModel: "Modèle d'analyse",
     setAiSearchGensparkHint:
@@ -2327,6 +2354,9 @@ export const strings = {
       "Tavily assure la recherche web avec votre clé ; la recherche d'images se rabat sur des sources gratuites.",
     setAiSearchParallelHint:
       'Laissez la clé vide pour la recherche Parallel gratuite (usage limité). Ajoutez une clé pour utiliser votre compte Parallel. La recherche d’images utilise d’autres sources.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: "Génération d'images",
     setAiCapAnalysis: "Analyse d'images",
     setAiCapVideo: 'Analyse vidéo',
@@ -2731,6 +2761,8 @@ export const strings = {
     setSecAiMedia: 'KI-Medien & Suche',
     setAiMediaGensparkHint:
       'Bildgenerierung und Bild-/Videoanalyse nutzen deine Genspark-Anmeldung.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Bildmodell',
     setAiAnalysisModel: 'Analysemodell',
     setAiSearchGensparkHint:
@@ -2741,6 +2773,9 @@ export const strings = {
       'Tavily liefert mit deinem Schlüssel die Websuche; die Bildsuche greift auf kostenlose Quellen zurück.',
     setAiSearchParallelHint:
       'Ohne Schlüssel ist die Parallel-Suche kostenlos (begrenzte Nutzung). Mit einem Schlüssel verwenden Sie Ihr Parallel-Konto. Die Bildsuche nutzt andere Quellen.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Bildgenerierung',
     setAiCapAnalysis: 'Bildanalyse',
     setAiCapVideo: 'Videoanalyse',
@@ -3141,6 +3176,8 @@ export const strings = {
     setSecAiMedia: 'Medios de IA y búsqueda',
     setAiMediaGensparkHint:
       'La generación de imágenes y el análisis de imágenes/vídeos usan tu inicio de sesión de Genspark.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Modelo de imagen',
     setAiAnalysisModel: 'Modelo de análisis',
     setAiSearchGensparkHint:
@@ -3151,6 +3188,9 @@ export const strings = {
       'Tavily ofrece búsqueda web con tu clave; la búsqueda de imágenes recurre a fuentes gratuitas.',
     setAiSearchParallelHint:
       'Deja la clave vacía para usar la búsqueda gratuita de Parallel (uso limitado). Añade una clave para usar tu cuenta de Parallel. Las imágenes se buscan en otras fuentes.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Generación de imágenes',
     setAiCapAnalysis: 'Análisis de imágenes',
     setAiCapVideo: 'Análisis de vídeo',
@@ -3535,6 +3575,8 @@ export const strings = {
     setSecAiMedia: 'สื่อ AI และการค้นหา',
     setAiMediaGensparkHint:
       'การสร้างภาพและการวิเคราะห์ภาพ/วิดีโอใช้การลงชื่อเข้าใช้ Genspark ของคุณ',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'โมเดลสร้างภาพ',
     setAiAnalysisModel: 'โมเดลวิเคราะห์',
     setAiSearchGensparkHint:
@@ -3545,6 +3587,9 @@ export const strings = {
       'Tavily ให้บริการค้นหาเว็บด้วยคีย์ของคุณ ส่วนการค้นหาภาพจะใช้แหล่งข้อมูลฟรีแทน',
     setAiSearchParallelHint:
       'เว้นคีย์ว่างไว้เพื่อค้นหาด้วย Parallel ฟรี (จำกัดการใช้งาน) เพิ่มคีย์เพื่อใช้บัญชี Parallel ของคุณ การค้นหารูปภาพใช้แหล่งข้อมูลอื่น',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'สร้างภาพ',
     setAiCapAnalysis: 'วิเคราะห์ภาพ',
     setAiCapVideo: 'วิเคราะห์วิดีโอ',
@@ -3938,6 +3983,8 @@ export const strings = {
     setSecAiMedia: 'Media & Pencarian AI',
     setAiMediaGensparkHint:
       'Pembuatan gambar dan analisis gambar/video menggunakan login Genspark Anda.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Model gambar',
     setAiAnalysisModel: 'Model analisis',
     setAiSearchGensparkHint:
@@ -3948,6 +3995,9 @@ export const strings = {
       'Tavily menyediakan pencarian web dengan kunci Anda; pencarian gambar memakai sumber gratis.',
     setAiSearchParallelHint:
       'Kosongkan kunci untuk pencarian Parallel gratis (penggunaan terbatas). Tambahkan kunci untuk menggunakan akun Parallel Anda. Pencarian gambar memakai sumber lain.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Pembuatan gambar',
     setAiCapAnalysis: 'Analisis gambar',
     setAiCapVideo: 'Analisis video',
@@ -4340,6 +4390,8 @@ export const strings = {
     setSecAiMedia: 'Медиа и поиск ИИ',
     setAiMediaGensparkHint:
       'Генерация изображений и анализ изображений/видео используют ваш вход в Genspark.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Модель изображений',
     setAiAnalysisModel: 'Модель анализа',
     setAiSearchGensparkHint:
@@ -4350,6 +4402,9 @@ export const strings = {
       'Tavily обеспечивает веб-поиск с вашим ключом; поиск изображений использует бесплатные источники.',
     setAiSearchParallelHint:
       'Оставьте ключ пустым для бесплатного поиска Parallel (с ограничениями). Добавьте ключ для использования своего аккаунта Parallel. Поиск изображений использует другие источники.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Генерация изображений',
     setAiCapAnalysis: 'Анализ изображений',
     setAiCapVideo: 'Анализ видео',
@@ -4735,6 +4790,8 @@ export const strings = {
       'ميزانية الإخراج في الدورة الواحدة. نماذج الاستدلال تصرفها على التفكير، فإذا نفدت جاء الرد فارغًا؛ ارفع هذه القيمة عندئذ.',
     setSecAiMedia: 'وسائط الذكاء الاصطناعي والبحث',
     setAiMediaGensparkHint: 'يستخدم توليد الصور وتحليل الصور/الفيديو تسجيل دخولك إلى Genspark.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'نموذج الصور',
     setAiAnalysisModel: 'نموذج التحليل',
     setAiSearchGensparkHint:
@@ -4745,6 +4802,9 @@ export const strings = {
       'يوفّر Tavily البحث في الويب بمفتاحك؛ ويعود البحث في الصور إلى مصادر مجانية.',
     setAiSearchParallelHint:
       'اترك المفتاح فارغًا لاستخدام بحث Parallel مجانًا (استخدام محدود). أضف مفتاحًا لاستخدام حسابك في Parallel. يستخدم بحث الصور مصادر أخرى.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'توليد الصور',
     setAiCapAnalysis: 'تحليل الصور',
     setAiCapVideo: 'تحليل الفيديو',
@@ -5135,6 +5195,8 @@ export const strings = {
     setSecAiMedia: 'Mídia e busca de IA',
     setAiMediaGensparkHint:
       'A geração de imagens e a análise de imagens/vídeos usam o seu login do Genspark.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Modelo de imagem',
     setAiAnalysisModel: 'Modelo de análise',
     setAiSearchGensparkHint:
@@ -5145,6 +5207,9 @@ export const strings = {
       'O Tavily oferece busca na web com a sua chave; a busca de imagens recorre a fontes gratuitas.',
     setAiSearchParallelHint:
       'Deixe a chave vazia para pesquisar gratuitamente com Parallel (uso limitado). Adicione uma chave para usar sua conta Parallel. A pesquisa de imagens usa outras fontes.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Geração de imagens',
     setAiCapAnalysis: 'Análise de imagens',
     setAiCapVideo: 'Análise de vídeo',
@@ -5533,6 +5598,8 @@ export const strings = {
     setSecAiMedia: 'Media e ricerca IA',
     setAiMediaGensparkHint:
       "La generazione di immagini e l'analisi di immagini/video usano il tuo accesso Genspark.",
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Modello immagini',
     setAiAnalysisModel: 'Modello di analisi',
     setAiSearchGensparkHint:
@@ -5543,6 +5610,9 @@ export const strings = {
       'Tavily offre la ricerca web con la tua chiave; la ricerca di immagini ricorre a fonti gratuite.',
     setAiSearchParallelHint:
       'Lascia la chiave vuota per la ricerca Parallel gratuita (uso limitato). Aggiungi una chiave per usare il tuo account Parallel. Le immagini vengono cercate in altre fonti.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Generazione di immagini',
     setAiCapAnalysis: 'Analisi di immagini',
     setAiCapVideo: 'Analisi video',
@@ -5926,6 +5996,8 @@ export const strings = {
     setSecAiMedia: 'Media i wyszukiwanie AI',
     setAiMediaGensparkHint:
       'Generowanie obrazów i analiza obrazów/wideo korzystają z logowania Genspark.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Model obrazów',
     setAiAnalysisModel: 'Model analizy',
     setAiSearchGensparkHint:
@@ -5936,6 +6008,9 @@ export const strings = {
       'Tavily zapewnia wyszukiwanie w sieci z Twoim kluczem; wyszukiwanie obrazów używa darmowych źródeł.',
     setAiSearchParallelHint:
       'Pozostaw klucz pusty, aby bezpłatnie korzystać z wyszukiwania Parallel (z limitami). Dodaj klucz, aby używać swojego konta Parallel. Obrazy są wyszukiwane w innych źródłach.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Generowanie obrazów',
     setAiCapAnalysis: 'Analiza obrazów',
     setAiCapVideo: 'Analiza wideo',
@@ -6290,6 +6365,8 @@ export const strings = {
     setSecAiMedia: 'AI média a vyhledávání',
     setAiMediaGensparkHint:
       'Generování obrázků a analýza obrázků/videí používají vaše přihlášení ke Genspark.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Model pro obrázky',
     setAiAnalysisModel: 'Model pro analýzu',
     setAiSearchGensparkHint:
@@ -6300,6 +6377,9 @@ export const strings = {
       'Tavily zajišťuje webové vyhledávání s vaším klíčem; obrázkové vyhledávání použije bezplatné zdroje.',
     setAiSearchParallelHint:
       'Nechte klíč prázdný pro bezplatné vyhledávání Parallel (omezené použití). Zadejte klíč pro použití svého účtu Parallel. Obrázky se vyhledávají v jiných zdrojích.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Generování obrázků',
     setAiCapAnalysis: 'Analýza obrázků',
     setAiCapVideo: 'Analýza videí',
@@ -6715,6 +6795,8 @@ export const strings = {
     setSecAiMedia: 'AI-media en zoeken',
     setAiMediaGensparkHint:
       'Afbeeldingen genereren en afbeelding-/video-analyse gebruiken je Genspark-aanmelding.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Afbeeldingsmodel',
     setAiAnalysisModel: 'Analysemodel',
     setAiSearchGensparkHint:
@@ -6725,6 +6807,9 @@ export const strings = {
       'Tavily levert webzoeken met je sleutel; afbeeldingszoeken valt terug op gratis bronnen.',
     setAiSearchParallelHint:
       'Laat de sleutel leeg voor gratis zoeken met Parallel (beperkt gebruik). Voeg een sleutel toe om je Parallel-account te gebruiken. Afbeeldingen komen uit andere bronnen.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Afbeeldingen genereren',
     setAiCapAnalysis: 'Afbeeldingsanalyse',
     setAiCapVideo: 'Video-analyse',
@@ -7114,6 +7199,8 @@ export const strings = {
     setSecAiMedia: 'Media & Carian AI',
     setAiMediaGensparkHint:
       'Penjanaan imej dan analisis imej/video menggunakan log masuk Genspark anda.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'Model imej',
     setAiAnalysisModel: 'Model analisis',
     setAiSearchGensparkHint:
@@ -7124,6 +7211,9 @@ export const strings = {
       'Tavily menyediakan carian web dengan kunci anda; carian imej menggunakan sumber percuma.',
     setAiSearchParallelHint:
       'Biarkan kunci kosong untuk carian Parallel percuma (penggunaan terhad). Tambah kunci untuk menggunakan akaun Parallel anda. Carian imej menggunakan sumber lain.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'Penjanaan imej',
     setAiCapAnalysis: 'Analisis imej',
     setAiCapVideo: 'Analisis video',
@@ -7497,6 +7587,8 @@ export const strings = {
       'תקציב פלט לסיבוב אחד. מודלי היסק מנצלים חלק ממנו לחשיבה, ואם הוא נגמר התשובה עלולה לחזור ריקה — במקרה כזה העלו את הערך.',
     setSecAiMedia: 'מדיה וחיפוש AI',
     setAiMediaGensparkHint: 'יצירת תמונות וניתוח תמונות/וידאו משתמשים בהתחברות Genspark שלך.',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'מודל תמונות',
     setAiAnalysisModel: 'מודל ניתוח',
     setAiSearchGensparkHint:
@@ -7507,6 +7599,9 @@ export const strings = {
       'Tavily מספק חיפוש באינטרנט עם המפתח שלך; חיפוש תמונות חוזר למקורות חינמיים.',
     setAiSearchParallelHint:
       'השאירו את המפתח ריק לחיפוש Parallel בחינם (שימוש מוגבל). הוסיפו מפתח כדי להשתמש בחשבון Parallel שלכם. חיפוש תמונות משתמש במקורות אחרים.',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'יצירת תמונות',
     setAiCapAnalysis: 'ניתוח תמונות',
     setAiCapVideo: 'ניתוח וידאו',
@@ -7888,6 +7983,8 @@ export const strings = {
     setSecAiMedia: 'AI मीडिया और खोज',
     setAiMediaGensparkHint:
       'इमेज जनरेशन और इमेज/वीडियो विश्लेषण आपके Genspark साइन-इन का उपयोग करते हैं।',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: 'इमेज मॉडल',
     setAiAnalysisModel: 'विश्लेषण मॉडल',
     setAiSearchGensparkHint:
@@ -7898,6 +7995,9 @@ export const strings = {
       'Tavily आपकी कुंजी से वेब खोज देता है; इमेज खोज मुफ़्त स्रोतों पर लौट जाती है।',
     setAiSearchParallelHint:
       'मुफ़्त Parallel खोज के लिए कुंजी खाली छोड़ें (सीमित उपयोग)। अपने Parallel खाते का उपयोग करने के लिए कुंजी जोड़ें। इमेज खोज अन्य स्रोतों का उपयोग करती है।',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: 'इमेज जनरेशन',
     setAiCapAnalysis: 'इमेज विश्लेषण',
     setAiCapVideo: 'वीडियो विश्लेषण',
@@ -8267,6 +8367,8 @@ export const strings = {
       '一次回合的輸出預算。推理模型會先消耗預算用於思考，預算用畢時回覆可能變成空白，遇到此情況請調高本項。',
     setSecAiMedia: '生圖、媒體與搜尋',
     setAiMediaGensparkHint: '生圖與圖片/影片解析使用 Genspark 帳號登入。',
+    setAiMediaAgyHint: 'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
+    setAiMediaMmxHint: 'Image analysis and image generation run through the local MiniMax CLI (mmx) with your MiniMax Token plan; no API key needed.',
     setAiImageModel: '生圖模型',
     setAiAnalysisModel: '解析模型',
     setAiSearchGensparkHint:
@@ -8276,6 +8378,9 @@ export const strings = {
     setAiSearchTavilyHint: 'Tavily 用你的 key 提供網頁搜尋；圖片搜尋改用免費來源。',
     setAiSearchParallelHint:
       '留空 API key 即可免費使用 Parallel 搜尋（用量有限）。填寫 key 可使用你的 Parallel 帳戶。圖片搜尋使用其他來源。',
+    setAiSearchLocalCliHint: 'Chinese queries and Chinese sites (.cn, Baidu, Zhihu, ...) use mmx domestic search, everything else uses Antigravity (agy) overseas search; failures automatically fall over to the other side.',
+    setAiSearchMmxHint: 'MiniMax CLI (mmx) serves Chinese and domestic-site search; no API key needed.',
+    setAiSearchAgyHint: 'Antigravity CLI (agy) serves overseas search; no API key needed.',
     setAiCapImage: '生圖',
     setAiCapAnalysis: '圖片解析',
     setAiCapVideo: '影片解析',

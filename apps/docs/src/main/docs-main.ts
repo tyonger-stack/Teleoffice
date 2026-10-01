@@ -110,7 +110,9 @@ import {
   ensureGenofficeLogin,
   gskApiKey,
   generateImageTool,
+  readAiSettingsFile,
   testSearchProvider,
+  testLocalCliMedia,
   gskLoginInfo,
   hasGskAuth,
   webSearchTool,
@@ -3954,6 +3956,9 @@ export function registerAiIpc(): void {
     if (!provider || provider === 'genspark') {
       return hasGskAuth() ? { ok: true } : { ok: false, error: tm('errGskNotLoggedIn') }
     }
+    if (provider === 'local-cli' || provider === 'mmx' || provider === 'antigravity') {
+      return testSearchProvider(provider, '')
+    }
     return testSearchProvider(provider, String(apiKey ?? ''))
   })
 
@@ -3965,6 +3970,10 @@ export function registerAiIpc(): void {
     }
     if (!provider || provider === 'genspark') {
       return hasGskAuth() ? { ok: true } : { ok: false, error: tm('errGskNotLoggedIn') }
+    }
+    // Local CLI backends: cheap binary (+ credential) check, nothing generated.
+    if (provider === 'antigravity' || provider === 'mmx') {
+      return testLocalCliMedia(provider, readAiSettingsFile(SETTINGS_PATH()))
     }
     if (!config) return { ok: false, error: 'No media provider configuration' }
     return testMediaProvider(provider, config)

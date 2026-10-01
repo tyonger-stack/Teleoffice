@@ -4,12 +4,16 @@ import {
   activeMediaConfig,
   activeMediaProvider,
   defaultAiMediaSettings,
+  getMediaProviderMeta,
   imageGenerationAvailable,
   mediaAnalysisAvailable,
+  mediaConfigUsable,
+  providerHasCapability,
   resolveAiMediaSettings,
 } from '../src/media'
 import {
   analyzeMediaWithProvider,
+  assertHttpMediaProvider,
   generateImageWithProvider,
   sniffImageMime,
   testMediaProvider,
@@ -38,11 +42,11 @@ function openaiSettings(apiKey = 'sk-test', imageModel = 'gpt-image-2'): AiSetti
 }
 
 describe('media settings', () => {
-  it('defaults every provider to its default models and genspark as the active one', () => {
+  it('defaults every provider to its default models and antigravity as the active one', () => {
     const media = defaultAiMediaSettings()
-    expect(media.imageProvider).toBe('genspark')
-    expect(media.analysisProvider).toBe('genspark')
-    expect(media.videoAnalysisProvider).toBe('genspark')
+    expect(media.imageProvider).toBe('antigravity')
+    expect(media.analysisProvider).toBe('antigravity')
+    expect(media.videoAnalysisProvider).toBe('antigravity')
     for (const meta of AI_MEDIA_PROVIDERS) {
       expect(media.providers[meta.id].imageModel).toBe(meta.defaultImageModel)
       expect(media.providers[meta.id].apiKey).toBe('')
@@ -53,7 +57,7 @@ describe('media settings', () => {
 
   it('is carried by defaultAiSettings and healed in from a pre-media settings file', () => {
     const defaults = defaultAiSettings()
-    expect(defaults.media?.imageProvider).toBe('genspark')
+    expect(defaults.media?.imageProvider).toBe('antigravity')
     const resolved = resolveAiSettings(
       { provider: 'genspark', providers: defaults.providers },
       defaultAiSettings(),
@@ -113,7 +117,7 @@ describe('media settings', () => {
     expect(activeMediaProvider(withMedia(custom), 'image')).toBe('genspark')
     custom.providers.custom.baseUrl = 'http://localhost:1234/v1'
     expect(activeMediaProvider(withMedia(custom), 'image')).toBe('custom')
-    expect(activeMediaProvider(withMedia(custom), 'analysis')).toBe('genspark')
+    expect(activeMediaProvider(withMedia(custom), 'analysis')).toBe('antigravity')
     expect(activeMediaConfig(withMedia(custom), 'image')?.provider).toBe('custom')
     // MiniMax has no analysis endpoint: picking it for analysis falls back
     const mm = defaultAiMediaSettings()
@@ -142,10 +146,22 @@ describe('media settings', () => {
 
   it('gates the tools on gsk login + toggle without BYOK, and on the BYOK model with it', () => {
     const genspark = defaultAiSettings()
+    genspark.media = {
+      ...genspark.media!,
+      imageProvider: 'genspark',
+      analysisProvider: 'genspark',
+      videoAnalysisProvider: 'genspark',
+    }
     expect(imageGenerationAvailable(genspark, true)).toBe(true)
     expect(imageGenerationAvailable(genspark, false)).toBe(false)
     expect(imageGenerationAvailable({ ...genspark, gskToolsEnabled: false }, true)).toBe(false)
     expect(mediaAnalysisAvailable({ ...genspark, gskToolsEnabled: false }, true)).toBe(false)
+
+    // the local CLI defaults need no login: the binary is the config
+    const local = defaultAiSettings()
+    expect(local.media?.imageProvider).toBe('antigravity')
+    expect(imageGenerationAvailable(local, false)).toBe(true)
+    expect(mediaAnalysisAvailable(local, false)).toBe(true)
 
     const byok = openaiSettings()
     expect(imageGenerationAvailable(byok, false)).toBe(true)
@@ -159,6 +175,7 @@ describe('media settings', () => {
     const custom = defaultAiMediaSettings()
     custom.imageProvider = 'custom'
     custom.analysisProvider = 'custom'
+    custom.videoAnalysisProvider = 'custom'
     custom.providers.custom = {
       apiKey: '',
       baseUrl: 'http://localhost:1234/v1',
@@ -623,5 +640,46 @@ describe('a failed media request does not buffer the whole error body', () => {
     expect(failed.ok).toBe(false)
     expect(failed.error).toMatch(/500/)
     expect(pulled()).toBeLessThanOrEqual(128 * 1024)
+  })
+})
+
+describe('local CLI media providers', () => {
+  it('catalogs antigravity and mmx as keyless local backends', () => {
+    const agy = getMediaProviderMeta('antigravity')!
+    const mmx = getMediaProviderMeta('mmx')!
+    expect(agy.label).toBe('Antigravity CLI (agy)')
+    expect(mmx.label).toBe('MiniMax CLI (mmx)')
+    expect(agy.localCli).toBe(true)
+    expect(mmx.localCli).toBe(true)
+    expect(agy.keyPlaceholder).toBe('Not required - local CLI')
+    expect(providerHasCapability(agy, 'image')).toBe(true)
+    expect(providerHasCapability(agy, 'analysis')).toBe(true)
+    expect(providerHasCapability(agy, 'video')).toBe(true)
+    expect(providerHasCapability(mmx, 'image')).toBe(true)
+    expect(providerHasCapability(mmx, 'analysis')).toBe(true)
+    expect(providerHasCapability(mmx, 'video')).toBe(false)
+  })
+
+  it('treats local providers as usable without a key and keeps them active', () => {
+    const agy = getMediaProviderMeta('antigravity')!
+    expect(mediaConfigUsable(agy, { apiKey: '', imageModel: '', analysisModel: '' })).toBe(true)
+    const settings = defaultAiSettings()
+    expect(activeMediaProvider(settings, 'image')).toBe('antigravity')
+    expect(activeMediaProvider(settings, 'analysis')).toBe('antigravity')
+    expect(activeMediaProvider(settings, 'video')).toBe('antigravity')
+  })
+
+  it('never sends local providers to the HTTP wire functions', async () => {
+    expect(() => assertHttpMediaProvider('antigravity')).toThrow(/local CLI backend/)
+    expect(() => assertHttpMediaProvider('mmx')).toThrow(/local CLI backend/)
+    await expect(
+      generateImageWithProvider('antigravity' as never, { apiKey: '', imageModel: '', analysisModel: '' }, { prompt: 'x' }),
+    ).rejects.toThrow(/local CLI/)
+    await expect(
+      analyzeMediaWithProvider('mmx' as never, { apiKey: '', imageModel: '', analysisModel: '' }, { media: [], requirements: 'x' }),
+    ).rejects.toThrow(/local CLI/)
+    expect(
+      await testMediaProvider('mmx' as never, { apiKey: '', imageModel: '', analysisModel: '' }),
+    ).toEqual({ ok: false, error: expect.stringMatching(/local CLI/) })
   })
 })

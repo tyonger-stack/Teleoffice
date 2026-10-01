@@ -315,8 +315,16 @@ describe('webSearch (SearchOptions)', () => {
 describe('search-tools', () => {
   it('maps the settings block onto SearchOptions', () => {
     const base = defaultAiSettings()
-    expect(searchOptionsFromSettings(base)).toEqual({ useGsk: true })
-    expect(searchOptionsFromSettings({ ...base, gskToolsEnabled: false })).toEqual({
+    expect(searchOptionsFromSettings(base)).toEqual({
+      useGsk: false,
+      localCli: { provider: 'local-cli', settings: base },
+    })
+    const genspark = {
+      ...base,
+      search: { ...base.search!, provider: 'genspark' as const },
+    }
+    expect(searchOptionsFromSettings(genspark)).toEqual({ useGsk: true })
+    expect(searchOptionsFromSettings({ ...genspark, gskToolsEnabled: false })).toEqual({
       useGsk: false,
     })
     const serper = {

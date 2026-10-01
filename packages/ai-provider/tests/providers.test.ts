@@ -8,8 +8,11 @@ import {
   clampMaxOutputTokens,
   cloudToolsEnabled,
   defaultAiSettings,
+  defaultAiLocalCliSettings,
+  localCliSettingsOf,
   maxOutputTokensOf,
   resolveAiSettings,
+  resolveAiLocalCliSettings,
 } from '../src/providers'
 import type { AiProviderId } from '../src/types'
 
@@ -391,5 +394,54 @@ describe('gskToolsEnabled', () => {
     )
     expect(off.gskToolsEnabled).toBe(false)
     expect(cloudToolsEnabled(off)).toBe(false)
+  })
+})
+
+describe('local CLI settings', () => {
+  it('ships defaults and keeps them through resolveAiSettings', () => {
+    expect(defaultAiLocalCliSettings()).toEqual({
+      agyPath: '',
+      mmxPath: '',
+      agyModel: '',
+      agyTimeoutSec: 300,
+      mmxRegion: 'cn',
+      searchRouting: 'auto',
+      fallback: true,
+      agyVideo: false,
+      ttsVoice: '',
+      asrLanguage: 'zh',
+    })
+    expect(defaultAiSettings().localCli).toEqual(defaultAiLocalCliSettings())
+    const resolved = resolveAiSettings(
+      { providers: {} as never },
+      defaultAiSettings(),
+    )
+    expect(resolved.localCli).toEqual(defaultAiLocalCliSettings())
+  })
+
+  it('normalises a stored block and trims paths', () => {
+    const resolved = resolveAiLocalCliSettings({
+      agyPath: '  /tmp/agy  ',
+      agyTimeoutSec: Number.NaN,
+      mmxRegion: 'eu',
+      searchRouting: 'sideways',
+      fallback: 'yes',
+      agyVideo: 1,
+      asrLanguage: '',
+    } as never)
+    expect(resolved.agyPath).toBe('/tmp/agy')
+    expect(resolved.agyTimeoutSec).toBe(300)
+    expect(resolved.mmxRegion).toBe('cn')
+    expect(resolved.searchRouting).toBe('auto')
+    expect(resolved.fallback).toBe(true)
+    expect(resolved.agyVideo).toBe(false)
+    expect(resolved.asrLanguage).toBe('zh')
+  })
+
+  it('reads the effective settings with localCliSettingsOf', () => {
+    expect(localCliSettingsOf(null).searchRouting).toBe('auto')
+    expect(localCliSettingsOf({ localCli: { ...defaultAiLocalCliSettings(), fallback: false } }).fallback).toBe(
+      false,
+    )
   })
 })

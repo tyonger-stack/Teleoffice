@@ -7,14 +7,16 @@
  * insert pipelines' fetchRemoteImage accepts.
  */
 
-import { existsSync, readFileSync, statSync } from 'node:fs'
-import { basename, extname } from 'node:path'
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { basename, extname, join } from 'node:path'
 import {
   activeMediaConfig,
   analyzeMediaWithProvider,
   cloudToolsEnabled,
   defaultAiSettings,
   generateImageWithProvider,
+  localCliSettingsOf,
   resolveAiSettings,
   type AiSettings,
   type LegacyAiSettings,
@@ -29,6 +31,19 @@ import {
 } from '@genoffice/electron-utils/remote-image'
 import { fetchWithSsrfGuard } from '@genoffice/electron-utils/safe-remote-url'
 import { gskAnalyzeMedia, gskGenerateImage, hasGskAuth, type GskGenerateImageOptions } from './gsk'
+import {
+  agyDescribe,
+  agyGenerateImage,
+  agyTranscribe,
+  agyVideoGenerate,
+  mmxDescribe,
+  mmxGenerateImage,
+  mmxSynthesize,
+  mmxTranscribe,
+  mmxVideoDownload,
+  mmxVideoGenerate,
+  mmxVideoTask,
+} from './local-cli'
 
 export const GSK_NOT_LOGGED_IN_ERROR =
   'Genspark account is not logged in on this machine; ask the user to log in first'
@@ -251,11 +266,97 @@ export type GenerateImageToolOp = GskGenerateImageOptions & {
   transparentBackground?: boolean
 }
 
+const LOCAL_IMAGE_EXT: Record<string, string> = {
+  'image/png': '.png',
+  'image/jpeg': '.jpg',
+  'image/gif': '.gif',
+  'image/webp': '.webp',
+}
+
+// Best-effort removal of our own staging dirs (no /tmp leaks).
+function rmrf(path: string): void {
+  try {
+    rmSync(path, { recursive: true, force: true })
+  } catch {
+    // staging litter must never fail the tool
+  }
+}
+
+// Local CLI image route: antigravity first (or mmx first when selected),
+// then the other CLI when fallback is on. Transparency is only a prompt hint
+// for the local CLIs (no background-removal second pass there).
+async function localGenerateImage(
+  settings: AiSettings,
+  prompt: string,
+  op: GenerateImageToolOp,
+): Promise<{
+  url?: string
+  error?: string
+  provider?: string
+  attempts?: { provider: string; error: string }[]
+}> {
+  const cli = localCliSettingsOf(settings)
+  const primary = activeMediaConfig(settings, 'image')?.provider
+  const order = primary === 'mmx' ? ['mmx', 'antigravity'] : ['antigravity', 'mmx']
+  if (!cli.fallback) order.splice(1)
+  const attempts: { provider: string; error: string }[] = []
+  const fullPrompt =
+    op.transparentBackground === true
+      ? prompt + ' The subject must be isolated on a clean, uniform background (transparent-background style cutout).'
+      : prompt
+  let referenceImagePaths: string[] = []
+  let refDir: string | null = null
+  try {
+    const references = await loadMediaReferences(op.referenceImageUrls ?? [])
+    if (references.length) {
+      refDir = mkdtempSync(join(tmpdir(), 'genoffice-imgref-'))
+      referenceImagePaths = references.map((blob, i) => {
+        const target = join(
+          refDir as string,
+          'ref-' + i + (LOCAL_IMAGE_EXT[blob.mime.toLowerCase()] ?? '.png'),
+        )
+        writeFileSync(target, blob.bytes)
+        return target
+      })
+    }
+    for (const id of order) {
+      try {
+        const image =
+          id === 'mmx'
+            ? await mmxGenerateImage(
+                { prompt: fullPrompt, aspectRatio: op.aspectRatio, referenceImagePaths },
+                settings,
+              )
+            : await agyGenerateImage(
+                { prompt: fullPrompt, aspectRatio: op.aspectRatio, referenceImagePaths },
+                settings,
+              )
+        return { url: storeGeneratedImage(image.bytes, image.mime), provider: id, attempts }
+      } catch (err) {
+        attempts.push({ provider: id, error: errorText(err) })
+      }
+    }
+    return {
+      error: attempts.map((a) => a.provider + ': ' + a.error).join('; ') || 'image generation failed',
+      attempts,
+    }
+  } catch (err) {
+    return { error: errorText(err), attempts }
+  } finally {
+    if (refDir) rmrf(refDir)
+  }
+}
+
 export async function generateImageTool(
   settingsPath: string,
   op: GenerateImageToolOp,
   options: MediaToolOptions = {},
-): Promise<{ url?: string; error?: string }> {
+): Promise<{
+  url?: string
+  error?: string
+  provider?: string
+  attempts?: { provider: string; error: string }[]
+}> {
   const prompt = String(op.prompt ?? '').trim()
   if (!prompt) return { error: 'prompt must not be empty' }
   const settings = readAiSettingsFile(settingsPath)
@@ -280,6 +381,10 @@ export async function generateImageTool(
         return { url: gen.url } // strip failed: the opaque image is still usable
       }
     }
+    // Local CLI backends never reach the HTTP providers below (guarded there too).
+    if (byok.provider === 'antigravity' || byok.provider === 'mmx') {
+      return localGenerateImage(settings, prompt, op)
+    }
     // `model` names Genspark-only special models (fal-*); BYOK uses the configured image model
     const references = await loadMediaReferences(op.referenceImageUrls ?? [])
     const image = await generateImageWithProvider(byok.provider, byok.config, {
@@ -298,7 +403,12 @@ export async function analyzeMediaTool(
   settingsPath: string,
   op: { mediaUrls: string[]; requirements: string },
   options: MediaToolOptions = {},
-): Promise<{ text?: string; error?: string }> {
+): Promise<{
+  text?: string
+  error?: string
+  provider?: string
+  attempts?: { provider: string; error: string }[]
+}> {
   const mediaUrls = (op.mediaUrls ?? []).map(String).filter(Boolean)
   const requirements = String(op.requirements ?? '').trim()
   if (!mediaUrls.length) return { error: 'mediaUrls must not be empty' }
@@ -330,9 +440,314 @@ export async function analyzeMediaTool(
     const hasVideo = media.some((m) => !m.mime.startsWith('image/'))
     const byok = hasVideo ? videoByok : imageByok
     if (!byok) return await viaGsk()
+    if (byok.provider === 'antigravity' || byok.provider === 'mmx') {
+      return localAnalyzeMedia(settings, mediaUrls, media, requirements, byok.provider)
+    }
     return {
       text: await analyzeMediaWithProvider(byok.provider, byok.config, { media, requirements }),
     }
+  } catch (err) {
+    return { error: errorText(err) }
+  }
+}
+
+const LOCAL_ANALYZE_EXT: Record<string, string> = {
+  'image/png': '.png',
+  'image/jpeg': '.jpg',
+  'image/gif': '.gif',
+  'image/webp': '.webp',
+  'video/mp4': '.mp4',
+  'video/quicktime': '.mov',
+  'video/webm': '.webm',
+  'video/x-matroska': '.mkv',
+  'audio/mpeg': '.mp3',
+  'audio/wav': '.wav',
+  'audio/mp4': '.m4a',
+  'audio/aac': '.aac',
+  'audio/ogg': '.ogg',
+  'audio/flac': '.flac',
+}
+
+// Local CLI analysis route: the selected CLI first, then the other one when
+// fallback is on. mmx vision reads images only: for audio/video inputs the
+// agy error is reported instead of failing over to mmx.
+async function localAnalyzeMedia(
+  settings: AiSettings,
+  mediaUrls: string[],
+  media: MediaBlob[],
+  requirements: string,
+  primary: 'antigravity' | 'mmx',
+): Promise<{
+  text?: string
+  error?: string
+  provider?: string
+  attempts?: { provider: string; error: string }[]
+}> {
+  const cli = localCliSettingsOf(settings)
+  const imageOnly = media.every((m) => m.mime.startsWith('image/'))
+  const order: Array<'antigravity' | 'mmx'> =
+    primary === 'mmx' ? ['mmx', 'antigravity'] : ['antigravity', 'mmx']
+  if (!cli.fallback) order.splice(1)
+  const attempts: { provider: string; error: string }[] = []
+  const staged: string[] = []
+  const stageBlobs = (blobs: MediaBlob[]): string[] => {
+    const dir = mkdtempSync(join(tmpdir(), 'genoffice-analyze-'))
+    staged.push(dir)
+    return blobs.map((blob, i) => {
+      const target = join(dir, 'media-' + i + (LOCAL_ANALYZE_EXT[blob.mime.toLowerCase()] ?? '.bin'))
+      writeFileSync(target, blob.bytes)
+      return target
+    })
+  }
+  try {
+    for (const id of order) {
+      try {
+        if (id === 'mmx') {
+          if (!imageOnly) {
+            throw new Error('MiniMax CLI (mmx) vision reads images only, not audio/video')
+          }
+          // https URLs go straight to mmx; everything else is already-loaded bytes.
+          const dir = mkdtempSync(join(tmpdir(), 'genoffice-analyze-'))
+          staged.push(dir)
+          const inputs = media.map((blob, i) => {
+            const ref = mediaUrls[i] as string
+            if (/^https?:\/\//i.test(ref)) return ref
+            const target = join(
+              dir,
+              'media-' + i + (LOCAL_ANALYZE_EXT[blob.mime.toLowerCase()] ?? '.bin'),
+            )
+            writeFileSync(target, blob.bytes)
+            return target
+          })
+          const parts: string[] = []
+          for (const input of inputs) {
+            parts.push(await mmxDescribe(input, requirements, settings))
+          }
+          return { text: parts.join('\n\n'), provider: 'mmx', attempts }
+        }
+        const text = await agyDescribe(stageBlobs(media), requirements, settings)
+        return { text, provider: 'antigravity', attempts }
+      } catch (err) {
+        attempts.push({ provider: id, error: errorText(err) })
+        // mmx cannot read audio/video at all: report the agy error, do not fail over.
+        if (id === 'antigravity' && !imageOnly && order.includes('mmx')) break
+      }
+    }
+    return {
+      error: attempts.map((a) => a.provider + ': ' + a.error).join('; ') || 'media analysis failed',
+      attempts,
+    }
+  } finally {
+    for (const dir of staged) rmrf(dir)
+  }
+}
+
+// -- speech + video tools (local CLIs only) --------------------------
+
+export interface SynthesizeSpeechToolOp {
+  text?: string
+  textFile?: string
+  out?: string
+  voice?: string
+  format?: string
+  model?: string
+  speed?: number
+  emotion?: string
+  language?: string
+}
+
+// Text to speech through mmx (the only local TTS backend).
+export async function synthesizeSpeechTool(
+  settingsPath: string,
+  op: SynthesizeSpeechToolOp,
+): Promise<{ path?: string; bytes?: Uint8Array; error?: string; provider?: string }> {
+  const settings = readAiSettingsFile(settingsPath)
+  let text = String(op.text ?? '')
+  if (op.textFile) {
+    try {
+      text = readFileSync(op.textFile, 'utf-8')
+    } catch (err) {
+      return { error: 'could not read text file: ' + errorText(err) }
+    }
+  }
+  if (!text.trim()) return { error: 'text must not be empty' }
+  const format = op.format || 'mp3'
+  const out = op.out ?? join(tmpdir(), 'speech-' + Date.now() + '.' + format)
+  try {
+    const r = await mmxSynthesize(
+      {
+        text,
+        out,
+        ...(op.voice !== undefined ? { voice: op.voice } : {}),
+        ...(op.format !== undefined ? { format: op.format } : {}),
+        ...(op.model !== undefined ? { model: op.model } : {}),
+        ...(op.speed !== undefined ? { speed: op.speed } : {}),
+        ...(op.emotion !== undefined ? { emotion: op.emotion } : {}),
+        ...(op.language !== undefined ? { language: op.language } : {}),
+      },
+      settings,
+    )
+    return { path: r.path, bytes: r.bytes, provider: 'mmx' }
+  } catch (err) {
+    return { error: errorText(err) }
+  }
+}
+
+// Ensure a tool-supplied audio reference is a local file mmx can read.
+
+// Materialise a remote audio reference into the given staging dir; plain
+// local paths pass through untouched.
+async function ensureLocalAudioFile(ref: string, dir: string): Promise<string> {
+  if (/^https?:\/\//i.test(ref) || ref.startsWith('data:') || ref.startsWith('file:')) {
+    const blob = await loadMediaReference(ref)
+    const target = join(dir, 'audio' + (LOCAL_ANALYZE_EXT[blob.mime.toLowerCase()] ?? '.bin'))
+    writeFileSync(target, blob.bytes)
+    return target
+  }
+  return ref
+}
+
+// Speech transcription: agy first (hears audio via view_file), mmx fallback.
+export async function transcribeAudioTool(
+  settingsPath: string,
+  op: { path: string; language?: string },
+): Promise<{
+  text?: string
+  error?: string
+  provider?: string
+  attempts?: { provider: string; error: string }[]
+}> {
+  const ref = String(op.path ?? '')
+  if (!ref) return { error: 'path must not be empty' }
+  const settings = readAiSettingsFile(settingsPath)
+  const cli = localCliSettingsOf(settings)
+  const language = op.language ?? cli.asrLanguage
+  const attempts: { provider: string; error: string }[] = []
+  try {
+    return { text: await agyTranscribe(ref, language, settings), provider: 'antigravity', attempts }
+  } catch (err) {
+    attempts.push({ provider: 'antigravity', error: errorText(err) })
+  }
+  if (!cli.fallback) {
+    return { error: attempts.map((a) => a.provider + ': ' + a.error).join('; '), attempts }
+  }
+  const staging = mkdtempSync(join(tmpdir(), 'genoffice-asr-'))
+  try {
+    const local = await ensureLocalAudioFile(ref, staging)
+    return { text: await mmxTranscribe(local, language, settings), provider: 'mmx', attempts }
+  } catch (err) {
+    attempts.push({ provider: 'mmx', error: errorText(err) })
+    return { error: attempts.map((a) => a.provider + ': ' + a.error).join('; '), attempts }
+  } finally {
+    rmrf(staging)
+  }
+}
+
+export interface GenerateVideoToolOp {
+  prompt: string
+  out?: string
+  image?: string
+  model?: string
+  duration?: number
+  ratio?: string
+  async?: boolean
+}
+
+// Video generation: agy only when explicitly enabled (it has no video tool),
+// then mmx. agy bytes are written to out; mmx downloads there itself.
+export async function generateVideoTool(
+  settingsPath: string,
+  op: GenerateVideoToolOp,
+): Promise<{
+  path?: string
+  taskId?: string
+  status?: string
+  fileId?: string
+  error?: string
+  provider?: string
+  attempts?: { provider: string; error: string }[]
+}> {
+  const prompt = String(op.prompt ?? '').trim()
+  if (!prompt) return { error: 'prompt must not be empty' }
+  const settings = readAiSettingsFile(settingsPath)
+  const cli = localCliSettingsOf(settings)
+  const attempts: { provider: string; error: string }[] = []
+  const out = op.out ?? join(tmpdir(), 'video-' + Date.now() + '.mp4')
+  const order: Array<'antigravity' | 'mmx'> = cli.agyVideo ? ['antigravity', 'mmx'] : ['mmx']
+  if (!cli.fallback) order.splice(1)
+  // agyVideo off means agy is never attempted: say so up front so the CLI
+  // error explains why only mmx appears in the attempts.
+  if (!cli.agyVideo) {
+    attempts.push({
+      provider: 'antigravity',
+      error: 'skipped: agy has no video generation tool (localCli.agyVideo=false)',
+    })
+  }
+  for (const id of order) {
+    try {
+      if (id === 'antigravity') {
+        const video = await agyVideoGenerate({ prompt }, settings)
+        writeFileSync(out, video.bytes)
+        return { path: out, provider: 'antigravity', attempts }
+      }
+      const r = await mmxVideoGenerate(
+        {
+          prompt,
+          out,
+          ...(op.image !== undefined ? { image: op.image } : {}),
+          ...(op.model !== undefined ? { model: op.model } : {}),
+          ...(op.duration !== undefined ? { duration: op.duration } : {}),
+          ...(op.ratio !== undefined ? { ratio: op.ratio } : {}),
+          ...(op.async !== undefined ? { async: op.async } : {}),
+        },
+        settings,
+      )
+      return {
+        ...(r.path !== undefined ? { path: r.path } : {}),
+        ...(r.taskId ? { taskId: r.taskId } : {}),
+        ...(r.status !== undefined ? { status: r.status } : {}),
+        ...(r.fileId !== undefined ? { fileId: r.fileId } : {}),
+        provider: 'mmx',
+        attempts,
+      }
+    } catch (err) {
+      attempts.push({ provider: id, error: errorText(err) })
+    }
+  }
+  return {
+    error: attempts.map((a) => a.provider + ': ' + a.error).join('; ') || 'video generation failed',
+    attempts,
+  }
+}
+
+// mmx video task status (no agy equivalent).
+export async function videoTaskTool(
+  settingsPath: string,
+  op: { taskId: string; model?: string },
+): Promise<{ result?: unknown; error?: string; provider?: string }> {
+  const taskId = String(op.taskId ?? '').trim()
+  if (!taskId) return { error: 'taskId must not be empty' }
+  const settings = readAiSettingsFile(settingsPath)
+  try {
+    const result = await mmxVideoTask(taskId, op.model, settings)
+    return { result, provider: 'mmx' }
+  } catch (err) {
+    return { error: errorText(err) }
+  }
+}
+
+// mmx video file download (no agy equivalent).
+export async function videoDownloadTool(
+  settingsPath: string,
+  op: { fileId: string; out: string },
+): Promise<{ path?: string; error?: string; provider?: string }> {
+  const fileId = String(op.fileId ?? '').trim()
+  if (!fileId) return { error: 'fileId must not be empty' }
+  if (!op.out) return { error: 'out must not be empty' }
+  const settings = readAiSettingsFile(settingsPath)
+  try {
+    const path = await mmxVideoDownload(fileId, op.out, settings)
+    return { path, provider: 'mmx' }
   } catch (err) {
     return { error: errorText(err) }
   }

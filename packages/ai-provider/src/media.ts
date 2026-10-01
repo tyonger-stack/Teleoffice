@@ -35,6 +35,34 @@ export const AI_MEDIA_PROVIDERS: AiMediaProviderMeta[] = [
     videoAnalysis: true,
   },
   {
+    id: 'antigravity',
+    label: 'Antigravity CLI (agy)',
+    description:
+      'Image generation + image/video/audio understanding through the local agy CLI (Google account)',
+    keyPlaceholder: 'Not required - local CLI',
+    localCli: true,
+    defaultBaseUrl: '',
+    imageModels: [],
+    defaultImageModel: '',
+    analysisModels: [],
+    defaultAnalysisModel: '',
+    videoAnalysis: true,
+  },
+  {
+    id: 'mmx',
+    label: 'MiniMax CLI (mmx)',
+    description:
+      'Image understanding + image generation through the local mmx CLI (MiniMax Token Plan)',
+    keyPlaceholder: 'Not required - local CLI',
+    localCli: true,
+    defaultBaseUrl: '',
+    imageModels: [],
+    defaultImageModel: '',
+    analysisModels: [],
+    defaultAnalysisModel: '',
+    videoAnalysis: false,
+  },
+  {
     id: 'openai',
     label: 'OpenAI',
     description: 'GPT Image for generation and editing; GPT chat models for image analysis',
@@ -208,6 +236,14 @@ export function providerHasCapability(
   meta: AiMediaProviderMeta,
   capability: MediaCapability,
 ): boolean {
+  // Local CLI backends have no HTTP wire protocol; their capabilities are fixed:
+  // antigravity generates images and reads image/video/audio, mmx generates
+  // images and reads images only (mmx vision is image-only).
+  if (meta.localCli) {
+    if (meta.id === 'antigravity') return true
+    if (meta.id === 'mmx') return capability === 'image' || capability === 'analysis'
+    return false
+  }
   if (capability === 'image') return !!meta.imageProtocol
   if (capability === 'video') return !!meta.analysisProtocol && meta.videoAnalysis
   return !!meta.analysisProtocol
@@ -224,9 +260,9 @@ export function defaultAiMediaSettings(): AiMediaSettings {
     }
   }
   return {
-    imageProvider: 'genspark',
-    analysisProvider: 'genspark',
-    videoAnalysisProvider: 'genspark',
+    imageProvider: 'antigravity',
+    analysisProvider: 'antigravity',
+    videoAnalysisProvider: 'antigravity',
     providers,
   }
 }
@@ -277,6 +313,8 @@ export function mediaConfigUsable(
   config: AiMediaProviderConfig | undefined,
 ): boolean {
   if (!config) return false
+  // Local CLI backends need no key: the binary (+ mmx credentials) is the config.
+  if (meta.localCli) return true
   // Trim-aware like activeProvider: whitespace-only survivors of in-memory
   // settings are not usable configs.
   if (meta.needsBaseUrl) return !!config.baseUrl?.trim()
@@ -311,7 +349,10 @@ export function activeMediaProvider(
 export function activeMediaConfig(
   settings: Pick<AiSettings, 'media'>,
   capability: MediaCapability,
-): { provider: Exclude<AiMediaProviderId, 'genspark'>; config: AiMediaProviderConfig } | null {
+): {
+  provider: Exclude<AiMediaProviderId, 'genspark'>
+  config: AiMediaProviderConfig
+} | null {
   const provider = activeMediaProvider(settings, capability)
   if (provider === 'genspark') return null
   return { provider, config: settings.media!.providers[provider] }
@@ -324,6 +365,9 @@ function byokModel(
   const active = activeMediaConfig(settings, capability)
   if (!active) return null
   const meta = getMediaProviderMeta(active.provider)!
+  // Local CLI backends have no model id; the provider id itself is the
+  // non-empty marker that keeps capabilityAvailable true.
+  if (meta.localCli) return active.provider
   return capability === 'image'
     ? active.config.imageModel || meta.defaultImageModel
     : active.config.analysisModel || meta.defaultAnalysisModel

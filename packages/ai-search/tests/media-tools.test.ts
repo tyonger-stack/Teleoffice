@@ -1,4 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
+import { describe, it, expect, vi, afterAll, beforeEach } from 'vitest'
 
 vi.mock('../src/gsk', () => ({
   gskGenerateImage: vi.fn(),
@@ -11,12 +14,39 @@ import { gskGenerateImage, gskAnalyzeMedia } from '../src/gsk'
 
 const gskGen = vi.mocked(gskGenerateImage)
 const gskAnalyze = vi.mocked(gskAnalyzeMedia)
-// nonexistent settings file → defaults: no BYOK media provider, cloud tools on → Genspark route
-const SETTINGS = '/nonexistent/ai-settings.json'
+// Explicit Genspark media settings: the app defaults now select the local
+// CLIs, so the Genspark route needs its providers spelled out.
+function gensparkSettingsFile(): string {
+  const dir = mkdtempSync(join(tmpdir(), 'genoffice-media-test-'))
+  const path = join(dir, 'ai-settings.json')
+  writeFileSync(
+    path,
+    JSON.stringify({
+      provider: 'genspark',
+      providers: {},
+      media: {
+        imageProvider: 'genspark',
+        analysisProvider: 'genspark',
+        videoAnalysisProvider: 'genspark',
+        providers: {},
+      },
+    }),
+  )
+  return path
+}
+const SETTINGS = gensparkSettingsFile()
 
 beforeEach(() => {
   gskGen.mockReset()
   gskAnalyze.mockReset()
+})
+
+afterAll(() => {
+  try {
+    rmSync(dirname(SETTINGS), { recursive: true, force: true })
+  } catch {
+    // best effort only
+  }
 })
 
 describe('generateImageTool transparentBackground (Genspark route)', () => {

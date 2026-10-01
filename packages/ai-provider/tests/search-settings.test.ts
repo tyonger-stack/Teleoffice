@@ -7,9 +7,9 @@ import {
 } from '../src/search-settings'
 
 describe('search settings', () => {
-  it('defaults to genspark with empty keys and rides along in defaultAiSettings', () => {
+  it('defaults to local-cli with empty keys and rides along in defaultAiSettings', () => {
     expect(defaultAiSearchSettings()).toEqual({
-      provider: 'genspark',
+      provider: 'local-cli',
       providers: {
         serper: { apiKey: '' },
         serply: { apiKey: '' },
@@ -17,7 +17,7 @@ describe('search settings', () => {
         parallel: { apiKey: '' },
       },
     })
-    expect(defaultAiSettings().search?.provider).toBe('genspark')
+    expect(defaultAiSettings().search?.provider).toBe('local-cli')
     const resolved = resolveAiSettings(
       { provider: 'genspark', providers: {} as never },
       defaultAiSettings(),
@@ -137,5 +137,28 @@ describe('Parallel search settings', () => {
       ),
     )
     expect(activeSearchProvider({ search: settings })).toBe('parallel')
+  })
+})
+
+describe('local CLI search settings', () => {
+  it('activates the local CLI providers without a key', () => {
+    for (const provider of ['local-cli', 'mmx', 'antigravity'] as const) {
+      expect(
+        activeSearchProvider({
+          search: { ...defaultAiSearchSettings(), provider },
+        }),
+      ).toBe(provider)
+    }
+    expect(activeSearchProvider({ search: { ...defaultAiSearchSettings(), provider: 'genspark' } })).toBe(
+      'genspark',
+    )
+  })
+
+  it('keeps a stored local provider through resolution', () => {
+    const settings = resolveAiSearchSettings(
+      JSON.parse(JSON.stringify({ provider: 'mmx', providers: {} })),
+    )
+    expect(settings.provider).toBe('mmx')
+    expect(activeSearchProvider({ search: settings })).toBe('mmx')
   })
 })

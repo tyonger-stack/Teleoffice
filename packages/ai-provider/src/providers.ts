@@ -1,6 +1,67 @@
 import { defaultAiMediaSettings, resolveAiMediaSettings } from './media'
 import { defaultAiSearchSettings, resolveAiSearchSettings } from './search-settings'
-import type { AiProviderId, AiProviderMeta, AiSettings, LegacyAiSettings } from './types'
+import type {
+  AiLocalCliSettings,
+  AiProviderId,
+  AiProviderMeta,
+  AiSettings,
+  LegacyAiSettings,
+} from './types'
+
+/** Defaults for the local CLI backends (agy + mmx). */
+export function defaultAiLocalCliSettings(): AiLocalCliSettings {
+  return {
+    agyPath: '',
+    mmxPath: '',
+    agyModel: '',
+    agyTimeoutSec: 300,
+    mmxRegion: 'cn',
+    searchRouting: 'auto',
+    fallback: true,
+    agyVideo: false,
+    ttsVoice: '',
+    asrLanguage: 'zh',
+  }
+}
+
+/**
+ * Merge a stored localCli block over defaults, normalising types so a
+ * hand-edited settings file cannot inject a wrong-typed value downstream.
+ */
+export function resolveAiLocalCliSettings(
+  stored: Partial<AiLocalCliSettings> | undefined,
+): AiLocalCliSettings {
+  const defaults = defaultAiLocalCliSettings()
+  if (!stored || typeof stored !== 'object') return defaults
+  const str = (v: unknown, fallback: string): string =>
+    typeof v === 'string' ? v : fallback
+  const num = (v: unknown, fallback: number): number =>
+    typeof v === 'number' && Number.isFinite(v) ? v : fallback
+  const bool = (v: unknown, fallback: boolean): boolean =>
+    typeof v === 'boolean' ? v : fallback
+  return {
+    agyPath: str(stored.agyPath, defaults.agyPath).trim(),
+    mmxPath: str(stored.mmxPath, defaults.mmxPath).trim(),
+    agyModel: str(stored.agyModel, defaults.agyModel).trim(),
+    agyTimeoutSec: num(stored.agyTimeoutSec, defaults.agyTimeoutSec),
+    mmxRegion: stored.mmxRegion === 'global' ? 'global' : 'cn',
+    searchRouting:
+      stored.searchRouting === 'mmx' || stored.searchRouting === 'antigravity'
+        ? stored.searchRouting
+        : 'auto',
+    fallback: bool(stored.fallback, defaults.fallback),
+    agyVideo: bool(stored.agyVideo, defaults.agyVideo),
+    ttsVoice: str(stored.ttsVoice, defaults.ttsVoice).trim(),
+    asrLanguage: str(stored.asrLanguage, defaults.asrLanguage).trim() || 'zh',
+  }
+}
+
+/** Effective local CLI settings of a settings object (defaults for absent blocks). */
+export function localCliSettingsOf(
+  settings: Pick<AiSettings, 'localCli'> | null | undefined,
+): AiLocalCliSettings {
+  return resolveAiLocalCliSettings(settings?.localCli ?? undefined)
+}
 
 /**
  * Genspark server-side LLM proxy endpoints. All three protocols share the
@@ -339,6 +400,7 @@ export function defaultAiSettings(
     provider: 'genspark',
     providers,
     gskToolsEnabled: true,
+    localCli: defaultAiLocalCliSettings(),
     media: defaultAiMediaSettings(),
     search: defaultAiSearchSettings(),
   }
@@ -503,6 +565,7 @@ export function resolveAiSettings(stored: unknown, defaults: AiSettings): AiSett
       trimConfigs(mergeProviderConfigs(defaults.providers, storedProviders)),
     ),
     gskToolsEnabled: settings.gskToolsEnabled ?? defaults.gskToolsEnabled ?? true,
+    localCli: resolveAiLocalCliSettings(settings.localCli ?? defaults.localCli),
     media: resolveAiMediaSettings(settings.media ?? defaults.media),
     search: resolveAiSearchSettings(settings.search ?? defaults.search),
     // clamped on read: a hand-edited settings file with an absurd cap must not be

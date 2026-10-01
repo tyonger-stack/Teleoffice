@@ -1,6 +1,7 @@
 export type {
   AiChatRequest,
   AiChatResponse,
+  AiLocalCliSettings,
   AiMediaProviderConfig,
   AiMediaProviderId,
   AiMediaProviderMeta,
@@ -30,8 +31,11 @@ export {
   clampMaxOutputTokens,
   cloudToolsEnabled,
   defaultAiSettings,
+  defaultAiLocalCliSettings,
+  localCliSettingsOf,
   maxOutputTokensOf,
   resolveAiSettings,
+  resolveAiLocalCliSettings,
 } from './providers'
 export {
   AI_MEDIA_PROVIDERS,
@@ -57,6 +61,7 @@ export {
 } from './search-settings'
 export {
   analyzeMediaWithProvider,
+  assertHttpMediaProvider,
   generateImageWithProvider,
   sniffImageMime,
   testMediaProvider,

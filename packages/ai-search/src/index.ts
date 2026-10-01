@@ -14,11 +14,19 @@ import {
   type WebSearchResult,
 } from './shared'
 import { gskImageSearch, gskWebSearch, hasGskAuth } from './gsk'
+import { localCliSettingsOf } from '@genoffice/ai-provider'
+import {
+  agySearch,
+  mmxSearch,
+  pickSearchProvider,
+  type LocalCliSettingsInput,
+} from './local-cli'
 import { parallelMcpSearch } from './parallel-mcp'
 
 export type { ImageSearchResult, WebSearchResult } from './shared'
 export * from './gsk'
 export * from './genoffice-auth'
+export * from './local-cli'
 export * from './media-tools'
 export * from './search-tools'
 
@@ -41,9 +49,20 @@ export interface SearchOptions {
   parallelKey?: string
   /** which backend to try first (default serper) */
   prefer?: 'serper' | 'serply' | 'tavily' | 'parallel'
+  /** set when a local CLI search provider is selected (local-cli / mmx / antigravity) */
+  localCli?: LocalCliSearchOptions
 }
 
-function normalizeOptions(opts: boolean | SearchOptions | undefined): Required<SearchOptions> {
+export interface LocalCliSearchOptions {
+  provider: 'local-cli' | 'mmx' | 'antigravity'
+  settings: LocalCliSettingsInput
+  /** explicit per-call override (auto | mmx | agy | cn | intl | ...) */
+  via?: string
+}
+
+function normalizeOptions(
+  opts: boolean | SearchOptions | undefined,
+): Required<Omit<SearchOptions, 'localCli'>> & Pick<SearchOptions, 'localCli'> {
   const o = typeof opts === 'boolean' ? { useGsk: opts } : (opts ?? {})
   return {
     useGsk: o.useGsk ?? true,
@@ -52,6 +71,7 @@ function normalizeOptions(opts: boolean | SearchOptions | undefined): Required<S
     tavilyKey: o.tavilyKey ?? TAVILY_KEY(),
     parallelKey: o.parallelKey ?? PARALLEL_KEY(),
     prefer: o.prefer ?? 'serper',
+    ...(o.localCli !== undefined ? { localCli: o.localCli } : {}),
   }
 }
 
@@ -60,6 +80,8 @@ type WebSearchResponse = {
   answer?: string
   method: string
   error?: string
+  /** per-backend failures on the way to the answer, so callers can show why a fallback happened */
+  attempts?: { provider: string; error: string }[]
 }
 
 /** Serper Google web search; null when the key is empty, the call fails, or nothing comes back */
@@ -258,6 +280,52 @@ function normalizeSearchArgs(
   return { query: typeof query === 'string' ? query.slice(0, 500) : '', max }
 }
 
+// Local CLI web search: primary CLI by routing, then the other CLI when
+// fallback is on, then the free chain (Parallel MCP, DuckDuckGo). gsk is
+// skipped on this route. Every failure is recorded in attempts.
+async function localCliWebSearch(
+  query: string,
+  max: number,
+  localCli: LocalCliSearchOptions,
+  parallelKey: string,
+): Promise<WebSearchResponse> {
+  const cliSettings = localCliSettingsOf(localCli.settings ?? null)
+  const explicit =
+    localCli.via ??
+    (localCli.provider === 'mmx' || localCli.provider === 'antigravity'
+      ? localCli.provider
+      : undefined)
+  const primary = pickSearchProvider(query, cliSettings.searchRouting, explicit)
+  const order = [primary]
+  if (cliSettings.fallback) order.push(primary === 'mmx' ? 'antigravity' : 'mmx')
+  const attempts: { provider: string; error: string }[] = []
+  for (const id of order) {
+    try {
+      const r =
+        id === 'mmx'
+          ? await mmxSearch(query, max, localCli.settings)
+          : await agySearch(query, max, localCli.settings)
+      if (r.results.length) return { ...r, method: id, attempts }
+      attempts.push({ provider: id, error: 'no results' })
+    } catch (err) {
+      attempts.push({ provider: id, error: err instanceof Error ? err.message : String(err) })
+    }
+  }
+  const free = await parallelWebSearch(parallelKey, query, max)
+  if (free) return { ...free, attempts }
+  try {
+    return { results: await duckWebSearch(query, max), method: 'duckduckgo', attempts }
+  } catch (err) {
+    // an unreachable backend must not read as an empty result set
+    return {
+      results: [],
+      method: 'error',
+      error: 'duckduckgo: ' + String(err),
+      attempts: [...attempts, { provider: 'duckduckgo', error: String(err) }],
+    }
+  }
+}
+
 export async function webSearch(
   query: string,
   maxResults = 6,
@@ -265,6 +333,9 @@ export async function webSearch(
 ): Promise<WebSearchResponse> {
   const o = normalizeOptions(options)
   const { query: q, max } = normalizeSearchArgs(query, maxResults, 6)
+  // A selected local CLI provider routes to agy/mmx first (gsk skipped),
+  // then the other CLI on fallback, then the free chain (Parallel MCP, DuckDuckGo).
+  if (o.localCli) return localCliWebSearch(q, max, o.localCli, o.parallelKey)
   // useGsk=false: the user turned Genspark cloud tools off or picked their own
   // search key — skip straight to the keyed/free backends
   if (o.useGsk && hasGskAuth()) {
@@ -310,7 +381,9 @@ export async function imageSearch(
 }> {
   const o = normalizeOptions(options)
   const { query: q, max } = normalizeSearchArgs(query, maxResults, 8)
-  if (o.useGsk && hasGskAuth()) {
+  // The local CLIs have no image-search API: a selected local provider keeps
+  // the keyed/free chain below and skips gsk.
+  if (o.useGsk && !o.localCli && hasGskAuth()) {
     try {
       const images = await gskImageSearch(q, max)
       if (images.length) return { images, method: 'gsk' }

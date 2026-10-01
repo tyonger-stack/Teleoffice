@@ -38,9 +38,16 @@ genoffice convert page.html --to docx                 # html2docx, same as the H
 genoffice convert report.docx --to md                 # GFM via the markdown editor's serializer
 genoffice convert book.xlsx --to csv [--sheet Data]   # one sheet, cell text as displayed, UTF-8 BOM, CRLF
 genoffice capabilities --json                        # which cloud features GenOffice has configured (no network call)
-genoffice search "electron headless export" [--images] [--max 6] --json
+genoffice search "electron headless export" [--images] [--max 6] [--via auto|mmx|agy] [--region cn|intl] --json
 genoffice image "isometric office, soft light" --aspect 16:9 --out hero.png
 genoffice media photo.jpg --ask "What text is in this picture?" --json
+genoffice tts "你好，世界" --out hello.mp3 --voice male-qn-qingse --format mp3 --speed 1 --emotion neutral --language zh
+genoffice tts --text-file notes.txt --out notes.mp3
+genoffice asr interview.wav --language zh
+genoffice video "aerial harbor at dawn" --out harbor.mp4 --image first.png --model MiniMax-H3 --duration 6 --ratio 16:9
+genoffice video --async "city timelapse" --out city.mp4
+genoffice video --task abc123 [--model MiniMax-H3]
+genoffice video --file-id fid9 --out clip.mp4
 genoffice docs read report.docx [--range 0-9] [--html] [--full] [--comments] [--revisions] [--header-footer] --json   # blocks (--full: whole text), comment threads, tracked changes, header/footer text
 genoffice docs apply report.docx --ops ops.json [--dry-run]           # apply_ops entries + insert_content / replace_blocks / insert_image / insert_chart / edit_chart / set_header_footer / reply_comment / resolve_comment
 genoffice docs check report.docx --json                               # fields without results, broken bookmark references, stale TOC, missing images, empty charts/headings, heading level skips, placeholder text, pending revisions, open comments; exit 0
@@ -220,18 +227,24 @@ Independently of the PATH, every launch of the packaged app writes the launcher 
 
 ## Cloud commands
 
-`search`, `image` and `media` reuse the editors' provider routing. Search uses
-the selected Serper / Serply / Tavily / Parallel provider when its key is configured;
-otherwise Genspark is the default when signed in (`~/.genoffice/auth.json`)
-and cloud tools are on, then Parallel's free, rate-limited Search MCP, then
-DuckDuckGo. Parallel
-and Tavily provide web search only. Image generation and media analysis use
-the corresponding provider chosen in the app's AI settings
-(`GenOffice/ai-settings.json` in the platform config directory, override with
-`GENOFFICE_AI_SETTINGS`). `HTTPS_PROXY` / `HTTP_PROXY` / `ALL_PROXY` are honoured.
-Search results, image bytes and analysis text come back in the JSON `detail`;
-`image` also writes the file. These are the only commands that send data off
-the machine.
+The search, image, media, tts, asr and video commands reuse the provider
+routing of the editors. Search defaults to the local CLIs: Chinese queries
+and Chinese sites (.cn, Baidu, Zhihu, ...) go through MiniMax mmx domestic
+search, everything else through Antigravity agy overseas search (--via
+auto|mmx|agy, --region cn|intl forces one side); when one side fails it falls
+over to the other, then Parallel's free Search MCP, then DuckDuckGo. A
+selected Serper / Serply / Tavily / Parallel provider runs first instead when
+its key is configured; Genspark runs first only when selected and signed in
+(~/.genoffice/auth.json) with cloud tools on. Image generation and media
+analysis default to Antigravity agy with MiniMax mmx as fallback (mmx vision
+reads images only); tts synthesizes speech through mmx, asr transcribes audio
+through agy with mmx fallback, and video generates video through mmx.
+Providers are chosen in the app's AI settings (GenOffice/ai-settings.json in
+the platform config directory, override with GENOFFICE_AI_SETTINGS).
+HTTPS_PROXY / HTTP_PROXY / ALL_PROXY are honoured. Search results, image
+bytes and analysis text come back in the JSON detail (method plus attempts on
+local-CLI fallbacks); image, tts and video also write files. These are the
+only commands that send data off the machine.
 
 ## Build and run in a checkout
 

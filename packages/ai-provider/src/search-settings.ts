@@ -12,6 +12,27 @@ export const AI_SEARCH_PROVIDERS: AiSearchProviderMeta[] = [
     keyPlaceholder: 'Not required - sign in to Genspark',
     imageSearch: true,
   },
+  {
+    id: 'local-cli',
+    label: 'Local CLIs (auto: mmx for Chinese / agy for foreign)',
+    keyPlaceholder: 'Not required - local CLI',
+    imageSearch: false,
+    localCli: true,
+  },
+  {
+    id: 'mmx',
+    label: 'MiniMax CLI (mmx)',
+    keyPlaceholder: 'Not required - local CLI',
+    imageSearch: false,
+    localCli: true,
+  },
+  {
+    id: 'antigravity',
+    label: 'Antigravity CLI (agy)',
+    keyPlaceholder: 'Not required - local CLI',
+    imageSearch: false,
+    localCli: true,
+  },
   { id: 'serper', label: 'Serper', keyPlaceholder: 'Serper API key', imageSearch: true },
   { id: 'serply', label: 'Serply', keyPlaceholder: 'Serply API key', imageSearch: true },
   { id: 'tavily', label: 'Tavily', keyPlaceholder: 'tvly-...', imageSearch: false },
@@ -20,7 +41,7 @@ export const AI_SEARCH_PROVIDERS: AiSearchProviderMeta[] = [
 
 export function defaultAiSearchSettings(): AiSearchSettings {
   return {
-    provider: 'genspark',
+    provider: 'local-cli',
     providers: {
       serper: { apiKey: '' },
       serply: { apiKey: '' },
@@ -43,11 +64,21 @@ export function resolveAiSearchSettings(
   return { provider: stored.provider ?? defaults.provider, providers }
 }
 
-/** Parallel can run keylessly; other custom providers require a key or fall back to Genspark. */
+/**
+ * Parallel can run keylessly; other custom providers require a key or fall
+ * back to Genspark. The local CLI providers need no key and always activate.
+ */
 export function activeSearchProvider(settings: Pick<AiSettings, 'search'>): AiSearchProviderId {
   const search = settings.search
   if (!search || search.provider === 'genspark') return 'genspark'
   if (!AI_SEARCH_PROVIDERS.some((m) => m.id === search.provider)) return 'genspark'
+  if (
+    search.provider === 'local-cli' ||
+    search.provider === 'mmx' ||
+    search.provider === 'antigravity'
+  ) {
+    return search.provider
+  }
   if (search.provider === 'parallel') return 'parallel'
   // Trim-aware: a whitespace-only key from in-memory settings falls back
   // instead of sending `Bearer    ` to the search backend.

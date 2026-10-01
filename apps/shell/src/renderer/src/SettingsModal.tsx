@@ -784,9 +784,14 @@ function AiMediaPane({
           window.aiOffice.testAiSearchSettings?.({
             provider: search.provider,
             apiKey:
-              search.provider === 'genspark'
+              search.provider === 'genspark' ||
+              search.provider === 'local-cli' ||
+              search.provider === 'mmx' ||
+              search.provider === 'antigravity'
                 ? ''
-                : (search.providers[search.provider]?.apiKey ?? ''),
+                : (search.providers[
+                    search.provider as keyof AiSearchSettings['providers']
+                  ]?.apiKey ?? ''),
           }) ?? Promise.resolve(fallback),
       ],
       ['image', () => vendorCheck(media.imageProvider)],
@@ -1001,10 +1006,10 @@ function AiMediaPane({
           : t('setAiCapVideo')
     const options = mediaCatalog.filter((m) =>
       cap === 'image'
-        ? !!m.imageProtocol
+        ? !!m.imageProtocol || !!m.localCli
         : cap === 'video'
-          ? !!m.analysisProtocol && m.videoAnalysis
-          : !!m.analysisProtocol,
+          ? (!!m.analysisProtocol && m.videoAnalysis) || (!!m.localCli && m.id === 'antigravity')
+          : !!m.analysisProtocol || !!m.localCli,
     )
     const current =
       cap === 'image'
@@ -1031,9 +1036,15 @@ function AiMediaPane({
         {subhead(cap, title)}
         {providerRow(title, id, options, pick)}
         <div className="set-field-desc set-ai-note">
-          {id === 'genspark' ? t('setAiMediaGensparkHint') : meta.description}
+          {id === 'genspark'
+            ? t('setAiMediaGensparkHint')
+            : id === 'antigravity'
+              ? t('setAiMediaAgyHint')
+              : id === 'mmx'
+                ? t('setAiMediaMmxHint')
+                : meta.description}
         </div>
-        {id !== 'genspark' && (
+        {id !== 'genspark' && !meta.localCli && (
           <>
             {modelRow(
               `set-ai-${cap}-model`,
@@ -1055,8 +1066,11 @@ function AiMediaPane({
   }
 
   const searchMeta = searchCatalog.find((m) => m.id === search.provider)
+  // Local CLI search backends need no key; the keyed map only carries the BYOK ids.
   const searchKey =
-    search.provider === 'genspark' ? '' : (search.providers[search.provider]?.apiKey ?? '')
+    search.provider === 'genspark' || searchMeta?.localCli
+      ? ''
+      : (search.providers[search.provider as keyof AiSearchSettings['providers']]?.apiKey ?? '')
 
   return (
     <>
@@ -1081,15 +1095,22 @@ function AiMediaPane({
         <div className="set-field-desc set-ai-note">
           {search.provider === 'genspark'
             ? t('setAiSearchGensparkHint')
-            : search.provider === 'parallel'
-              ? t('setAiSearchParallelHint')
-              : search.provider === 'serply'
-                ? t('setAiSearchSerplyHint')
-                : searchMeta?.imageSearch
-                  ? t('setAiSearchSerperHint')
-                  : t('setAiSearchTavilyHint')}
+            : search.provider === 'local-cli'
+              ? t('setAiSearchLocalCliHint')
+              : search.provider === 'mmx'
+                ? t('setAiSearchMmxHint')
+                : search.provider === 'antigravity'
+                  ? t('setAiSearchAgyHint')
+                  : search.provider === 'parallel'
+                    ? t('setAiSearchParallelHint')
+                    : search.provider === 'serply'
+                      ? t('setAiSearchSerplyHint')
+                      : searchMeta?.imageSearch
+                        ? t('setAiSearchSerperHint')
+                        : t('setAiSearchTavilyHint')}
         </div>
         {search.provider !== 'genspark' &&
+          !searchMeta?.localCli &&
           keyRow('set-ai-search-key', searchKey, searchMeta?.keyPlaceholder ?? 'API Key', (v) =>
             setSearch({
               ...search,

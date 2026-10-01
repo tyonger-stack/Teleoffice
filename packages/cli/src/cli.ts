@@ -13,6 +13,9 @@ import { mediaCommand } from './commands/media'
 import { mergeCommand } from './commands/merge'
 import { searchCommand } from './commands/search'
 import { selectionCommand } from './commands/selection'
+import { ttsCommand } from './commands/tts'
+import { asrCommand } from './commands/asr'
+import { videoCommand } from './commands/video'
 import { infoCommand } from './commands/info'
 import { installCommand } from './commands/install'
 import { mcpCommand } from './commands/mcp'
@@ -65,6 +68,9 @@ export function defaultRegistry(): CommandRegistry {
     .register(searchCommand)
     .register(imageCommand)
     .register(mediaCommand)
+    .register(ttsCommand)
+    .register(asrCommand)
+    .register(videoCommand)
     .register(openCommand)
     .register(selectionCommand)
     .register(capabilitiesCommand)

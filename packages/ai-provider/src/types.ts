@@ -55,6 +55,8 @@ export interface AiProviderMeta {
 /** Image generation / media analysis backends (separate from the chat provider) */
 export type AiMediaProviderId =
   | 'genspark'
+  | 'antigravity'
+  | 'mmx'
   | 'openai'
   | 'gemini'
   | 'doubao'
@@ -69,6 +71,24 @@ export type AiMediaProviderId =
 export type AiImageProtocol = 'openai-images' | 'gemini' | 'dashscope' | 'minimax'
 /** wire shape of the understanding endpoint */
 export type AiAnalysisProtocol = 'openai-chat' | 'gemini'
+
+/** Local CLI backends (agy + mmx): paths, models, timeouts and routing */
+export interface AiLocalCliSettings {
+  /** '' = auto-detect (~/.local/bin/agy, then PATH) */
+  agyPath: string
+  /** '' = auto-detect (mmx-env wrapper, then ~/.local/bin/mmx, then PATH) */
+  mmxPath: string
+  /** '' = the agy CLI default model */
+  agyModel: string
+  agyTimeoutSec: number
+  mmxRegion: 'cn' | 'global'
+  searchRouting: 'auto' | 'mmx' | 'antigravity'
+  fallback: boolean
+  /** agy 1.2.13 has no video tool; true = still try agy first for video */
+  agyVideo: boolean
+  ttsVoice: string
+  asrLanguage: string
+}
 
 export interface AiMediaProviderConfig {
   apiKey: string
@@ -87,6 +107,8 @@ export interface AiMediaProviderMeta {
   description: string
   keyPlaceholder: string
   needsBaseUrl?: boolean
+  /** true for the local CLI backends (agy/mmx): no key, no HTTP wire protocol */
+  localCli?: boolean
   /** '' for genspark (gsk login) and custom (user-supplied) */
   defaultBaseUrl: string
   /** absent = the provider does not generate images */
@@ -114,7 +136,15 @@ export interface AiMediaSettings {
 }
 
 /** web/image search backends; Parallel supports both a user key and free keyless search */
-export type AiSearchProviderId = 'genspark' | 'serper' | 'serply' | 'tavily' | 'parallel'
+export type AiSearchProviderId =
+  | 'genspark'
+  | 'local-cli'
+  | 'mmx'
+  | 'antigravity'
+  | 'serper'
+  | 'serply'
+  | 'tavily'
+  | 'parallel'
 
 export interface AiSearchProviderMeta {
   id: AiSearchProviderId
@@ -122,16 +152,23 @@ export interface AiSearchProviderMeta {
   keyPlaceholder: string
   /** the backend also serves image search (otherwise image search falls back to free sources) */
   imageSearch: boolean
+  /** true for the local CLI backends: no key needed */
+  localCli?: boolean
 }
 
 export interface AiSearchSettings {
   provider: AiSearchProviderId
-  providers: Record<Exclude<AiSearchProviderId, 'genspark'>, { apiKey: string }>
+  providers: Record<
+    Exclude<AiSearchProviderId, 'genspark' | 'local-cli' | 'mmx' | 'antigravity'>,
+    { apiKey: string }
+  >
 }
 
 export interface AiSettings {
   provider: AiProviderId
   providers: Record<AiProviderId, AiProviderConfig>
+  /** local CLI backends (agy + mmx); absent (pre-CLI settings files) means defaults */
+  localCli?: AiLocalCliSettings | undefined
   /**
    * Provider for generate_image / analyze_media. Absent (pre-media settings
    * files) means Genspark, i.e. the gsk login + gskToolsEnabled gate.

@@ -44,7 +44,16 @@ export interface AnalyzeMediaInput {
   requirements: string
 }
 
-export type ByokMediaProviderId = Exclude<AiMediaProviderId, 'genspark'>
+export type ByokMediaProviderId = Exclude<AiMediaProviderId, 'genspark' | 'antigravity' | 'mmx'>
+
+// Local CLI media ids are served by the agy/mmx CLIs in ai-search, never here.
+export function assertHttpMediaProvider(provider: AiMediaProviderId): asserts provider is ByokMediaProviderId {
+  if (provider === 'antigravity' || provider === 'mmx') {
+    throw new Error(
+      'Media provider ' + provider + ' is a local CLI backend; route it through the local CLI runtime',
+    )
+  }
+}
 
 /** image generation can take minutes on the large models */
 const GENERATE_TIMEOUT_MS = 600_000
@@ -679,6 +688,7 @@ export async function generateImageWithProvider(
   input: GenerateImageInput,
   signal?: AbortSignal,
 ): Promise<MediaBlob> {
+  assertHttpMediaProvider(provider)
   const meta = metaOf(provider)
   requireBaseUrl(meta, config)
   if (!meta.imageProtocol) throw new Error(`${meta.label} does not generate images`)
@@ -702,6 +712,7 @@ export async function analyzeMediaWithProvider(
   input: AnalyzeMediaInput,
   signal?: AbortSignal,
 ): Promise<string> {
+  assertHttpMediaProvider(provider)
   const meta = metaOf(provider)
   requireBaseUrl(meta, config)
   if (!meta.analysisProtocol) throw new Error(`${meta.label} does not analyze media`)
@@ -726,6 +737,7 @@ export async function testMediaProvider(
   signal?: AbortSignal,
 ): Promise<{ ok: boolean; error?: string }> {
   try {
+    assertHttpMediaProvider(provider)
     const meta = metaOf(provider)
     requireBaseUrl(meta, config)
     const guard = withTimeout(signal, TEST_TIMEOUT_MS)

@@ -26,7 +26,7 @@ const EXTS_BY_MIME: Record<string, readonly string[]> = {
 export const imageCommand: CommandDef = {
   name: 'image',
   summary:
-    'Generate an image from a prompt with the configured image provider and save it as a file.',
+    'Generate an image from a prompt (default: Antigravity agy, fallback MiniMax mmx) and save it as a file.',
   usage: 'image <prompt> [--out <file>] [--aspect 16:9] [--size 1k] [--ref <image>]... [--force]',
   options: [
     {
@@ -100,7 +100,7 @@ export const imageCommand: CommandDef = {
     if (!r.url)
       throw new CliError(EXIT.app, r.error ?? 'image generation failed', undefined, {
         suggestion:
-          'retry once later; if it persists, check the Genspark login in the GenOffice app, configure a BYOK image provider under Settings (AI Media), or continue without generated images',
+          'retry once later; if it persists, check the agy/mmx CLIs or the Genspark login in the GenOffice app, configure an image provider under Settings (AI Media & Search), or continue without generated images',
       })
     const image = await loadImage(r.url)
     const ext = EXTS_BY_MIME[image.mime]?.[0] ?? 'png'
@@ -120,6 +120,8 @@ export const imageCommand: CommandDef = {
         mime: image.mime,
         bytes: image.bytes.byteLength,
         source_url: r.url,
+        ...(r.provider ? { provider: r.provider } : {}),
+        ...(r.attempts?.length ? { attempts: r.attempts } : {}),
       },
       ...(renamed
         ? {
