@@ -93,8 +93,8 @@ export function bookmarkNamesOf(xml: string): {
 } {
   const names: string[] = []
   const hidden: string[] = []
-  for (const m of xml.matchAll(/<w:bookmarkStart [^>]*w:name="([^"]+)"/g)) {
-    const name = decodeEntities(m[1])
+  for (const m of xml.matchAll(/<w:bookmarkStart [^>]*w:name=(?:"([^"]+)"|'([^']+)')/g)) {
+    const name = decodeEntities(m[1] ?? m[2] ?? '')
     // A _ prefix marks Word internal bookmarks (_Ref/_Toc/_Hlk): hidden from the UI, but
     // they must be re-emitted when the paragraph rebuilds, otherwise REF cross-references
     // and TOC anchors pointing at them break
