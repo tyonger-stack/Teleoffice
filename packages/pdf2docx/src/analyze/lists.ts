@@ -191,13 +191,30 @@ function levelOf(x0: number, levels: number[], tolPt: number): number {
 }
 
 /**
+ * Doc-level ordered-run state. `next` hands out run ids; `lastOrdered` carries
+ * the run that ended at a page or column boundary so a single item that
+ * continues it is still recognised as part of the same list.
+ */
+export interface ListSeq {
+  next: number
+  /** the ordered run accepted last, with its terminal ordinal */
+  lastOrdered?: {
+    value: number
+    style: NonNullable<ListInfo['style']>
+    level: number
+    seqId: number
+    start: number
+  }
+}
+
+/**
  * Validate one region (a maximal run of consecutive item candidates) and
  * return the accepted items with their list annotations. `seq` provides
- * page-unique ids for ordered runs.
+ * run ids for ordered lists and carries the previous run across page breaks.
  */
 function validateRegion(
   items: ItemCand[],
-  seq: { next: number },
+  seq: ListSeq,
   bodyLeftX0?: number,
   rtl = false,
 ): Map<ItemCand, ListInfo> {
@@ -298,12 +315,37 @@ function validateRegion(
       if (run.length >= 2) {
         const seqId = seq.next++
         const start = run[0]!.marker.value!
+        const style = run[0]!.marker.style!
         for (const item of run) {
           accepted.set(item, {
             kind: 'ordered',
             level,
             seqId,
             start,
+            style: item.marker.style,
+            marker: item.marker.text,
+          })
+        }
+        const last = run[run.length - 1]!.marker.value!
+        seq.lastOrdered = { value: last, style, level, seqId, start }
+      } else if (run.length === 1) {
+        // A single item is a heading (P5) unless it plainly continues the run
+        // the previous page or column ended on: same style, same level, and
+        // the very next ordinal. Without this, a list that breaks with one
+        // item left on the next page loses its numbering there.
+        const item = run[0]!
+        const prev = seq.lastOrdered
+        if (
+          prev !== undefined &&
+          prev.style === item.marker.style &&
+          prev.level === level &&
+          prev.value + 1 === item.marker.value
+        ) {
+          accepted.set(item, {
+            kind: 'ordered',
+            level,
+            seqId: prev.seqId,
+            start: prev.start,
             style: item.marker.style,
             marker: item.marker.text,
           })
@@ -359,11 +401,12 @@ function plainBlock(lines: Line[], src: TextBlock, isPrefix: boolean): TextBlock
 /**
  * Detect list items across a column's paragraph blocks. Accepted items become
  * their own TextBlocks carrying `list`; everything else passes through (a
- * rejected candidate re-joins its original block unchanged).
+ * rejected candidate re-joins its original block unchanged). Pass one `seq`
+ * for the whole document so a run broken by a page break continues.
  */
 export function detectListBlocks(
   blocks: TextBlock[],
-  seq: { next: number },
+  seq: ListSeq,
   fallbackBodyLeftX0?: number,
 ): TextBlock[] {
   if (blocks.length === 0) return blocks

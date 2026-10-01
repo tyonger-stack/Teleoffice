@@ -225,6 +225,40 @@ describe('detectListBlocks: ordered lists', () => {
     expect(items).toHaveLength(2)
     expect(blocks.map(textOf).join(' ')).toContain('7. seven')
   })
+
+  it('continues a run broken by a page break (single item on the next page)', () => {
+    // page 1 ends the run, page 2 carries only the next ordinal: a lone item
+    // is a heading unless it continues the run the shared state ended on
+    const seq = { next: 0 }
+    const first = blocksOf(
+      [
+        { text: '1. first item on the opening page', x: 72 },
+        { text: '2. second item on the opening page', x: 72 },
+      ],
+      seq,
+    )
+    expect(first.map((b) => b.list?.seqId)).toEqual([0, 0])
+
+    const second = blocksOf([{ text: '3. the only item on the next page', x: 72 }], seq)
+    expect(second[0]!.list).toMatchObject({ kind: 'ordered', level: 0, start: 1, style: 'dot' })
+    expect(second[0]!.list!.seqId).toBe(0)
+    expect(textOf(second[0]!)).toBe('the only item on the next page')
+  })
+
+  it('still rejects a lone numbered line that continues nothing', () => {
+    const seq = { next: 0 }
+    blocksOf(
+      [
+        { text: '1. one', x: 72 },
+        { text: '2. two', x: 72 },
+      ],
+      seq,
+    )
+    // a different ordinal, not the next one in the run
+    const stray = blocksOf([{ text: '9. unrelated lone paragraph', x: 72 }], seq)
+    expect(stray[0]!.list).toBeUndefined()
+    expect(textOf(stray[0]!)).toContain('9. unrelated lone paragraph')
+  })
 })
 
 describe('rebuild: list items become real docx numbering', () => {
