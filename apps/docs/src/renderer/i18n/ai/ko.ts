@@ -8,7 +8,6 @@ export const ko = {
   aiStarterPolishAll: '전체 문서를 더 전문적인 어조로 다듬어 줘',
   aiStarterContinue: '지금 내용에 이어서 계속 써 줘',
   aiStarterFillTemplate: '문서의 자리 표시자를 찾아 채워 줘',
-  aiGskLoginBtn: 'Genspark 로그인',
   aiPanelTitle: 'Genspark',
   aiOpenAssistant: 'AI 도우미 열기',
   aiSummarizeBtn: 'AI 요약',
@@ -113,7 +112,7 @@ export const ko = {
   aiNetworkError:
     '네트워크에 문제가 있어 AI 서비스에 연결할 수 없습니다. 연결을 확인한 후 다시 시도해 주세요',
   aiCreditsExhausted:
-    'Genspark 크레딧을 모두 사용했습니다. genspark.ai/pricing에서 충전한 후 다시 시도해 주세요',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiSumReadAttachment: '첨부 파일 읽기',
   aiSumImageAttachment: '이미지 첨부 {name}',
   aiSumRead: '{name} 읽기',

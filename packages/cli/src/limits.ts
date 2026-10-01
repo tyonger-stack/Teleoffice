@@ -1,7 +1,7 @@
 import { closeSync, fstatSync, openSync, readSync } from 'node:fs'
-import { DOCX_ZIP_LIMITS } from '@genoffice/docx-engine'
-import { PPTX_ZIP_LIMITS } from '@genoffice/pptx-engine'
-import { XLSX_ZIP_LIMITS } from '@genoffice/xlsx-gateway/gateway/xlsx-gateway'
+import { DOCX_ZIP_LIMITS } from '@teleoffice/docx-engine'
+import { PPTX_ZIP_LIMITS } from '@teleoffice/pptx-engine'
+import { XLSX_ZIP_LIMITS } from '@teleoffice/xlsx-gateway/gateway/xlsx-gateway'
 import { CliError, EXIT } from './result'
 
 export interface ZipDirectoryEntry {

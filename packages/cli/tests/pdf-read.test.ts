@@ -11,7 +11,7 @@ describe('teleoffice pdf read', () => {
     const pdf = writeMinimalPdf(
       join(tempDir(), 'three.pdf'),
       ['Alpha page', 'Beta page', 'Gamma page'],
-      { title: 'Quarterly notes', author: 'GenOffice' },
+      { title: 'Quarterly notes', author: 'TeleOffice' },
     )
     const r = await run(['pdf', 'read', pdf, '--json'])
     expect(r.code).toBe(0)
@@ -21,7 +21,7 @@ describe('teleoffice pdf read', () => {
       pages: 3,
       encrypted: false,
       title: 'Quarterly notes',
-      author: 'GenOffice',
+      author: 'TeleOffice',
       range: '1-3',
     })
     expect(detail.truncated).toBeUndefined()
@@ -84,14 +84,14 @@ describe('teleoffice pdf read', () => {
   })
 
   it('clips page text to --max-chars and marks the page truncated', async () => {
-    const pdf = writeMinimalPdf(join(tempDir(), 'one.pdf'), 'Hello genoffice readers')
+    const pdf = writeMinimalPdf(join(tempDir(), 'one.pdf'), 'Hello teleoffice readers')
     const r = await run(['pdf', 'read', pdf, '--max-chars', '5', '--json'])
     expect(r.json().detail.pages_read[0]).toMatchObject({
-      text: 'Hello…(+18 chars)',
+      text: 'Hello…(+19 chars)',
       truncated: true,
     })
     const full = await run(['pdf', 'read', pdf, '--full', '--json'])
-    expect(full.json().detail.pages_read[0].text).toBe('Hello genoffice readers')
+    expect(full.json().detail.pages_read[0].text).toBe('Hello teleoffice readers')
   })
 
   it('needs the right password for an encrypted PDF and reports it as encrypted', async () => {

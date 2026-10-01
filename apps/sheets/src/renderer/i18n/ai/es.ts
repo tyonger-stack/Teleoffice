@@ -5,7 +5,6 @@ export const es = {
   aiEmptyBuildTitle: 'Deja que la IA construya este libro por ti',
   aiEmptyBuildBody:
     'Describe la tabla, los datos o el gráfico que necesitas: la IA los crea directamente.',
-  aiGskLoginBtn: 'Iniciar sesión en Genspark',
   aiUndelivered: 'No enviado',
   aiRetry: 'Reintentar',
   aiOpenAssistant: 'Abrir el asistente de IA',
@@ -50,13 +49,7 @@ export const es = {
   aiFileTooltip:
     'SHA-256 {sha}\nAl guardar solo se reescriben las entradas editadas; todo lo demás se conserva.',
   aiFileMeta: '{sheets} hojas · {entries} entradas',
-  aiGensparkAccount: 'Cuenta de Genspark',
-  aiAccountChecking: 'Comprobando…',
-  aiLoggedIn: 'Sesión iniciada',
-  aiLoggedInAs: 'Sesión iniciada: {email}',
-  aiNotLoggedIn: 'Sin sesión iniciada (las funciones de IA requieren una cuenta de Genspark)',
-  aiWaitingBrowserLogin: 'Esperando el inicio de sesión en el navegador…',
-  aiLoginGenspark: 'Iniciar sesión en Genspark',
+  aiResizePanel: 'Resize AI panel',
   aiModel: 'Modelo',
   aiCancel: 'Cancelar',
   aiSave: 'Guardar',
@@ -68,7 +61,7 @@ export const es = {
   aiNetworkError:
     'Problema de red: no se pudo conectar con el servicio de IA. Comprueba tu conexión e inténtalo de nuevo',
   aiCreditsExhausted:
-    'Tus créditos de Genspark se han agotado. Recarga en genspark.ai/pricing e inténtalo de nuevo',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiToolWorkbookContext: 'Leer información del libro',
   aiToolReadRange: 'Leer rango',
   aiToolReadRangeOf: 'Leer rango {range}',

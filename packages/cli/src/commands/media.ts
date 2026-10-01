@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { analyzeMediaTool } from '@genoffice/ai-search'
+import { analyzeMediaTool } from '@teleoffice/ai-search'
 import { flagString } from '../args'
 import { aiSettingsPath, prepareCloud } from '../cloud'
 import { resolveInput } from '../fs'
@@ -33,7 +33,7 @@ export const mediaCommand: CommandDef = {
     if (r.text === undefined)
       throw new CliError(EXIT.app, r.error ?? 'media analysis failed', undefined, {
         suggestion:
-          'retry once later; if it persists, check the agy/mmx CLIs or the Genspark login in the GenOffice app, or configure an analysis provider under Settings (AI Media & Search)',
+          'retry once later; if it persists, check the agy/mmx CLIs or the Genspark login in the TeleOffice app, or configure an analysis provider under Settings (AI Media & Search)',
       })
     const failure = providerFailure(r.text)
     if (failure) throw new CliError(EXIT.conversion, `media analysis failed: ${failure}`)

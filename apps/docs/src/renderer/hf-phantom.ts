@@ -13,7 +13,7 @@ import type {
   HfParagraph,
   StyleDisplay,
   StyleInfo,
-} from '@genoffice/docx-engine'
+} from '@teleoffice/docx-engine'
 import { hfParasOf } from './editor/hf-text'
 import type { HfKind, HfResolved } from './hf-sections'
 

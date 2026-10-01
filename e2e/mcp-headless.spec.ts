@@ -3,8 +3,8 @@ import { launchShell, closeAndSaveVideo } from './helpers'
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { parseDocx } from '@genoffice/docx-engine'
-import { openPptx } from '@genoffice/pptx-engine'
+import { parseDocx } from '@teleoffice/docx-engine'
+import { openPptx } from '@teleoffice/pptx-engine'
 import JSZip from 'jszip'
 import http, { createServer } from 'node:http'
 
@@ -60,8 +60,8 @@ test.describe('MCP headless generation', () => {
   test('spawns the bundled CLI to create docx/pptx/xlsx', async () => {
     test.setTimeout(120_000)
     const port = await freePort()
-    const outDir = await mkdtemp(join(tmpdir(), 'genoffice-mcp-headless-'))
-    const userDataDir = await mkdtemp(join(tmpdir(), 'genoffice-mcp-headless-userdata-'))
+    const outDir = await mkdtemp(join(tmpdir(), 'teleoffice-mcp-headless-'))
+    const userDataDir = await mkdtemp(join(tmpdir(), 'teleoffice-mcp-headless-userdata-'))
     // background generation must be ON to expose the create_* tools
     await writeFile(
       join(userDataDir, 'app-settings.json'),

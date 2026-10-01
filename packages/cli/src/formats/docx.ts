@@ -22,7 +22,7 @@ import {
   type StyleUpsert,
   type PictureWatermarkSpec,
   type WatermarkSpec,
-} from '@genoffice/docx-engine'
+} from '@teleoffice/docx-engine'
 import type { FloatSpec } from '../../../../apps/docs/src/renderer/ai/floating-ops'
 import type { AiNotesAccess, NoteKind } from '../../../../apps/docs/src/renderer/ai/note-ops'
 import type { AiCommentsAccess } from '../../../../apps/docs/src/renderer/ai/tools'
@@ -508,10 +508,10 @@ export async function applyDocOps(
       else results.push({ index, op: name, output: r.output! })
     } else {
       const call = HTML_TOOLS.has(name)
-        ? { id: `genoffice-${index}`, name, input: htmlToolInput(doc, name, op) }
+        ? { id: `teleoffice-${index}`, name, input: htmlToolInput(doc, name, op) }
         : SIDE_TOOLS.has(name)
-          ? { id: `genoffice-${index}`, name, input: sideToolInput(doc, name, op) }
-          : { id: `genoffice-${index}`, name: 'apply_ops', input: { ops: [op] } }
+          ? { id: `teleoffice-${index}`, name, input: sideToolInput(doc, name, op) }
+          : { id: `teleoffice-${index}`, name: 'apply_ops', input: { ops: [op] } }
       const exec = await doc.mods.tools.executeTool(
         doc.editor,
         call,

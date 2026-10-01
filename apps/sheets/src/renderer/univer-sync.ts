@@ -51,24 +51,24 @@ import type {
   StyleColorInput,
   SetDataValidationOperation,
   SetHyperlinkOperation,
-} from '@genoffice/xlsx-gateway/domain/workbook-dsl'
+} from '@teleoffice/xlsx-gateway/domain/workbook-dsl'
 import {
   columnIndex,
   columnLabel,
   parseAddress,
   parseRange,
   rangeCellCount,
-} from '@genoffice/xlsx-gateway/domain/cell-address'
-import { splitSheetRef, type CellBounds } from '@genoffice/xlsx-gateway/domain/chart-visual'
-import { InMemoryWorkbookAdapter } from '@genoffice/xlsx-gateway/domain/in-memory-workbook'
-import { normalizeStyleColor, resolveStyleColor } from '@genoffice/xlsx-gateway/domain/style-color'
-import { WORST_FIRST_ICON_SETS } from '@genoffice/xlsx-gateway/gateway/xlsx-cf'
+} from '@teleoffice/xlsx-gateway/domain/cell-address'
+import { splitSheetRef, type CellBounds } from '@teleoffice/xlsx-gateway/domain/chart-visual'
+import { InMemoryWorkbookAdapter } from '@teleoffice/xlsx-gateway/domain/in-memory-workbook'
+import { normalizeStyleColor, resolveStyleColor } from '@teleoffice/xlsx-gateway/domain/style-color'
+import { WORST_FIRST_ICON_SETS } from '@teleoffice/xlsx-gateway/gateway/xlsx-cf'
 import type {
   CellFormatState,
   CellScalar,
   CellState,
   WorkbookSnapshot,
-} from '@genoffice/xlsx-gateway/domain/workbook.types'
+} from '@teleoffice/xlsx-gateway/domain/workbook.types'
 import type {
   WorkbookCellStyle,
   WorkbookCfState,
@@ -118,7 +118,7 @@ import {
 import { isPlainArithmeticFormula } from './formula-cached-fallback'
 import { degradeQuadraticFormulaCells } from './formula-cost'
 import { extractFunctionNames } from './formula-functions'
-import { DEFAULT_SHORT_DATE, setSystemShortDate } from '@genoffice/xlsx-gateway/shared/short-date'
+import { DEFAULT_SHORT_DATE, setSystemShortDate } from '@teleoffice/xlsx-gateway/shared/short-date'
 import { getWorkbookMdw, setWorkbookMdw } from './app-constants'
 import { excelRowPitchPx } from './autofit-line-pitch'
 import {
@@ -4477,7 +4477,7 @@ export function patchWorksheetRangeInner(
       // SELECTION — conditional formatting strips the selected cells from
       // every rule, a rule-range rectangle decomposition that costs seconds
       // per eviction on wide rules and permanently fragments the rule
-      // (genoffice#158). Eviction is internal bookkeeping; only cells move.
+      // (teleoffice#158). Eviction is internal bookkeeping; only cells move.
       // Engine-owned closure cells must survive the eviction ({} is a merge
       // no-op, so pinned cells stay untouched — clearing and re-installing a
       // formula re-dirties its whole dependency web).
@@ -4907,7 +4907,7 @@ interface PivotBand {
 
 /// Excel keeps pivot styling out of cell xfs entirely; paint the style bands
 /// resolved sidecar-side from pivotTableStyleInfo (calibrated against Excel
-/// for Mac: genoffice-sample/sheets/calib/pivot-style-truths.json).
+/// for Mac: teleoffice-sample/sheets/calib/pivot-style-truths.json).
 ///
 /// Precedence, lowest first: wholeTable, row stripe, column stripe,
 /// firstColumn (row-label columns), subheading / subtotal, header (+ the

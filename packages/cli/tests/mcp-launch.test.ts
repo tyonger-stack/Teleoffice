@@ -1,20 +1,13 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import {
-  isGenofficeLauncher,
-  isLegacyLauncher,
-  mcpSnippet,
-  readMcpEntry,
-  removeMcpEntry,
-  writeMcpEntry,
-} from '../src/agent-mcp'
+import { isTeleofficeLauncher, mcpSnippet, readMcpEntry, writeMcpEntry } from '../src/agent-mcp'
 import { mcpLaunch, mcpLaunchFromLauncher, type McpLaunch } from '../src/mcp-launch'
 import { tempDir } from './helpers'
 
-const WIN_DIR = 'C:\\Users\\Jane Doe\\AppData\\Local\\Programs\\GenOffice\\resources\\cli'
+const WIN_DIR = 'C:\\Users\\Jane Doe\\AppData\\Local\\Programs\\TeleOffice\\resources\\cli'
 const WIN_APP: McpLaunch = {
-  command: `${WIN_DIR}\\..\\..\\GenOffice.exe`,
+  command: `${WIN_DIR}\\..\\..\\TeleOffice.exe`,
   args: [`${WIN_DIR}\\teleoffice.cjs`, 'mcp'],
   env: { ELECTRON_RUN_AS_NODE: '1' },
 }
@@ -22,15 +15,15 @@ const WIN_APP: McpLaunch = {
 describe('mcp launch entry', () => {
   it('is the absolute launcher on macOS and Linux', () => {
     expect(
-      mcpLaunchFromLauncher('/Applications/GenOffice.app/Contents/Resources/cli/teleoffice'),
+      mcpLaunchFromLauncher('/Applications/TeleOffice.app/Contents/Resources/cli/teleoffice'),
     ).toEqual({
-      command: '/Applications/GenOffice.app/Contents/Resources/cli/teleoffice',
+      command: '/Applications/TeleOffice.app/Contents/Resources/cli/teleoffice',
       args: ['mcp'],
     })
   })
 
   it('runs the packaged Windows app as Node on the bundle, exactly as the app snippet does', () => {
-    const exists = (p: string) => p === `${WIN_DIR}\\..\\..\\GenOffice.exe`
+    const exists = (p: string) => p === `${WIN_DIR}\\..\\..\\TeleOffice.exe`
     const fromCli = mcpLaunchFromLauncher(`${WIN_DIR}\\teleoffice.cmd`, { exists })
     expect(fromCli).toEqual(WIN_APP)
     expect(fromCli).toEqual(mcpLaunch({ status: 'missing', launcherDir: WIN_DIR }))
@@ -52,15 +45,15 @@ describe('mcp launch entry', () => {
   })
 
   it('recognises every launcher shape as ours', () => {
-    expect(isGenofficeLauncher('/opt/GenOffice/resources/cli/teleoffice')).toBe(true)
-    expect(isGenofficeLauncher('C:\\GenOffice\\resources\\cli\\teleoffice.cmd')).toBe(true)
-    expect(isGenofficeLauncher('C:\\Program Files\\GenOffice\\GenOffice.exe')).toBe(true)
-    expect(isGenofficeLauncher(WIN_APP.command, WIN_APP.args)).toBe(true)
+    expect(isTeleofficeLauncher('/opt/TeleOffice/resources/cli/teleoffice')).toBe(true)
+    expect(isTeleofficeLauncher('C:\\TeleOffice\\resources\\cli\\teleoffice.cmd')).toBe(true)
+    expect(isTeleofficeLauncher('C:\\Program Files\\TeleOffice\\TeleOffice.exe')).toBe(true)
+    expect(isTeleofficeLauncher(WIN_APP.command, WIN_APP.args)).toBe(true)
     expect(
-      isGenofficeLauncher('node', ['C:\\src\\packages\\cli\\dist\\teleoffice.cjs', 'mcp']),
+      isTeleofficeLauncher('node', ['C:\\src\\packages\\cli\\dist\\teleoffice.cjs', 'mcp']),
     ).toBe(true)
-    expect(isGenofficeLauncher('npx', ['-y', 'other-mcp'])).toBe(false)
-    expect(isGenofficeLauncher(null)).toBe(false)
+    expect(isTeleofficeLauncher('npx', ['-y', 'other-mcp'])).toBe(false)
+    expect(isTeleofficeLauncher(null)).toBe(false)
   })
 
   it('carries env in every config format', () => {
@@ -115,11 +108,11 @@ describe('mcp launch entry', () => {
     expect(mcpSnippet('codex', WIN_APP)).toContain('[mcp_servers.teleoffice.env]')
   })
 
-  it('treats the app snippet entry (GenOffice.exe on teleoffice.cjs) as ours, not occupied', () => {
+  it('treats the app snippet entry (TeleOffice.exe on teleoffice.cjs) as ours, not occupied', () => {
     const home = tempDir()
     const file = join(home, 'mcp.json')
     writeFileSync(file, JSON.stringify({ mcpServers: { teleoffice: WIN_APP } }))
-    const posix = { command: '/opt/GenOffice/resources/cli/teleoffice', args: ['mcp'] }
+    const posix = { command: '/opt/TeleOffice/resources/cli/teleoffice', args: ['mcp'] }
     expect(readMcpEntry('cursor', file, posix)).toEqual({
       status: 'stale',
       command: WIN_APP.command,
@@ -138,64 +131,5 @@ describe('mcp launch entry', () => {
     )
     expect(readMcpEntry('codex', toml, posix).status).toBe('stale')
     expect(readMcpEntry('codex', toml, WIN_APP).status).toBe('registered')
-  })
-})
-
-describe('legacy genoffice MCP entries', () => {
-  const OLD = { command: '/opt/GenOffice/resources/cli/genoffice', args: ['mcp'] }
-  const NEW = { command: '/opt/GenOffice/resources/cli/teleoffice', args: ['mcp'] }
-
-  it('recognises the launchers from before the rename', () => {
-    expect(isLegacyLauncher('/opt/GenOffice/resources/cli/genoffice')).toBe(true)
-    expect(isLegacyLauncher('C:\\GenOffice\\resources\\cli\\genoffice.cmd')).toBe(true)
-    expect(
-      isLegacyLauncher('C:\\GenOffice\\GenOffice.exe', ['C:\\cli\\genoffice.cjs', 'mcp']),
-    ).toBe(true)
-    // the app binary on the new script is current, not legacy
-    expect(isLegacyLauncher(WIN_APP.command, WIN_APP.args)).toBe(false)
-    expect(isLegacyLauncher('npx', ['-y', 'genoffice-mcp'])).toBe(false)
-  })
-
-  it('drops our old JSON entry when writing or removing the new one, but keeps a foreign genoffice entry', () => {
-    const home = tempDir()
-    const file = join(home, 'mcp.json')
-    writeFileSync(file, JSON.stringify({ mcpServers: { genoffice: OLD, other: { command: 'x' } } }))
-    writeMcpEntry('cursor', file, NEW)
-    expect(JSON.parse(readFileSync(file, 'utf-8')).mcpServers).toEqual({
-      other: { command: 'x' },
-      teleoffice: { type: 'stdio', ...NEW },
-    })
-
-    writeFileSync(file, JSON.stringify({ mcpServers: { genoffice: OLD, other: { command: 'x' } } }))
-    expect(removeMcpEntry('cursor', file)).toBe(true)
-    expect(JSON.parse(readFileSync(file, 'utf-8')).mcpServers).toEqual({ other: { command: 'x' } })
-
-    const foreign = { command: 'npx', args: ['-y', 'someone-elses-genoffice'] }
-    writeFileSync(file, JSON.stringify({ mcpServers: { genoffice: foreign } }))
-    writeMcpEntry('cursor', file, NEW)
-    expect(JSON.parse(readFileSync(file, 'utf-8')).mcpServers.genoffice).toEqual(foreign)
-    writeFileSync(file, JSON.stringify({ mcpServers: { genoffice: foreign } }))
-    expect(removeMcpEntry('cursor', file)).toBe(false)
-  })
-
-  it('drops our old Codex table with its sub-tables, but keeps a foreign one', () => {
-    const home = tempDir()
-    const file = join(home, 'config.toml')
-    writeFileSync(
-      file,
-      '[mcp_servers.other]\ncommand = "npx"\n\n' +
-        '[mcp_servers.genoffice]\ncommand = "/opt/GenOffice/resources/cli/genoffice"\nargs = ["mcp"]\n\n' +
-        '[mcp_servers.genoffice.env]\nX = "1"\n',
-    )
-    writeMcpEntry('codex', file, NEW)
-    const text = readFileSync(file, 'utf-8')
-    expect(text).not.toContain('genoffice')
-    expect(text).toContain('[mcp_servers.other]')
-    expect(text).toContain('[mcp_servers.teleoffice]')
-
-    const foreign = '[mcp_servers.genoffice]\ncommand = "npx"\nargs = ["-y", "other"]\n'
-    writeFileSync(file, foreign)
-    expect(removeMcpEntry('codex', file)).toBe(false)
-    expect(readFileSync(file, 'utf-8')).toBe(foreign)
   })
 })

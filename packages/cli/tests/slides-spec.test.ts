@@ -147,9 +147,9 @@ describe('teleoffice slides render', () => {
     })
     const pptx = join(dir, 'r.pptx')
     expect((await run(['create', '--type', 'pptx', '--spec', spec, '--out', pptx])).code).toBe(0)
-    // a stand-in for the GenOffice binary: copies a prepared PDF to --out and prints the envelope
+    // a stand-in for the TeleOffice binary: copies a prepared PDF to --out and prints the envelope
     const pdf = writeMinimalPdf(join(dir, 'export.pdf'))
-    const fake = join(dir, 'fake-genoffice.sh')
+    const fake = join(dir, 'fake-teleoffice.sh')
     writeFileSync(
       fake,
       `#!/bin/sh\nwhile [ $# -gt 0 ]; do if [ "$1" = "--out" ]; then out="$2"; fi; shift; done\ncp "${pdf}" "$out"\necho '{"status":"ok","summary":"exported"}'\n`,
@@ -157,7 +157,7 @@ describe('teleoffice slides render', () => {
     chmodSync(fake, 0o755)
     const shots = join(dir, 'shots')
     const r = await run(['slides', 'render', pptx, '--out', shots, '--scale', '2', '--json'], {
-      env: { ...process.env, GENOFFICE_APP_BIN: fake },
+      env: { ...process.env, TELEOFFICE_APP_BIN: fake },
     })
     expect(r.code).toBe(0)
     const files = r.json().detail.files as { path: string; width: number }[]

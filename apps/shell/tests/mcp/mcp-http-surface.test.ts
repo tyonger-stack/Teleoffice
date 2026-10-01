@@ -6,8 +6,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import { parseDocx } from '@genoffice/docx-engine'
-import { openPptx } from '@genoffice/pptx-engine'
+import { parseDocx } from '@teleoffice/docx-engine'
+import { openPptx } from '@teleoffice/pptx-engine'
 import JSZip from 'jszip'
 import { PDFDocument, StandardFonts } from 'pdf-lib'
 import {
@@ -172,7 +172,7 @@ async function waitForHealth(p: number, timeoutMs = 10_000): Promise<void> {
 
 async function connect(): Promise<Client> {
   await waitForHealth(port)
-  const client = new Client({ name: 'genoffice-acceptance', version: '1.0.0' })
+  const client = new Client({ name: 'teleoffice-acceptance', version: '1.0.0' })
   // exactly the shape in the mcpServers entry under test
   await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${port}/mcp`)))
   return client
@@ -199,7 +199,7 @@ async function call(
 
 beforeAll(async () => {
   port = await freePort()
-  workDir = await mkdtemp(join(tmpdir(), 'genoffice-acceptance-'))
+  workDir = await mkdtemp(join(tmpdir(), 'teleoffice-acceptance-'))
   logPath = join(workDir, 'mcp-log.txt')
   configureMcpRuntime({
     version: '0.9.0-acceptance',
@@ -242,7 +242,7 @@ describe('MCP surface over Streamable HTTP (/mcp)', () => {
         formats: string[]
         families: Array<{ family: string; editor: { open: string[] }; mcp?: unknown }>
       }
-      expect(infoJson.name).toBe('GenOffice')
+      expect(infoJson.name).toBe('TeleOffice')
       expect(infoJson.version).toBe('0.9.0-acceptance')
       expect(infoJson.defaultSaveDir).toBe(workDir)
       // background generation is off here, so create_docx/create_pptx/create_xlsx
@@ -542,7 +542,7 @@ describe('MCP surface over Streamable HTTP (/mcp)', () => {
       result?: { content?: Array<{ text?: string }> }
     }
     const infoText = (callBody.result?.content ?? []).map((c) => c.text ?? '').join('')
-    expect(infoText).toContain('GenOffice')
+    expect(infoText).toContain('TeleOffice')
     console.log('[tools/call get_app_info] ok,', infoText.length, 'chars')
 
     // a bad session id is refused, not silently accepted

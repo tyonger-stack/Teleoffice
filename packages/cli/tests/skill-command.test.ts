@@ -13,7 +13,7 @@ function fakeMachine(agents: string[]) {
   for (const dot of agents) mkdirSync(join(home, dot), { recursive: true })
   const userData = join(home, 'userData')
   mkdirSync(userData)
-  return { home, env: { GENOFFICE_HOME: home, GENOFFICE_USER_DATA: userData } }
+  return { home, env: { TELEOFFICE_HOME: home, TELEOFFICE_USER_DATA: userData } }
 }
 
 describe('teleoffice skill', () => {
@@ -58,7 +58,7 @@ describe('teleoffice skill', () => {
       installed_version: bundledVersion,
     })
     const settings = JSON.parse(
-      readFileSync(join(m.env.GENOFFICE_USER_DATA, 'app-settings.json'), 'utf-8'),
+      readFileSync(join(m.env.TELEOFFICE_USER_DATA, 'app-settings.json'), 'utf-8'),
     )
     expect(settings.agentSkillInstalls[path]).toMatchObject({
       version: bundledVersion,
@@ -146,7 +146,7 @@ describe('teleoffice skill', () => {
     expect(existsSync(join(dir, 'teleoffice', 'SKILL.md'))).toBe(true)
     expect(r.json().detail.agents[0]).toMatchObject({ agent: null, skills_dir: dir })
     const settings = JSON.parse(
-      readFileSync(join(m.env.GENOFFICE_USER_DATA, 'app-settings.json'), 'utf-8'),
+      readFileSync(join(m.env.TELEOFFICE_USER_DATA, 'app-settings.json'), 'utf-8'),
     )
     expect(Object.keys(settings.agentSkillInstalls)).toEqual([join(dir, 'teleoffice', 'SKILL.md')])
     const none = await run(['skill', 'install', 'all', '--json'], { env: m.env })
@@ -155,10 +155,10 @@ describe('teleoffice skill', () => {
 
   it('creates the app data folder for the ledger on a machine that never ran the app', async () => {
     const m = fakeMachine(['.claude'])
-    const env = { ...m.env, GENOFFICE_USER_DATA: join(m.home, 'never', 'launched') }
+    const env = { ...m.env, TELEOFFICE_USER_DATA: join(m.home, 'never', 'launched') }
     const r = await run(['skill', 'install', 'claude-code', '--json'], { env })
     expect(r.code).toBe(0)
-    expect(existsSync(join(env.GENOFFICE_USER_DATA, 'app-settings.json'))).toBe(true)
+    expect(existsSync(join(env.TELEOFFICE_USER_DATA, 'app-settings.json'))).toBe(true)
   })
 
   it('install all refuses before writing anything when one target is blocked', async () => {
@@ -170,6 +170,6 @@ describe('teleoffice skill', () => {
     expect(r.code).toBe(2)
     expect(r.json().detail).toMatchObject({ agent: 'codex', status: 'occupied' })
     expect(existsSync(join(m.home, '.claude', 'skills', 'teleoffice'))).toBe(false)
-    expect(existsSync(join(m.env.GENOFFICE_USER_DATA, 'app-settings.json'))).toBe(false)
+    expect(existsSync(join(m.env.TELEOFFICE_USER_DATA, 'app-settings.json'))).toBe(false)
   })
 })

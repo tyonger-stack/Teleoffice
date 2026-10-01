@@ -14,7 +14,7 @@ import {
   MAX_TOOL_CLI_NDJSON_BYTES,
   summarizeGskFailure,
 } from '../src/gsk'
-import { ResponseTooLargeError } from '@genoffice/electron-utils/remote-image'
+import { ResponseTooLargeError } from '@teleoffice/electron-utils/remote-image'
 
 describe('parseGskOutput', () => {
   it('parses clean JSON', () => {

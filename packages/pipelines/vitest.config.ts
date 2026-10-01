@@ -7,19 +7,19 @@ const here = dirname(fileURLToPath(import.meta.url))
 export default defineConfig({
   resolve: {
     alias: {
-      '@genoffice/pptx-engine/table-grid': resolve(here, '../pptx-engine/src/table-grid.ts'),
-      '@genoffice/pptx-engine/identity': resolve(here, '../pptx-engine/src/identity.ts'),
-      '@genoffice/pptx-engine/background-promote': resolve(
+      '@teleoffice/pptx-engine/table-grid': resolve(here, '../pptx-engine/src/table-grid.ts'),
+      '@teleoffice/pptx-engine/identity': resolve(here, '../pptx-engine/src/identity.ts'),
+      '@teleoffice/pptx-engine/background-promote': resolve(
         here,
         '../pptx-engine/src/background-promote.ts',
       ),
-      '@genoffice/pptx-engine/custgeom': resolve(here, '../pptx-engine/src/custgeom.ts'),
-      '@genoffice/pptx-engine': resolve(here, '../pptx-engine/src/index.ts'),
-      '@genoffice/pptx-render/preset-geometry': resolve(
+      '@teleoffice/pptx-engine/custgeom': resolve(here, '../pptx-engine/src/custgeom.ts'),
+      '@teleoffice/pptx-engine': resolve(here, '../pptx-engine/src/index.ts'),
+      '@teleoffice/pptx-render/preset-geometry': resolve(
         here,
         '../pptx-render/src/preset-geometry.ts',
       ),
-      '@genoffice/pptx-render': resolve(here, '../pptx-render/src/index.ts'),
+      '@teleoffice/pptx-render': resolve(here, '../pptx-render/src/index.ts'),
     },
   },
   test: {

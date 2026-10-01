@@ -20,7 +20,7 @@ describe('mcp http hardening', () => {
       host: '127.0.0.1',
       token: TOKEN,
       cwd: tempDir(),
-      env: { ...process.env, GENOFFICE_AUDIT_LOG: 'off', GENOFFICE_ALLOWED_ROOTS: '' },
+      env: { ...process.env, TELEOFFICE_AUDIT_LOG: 'off', TELEOFFICE_ALLOWED_ROOTS: '' },
       log: () => {},
       registry: defaultRegistry(),
     })
@@ -67,9 +67,9 @@ describe('mcp http hardening', () => {
       cwd: tempDir(),
       env: {
         ...process.env,
-        GENOFFICE_AUDIT_LOG: 'off',
-        GENOFFICE_ALLOWED_ROOTS: '',
-        GENOFFICE_TRUST_PROXY_HEADERS: '1',
+        TELEOFFICE_AUDIT_LOG: 'off',
+        TELEOFFICE_ALLOWED_ROOTS: '',
+        TELEOFFICE_TRUST_PROXY_HEADERS: '1',
       },
       log: () => {},
       registry: defaultRegistry(),
@@ -172,7 +172,7 @@ describe('mcp http hardening', () => {
 
 /** Delete this server's stored copy found under the tmp FileStore roots. */
 function removeStoredCopy(name: string): void {
-  const prefix = `genoffice-mcp-http-${process.pid}-`
+  const prefix = `teleoffice-mcp-http-${process.pid}-`
   for (const entry of readdirSync(tmpdir())) {
     if (!entry.startsWith(prefix)) continue
     removeMatching(join(tmpdir(), entry), name)

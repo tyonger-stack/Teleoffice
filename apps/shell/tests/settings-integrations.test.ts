@@ -64,8 +64,8 @@ function baseStatus(): IntegrationsStatus {
       status: 'missing',
       location: '/usr/local/bin/teleoffice',
       manual:
-        'sudo ln -sf /Applications/GenOffice.app/Contents/Resources/cli/teleoffice /usr/local/bin/teleoffice',
-      launcherDir: '/Applications/GenOffice.app/Contents/Resources/cli',
+        'sudo ln -sf /Applications/TeleOffice.app/Contents/Resources/cli/teleoffice /usr/local/bin/teleoffice',
+      launcherDir: '/Applications/TeleOffice.app/Contents/Resources/cli',
       ephemeral: false,
       version: '0.4.0',
     },
@@ -114,23 +114,15 @@ async function openIntegrations(
         LocaleProvider,
         { initial: 'en' },
         createElement(SettingsModal, {
-          status: null,
-          loggingOut: false,
-          loginWaiting: false,
-          loginUrl: null,
-          urlCopied: false,
-          onOpenLoginUrl: vi.fn(),
-          onCopyLoginUrl: vi.fn(),
           onClose: vi.fn(),
-          onLogin: vi.fn(),
-          onLogout: vi.fn(),
+          target: { section: 'integrations' },
           ...extra,
         }),
       ),
     )
     await Promise.resolve()
   })
-  await click(buttonWithText('Integrations'))
+  await flush()
 }
 
 describe('Settings → Integrations', () => {
@@ -151,7 +143,7 @@ describe('Settings → Integrations', () => {
     expect(rows[2]!.textContent).toContain('Installed 2.1.0 (not by this app)')
     expect(rows[2]!.querySelectorAll('button')).toHaveLength(0)
     // CLI block: launcher path, PATH state in plain words, the manual command as copyable code
-    expect(host.textContent).toContain('/Applications/GenOffice.app/Contents/Resources/cli')
+    expect(host.textContent).toContain('/Applications/TeleOffice.app/Contents/Resources/cli')
     expect(host.textContent).toContain("not on your terminal's PATH")
     expect(host.querySelector('.set-intg-cli code')?.textContent).toContain('sudo ln -sf')
     expect(host.textContent).toContain('skill 2.1.0')
@@ -160,16 +152,16 @@ describe('Settings → Integrations', () => {
     expect(host.textContent).toContain('Pick any one of these three ways')
     // the same three prompts appear under both the CLI and the MCP part
     expect(host.querySelectorAll('.set-intg-example')).toHaveLength(6)
-    expect(host.textContent).toContain('npx skills add genspark-ai/genoffice')
+    expect(host.textContent).toContain('npx skills add tyonger-stack/Teleoffice')
     // MCP block: the launcher itself while teleoffice is not on the PATH, as a command and as JSON
     const mcp = [...host.querySelectorAll('.set-intg-mcp code')].map((c) => c.textContent)
     expect(mcp[0]).toBe(
-      'claude mcp add --transport stdio teleoffice -- /Applications/GenOffice.app/Contents/Resources/cli/teleoffice mcp',
+      'claude mcp add --transport stdio teleoffice -- /Applications/TeleOffice.app/Contents/Resources/cli/teleoffice mcp',
     )
     expect(JSON.parse(mcp[1]!)).toEqual({
       mcpServers: {
         teleoffice: {
-          command: '/Applications/GenOffice.app/Contents/Resources/cli/teleoffice',
+          command: '/Applications/TeleOffice.app/Contents/Resources/cli/teleoffice',
           args: ['mcp'],
         },
       },
@@ -181,12 +173,12 @@ describe('Settings → Integrations', () => {
     expect(
       mcpLaunch({
         status: 'present',
-        launcherDir: '/Applications/GenOffice.app/Contents/Resources/cli',
+        launcherDir: '/Applications/TeleOffice.app/Contents/Resources/cli',
       }),
     ).toEqual({ command: 'teleoffice', args: ['mcp'] })
-    const winDir = 'C:\\Users\\Jane Doe\\AppData\\Local\\Programs\\GenOffice\\resources\\cli'
+    const winDir = 'C:\\Users\\Jane Doe\\AppData\\Local\\Programs\\TeleOffice\\resources\\cli'
     const win = {
-      command: `${winDir}\\..\\..\\GenOffice.exe`,
+      command: `${winDir}\\..\\..\\TeleOffice.exe`,
       args: [`${winDir}\\teleoffice.cjs`, 'mcp'],
       env: { ELECTRON_RUN_AS_NODE: '1' },
     }
@@ -197,9 +189,9 @@ describe('Settings → Integrations', () => {
     )
     expect(JSON.parse(mcpConfigJson(win))).toEqual({ mcpServers: { teleoffice: win } })
     expect(
-      mcpClaudeCommand({ command: '/Applications/Gen Office.app/cli/teleoffice', args: ['mcp'] }),
+      mcpClaudeCommand({ command: '/Applications/Tele Office.app/cli/teleoffice', args: ['mcp'] }),
     ).toBe(
-      'claude mcp add --transport stdio teleoffice -- "/Applications/Gen Office.app/cli/teleoffice" mcp',
+      'claude mcp add --transport stdio teleoffice -- "/Applications/Tele Office.app/cli/teleoffice" mcp',
     )
   })
 
@@ -238,7 +230,7 @@ describe('Settings → Integrations', () => {
       path: '/x/teleoffice/SKILL.md',
       installedVersion: '2.1.0',
     }))
-    const saveZip = vi.fn(async () => '/Users/u/Downloads/genoffice-skill-2.1.0.zip')
+    const saveZip = vi.fn(async () => '/Users/u/Downloads/teleoffice-skill-2.1.0.zip')
     await openIntegrations({
       status: async () => baseStatus(),
       pickSkillDir: async () => '/x',
@@ -252,7 +244,7 @@ describe('Settings → Integrations', () => {
 
     await click(buttonWithText('Download skill (zip)'))
     expect(saveZip).toHaveBeenCalledWith('Save skill')
-    expect(host.textContent).toContain('Saved to /Users/u/Downloads/genoffice-skill-2.1.0.zip')
+    expect(host.textContent).toContain('Saved to /Users/u/Downloads/teleoffice-skill-2.1.0.zip')
   })
 
   it('marks the Integrations entry while a detected assistant holds an older skill', async () => {

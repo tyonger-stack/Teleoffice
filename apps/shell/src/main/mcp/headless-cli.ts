@@ -13,7 +13,7 @@ import { cliErrorMessage, type CliRunOutcome, type CliRunner } from './cli-runne
 
 /** run `fn` with a scratch directory that is always removed afterwards */
 async function withTempDir<T>(fn: (dir: string) => Promise<T>): Promise<T> {
-  const dir = await mkdtemp(join(tmpdir(), 'genoffice-mcp-'))
+  const dir = await mkdtemp(join(tmpdir(), 'teleoffice-mcp-'))
   try {
     return await fn(dir)
   } finally {

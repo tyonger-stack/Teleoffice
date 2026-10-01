@@ -20,7 +20,7 @@ import {
   type NewElementOptions,
   type NewTableOptions,
   type Paragraph,
-} from '@genoffice/pptx-engine'
+} from '@teleoffice/pptx-engine'
 import {
   coerceBytes,
   dataUrlExt,

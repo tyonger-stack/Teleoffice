@@ -4,7 +4,6 @@ export const th = {
   aiComposerPlaceholderBuild: 'อธิบายตาราง ข้อมูล หรือแผนภูมิที่จะสร้าง…',
   aiEmptyBuildTitle: 'ให้ AI สร้างเวิร์กบุ๊กนี้ให้คุณ',
   aiEmptyBuildBody: 'อธิบายตาราง ข้อมูล หรือแผนภูมิที่ต้องการ แล้ว AI จะสร้างให้ทันที',
-  aiGskLoginBtn: 'ลงชื่อเข้าใช้ Genspark',
   aiUndelivered: 'ส่งไม่สำเร็จ',
   aiRetry: 'ลองอีกครั้ง',
   aiOpenAssistant: 'เปิดผู้ช่วย AI',
@@ -48,13 +47,7 @@ export const th = {
   aiFileTooltip:
     'SHA-256 {sha}\nการบันทึกจะเขียนทับเฉพาะรายการที่แก้ไขเท่านั้น ส่วนที่เหลือคงไว้ตามเดิม',
   aiFileMeta: 'แผ่นงาน {sheets} แผ่น · รายการ {entries} รายการ',
-  aiGensparkAccount: 'บัญชี Genspark',
-  aiAccountChecking: 'กำลังตรวจสอบ…',
-  aiLoggedIn: 'ลงชื่อเข้าใช้แล้ว',
-  aiLoggedInAs: 'ลงชื่อเข้าใช้แล้ว: {email}',
-  aiNotLoggedIn: 'ยังไม่ได้ลงชื่อเข้าใช้ (ฟีเจอร์ AI ต้องใช้บัญชี Genspark)',
-  aiWaitingBrowserLogin: 'กำลังรอการลงชื่อเข้าใช้ในเบราว์เซอร์…',
-  aiLoginGenspark: 'ลงชื่อเข้าใช้ Genspark',
+  aiResizePanel: 'Resize AI panel',
   aiModel: 'โมเดล',
   aiCancel: 'ยกเลิก',
   aiSave: 'บันทึก',
@@ -65,7 +58,7 @@ export const th = {
   aiNetworkError:
     'เครือข่ายมีปัญหา ไม่สามารถเชื่อมต่อบริการ AI ได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองใหม่',
   aiCreditsExhausted:
-    'เครดิต Genspark ของคุณหมดแล้ว โปรดเติมเครดิตที่ genspark.ai/pricing แล้วลองใหม่',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiToolWorkbookContext: 'อ่านข้อมูลเวิร์กบุ๊ก',
   aiToolReadRange: 'อ่านช่วง',
   aiToolReadRangeOf: 'อ่านช่วง {range}',

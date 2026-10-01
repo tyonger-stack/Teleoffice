@@ -1,17 +1,20 @@
 import JSZip from 'jszip'
-import { assertDeclaredSizesWithinLimits, assertZipInflatesWithinLimits } from '@genoffice/zip-gate'
+import {
+  assertDeclaredSizesWithinLimits,
+  assertZipInflatesWithinLimits,
+} from '@teleoffice/zip-gate'
 import { needsOoxmlNormalization, normalizeOoxmlXml } from './ooxml-normalize'
 
 // Re-exported for the engine's public API (index.ts) and the CLI's pre-open
-// check: the implementations live in @genoffice/zip-gate so the pptx engine
+// check: the implementations live in @teleoffice/zip-gate so the pptx engine
 // and the attachment parsers share one metered-inflation gate (see #759).
 export {
   assertDeclaredSizesWithinLimits,
   assertZipInflatesWithinLimits,
   type DeclaredPart,
   type ZipLimits,
-} from '@genoffice/zip-gate'
-export { DEFAULT_ZIP_LIMITS as DOCX_ZIP_LIMITS } from '@genoffice/zip-gate'
+} from '@teleoffice/zip-gate'
+export { DEFAULT_ZIP_LIMITS as DOCX_ZIP_LIMITS } from '@teleoffice/zip-gate'
 
 const EOCD_SIG = 0x06054b50
 const CENTRAL_SIG = 0x02014b50

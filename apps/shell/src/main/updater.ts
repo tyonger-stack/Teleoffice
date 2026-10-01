@@ -4,7 +4,7 @@ import { app, dialog, shell } from 'electron'
 import type { BrowserWindow } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import type { UpdateInfo } from 'electron-updater'
-import { createI18n, getUiLang, htmlLang } from '@genoffice/i18n'
+import { createI18n, getUiLang, htmlLang } from '@teleoffice/i18n'
 import type {
   UpdateChannel,
   UpdatePhase,
@@ -25,7 +25,7 @@ import {
  * the update channel prefix (production builds only). The packaged app reads
  * that URL from resources/app-update.yml, which electron-builder bakes in
  * from the `publish` config in apps/shell/electron-builder.cjs — the URL
- * itself is injected at build time via the GENOFFICE_UPDATE_URL env var and
+ * itself is injected at build time via the TELEOFFICE_UPDATE_URL env var and
  * is intentionally not committed to the repo.
  *
  * UX is the strong-guidance modal card (update-window.ts), not a native
@@ -36,7 +36,7 @@ import {
  * replaces the .AppImage file in place, no root needed); deb installs have
  * no updater — users upgrade via `apt install ./<new>.deb`.
  *
- * Dev preview: GENOFFICE_FAKE_UPDATE=<version> in an unpacked run opens the
+ * Dev preview: TELEOFFICE_FAKE_UPDATE=<version> in an unpacked run opens the
  * window with a simulated download so the UI can be exercised end to end.
  */
 
@@ -408,7 +408,7 @@ const MANUAL_FALLBACK_AFTER = 2
 // and signing track, so a stable/legacy-track user could land on the wrong
 // build. Preferred is the CDN installer derived from the user's own update
 // feed (see manualDownloadUrlFor), which matches channel, track, and arch.
-const DOWNLOAD_PAGE_URL = 'https://github.com/genspark-ai/genoffice/releases/latest'
+const DOWNLOAD_PAGE_URL = 'https://github.com/tyonger-stack/Teleoffice/releases/latest'
 
 /// Trusted HTTPS base URL baked into resources/app-update.yml. Manual download
 /// links are always rebuilt from this base rather than trusting URLs supplied
@@ -469,7 +469,7 @@ function manualDownloadUrlFor(info: UpdateInfo): string | null {
 let started = false
 // version the user declined this session — don't nag again until next launch
 let dismissedVersion: string | null = null
-// re-shows the GENOFFICE_FAKE_UPDATE window so the manual check is
+// re-shows the TELEOFFICE_FAKE_UPDATE window so the manual check is
 // exercisable in dev runs too
 let fakeShowAgain: (() => void) | null = null
 let manualCheckInFlight = false
@@ -594,8 +594,8 @@ export function initAutoUpdater(
   started = true
 
   // dev preview of the update window with a simulated download
-  if (!app.isPackaged && process.env.GENOFFICE_FAKE_UPDATE) {
-    initFakeUpdate(getWindow, process.env.GENOFFICE_FAKE_UPDATE)
+  if (!app.isPackaged && process.env.TELEOFFICE_FAKE_UPDATE) {
+    initFakeUpdate(getWindow, process.env.TELEOFFICE_FAKE_UPDATE)
     return
   }
   // Unpacked runs have no app-update.yml and must not hit the CDN with a

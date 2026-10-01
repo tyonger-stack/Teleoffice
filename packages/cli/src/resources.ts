@@ -30,7 +30,7 @@ export function repoRoot(): string | null {
     const pkg = join(dir, 'package.json')
     if (existsSync(pkg)) {
       try {
-        if (JSON.parse(readFileSync(pkg, 'utf-8')).name === 'genoffice') {
+        if (JSON.parse(readFileSync(pkg, 'utf-8')).name === 'teleoffice') {
           cachedRepo = dir
           return dir
         }
@@ -45,7 +45,7 @@ export function repoRoot(): string | null {
 }
 
 export function pdfiumWasmPath(): string {
-  if (process.env.GENOFFICE_PDFIUM_WASM) return process.env.GENOFFICE_PDFIUM_WASM
+  if (process.env.TELEOFFICE_PDFIUM_WASM) return process.env.TELEOFFICE_PDFIUM_WASM
   const packaged = packagedResourcesDir()
   if (packaged) return join(packaged, 'wasm', 'pdfium.wasm')
   const root = repoRoot()
@@ -54,7 +54,7 @@ export function pdfiumWasmPath(): string {
       return createRequire(join(root, 'package.json')).resolve('@embedpdf/pdfium/pdfium.wasm')
     } catch {}
   }
-  throw new Error('pdfium.wasm not found (set GENOFFICE_PDFIUM_WASM)')
+  throw new Error('pdfium.wasm not found (set TELEOFFICE_PDFIUM_WASM)')
 }
 
 export function xlsxSidecarPath(): string | null {
@@ -95,9 +95,9 @@ export interface AppLaunch {
   args: string[]
 }
 
-/** How to start the GenOffice GUI: the app binary that hosts this CLI, an installed app, or the dev checkout. */
+/** How to start the TeleOffice GUI: the app binary that hosts this CLI, an installed app, or the dev checkout. */
 export function appLaunch(env: NodeJS.ProcessEnv = process.env): AppLaunch | null {
-  if (env.GENOFFICE_APP_BIN) return { command: env.GENOFFICE_APP_BIN, args: [] }
+  if (env.TELEOFFICE_APP_BIN) return { command: env.TELEOFFICE_APP_BIN, args: [] }
   if (packagedResourcesDir() && process.versions.electron) {
     return { command: process.execPath, args: [] }
   }
@@ -122,25 +122,25 @@ function installedAppBinaries(
     case 'darwin':
       return [
         ...(shipped ? [shipped] : []),
-        '/Applications/GenOffice.app/Contents/MacOS/GenOffice',
-        join(homedir(), 'Applications/GenOffice.app/Contents/MacOS/GenOffice'),
+        '/Applications/TeleOffice.app/Contents/MacOS/TeleOffice',
+        join(homedir(), 'Applications/TeleOffice.app/Contents/MacOS/TeleOffice'),
       ]
     case 'win32':
       return [
         ...(shipped ? [shipped] : []),
-        env.LOCALAPPDATA ? join(env.LOCALAPPDATA, 'Programs', 'GenOffice', 'GenOffice.exe') : '',
-        env.ProgramFiles ? join(env.ProgramFiles, 'GenOffice', 'GenOffice.exe') : '',
+        env.LOCALAPPDATA ? join(env.LOCALAPPDATA, 'Programs', 'TeleOffice', 'TeleOffice.exe') : '',
+        env.ProgramFiles ? join(env.ProgramFiles, 'TeleOffice', 'TeleOffice.exe') : '',
       ].filter(Boolean)
     default:
-      return [...(shipped ? [shipped] : []), '/opt/GenOffice/genoffice', '/usr/bin/genoffice']
+      return [...(shipped ? [shipped] : []), '/opt/TeleOffice/teleoffice', '/usr/bin/teleoffice']
   }
 }
 
 export function appBinaryForResources(resources: string, platform: NodeJS.Platform): string {
   const install = dirname(resources)
-  if (platform === 'darwin') return join(install, 'MacOS', 'GenOffice')
-  if (platform === 'win32') return join(install, 'GenOffice.exe')
-  return join(install, 'genoffice')
+  if (platform === 'darwin') return join(install, 'MacOS', 'TeleOffice')
+  if (platform === 'win32') return join(install, 'TeleOffice.exe')
+  return join(install, 'teleoffice')
 }
 
 /**

@@ -1,7 +1,7 @@
 import type { Editor } from '@tiptap/core'
 import type { Node as PmNode } from '@tiptap/pm/model'
 import { isInTable, mergeCells, selectedRect, splitCell } from '@tiptap/pm/tables'
-import type { DocDefaults, Run, StyleInfo, TextboxDisplay } from '@genoffice/docx-engine'
+import type { DocDefaults, Run, StyleInfo, TextboxDisplay } from '@teleoffice/docx-engine'
 import { getActiveSubEditor } from '../editor/active-editor'
 import { tableCellsSelection } from '../editor/table-ops'
 import { effectiveBidi, selectionHasBidi } from '../editor/direction'

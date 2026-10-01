@@ -82,6 +82,8 @@ export interface RawFormAnnotation {
   options?: { exportValue?: unknown; displayValue?: unknown }[]
   contents?: string
   contentsObj?: { str?: string }
+  teleOfficeFormField?: string
+  /** Legacy key written before the TeleOffice rebrand; still read for old PDFs. */
   genOfficeFormField?: string
 }
 
@@ -258,6 +260,8 @@ export async function buildFormCatalog(doc: PDFDocumentProxy): Promise<FormCatal
 }
 
 function visualSignatureFieldName(annotation: RawFormAnnotation): string | null {
+  if (annotation.teleOfficeFormField) return annotation.teleOfficeFormField
+  // PDFs annotated before the rebrand stored GenOfficeFormField.
   if (annotation.genOfficeFormField) return annotation.genOfficeFormField
   const contents = annotation.contentsObj?.str ?? annotation.contents
   return contents?.startsWith(VISUAL_SIGNATURE_CONTENT_PREFIX)

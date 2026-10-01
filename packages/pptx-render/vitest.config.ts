@@ -9,13 +9,13 @@ export default defineConfig({
   resolve: {
     alias: {
       // Subpath before the bare name: string aliases are prefix replacements
-      '@genoffice/pptx-engine/table-grid': resolve(here, '../pptx-engine/src/table-grid.ts'),
-      '@genoffice/pptx-engine/identity': resolve(here, '../pptx-engine/src/identity.ts'),
-      '@genoffice/pptx-engine/background-promote': resolve(
+      '@teleoffice/pptx-engine/table-grid': resolve(here, '../pptx-engine/src/table-grid.ts'),
+      '@teleoffice/pptx-engine/identity': resolve(here, '../pptx-engine/src/identity.ts'),
+      '@teleoffice/pptx-engine/background-promote': resolve(
         here,
         '../pptx-engine/src/background-promote.ts',
       ),
-      '@genoffice/pptx-engine': resolve(here, '../pptx-engine/src/index.ts'),
+      '@teleoffice/pptx-engine': resolve(here, '../pptx-engine/src/index.ts'),
     },
   },
   test: {

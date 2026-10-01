@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { transcribeAudioTool } from '@genoffice/ai-search'
+import { transcribeAudioTool } from '@teleoffice/ai-search'
 import { flagString } from '../args'
 import { aiSettingsPath, prepareCloud } from '../cloud'
 import { resolveInput } from '../fs'

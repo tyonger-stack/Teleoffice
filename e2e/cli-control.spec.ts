@@ -158,9 +158,19 @@ test.describe('cli control channel', () => {
       )
       expect(moved, JSON.stringify(moved)).toMatchObject({ ok: true, result: { range: 'B2:C3' } })
       expect(typeof moved.result.sheet).toBe('string')
-      const sel = JSON.parse(await request(ep, ep.token, { cmd: 'selection', path: BOOK }))
-      expect(sel).toMatchObject({ ok: true, result: { sheet: moved.result.sheet, range: 'B2:C3' } })
-      expect(sel.result.values).toHaveLength(2)
+      // Univer can briefly re-assert A1 while render controllers finish mounting
+      // after goto; poll until selection matches the activated range.
+      let sel: { ok: boolean; result: { sheet: string; range: string; values?: unknown[] } }
+      await expect
+        .poll(
+          async () => {
+            sel = JSON.parse(await request(ep, ep.token, { cmd: 'selection', path: BOOK }))
+            return sel
+          },
+          { timeout: 30_000 },
+        )
+        .toMatchObject({ ok: true, result: { sheet: moved.result.sheet, range: 'B2:C3' } })
+      expect(sel!.result.values).toHaveLength(2)
       const noSheet = JSON.parse(
         await request(ep, ep.token, {
           cmd: 'open',

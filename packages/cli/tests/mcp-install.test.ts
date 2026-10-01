@@ -8,7 +8,7 @@ const LAUNCHER = resolve(__dirname, '..', 'bin', 'teleoffice')
 function fakeMachine(agents: string[]) {
   const home = tempDir()
   for (const dot of agents) mkdirSync(join(home, dot), { recursive: true })
-  return { home, env: { GENOFFICE_HOME: home } as NodeJS.ProcessEnv }
+  return { home, env: { TELEOFFICE_HOME: home } as NodeJS.ProcessEnv }
 }
 
 const readJson = (path: string) => JSON.parse(readFileSync(path, 'utf-8'))
@@ -107,14 +107,14 @@ describe('teleoffice mcp install', () => {
 
     writeFileSync(
       file,
-      '[mcp_servers.teleoffice]\ncommand = "/old/GenOffice.app/Contents/Resources/cli/teleoffice"\nargs = ["mcp"]\n\n' +
+      '[mcp_servers.teleoffice]\ncommand = "/old/TeleOffice.app/Contents/Resources/cli/teleoffice"\nargs = ["mcp"]\n\n' +
         '[mcp_servers.teleoffice.env]\nFOO = "1"\n\n[mcp_servers.other]\ncommand = "npx"\n\n[projects."/tmp/x"]\ntrust_level = "trusted"\n',
     )
     const listed = await run(['mcp', 'list', '--json'], { env: m.env })
     expect(listed.json().detail.agents.find((a: any) => a.agent === 'codex')).toMatchObject({
       status: 'stale',
       registered: true,
-      command: '/old/GenOffice.app/Contents/Resources/cli/teleoffice',
+      command: '/old/TeleOffice.app/Contents/Resources/cli/teleoffice',
     })
     const replaced = await run(['mcp', 'install', 'codex', '--json'], { env: m.env })
     expect(replaced.code).toBe(0)

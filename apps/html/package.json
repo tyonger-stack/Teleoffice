@@ -1,6 +1,6 @@
 {
-  "name": "@genoffice/html",
-  "productName": "GenOffice HTML",
+  "name": "@teleoffice/html",
+  "productName": "TeleOffice HTML",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
@@ -21,14 +21,14 @@
     "@codemirror/search": "^6.7.2",
     "@codemirror/state": "^6.7.4",
     "@codemirror/view": "^6.43.11",
-    "@genoffice/agent-core": "*",
-    "@genoffice/ai-provider": "*",
-    "@genoffice/ai-search": "*",
-    "@genoffice/electron-utils": "*",
-    "@genoffice/file-parse": "*",
-    "@genoffice/i18n": "*",
-    "@genoffice/project-store": "*",
-    "@genoffice/ui": "*",
+    "@teleoffice/agent-core": "*",
+    "@teleoffice/ai-provider": "*",
+    "@teleoffice/ai-search": "*",
+    "@teleoffice/electron-utils": "*",
+    "@teleoffice/file-parse": "*",
+    "@teleoffice/i18n": "*",
+    "@teleoffice/project-store": "*",
+    "@teleoffice/ui": "*",
     "@lezer/highlight": "^1.2.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -43,5 +43,5 @@
     "vite": "^7.3.1",
     "vitest": "^4.1.11"
   },
-  "author": "GenOffice"
+  "author": "TeleOffice"
 }

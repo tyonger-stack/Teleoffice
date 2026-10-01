@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process'
 /**
  * Shell-main half of the MCP → `teleoffice` CLI delegation.
  *
- * The app already ships the CLI (`@genoffice/cli`) and runs it on its own Node
+ * The app already ships the CLI (`@teleoffice/cli`) and runs it on its own Node
  * runtime, so the headless MCP tools do not reimplement document engines: they
  * spawn the same CLI a shell user or another agent would, with `--json`, and
  * map its result contract (`{ status, command, summary, output_path, detail }`,
@@ -118,7 +118,7 @@ export function createCliRunner(paths: CliRunnerPaths): CliRunner {
         }
         const timer = setTimeout(() => {
           child.kill()
-          finish({ ok: false, code: -1, stdout, stderr: `${stderr}\ngenoffice timed out` })
+          finish({ ok: false, code: -1, stdout, stderr: `${stderr}\nteleoffice timed out` })
         }, timeoutMs)
         child.stdout?.on('data', (chunk: Buffer) => onChunk(chunk, 'out'))
         child.stderr?.on('data', (chunk: Buffer) => onChunk(chunk, 'err'))

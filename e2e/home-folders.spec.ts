@@ -21,7 +21,7 @@ test.describe('home folders panel', () => {
   let root: string
 
   test.beforeEach(() => {
-    root = realpathSync(mkdtempSync(join(tmpdir(), 'genoffice-e2e-root-')))
+    root = realpathSync(mkdtempSync(join(tmpdir(), 'teleoffice-e2e-root-')))
     mkdirSync(join(root, 'Clients', 'A Corp'), { recursive: true })
     mkdirSync(join(root, 'Clients', 'Contracts'), { recursive: true })
     mkdirSync(join(root, 'Personal'))
@@ -98,12 +98,16 @@ test.describe('home folders panel', () => {
       await draftsRow.locator('.more-btn').click()
       await page.locator('.folder-menu button', { hasText: 'Rename' }).click()
       const renameInput = page.locator('.recent-list .rename-input')
+      await expect(renameInput).toBeVisible()
       await renameInput.fill('Final')
       await renameInput.press('Enter')
+      // Disk rename commits async via IPC; wait for the folder before the row label.
+      await expect
+        .poll(() => existsSync(join(root, 'Clients', 'Contracts', 'Final')), { timeout: 15_000 })
+        .toBe(true)
       await expect(
         page.locator('.recent-list .folder-item .recent-name', { hasText: 'Final' }),
       ).toBeVisible()
-      expect(existsSync(join(root, 'Clients', 'Contracts', 'Final'))).toBe(true)
 
       // delete Final (confirm dialog → trash)
       const finalRow = page.locator('.recent-row', {
@@ -125,7 +129,7 @@ test.describe('home folders panel', () => {
   })
 
   test('an added folder joins the tree in place and leaves the list without touching disk', async () => {
-    const extra = realpathSync(mkdtempSync(join(tmpdir(), 'genoffice-e2e-extra-')))
+    const extra = realpathSync(mkdtempSync(join(tmpdir(), 'teleoffice-e2e-extra-')))
     mkdirSync(join(extra, 'Projects', 'Alpha'), { recursive: true })
     writeFileSync(join(extra, 'Projects', 'plan.md'), '# plan')
     const launched = await launchShell({
@@ -199,7 +203,7 @@ test.describe('home folders panel', () => {
       expect(hasPdf(root)).toBe(false)
       // and the tab opened on the moved path, not the vanished root one
       await expect(page.locator('.tab-bar .tab-item', { hasText: '.pdf' })).toBeVisible()
-      // a second New from the same folder view: with genoffice#1036 nothing lands on
+      // a second New from the same folder view: with teleoffice#1036 nothing lands on
       // disk until the user saves — the folder only pre-selects the Save As
       // location, so the tree view must stay clean
       await page.locator('.tab-bar .tab-item.tab-home').click()

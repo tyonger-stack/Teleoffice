@@ -14,7 +14,7 @@ import type { TFunc } from './locale'
  */
 export function mcpConfigExample(port: string): string {
   return JSON.stringify(
-    { mcpServers: { 'genoffice-editor': { url: `http://127.0.0.1:${port}/mcp` } } },
+    { mcpServers: { 'teleoffice-editor': { url: `http://127.0.0.1:${port}/mcp` } } },
     null,
     2,
   )

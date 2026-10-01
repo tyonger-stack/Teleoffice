@@ -2,13 +2,13 @@ import { basename, isAbsolute, resolve } from 'node:path'
 import { flagBool, flagString } from '../args'
 import { readInput } from '../fs'
 import { resolveTemplateSource } from '../formats/slide-spec'
-import { inspectTemplate, type TemplateInfo } from '@genoffice/pipelines/slides'
+import { inspectTemplate, type TemplateInfo } from '@teleoffice/pipelines/slides'
 import {
   addTemplate,
   listTemplates,
   removeTemplate,
   templatesDir,
-} from '@genoffice/pipelines/slides/templates'
+} from '@teleoffice/pipelines/slides/templates'
 import type { CommandContext, CommandDef } from '../registry'
 import { CliError, EXIT } from '../result'
 

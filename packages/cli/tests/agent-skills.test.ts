@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -13,7 +12,6 @@ import {
   installSkill,
   parseSkillFrontmatter,
   readInstallState,
-  removeLegacySkill,
   uninstallSkill,
   type SkillLedger,
 } from '../src/agent-skills'
@@ -24,7 +22,7 @@ const skillText = (version: string, body = 'Run `teleoffice --version` first.') 
 const bundled = (version = '1.2.0') => bundledSkillFrom(Buffer.from(skillText(version)))
 
 function home(): string {
-  return mkdtempSync(join(tmpdir(), 'genoffice-skills-'))
+  return mkdtempSync(join(tmpdir(), 'teleoffice-skills-'))
 }
 
 describe('detectAgents', () => {
@@ -156,48 +154,5 @@ describe('buildSkillZip', () => {
       'teleoffice/SKILL.md',
     ])
     expect(await zip.file('teleoffice/SKILL.md')!.async('string')).toBe(b.text)
-  })
-})
-
-describe('removeLegacySkill', () => {
-  const legacyText = skillText('2.70.0').replace('name: teleoffice', 'name: genoffice')
-  const sha = (text: string) => createHash('sha256').update(text).digest('hex')
-  const entry = (text: string) => ({
-    version: '2.70.0',
-    sha256: sha(text),
-    at: '2026-09-01T00:00:00.000Z',
-    channel: 'app' as const,
-  })
-
-  function legacy(dir: string, text = legacyText): string {
-    mkdirSync(join(dir, 'genoffice'), { recursive: true })
-    const path = join(dir, 'genoffice', 'SKILL.md')
-    writeFileSync(path, text)
-    return path
-  }
-
-  it('removes the genoffice skill this app wrote when the teleoffice one is installed', () => {
-    const dir = join(home(), 'skills')
-    const old = legacy(dir)
-    const ledger: SkillLedger = { [old]: entry(legacyText) }
-    const path = installSkill(dir, bundled(), ledger)
-    expect(existsSync(path)).toBe(true)
-    expect(existsSync(join(dir, 'genoffice'))).toBe(false)
-    expect(ledger[old]).toBeUndefined()
-  })
-
-  it('keeps a genoffice skill that was edited, not ours, or shares its folder', () => {
-    const dir = join(home(), 'skills')
-    const old = legacy(dir)
-    expect(removeLegacySkill(dir, {})).toBe(false)
-    const ledger: SkillLedger = { [old]: entry('something else') }
-    expect(removeLegacySkill(dir, ledger)).toBe(false)
-    expect(existsSync(old)).toBe(true)
-
-    const ours: SkillLedger = { [old]: entry(legacyText) }
-    writeFileSync(join(dir, 'genoffice', 'notes.txt'), 'mine')
-    expect(uninstallSkill(dir, ours)).toBe(true)
-    expect(existsSync(old)).toBe(false)
-    expect(readFileSync(join(dir, 'genoffice', 'notes.txt'), 'utf-8')).toBe('mine')
   })
 })

@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
-import { createBlankPptx } from '@genoffice/pptx-engine'
+import { createBlankPptx } from '@teleoffice/pptx-engine'
 import {
   addTemplate,
   listTemplates,

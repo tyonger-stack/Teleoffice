@@ -9,14 +9,14 @@ import {
   type ControlReply,
   type ControlRequest,
 } from './control-protocol'
-import { genofficeUserDataDir } from './gui'
+import { teleofficeUserDataDir } from './gui'
 import { CliError, EXIT, type ErrorReason } from './result'
 
 /** The running shell's control endpoint, or null when no live shell published one. */
 export function controlEndpoint(env: NodeJS.ProcessEnv): ControlEndpoint | null {
-  const dirs = env.GENOFFICE_USER_DATA
-    ? [env.GENOFFICE_USER_DATA]
-    : [genofficeUserDataDir(env), `${genofficeUserDataDir(env)} Dev`]
+  const dirs = env.TELEOFFICE_USER_DATA
+    ? [env.TELEOFFICE_USER_DATA]
+    : [teleofficeUserDataDir(env), `${teleofficeUserDataDir(env)} Dev`]
   for (const dir of dirs) {
     const file = join(dir, CONTROL_FILE)
     if (!existsSync(file)) continue
@@ -77,9 +77,9 @@ export function controlRequest(
     const unavailable = (why: string) =>
       settle(() =>
         reject(
-          new CliError(EXIT.app, `GenOffice did not answer: ${why}`, undefined, {
+          new CliError(EXIT.app, `TeleOffice did not answer: ${why}`, undefined, {
             reason: 'app_unavailable',
-            suggestion: 'start GenOffice (or `teleoffice open <file>`) and retry',
+            suggestion: 'start TeleOffice (or `teleoffice open <file>`) and retry',
           }),
         ),
       )

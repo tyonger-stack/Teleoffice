@@ -1,6 +1,6 @@
-# @genoffice/cli
+# @teleoffice/cli
 
-`teleoffice` is the GenOffice command line. It exposes the suite's document engines
+`teleoffice` is the TeleOffice command line. It exposes the suite's document engines
 to scripts and AI agents without opening a window: the packaged app runs the
 bundled CLI on its own Node runtime (`ELECTRON_RUN_AS_NODE`), so nothing extra
 has to be installed.
@@ -42,7 +42,7 @@ teleoffice convert report.docx --to html               # the Word editor's stand
 teleoffice convert page.html --to docx                 # html2docx, same as the HTML app's Export as Word
 teleoffice convert report.docx --to md                 # GFM via the markdown editor's serializer
 teleoffice convert book.xlsx --to csv [--sheet Data]   # one sheet, cell text as displayed, UTF-8 BOM, CRLF
-teleoffice capabilities --json                        # which cloud features GenOffice has configured (no network call)
+teleoffice capabilities --json                        # which cloud features TeleOffice has configured (no network call)
 teleoffice search "electron headless export" [--images] [--max 6] [--via auto|mmx|agy] [--region cn|intl] --json
 teleoffice image "isometric office, soft light" --aspect 16:9 --out hero.png
 teleoffice media photo.jpg --ask "What text is in this picture?" --json
@@ -64,18 +64,18 @@ teleoffice skill list   # coding agents found on this machine and the skill vers
 teleoffice skill install --dir ./skills --force   # copy the bundled skill into a skills directory
 teleoffice install-cli   # put teleoffice on the PATH
 teleoffice mcp --http 3000 [--host 127.0.0.1] [--token secret]   # Streamable HTTP for clients on other machines; omit --http for stdio
-teleoffice mcp --compact-schemas   # advertise ops/cells/data as plain arrays instead of the per-op schema (smaller tools/list; also GENOFFICE_MCP_COMPACT_SCHEMAS=1)
+teleoffice mcp --compact-schemas   # advertise ops/cells/data as plain arrays instead of the per-op schema (smaller tools/list; also TELEOFFICE_MCP_COMPACT_SCHEMAS=1)
 teleoffice mcp install all   # register the stdio server with every coding agent found (or one: claude-code, codex, cursor, gemini, copilot, opencode, windsurf)
 teleoffice mcp list          # each agent's MCP config and whether teleoffice is registered; `mcp uninstall <agent>` removes the entry
 ```
 
 Word and Markdown commands run the docs and markdown editors under jsdom (installed once per process, loaded lazily). Those modules are imported from the app renderers by relative path until they move into packages of their own.
 
-Workbook writes go through `@genoffice/xlsx-gateway` (the app's save path). The in-memory workbook validates and applies the cell, format and structure ops; ops the snapshot cannot hold (charts, images, tables, filters, conditional formats, validation, hyperlinks, notes, panes, page setup, protection, defined names, tab order) become the gateway's declarative save payloads, as the app's edit journal does. `add_pivot` and `add_sparkline` run headless too; only `refresh_pivot` and edits to objects created in an editor session (`add_table_row` / `add_table_column`, `delete_table_row` / `delete_table_column` / `delete_table`, `edit_shape`, `delete_visual`) are refused headless. After writing formulas teleoffice evaluates them with the xlsx sidecar and stores the results as cached values, so `sheet read` and plain readers see numbers, not blanks.
+Workbook writes go through `@teleoffice/xlsx-gateway` (the app's save path). The in-memory workbook validates and applies the cell, format and structure ops; ops the snapshot cannot hold (charts, images, tables, filters, conditional formats, validation, hyperlinks, notes, panes, page setup, protection, defined names, tab order) become the gateway's declarative save payloads, as the app's edit journal does. `add_pivot` and `add_sparkline` run headless too; only `refresh_pivot` and edits to objects created in an editor session (`add_table_row` / `add_table_column`, `delete_table_row` / `delete_table_column` / `delete_table`, `edit_shape`, `delete_visual`) are refused headless. After writing formulas teleoffice evaluates them with the xlsx sidecar and stores the results as cached values, so `sheet read` and plain readers see numbers, not blanks.
 
-`create`/`slides apply` take the same ops the in-app AI uses (`@genoffice/pptx-ops`), as a JSON array or `{ "ops": [...] }`; `--ops -` reads stdin. Image ops accept a local file path in their `bytes` field. A rejected op comes back with the guided error and its usage line so the caller can fix and retry; atomic transactions leave the file untouched.
+`create`/`slides apply` take the same ops the in-app AI uses (`@teleoffice/pptx-ops`), as a JSON array or `{ "ops": [...] }`; `--ops -` reads stdin. Image ops accept a local file path in their `bytes` field. A rejected op comes back with the guided error and its usage line so the caller can fix and retry; atomic transactions leave the file untouched.
 
-`create --type pptx --spec` is the CLI end of the app's deck generation pipeline (`@genoffice/pipelines`): the caller's agent does the design work following `teleoffice guide slides design`, writing the style sheet, the outline and one page spec file per slide (`teleoffice guide slides spec`), and the same page builder the app uses turns them into a pptx, measuring every text box and growing it to its content. Where the app separates the stages into model calls, the CLI separates them into files: `slides check` validates the outline against the planning rules and builds and audits a single page file, then checks it against its outline entry and the style sheet's palette (both found beside the page files), `create --spec <dir>` runs the same checks on every file and refuses to assemble a deck with pages missing or disagreeing with the outline, and `slides replace` rebuilds one slide from its file. `slides audit` runs the app's deterministic layout audit; `slides render` gives the agent PNGs to look at. No model call happens inside teleoffice.
+`create --type pptx --spec` is the CLI end of the app's deck generation pipeline (`@teleoffice/pipelines`): the caller's agent does the design work following `teleoffice guide slides design`, writing the style sheet, the outline and one page spec file per slide (`teleoffice guide slides spec`), and the same page builder the app uses turns them into a pptx, measuring every text box and growing it to its content. Where the app separates the stages into model calls, the CLI separates them into files: `slides check` validates the outline against the planning rules and builds and audits a single page file, then checks it against its outline entry and the style sheet's palette (both found beside the page files), `create --spec <dir>` runs the same checks on every file and refuses to assemble a deck with pages missing or disagreeing with the outline, and `slides replace` rebuilds one slide from its file. `slides audit` runs the app's deterministic layout audit; `slides render` gives the agent PNGs to look at. No model call happens inside teleoffice.
 
 Every command prints a one-line human summary by default or a single JSON
 object with `--json` (`{ status, command, summary, output_path?, warnings?, detail? }`);
@@ -92,7 +92,7 @@ ranges, available ids, sheet names, usage lines) come back as fields in
 
 ## Slide template decks
 
-`create --type pptx --spec` also builds on a corporate `.pptx` template so slides use its masters, layouts and theme instead of blank pages. `template inspect` reports the slide size, the theme colors and fonts per master, and every layout with its placeholder slots; a template page names its `layout` and fills `title`/`subtitle`/`body` plus single `placeholders[]` slots (`text`, `paragraphs`, `bullets`, `image`) with `elements` in template px (`guide slides spec` has the format). The `--template` flag wins over a `"template"` field in the spec, which wins over one in the outline; `--font` (else the spec `font`, else the registry default) retypes the theme and every run without an explicit font, and `--keep-template-slides` keeps the sample slides. Templates register with `template add` into `~/.teleoffice/templates` (`TELEOFFICE_TEMPLATES_DIR`, or the older `GENOFFICE_TEMPLATES_DIR`, moves it); `--start-layout <name>` records the GUI starter layout (a layout name, optionally qualified as `1:Name`).
+`create --type pptx --spec` also builds on a corporate `.pptx` template so slides use its masters, layouts and theme instead of blank pages. `template inspect` reports the slide size, the theme colors and fonts per master, and every layout with its placeholder slots; a template page names its `layout` and fills `title`/`subtitle`/`body` plus single `placeholders[]` slots (`text`, `paragraphs`, `bullets`, `image`) with `elements` in template px (`guide slides spec` has the format). The `--template` flag wins over a `"template"` field in the spec, which wins over one in the outline; `--font` (else the spec `font`, else the registry default) retypes the theme and every run without an explicit font, and `--keep-template-slides` keeps the sample slides. Templates register with `template add` into `~/.teleoffice/templates` (`TELEOFFICE_TEMPLATES_DIR` moves it); `--start-layout <name>` records the GUI starter layout (a layout name, optionally qualified as `1:Name`).
 
 ## Template merge
 
@@ -118,7 +118,7 @@ it in one run); `unreachable_nested` sits inside a nested pptx group or a
 table in a group, which deck-level `findReplace` does not reach (ungroup it). Unresolved placeholders stay in place and the result carries an
 `unresolved_placeholder` warning; `--strict` turns them into an error of the
 same name and writes nothing. The output is written atomically, an existing
-file needs `--force`, and the GUI-open check and `GENOFFICE_ALLOWED_ROOTS`
+file needs `--force`, and the GUI-open check and `TELEOFFICE_ALLOWED_ROOTS`
 apply as for every other write.
 
 ## MCP server
@@ -126,7 +126,7 @@ apply as for every other write.
 `teleoffice mcp` serves the same commands as Model Context Protocol tools on
 stdio, for clients that cannot run a shell or should not (Claude Desktop,
 Cursor, sandboxed agents). Nothing else is needed on the machine: the process
-runs on the app's Node runtime like every other command, and GenOffice itself
+runs on the app's Node runtime like every other command, and TeleOffice itself
 only starts, hidden, for the conversions that need its renderer.
 
 ```bash
@@ -140,7 +140,7 @@ claude mcp add --transport stdio teleoffice -- teleoffice mcp
 `teleoffice mcp install <agent|all> [--dir <path>] [--force]` writes that entry
 for you, pointing at the absolute launcher path so it works without `teleoffice`
 on the PATH (on Windows, where MCP clients spawn without a shell, the entry
-runs `GenOffice.exe` as Node on the bundled `teleoffice.cjs` with
+runs `TeleOffice.exe` as Node on the bundled `teleoffice.cjs` with
 `ELECTRON_RUN_AS_NODE=1`, the same entry the app's Settings snippet shows): `~/.claude.json` (Claude Code, user scope; `CLAUDE_CONFIG_DIR`
 honoured), `~/.codex/config.toml` (`[mcp_servers.teleoffice]`; `CODEX_HOME`),
 `~/.cursor/mcp.json`, `~/.gemini/settings.json`, `~/.copilot/mcp-config.json`
@@ -163,7 +163,7 @@ envelope `--json` prints; an error comes back with `isError` and the same
 `error` reason. The `ops`, `cells` and `data` parameters carry the per-op
 schema of `guide <domain> --json` (one variant per op with its fields), so a
 client sees the fields without reading the guide; `teleoffice mcp
---compact-schemas` (or `GENOFFICE_MCP_COMPACT_SCHEMAS=1`) advertises them as
+--compact-schemas` (or `TELEOFFICE_MCP_COMPACT_SCHEMAS=1`) advertises them as
 plain arrays for clients with a small context budget. The op references are
 also resources (`teleoffice://guide/docs`, `…/sheets`, `…/slides`,
 `…/slides/design`, `…/slides/spec`).
@@ -175,7 +175,7 @@ outline entry and the palette), `deck_build` and `deck_replace`
 command line's staged flow, so a deck started from either side can be finished
 from the other.
 
-Behind a reverse proxy, set `GENOFFICE_TRUST_PROXY_HEADERS=1` so the download
+Behind a reverse proxy, set `TELEOFFICE_TRUST_PROXY_HEADERS=1` so the download
 URLs the server hands out use the forwarded host and scheme; by default the
 `X-Forwarded-*` headers are ignored.
 
@@ -188,20 +188,18 @@ scratch directory, `src/mcp/files.ts`), and a tool that writes a file returns
 `resource_link` otherwise (`src/mcp/remote.ts`). Each session has its own
 scratch directory, working directory and deck state; `open` and `selection`
 are not registered;
-with `GENOFFICE_ALLOWED_ROOTS` unset the tools are confined to the server's
+with `TELEOFFICE_ALLOWED_ROOTS` unset the tools are confined to the server's
 file store.
 
 ## Putting teleoffice on the PATH
 
-- **macOS**: the app tries to symlink `/usr/local/bin/teleoffice` (or `/opt/homebrew/bin/teleoffice`) on every launch until one succeeds. If neither directory is writable it stays silent; run `teleoffice install-cli` from the launcher, or `sudo mkdir -p /usr/local/bin && sudo ln -sf "/Applications/GenOffice.app/Contents/Resources/cli/teleoffice" /usr/local/bin/teleoffice`.
+- **macOS**: the app tries to symlink `/usr/local/bin/teleoffice` (or `/opt/homebrew/bin/teleoffice`) on every launch until one succeeds. If neither directory is writable it stays silent; run `teleoffice install-cli` from the launcher, or `sudo mkdir -p /usr/local/bin && sudo ln -sf "/Applications/TeleOffice.app/Contents/Resources/cli/teleoffice" /usr/local/bin/teleoffice`.
 - **Windows**: the installer appends `<install dir>\resources\cli` to the user PATH (`apps/shell/build/installer.nsh`, REG_EXPAND_SZ preserved, removed on uninstall) and the app re-checks once per version; new terminals see `teleoffice`. The directory holds `teleoffice.cmd` for cmd / PowerShell and the extension-less `teleoffice` for Git Bash.
 - **Linux**: the deb/rpm post-install links `/usr/bin/teleoffice`; the AppImage relies on the first-launch symlink into `/usr/local/bin` when it is writable.
 
 `teleoffice install-cli` repeats the attempt and prints the manual command when it cannot finish. jsdom (for Word/Markdown) ships beside the bundle as `Resources/cli/node_modules`, collected by `collect-deps.mjs` at build time.
 
 Independently of the PATH, every launch of the packaged app writes the launcher directory to `~/.teleoffice/launcher` (`TELEOFFICE_AUTH_DIR` overrides the directory, as for `auth.json`). The `teleoffice` agent skill (`skills/teleoffice/SKILL.md`) reads it when `teleoffice` is not on the PATH. `teleoffice --version` prints this package's version, inlined by `build.mjs`.
-
-The per-user directory (`auth.json`, `launcher`, `cli-audit.jsonl`, `templates/`) is `~/.teleoffice`; it was `~/.genoffice` before the command was renamed from `genoffice` to `teleoffice`. The first CLI run or app start that finds `~/.genoffice` and no `~/.teleoffice` renames the folder (or, when the rename fails, copies it and keeps the original) and rewrites template registry paths that pointed inside it. Until that has happened the old folder stays in use; when both exist the new one wins and the old one is left alone. `TELEOFFICE_AUTH_DIR`, `TELEOFFICE_TEMPLATES_DIR`, `TELEOFFICE_AUDIT_LOG` and `TELEOFFICE_HOME` take precedence over the older `GENOFFICE_*` names, which are still honoured.
 
 ## Layout
 
@@ -211,7 +209,7 @@ The per-user directory (`auth.json`, `launcher`, `cli-audit.jsonl`, `templates/`
 - `src/commands/` — `info`, `convert`, `create`, `render`, `slides`, `sheet`, `docs`,
   `guide`, `open`, `capabilities`, `search`, `image`, `media`, `install-cli`.
 - `src/dom.ts` — the jsdom bootstrap the Word/Markdown paths need.
-- `src/formats/` — thin adapters over `@genoffice/pdf2docx`, the xlsx sidecar
+- `src/formats/` — thin adapters over `@teleoffice/pdf2docx`, the xlsx sidecar
   and the sheets CSV importer.
 - `src/resources.ts` — locates pdfium wasm, the xlsx sidecar and the OCR
   helper in both the packaged `Resources/` layout and the dev checkout.
@@ -220,15 +218,15 @@ The per-user directory (`auth.json`, `launcher`, `cli-audit.jsonl`, `templates/`
 
 ## Path policy and audit log
 
-- `GENOFFICE_ALLOWED_ROOTS` (PATH-style list of directories) confines every file teleoffice
+- `TELEOFFICE_ALLOWED_ROOTS` (PATH-style list of directories) confines every file teleoffice
   reads or writes to those trees; symlinks are resolved before the check. A path
   outside exits 2 with the roots in `detail.allowed_roots`. Unset means
   unrestricted.
 - `apply --out` onto another existing file needs `--force`, like `create` / `convert`;
   editing in place never does. Unknown options are rejected instead of ignored.
-- A file the running GenOffice shell has open in a tab is not rewritten in place
+- A file the running TeleOffice shell has open in a tab is not rewritten in place
   (exit 2, `detail.gui_pid`): the shell publishes its open tabs to
-  `userData/open-documents.json` and teleoffice reads it (`GENOFFICE_USER_DATA`
+  `userData/open-documents.json` and teleoffice reads it (`TELEOFFICE_USER_DATA`
   overrides the location). `--force` writes anyway; the editor then warns about
   the on-disk change at its next save (Word, Excel) or may overwrite it (PowerPoint).
 - Every executed command appends one JSON line (`ts`, `command`, `argv`,
@@ -250,8 +248,8 @@ its key is configured; Genspark runs first only when selected and signed in
 analysis default to Antigravity agy with MiniMax mmx as fallback (mmx vision
 reads images only); tts synthesizes speech through mmx, asr transcribes audio
 through agy with mmx fallback, and video generates video through mmx.
-Providers are chosen in the app's AI settings (GenOffice/ai-settings.json in
-the platform config directory, override with GENOFFICE_AI_SETTINGS).
+Providers are chosen in the app's AI settings (TeleOffice/ai-settings.json in
+the platform config directory, override with TELEOFFICE_AI_SETTINGS).
 HTTPS_PROXY / HTTP_PROXY / ALL_PROXY are honoured. Search results, image
 bytes and analysis text come back in the JSON detail (method plus attempts on
 local-CLI fallbacks); image, tts and video also write files. These are the
@@ -273,13 +271,13 @@ Genspark route automatically (the CLI failures stay in `attempts`), and
 ## Build and run in a checkout
 
 ```
-npm run build -w @genoffice/cli       # esbuild → dist/teleoffice.cjs
+npm run build -w @teleoffice/cli       # esbuild → dist/teleoffice.cjs
 packages/cli/bin/teleoffice info file.docx  # falls back to the system node
 ```
 
 Conversions that need an app renderer (Word/PowerPoint/Excel/HTML/Markdown → PDF,
-Word → HTML, HTML → Word, `create --type pdf`) run inside the GenOffice binary
+Word → HTML, HTML → Word, `create --type pdf`) run inside the TeleOffice binary
 through its hidden `--headless-export` mode: teleoffice spawns it (Dock hidden, no
 window), reads the JSON envelope it prints and maps its exit code. Set
-`GENOFFICE_APP_BIN` to point at a specific executable; in a checkout the dev Electron
+`TELEOFFICE_APP_BIN` to point at a specific executable; in a checkout the dev Electron
 plus `apps/shell` is used, so `npm run build:all` first.

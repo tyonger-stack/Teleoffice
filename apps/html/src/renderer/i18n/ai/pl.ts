@@ -4,7 +4,8 @@ export const pl = {
   aiCollapsePanel: 'Zwiń panel',
   aiComposerPlaceholder: 'Poproś AI o napisanie lub edycję…',
   aiCopyReplyTitle: 'Kopiuj odpowiedź',
-  aiCreditsExhausted: 'Brak kredytów — doładuj na genspark.ai',
+  aiCreditsExhausted:
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiEmptyTitle: 'Zaprojektuj stronę z AI',
   aiEmptyBody:
     'Landing page, raport, plakat: powiedz, po co i dla kogo; AI najpierw zaproponuje brief, a potem zbuduje stronę',

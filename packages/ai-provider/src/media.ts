@@ -23,7 +23,8 @@ export const AI_MEDIA_PROVIDERS: AiMediaProviderMeta[] = [
   {
     id: 'genspark',
     label: 'Genspark',
-    description: 'Image generation, media analysis and search through your Genspark sign-in',
+    description:
+      'Image generation, media analysis and search via GSK_API_KEY or another configured key',
     keyPlaceholder: 'Not required - sign in to Genspark',
     defaultBaseUrl: '',
     imageProtocol: 'openai-images',

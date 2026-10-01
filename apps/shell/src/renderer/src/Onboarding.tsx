@@ -17,8 +17,8 @@ interface Slide {
   bodyKey?: StringKey
   /** render the body in the dimmer footnote gray (slide 3's credits disclaimer) */
   bodyDim?: boolean
-  /** community slide shows the credits offer panel with the "Join GenTeam" call-to-action */
-  showOffer?: boolean
+  /** community slide can show a GenTeam invite (no credits / login) */
+  showCommunity?: boolean
   /** closing slide shows the "star us on GitHub" hint */
   showStar?: boolean
   /** closing slide explains default-on analytics and how to disable it */
@@ -28,7 +28,7 @@ interface Slide {
 
 const SLIDES: readonly Slide[] = [
   { titleKey: 'onbTitle1', subtitleKey: 'onbSubtitle1', bodyKey: 'onbBody1', art: 'logo' },
-  { titleKey: 'onbTitle2', subtitleKey: 'onbBody2', showOffer: true, art: 'gift' },
+  { titleKey: 'onbTitle2', subtitleKey: 'onbBody2', showCommunity: true, art: 'gift' },
   {
     titleKey: 'onbTitle3',
     subtitleKey: 'onbBody3',
@@ -39,13 +39,6 @@ const SLIDES: readonly Slide[] = [
     art: 'check',
   },
 ]
-
-/** render `**emphasized**` segments of a localized string as <strong> */
-function renderEmphasis(text: string) {
-  return text
-    .split('**')
-    .map((part, i) => (i % 2 === 1 ? <strong key={part}>{part}</strong> : part))
-}
 
 /* exact vectors from the design spec:
  * 60px canvas, 4px strokes — same visual mass as the 60px app icon */
@@ -220,9 +213,8 @@ export function Onboarding({ onDone }: OnboardingProps) {
                   </span>
                 </div>
               )}
-              {s.showOffer && (
+              {s.showCommunity && (
                 <div className="onb-offer">
-                  <p className="onb-credits">{renderEmphasis(t('onbCredits'))}</p>
                   <button className="onb-join" onClick={() => void window.aiOffice.openGenTeam()}>
                     {t('onbJoinGenTeam')}
                     <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">

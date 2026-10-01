@@ -3,8 +3,8 @@ import type {
   AgentTarget,
   SkillInstallState,
   SkillInstallStatus,
-} from '@genoffice/cli/agent-skills'
-import type { InstallOutcome } from '@genoffice/cli/install'
+} from '@teleoffice/cli/agent-skills'
+import type { InstallOutcome } from '@teleoffice/cli/install'
 
 export type { AgentId, AgentTarget, SkillInstallState, SkillInstallStatus }
 
@@ -35,7 +35,7 @@ export interface IntegrationsApi {
   uninstallSkill(agentId: AgentId): Promise<SkillInstallState>
   /** folder picker for "install elsewhere"; null when cancelled */
   pickSkillDir(title: string): Promise<string | null>
-  /** save dialog + write of genoffice-skill-<version>.zip; the saved path, null when cancelled */
+  /** save dialog + write of teleoffice-skill-<version>.zip; the saved path, null when cancelled */
   saveSkillZip(title: string): Promise<string | null>
   /** put text on the clipboard (paths, the manual PATH command) */
   copyText(text: string): Promise<void>

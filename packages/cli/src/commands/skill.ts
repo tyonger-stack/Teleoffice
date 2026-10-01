@@ -17,7 +17,7 @@ import {
   type SkillLedger,
 } from '../agent-skills'
 import { flagBool, flagString } from '../args'
-import { genofficeUserDataDir } from '../gui'
+import { teleofficeUserDataDir } from '../gui'
 import type { CommandContext, CommandDef } from '../registry'
 import { bundledSkillPath } from '../resources'
 import { CliError, EXIT, type Warning } from '../result'
@@ -241,7 +241,7 @@ function row(target: AgentTarget | null, detected: boolean, state: SkillInstallS
 
 /** test seam: the home the agent dotfolders are probed under */
 function home(env: NodeJS.ProcessEnv): string {
-  return env.TELEOFFICE_HOME || env.GENOFFICE_HOME || homedir()
+  return env.TELEOFFICE_HOME || homedir()
 }
 
 function skillFile(): string {
@@ -256,7 +256,7 @@ function bundled(): BundledSkill {
 }
 
 function settingsPath(env: NodeJS.ProcessEnv): string {
-  return join(genofficeUserDataDir(env), 'app-settings.json')
+  return join(teleofficeUserDataDir(env), 'app-settings.json')
 }
 
 function readSettings(env: NodeJS.ProcessEnv): Record<string, unknown> {

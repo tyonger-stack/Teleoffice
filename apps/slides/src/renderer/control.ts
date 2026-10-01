@@ -1,4 +1,4 @@
-import type { RenderNode, RenderSlide } from '@genoffice/pptx-render'
+import type { RenderNode, RenderSlide } from '@teleoffice/pptx-render'
 
 /** Request/reply the shell relays from `teleoffice open --slide/--el` and `teleoffice selection`. */
 export type ControlRequest =

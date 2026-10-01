@@ -23,7 +23,7 @@ const SUBCOMMANDS = ['install', 'uninstall', 'list']
 export const mcpCommand: CommandDef = {
   name: 'mcp',
   summary:
-    "Serve every command as a Model Context Protocol tool: on stdio for an MCP client on this machine (`claude mcp add --transport stdio teleoffice -- teleoffice mcp`, Cursor, Claude Desktop), or with --http as a Streamable HTTP server that clients on other machines reach by URL. Over HTTP, files travel too: PUT /files/<name> uploads one and every tool takes http(s) URLs in place of paths; outputs come back as download URLs and, when small, as embedded resources. Ops, specs and Markdown are passed inline either way; a new deck goes through deck_start, deck_page and deck_build. `mcp install <agent|all>` registers the stdio server in a coding agent's MCP config (Claude Code, Codex, Cursor, Gemini CLI, Copilot CLI, OpenCode, Windsurf); `mcp uninstall <agent>` removes it; `mcp list` shows where each agent stands. The ops, cells and data parameters of the apply and create tools are advertised with the typed per-op schema of `guide <domain> --json`; --compact-schemas (or GENOFFICE_MCP_COMPACT_SCHEMAS=1) advertises them as plain arrays for clients with a small context budget.",
+    "Serve every command as a Model Context Protocol tool: on stdio for an MCP client on this machine (`claude mcp add --transport stdio teleoffice -- teleoffice mcp`, Cursor, Claude Desktop), or with --http as a Streamable HTTP server that clients on other machines reach by URL. Over HTTP, files travel too: PUT /files/<name> uploads one and every tool takes http(s) URLs in place of paths; outputs come back as download URLs and, when small, as embedded resources. Ops, specs and Markdown are passed inline either way; a new deck goes through deck_start, deck_page and deck_build. `mcp install <agent|all>` registers the stdio server in a coding agent's MCP config (Claude Code, Codex, Cursor, Gemini CLI, Copilot CLI, OpenCode, Windsurf); `mcp uninstall <agent>` removes it; `mcp list` shows where each agent stands. The ops, cells and data parameters of the apply and create tools are advertised with the typed per-op schema of `guide <domain> --json`; --compact-schemas (or TELEOFFICE_MCP_COMPACT_SCHEMAS=1) advertises them as plain arrays for clients with a small context budget.",
   usage:
     'mcp [--http <port> [--host <addr>] [--token <secret>]] [--compact-schemas] | mcp install <agent|all> [--dir <path>] [--force] | mcp uninstall <agent|all> [--dir <path>] [--force] | mcp list',
   quiet: (args) => args.positionals.length === 0,
@@ -42,12 +42,12 @@ export const mcpCommand: CommandDef = {
       name: 'token',
       value: 'secret',
       description:
-        'with --http, require this bearer token on every request (default: $GENOFFICE_MCP_TOKEN, else none)',
+        'with --http, require this bearer token on every request (default: $TELEOFFICE_MCP_TOKEN, else none)',
     },
     {
       name: 'compact-schemas',
       description:
-        'advertise ops, cells and data as untyped arrays instead of the per-op schema (smaller tools/list; also GENOFFICE_MCP_COMPACT_SCHEMAS=1)',
+        'advertise ops, cells and data as untyped arrays instead of the per-op schema (smaller tools/list; also TELEOFFICE_MCP_COMPACT_SCHEMAS=1)',
     },
     {
       name: 'dir',
@@ -115,7 +115,7 @@ export const mcpCommand: CommandDef = {
 async function serve(args: Parameters<CommandDef['run']>[0], ctx: CommandContext) {
   const http = flagString(args, 'http')
   const compactSchemas =
-    flagBool(args, 'compact-schemas') || envFlag(ctx.env.GENOFFICE_MCP_COMPACT_SCHEMAS)
+    flagBool(args, 'compact-schemas') || envFlag(ctx.env.TELEOFFICE_MCP_COMPACT_SCHEMAS)
   if (http === undefined) {
     // lazy: the server imports runCli, which registers this command
     const { serveStdio } = await import('../mcp/server')
@@ -135,7 +135,7 @@ async function serve(args: Parameters<CommandDef['run']>[0], ctx: CommandContext
   if (tokenFlag !== undefined && tokenFlag.trim() === '') {
     throw new CliError(
       EXIT.usage,
-      '--token needs a non-empty value (omit the flag, or set GENOFFICE_MCP_TOKEN)',
+      '--token needs a non-empty value (omit the flag, or set TELEOFFICE_MCP_TOKEN)',
       undefined,
       { reason: 'invalid_argument' },
     )
@@ -147,7 +147,7 @@ async function serve(args: Parameters<CommandDef['run']>[0], ctx: CommandContext
     log: ctx.log,
     port,
     host: flagString(args, 'host'),
-    token: tokenFlag ?? (ctx.env.GENOFFICE_MCP_TOKEN?.trim() || undefined),
+    token: tokenFlag ?? (ctx.env.TELEOFFICE_MCP_TOKEN?.trim() || undefined),
     compactSchemas,
   })
   return { summary: 'mcp server stopped' }
@@ -178,7 +178,7 @@ interface Target {
 }
 
 function home(env: NodeJS.ProcessEnv): string {
-  return env.TELEOFFICE_HOME || env.GENOFFICE_HOME || homedir()
+  return env.TELEOFFICE_HOME || homedir()
 }
 
 /** The entry every config gets: the absolute launcher, or on Windows the app run as Node on the bundle. */

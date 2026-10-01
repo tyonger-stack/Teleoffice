@@ -78,7 +78,7 @@ describe('export fonts', () => {
           'font-style': 'normal',
         },
       ],
-      'genoffice-app://slides/assets/index-x.css',
+      'teleoffice-app://slides/assets/index-x.css',
     )
     const fetchMock = vi.fn(async (url: string) => ({
       ok: true,
@@ -90,17 +90,17 @@ describe('export fonts', () => {
 
     const css = await collectExportFontCss(["'Carlito GO', 'PingFang SC', sans-serif"])
     expect(fetchMock.mock.calls[0]![0]).toBe(
-      'genoffice-app://slides/assets/Carlito-Regular-abc.ttf',
+      'teleoffice-app://slides/assets/Carlito-Regular-abc.ttf',
     )
     expect(css).toContain('font-family:"Carlito GO"')
   })
 
   it('resolveSheetUrl keeps absolute and data URLs and falls back to the page base', () => {
-    expect(resolveSheetUrl('data:font/ttf;base64,AA', 'genoffice-app://slides/assets/a.css')).toBe(
+    expect(resolveSheetUrl('data:font/ttf;base64,AA', 'teleoffice-app://slides/assets/a.css')).toBe(
       'data:font/ttf;base64,AA',
     )
-    expect(resolveSheetUrl('/assets/F.ttf', 'genoffice-app://slides/assets/a.css')).toBe(
-      'genoffice-app://slides/assets/F.ttf',
+    expect(resolveSheetUrl('/assets/F.ttf', 'teleoffice-app://slides/assets/a.css')).toBe(
+      'teleoffice-app://slides/assets/F.ttf',
     )
     expect(resolveSheetUrl('F.ttf', null)).toBe(new URL('F.ttf', document.baseURI).href)
   })

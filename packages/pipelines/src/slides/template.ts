@@ -22,7 +22,7 @@ import {
   type OpenedPptx,
   type Paragraph,
   type Slide,
-} from '@genoffice/pptx-engine'
+} from '@teleoffice/pptx-engine'
 import { MAX_DECK_PAGES } from './deck-spec'
 import { coverCropFractions } from './cover-crop'
 import {

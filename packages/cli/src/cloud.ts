@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { setGskProxyUrl } from '@genoffice/ai-search'
-import { genofficeUserDataDir } from './gui'
+import { setGskProxyUrl } from '@teleoffice/ai-search'
+import { teleofficeUserDataDir } from './gui'
 import { packagedResourcesDir } from './resources'
 
 /**
@@ -12,7 +12,7 @@ import { packagedResourcesDir } from './resources'
  * has to locate without Electron.
  */
 export function aiSettingsPath(env: NodeJS.ProcessEnv): string {
-  return env.GENOFFICE_AI_SETTINGS || join(genofficeUserDataDir(env), 'ai-settings.json')
+  return env.TELEOFFICE_AI_SETTINGS || join(teleofficeUserDataDir(env), 'ai-settings.json')
 }
 
 /** First http(s) proxy in the usual environment variables, as the app's main process reads them. */

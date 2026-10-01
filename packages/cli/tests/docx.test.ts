@@ -63,7 +63,7 @@ describe('teleoffice docx (docs editor under jsdom)', () => {
     writeFileSync(
       ops,
       JSON.stringify([
-        { op: 'findReplace', find: firstText.split(' ')[0], replace: 'GENOFFICE' },
+        { op: 'findReplace', find: firstText.split(' ')[0], replace: 'TELEOFFICE' },
         { op: 'setFont', target: { blockIndexes: [0] }, color: 'FF0000', bold: true },
         { op: 'insert_content', afterBlockIndex: 0, html: '<p>Inserted by teleoffice.</p>' },
         {
@@ -85,7 +85,7 @@ describe('teleoffice docx (docs editor under jsdom)', () => {
     const xml = await documentXml(copy)
     expect(xml).toContain('Inserted by teleoffice.')
     expect(xml).toContain('Replaced heading')
-    expect(xml).toContain('GENOFFICE')
+    expect(xml).toContain('TELEOFFICE')
     expect(xml).toContain('<w:color w:val="FF0000"/>')
 
     const after = await run(['docs', 'read', copy, '--range', '1', '--json'])
