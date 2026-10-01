@@ -157,11 +157,7 @@ interface Exploded {
 
 function explodeBlock(block: TextBlock, srcIndex: number): Exploded {
   const out: Exploded = { srcIndex, block, prefixLines: [], items: [] }
-  if (block.dir === 'rtl') {
-    // RTL list markers sit on the right edge; detection is LTR-only for now
-    out.prefixLines = block.lines
-    return out
-  }
+  const rtl = block.dir === 'rtl'
   let current: ItemCand | null = null
   for (const line of block.lines) {
     const marker = parseListMarker(line)
@@ -170,13 +166,15 @@ function explodeBlock(block: TextBlock, srcIndex: number): Exploded {
         srcIndex,
         lines: [line],
         marker,
-        x0: line.box.x0,
+        x0: rtl ? line.box.x1 : line.box.x0,
         fontSize: lineFontSize(line),
         hanging: false,
       }
       out.items.push(current)
     } else if (current) {
-      const indent = (line.box.x0 - current.x0) / current.fontSize
+      const indent = rtl
+        ? (current.x0 - line.box.x1) / current.fontSize
+        : (line.box.x0 - current.x0) / current.fontSize
       if (indent >= HANGING_MIN_EMS && indent <= HANGING_MAX_EMS) current.hanging = true
       current.lines.push(line)
     } else {
@@ -201,18 +199,20 @@ function validateRegion(
   items: ItemCand[],
   seq: { next: number },
   bodyLeftX0?: number,
+  rtl = false,
 ): Map<ItemCand, ListInfo> {
   const accepted = new Map<ItemCand, ListInfo>()
   const em = median(items.map((i) => i.fontSize)) || 12
   const tolPt = LEVEL_X_TOL_EMS * em
 
-  // level clustering over marker x positions
+  // level clustering over marker x positions. RTL markers anchor on the right
+  // edge, so a SMALLER x is a DEEPER level — the sort inverts.
   const levelXs: number[] = []
   for (const item of items) {
     const lvl = levelOf(item.x0, levelXs, tolPt)
     if (lvl === levelXs.length) levelXs.push(item.x0)
   }
-  const sortedXs = [...levelXs].sort((a, b) => a - b)
+  const sortedXs = [...levelXs].sort((a, b) => (rtl ? b - a : a - b))
   const levelFor = (item: ItemCand): number => levelOf(item.x0, sortedXs, tolPt)
 
   // multi-level outline numbers ("3.1.15."): the level comes from the marker's
@@ -267,8 +267,14 @@ function validateRegion(
     // dash bullets without hanging evidence still count as a list when ≥2
     // siblings sit clearly indented past the surrounding plain text (P20:
     // slide sub-bullets are single short lines — dialogue never indents)
-    const indented = (i: ItemCand): boolean =>
-      bodyLeftX0 !== undefined && i.x0 - bodyLeftX0 >= WEAK_INDENT_MIN_EMS * Math.max(i.fontSize, 1)
+    const indented = (i: ItemCand): boolean => {
+      // RTL indent evidence would judge against the right margin, not the left
+      if (rtl) return false
+      return (
+        bodyLeftX0 !== undefined &&
+        i.x0 - bodyLeftX0 >= WEAK_INDENT_MIN_EMS * Math.max(i.fontSize, 1)
+      )
+    }
     const indentedWeakCount = bullets.filter((i) => i.marker.weak && indented(i)).length
     for (const item of bullets) {
       const ok = item.marker.weak
@@ -370,7 +376,7 @@ export function detectListBlocks(
   // neighbours; the page-level fallback (median section-column x0) serves it.
   const plainX0s = exploded
     .filter((e) => e.items.length === 0 && e.block.lines.length > 0)
-    .map((e) => e.block.box.x0)
+    .map((e) => (e.block.dir === 'rtl' ? e.block.box.x1 : e.block.box.x0))
   const bodyLeftX0 = plainX0s.length > 0 ? median(plainX0s) : fallbackBodyLeftX0
 
   // regions = maximal runs of consecutive items; a plain block (or a plain
@@ -388,7 +394,8 @@ export function detectListBlocks(
 
   const accepted = new Map<ItemCand, ListInfo>()
   for (const r of regions) {
-    for (const [cand, info] of validateRegion(r, seq, bodyLeftX0)) accepted.set(cand, info)
+    const rtl = blocks[r[0]!.srcIndex]?.dir === 'rtl'
+    for (const [cand, info] of validateRegion(r, seq, bodyLeftX0, rtl)) accepted.set(cand, info)
   }
   if (accepted.size === 0) return blocks
 

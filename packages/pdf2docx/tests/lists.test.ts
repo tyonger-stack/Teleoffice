@@ -271,3 +271,36 @@ describe('rebuild: list items become real docx numbering', () => {
     ])
   })
 })
+
+describe('detectListBlocks: RTL lists', () => {
+  /** lay out an RTL bullet item with the bullet at a fixed right-edge position */
+  function rtlBulletItem(text: string, rightEdge: number, y: number): PdfChar[] {
+    const logical = `\u2022 ${text}`
+    const reversed = [...logical].reverse().join('')
+    const { chars } = mkText(reversed, 0, { y, fontSize: 10 })
+    const width = chars[chars.length - 1]!.box.x1 - chars[0]!.box.x0
+    const offset = rightEdge - width
+    return chars.map((c) => ({
+      ...c,
+      box: { ...c.box, x0: c.box.x0 + offset, x1: c.box.x1 + offset },
+      looseBox: { ...c.looseBox, x0: c.looseBox.x0 + offset, x1: c.looseBox.x1 + offset },
+      originX: c.originX + offset,
+    }))
+  }
+
+  it('detects Hebrew bullet items as a list with markers stripped', () => {
+    const chars = [
+      ...rtlBulletItem('\u05e4\u05e8\u05d9\u05d8 \u05e8\u05d0\u05e9\u05d5\u05df', 540, 700),
+      ...rtlBulletItem('\u05e4\u05e8\u05d9\u05d8 \u05e9\u05e0\u05d9', 540, 672),
+    ]
+    const body = { bodyLeft: 72, bodyRight: 540 }
+    const blocks = detectListBlocks(groupIntoBlocks(analyzeChars(chars), body), { next: 0 })
+    expect(blocks).toHaveLength(2)
+    for (const b of blocks) {
+      expect(b.dir).toBe('rtl')
+      expect(b.list).toMatchObject({ kind: 'bullet', level: 0 })
+    }
+    expect(textOf(blocks[0]!)).toBe('\u05e4\u05e8\u05d9\u05d8 \u05e8\u05d0\u05e9\u05d5\u05df')
+    expect(textOf(blocks[1]!)).toBe('\u05e4\u05e8\u05d9\u05d8 \u05e9\u05e0\u05d9')
+  })
+})
