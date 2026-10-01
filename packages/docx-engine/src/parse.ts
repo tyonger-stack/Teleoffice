@@ -4126,7 +4126,11 @@ function extractRuns(
         const rId = attrs['r:id']
         const anchor = attrs['w:anchor']
         const tooltip = attrs['w:tooltip']
-        const href = rId ? (ctx.rels.get(rId)?.target ?? '') : anchor ? `#${anchor}` : ''
+        const href = rId
+          ? `${ctx.rels.get(rId)?.target ?? ''}${anchor ? `#${anchor}` : ''}`
+          : anchor
+            ? `#${anchor}`
+            : ''
         const first = runs.length
         walk(childrenOf(node), { href, rId, ...(tooltip ? { tooltip } : {}) }, rev)
         // Word paints a bookmark link only through its character style: an
