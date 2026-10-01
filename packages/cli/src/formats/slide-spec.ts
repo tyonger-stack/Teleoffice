@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
-import { basename, extname, join, resolve } from 'node:path'
+import { basename, extname, isAbsolute, join, resolve } from 'node:path'
 import {
   auditDeck,
   buildDeckPptx,
@@ -51,6 +51,8 @@ export interface BuiltDeck {
   pages: number
   issues: DeckPageIssue[]
   imageFailures: { page: number; url: string }[]
+  totalSlides?: number
+  keptSlides?: number
 }
 
 function specDeps(ctx: PathContext, specDir?: string): BuildPageDeps {
@@ -492,12 +494,28 @@ export interface TemplateSource {
   path: string
   master?: number
   font?: string
+  startLayout?: string
 }
 
 // An existing deck path (relative to the working directory) wins over a
 // registered name; otherwise the name resolves through the registry.
 export function resolveTemplateSource(ref: string, ctx: PathContext): TemplateSource {
   if (ref.includes('/') || ref.includes('\\') || /\.potx?$/i.test(ref)) {
+    const ext = extname(ref).toLowerCase()
+    if (ext !== '.pptx' && ext !== '.potx') {
+      throw new CliError(
+        EXIT.usage,
+        'template file must be a .pptx or .potx: ' + ref,
+        undefined,
+        INVALID,
+      )
+    }
+    const candidate = isAbsolute(ref) ? ref : resolve(ctx.cwd, ref)
+    if (!existsSync(candidate) || !statSync(candidate).isFile()) {
+      throw new CliError(EXIT.file, 'template file not found: ' + ref, undefined, {
+        reason: 'file_not_found',
+      })
+    }
     const path = resolveInput(ref, ctx)
     const known = listTemplates(ctx.env).find((t) => t.path === path)
     return {
@@ -505,6 +523,7 @@ export function resolveTemplateSource(ref: string, ctx: PathContext): TemplateSo
       path,
       ...(known?.master !== undefined ? { master: known.master } : {}),
       ...(known?.font !== undefined ? { font: known.font } : {}),
+      ...(known?.startLayout !== undefined ? { startLayout: known.startLayout } : {}),
     }
   }
   try {
@@ -602,6 +621,8 @@ export async function buildDeckFromTemplateText(
   return {
     bytes: built.bytes,
     pages: parsed.spec.pages.length,
+    totalSlides: built.totalSlides,
+    keptSlides: built.keptSlides,
     issues: withImageWarnings(parsed.issues, built.imageWarnings),
     imageFailures: built.imageFailures,
     template: {
@@ -673,6 +694,9 @@ export async function buildDeckFromTemplateDir(
   })
   if (!parsed.ok) throw new CliError(EXIT.usage, dir + ': ' + parsed.error, undefined, INVALID)
   if (req.keepSlides) parsed.spec.keepSlides = true
+  if (!parsed.spec.title && outline?.topic?.trim()) {
+    parsed.spec.title = outline.topic.trim()
+  }
   const named = (i: number): { file: string } => ({ file: basename(files[i]!) })
   const outlineFindings: BuiltTemplateDeckFromDir['outlineFindings'] = []
   if (outline) {
@@ -716,6 +740,8 @@ export async function buildDeckFromTemplateDir(
   return {
     bytes: built.bytes,
     pages: parsed.spec.pages.length,
+    totalSlides: built.totalSlides,
+    keptSlides: built.keptSlides,
     issues: withImageWarnings(parsed.issues, built.imageWarnings).map((x) => ({
       ...x,
       ...named(x.page),

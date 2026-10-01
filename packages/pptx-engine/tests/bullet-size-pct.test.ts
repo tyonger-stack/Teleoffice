@@ -20,6 +20,9 @@ describe('parseBulletSizePct', () => {
 
   it('clamps to the schema range and rejects junk', () => {
     expect(parseBulletSizePct('5000')).toBe(25)
+    // the whole-percent cut-off is 1000: 999 is a percent, 1000 thousandths
+    expect(parseBulletSizePct('999')).toBe(400)
+    expect(parseBulletSizePct('1000')).toBe(25)
     expect(parseBulletSizePct('900000')).toBe(400)
     expect(parseBulletSizePct('abc')).toBeNull()
     expect(parseBulletSizePct('')).toBeNull()

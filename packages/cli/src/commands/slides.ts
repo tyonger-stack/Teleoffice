@@ -138,7 +138,7 @@ export const slidesCommand: CommandDef = {
           undefined,
           {
             reason: verb === undefined ? 'missing_argument' : 'invalid_argument',
-            suggestion: 'run genoffice help slides',
+            suggestion: 'run `genoffice help slides`',
           },
         )
     }
@@ -331,7 +331,12 @@ async function check(
     const tmpl = templateRef ? await templateBytesAndInfo(templateRef, ctx) : null
     const r = parseOutline(
       text,
-      tmpl ? { templateLayouts: templateCheckLayouts(tmpl.info, tmpl.resolved.master) } : {},
+      tmpl
+        ? {
+            templateLayouts: templateCheckLayouts(tmpl.info, tmpl.resolved.master),
+            templateLayoutCount: tmpl.info.masters.flatMap((m) => m.layouts).length,
+          }
+        : {},
     )
     if (!r.ok) {
       throw new CliError(EXIT.usage, `${basename(path)}: ${r.error}`, undefined, {
@@ -420,7 +425,7 @@ async function check(
   return {
     summary: count
       ? `${basename(path)}: ${count} finding(s)`
-      : basename(path) + ': page builds clean',
+      : `${basename(path)}: page builds clean`,
     detail,
   }
 }
@@ -482,12 +487,7 @@ async function checkTemplatePage(
           {
             page,
             level: 'error' as const,
-            message:
-              'no outline entry for page ' +
-              page +
-              ' (the outline has ' +
-              stage.outline.outline.pages.length +
-              ' pages)',
+            message: `no outline entry for page ${page} (the outline has ${stage.outline.outline.pages.length} pages)`,
           },
         ]
     : []
@@ -526,21 +526,14 @@ async function checkTemplatePage(
   if (errors.length) {
     throw new CliError(
       EXIT.usage,
-      basename(path) +
-        ': ' +
-        errors.length +
-        ' error(s) against ' +
-        basename(stage.outline!.file) +
-        ' pages[' +
-        page +
-        ']',
+      `${basename(path)}: ${errors.length} error(s) against ${basename(stage.outline!.file)} pages[${page}]`,
       detail,
     )
   }
   return {
     summary: count
-      ? basename(path) + ': ' + count + ' finding(s)'
-      : basename(path) + ': page builds clean',
+      ? `${basename(path)}: ${count} finding(s)`
+      : `${basename(path)}: page builds clean`,
     detail,
   }
 }

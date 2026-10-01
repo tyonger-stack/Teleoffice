@@ -220,7 +220,10 @@ export const createCommand: CommandDef = {
       }
     }
     return {
-      summary: `created ${basename(output)} (${result.slides} slides)`,
+      summary:
+        result.keptSlides !== undefined && result.keptSlides > 0
+          ? `created ${basename(output)} (${result.slides} slides: ${result.slides - result.keptSlides} new + ${result.keptSlides} kept from template)`
+          : `created ${basename(output)} (${result.slides} slides)`,
       outputPath: output,
       detail,
     }
@@ -230,7 +233,12 @@ export const createCommand: CommandDef = {
 async function createPptx(
   args: Parameters<CommandDef['run']>[0],
   ctx: CommandContext,
-): Promise<{ bytes: Uint8Array; slides: number; detail: CommandResult['detail'] }> {
+): Promise<{
+  bytes: Uint8Array
+  slides: number
+  keptSlides?: number
+  detail: CommandResult['detail']
+}> {
   const { text, source } = readOpsInput(args, ctx)
   const ops = inlineLocalFiles(parseOps(text, source), ctx)
   const opened = await blankDeck()
@@ -253,7 +261,12 @@ async function createPptx(
 async function createPptxFromSpec(
   args: Parameters<CommandDef['run']>[0],
   ctx: CommandContext,
-): Promise<{ bytes: Uint8Array; slides: number; detail: CommandResult['detail'] }> {
+): Promise<{
+  bytes: Uint8Array
+  slides: number
+  keptSlides?: number
+  detail: CommandResult['detail']
+}> {
   const spec = flagString(args, 'spec')!
   const next =
     'genoffice slides audit <file> for the geometry audit; genoffice slides render <file> --out <dir> for PNGs; genoffice slides replace <file> --slide n --spec <page.json> to rebuild one page'
@@ -281,7 +294,8 @@ async function createPptxFromSpec(
       })
       return {
         bytes: built.bytes,
-        slides: built.pages,
+        slides: built.totalSlides ?? built.pages,
+        ...(built.keptSlides !== undefined ? { keptSlides: built.keptSlides } : {}),
         detail: {
           via: 'template deck spec directory',
           template: built.template,
@@ -330,7 +344,8 @@ async function createPptxFromSpec(
     )
     return {
       bytes: built.bytes,
-      slides: built.pages,
+      slides: built.totalSlides ?? built.pages,
+      ...(built.keptSlides !== undefined ? { keptSlides: built.keptSlides } : {}),
       detail: {
         via: 'template deck spec',
         template: built.template,

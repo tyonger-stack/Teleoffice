@@ -1,7 +1,14 @@
-import { mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+// homedir() is redirected per test (fakeHome) to exercise the ~/.local/bin paths.
+const osHome = vi.hoisted(() => ({ fake: '' }))
+vi.mock('node:os', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:os')>()
+  return { ...actual, homedir: () => osHome.fake || actual.homedir() }
+})
 import {
   AGY_NO_VIDEO,
   agyDescribe,
@@ -86,6 +93,7 @@ beforeEach(() => {
     'GENOFFICE_MMX_PATH',
     'MINIMAX_API_KEY',
     'MMX_CONFIG_DIR',
+    'MINIMAX_REGION',
     'AI_SEARCH_DISABLE_GSK',
   ]) {
     savedEnv[k] = process.env[k]
@@ -97,11 +105,13 @@ beforeEach(() => {
   process.env.GENOFFICE_MMX_PATH = dummyBin
   delete process.env.MINIMAX_API_KEY
   delete process.env.MMX_CONFIG_DIR
+  delete process.env.MINIMAX_REGION
   // No Genspark in these tests: the gsk backend stays off unless a test enables it.
   process.env.AI_SEARCH_DISABLE_GSK = '1'
 })
 
 afterEach(() => {
+  osHome.fake = ''
   setLocalCliRunner(null)
   setAgyRedirectResolver(null)
   vi.restoreAllMocks()
@@ -1050,6 +1060,42 @@ describe('local CLI subprocess environment', () => {
     expect(inv?.via).toBe('mmx-env')
     expect(inv?.baseArgs).toEqual([])
     expect(inv?.env.MINIMAX_REGION).toBe('global')
+    expect(resolveMmxInvocation(null)?.env.MINIMAX_REGION).toBe('cn')
+  })
+
+  it('lets MINIMAX_REGION win when no region is saved, and a saved region win over it', () => {
+    process.env.MINIMAX_REGION = 'global'
+    process.env.GENOFFICE_MMX_PATH = dummyBin
+    const plain = resolveMmxInvocation(null)
+    expect(plain?.via).toBe('mmx')
+    expect(plain?.baseArgs).toEqual(['--non-interactive', '--region', 'global'])
+    const unset = resolveMmxInvocation({ localCli: defaultAiLocalCliSettings() })
+    expect(unset?.baseArgs).toEqual(['--non-interactive', '--region', 'global'])
+    const saved = resolveMmxInvocation({
+      localCli: { ...defaultAiLocalCliSettings(), mmxRegion: 'cn' },
+    })
+    expect(saved?.baseArgs).toEqual(['--non-interactive', '--region', 'cn'])
+  })
+
+  it('passes the region to the ~/.local/bin/mmx-env wrapper', () => {
+    const home = ownedDir('genoffice-home-')
+    mkdirSync(join(home, '.local', 'bin'), { recursive: true })
+    const wrapper = join(home, '.local', 'bin', 'mmx-env')
+    writeFileSync(wrapper, '')
+    osHome.fake = home
+    delete process.env.GENOFFICE_MMX_PATH
+    process.env.MINIMAX_API_KEY = 'k'
+    process.env.MINIMAX_REGION = 'global'
+    const fromEnv = resolveMmxInvocation(null)
+    expect(fromEnv?.cmd).toBe(wrapper)
+    expect(fromEnv?.via).toBe('mmx-env')
+    expect(fromEnv?.env.MINIMAX_REGION).toBe('global')
+    const saved = resolveMmxInvocation({
+      localCli: { ...defaultAiLocalCliSettings(), mmxRegion: 'cn' },
+    })
+    expect(saved?.cmd).toBe(wrapper)
+    expect(saved?.env.MINIMAX_REGION).toBe('cn')
+    delete process.env.MINIMAX_REGION
     expect(resolveMmxInvocation(null)?.env.MINIMAX_REGION).toBe('cn')
   })
 

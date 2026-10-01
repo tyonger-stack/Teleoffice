@@ -1,8 +1,29 @@
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { run, tempDir } from './helpers'
+
+const owned: string[] = []
+
+afterEach(() => {
+  for (const dir of owned.splice(0)) {
+    try {
+      rmSync(dir, { recursive: true, force: true })
+    } catch {
+      // ignore cleanup errors
+    }
+  }
+})
+
+function track(dir: string): string {
+  owned.push(dir)
+  return dir
+}
+
+function ownedTempDir(): string {
+  return track(tempDir())
+}
 
 function textEl(text: string) {
   return {
@@ -27,13 +48,13 @@ async function makeTemplate(dir: string): Promise<string> {
 }
 
 function templateEnv(dir: string): { cwd: string; env: NodeJS.ProcessEnv } {
-  const templates = mkdtempSync(join(tmpdir(), 'genoffice-templates-'))
+  const templates = track(mkdtempSync(join(tmpdir(), 'genoffice-templates-')))
   return { cwd: dir, env: { ...process.env, GENOFFICE_TEMPLATES_DIR: templates } }
 }
 
 describe('genoffice template', () => {
   it('inspects a deck, manages the registry and reports the dir', async () => {
-    const dir = tempDir()
+    const dir = ownedTempDir()
     const ctx = templateEnv(dir)
     const template = await makeTemplate(dir)
     const inspected = await run(['template', 'inspect', template, '--json'], ctx)
@@ -43,7 +64,6 @@ describe('genoffice template', () => {
     expect(detail.canvas).toEqual({ w: 1280, h: 720 })
     expect(detail.usage.length).toBeGreaterThan(0)
     expect(inspected.json().summary).toContain('1 layouts')
-
     expect((await run(['template', 'list', '--json'], ctx)).json().detail.templates).toEqual([])
     const added = await run(
       ['template', 'add', 'Base', template, '--master', '0', '--font', 'Arial', '--json'],
@@ -64,7 +84,7 @@ describe('genoffice template', () => {
   })
 
   it('builds a deck on a template file and on a registered name', async () => {
-    const dir = tempDir()
+    const dir = ownedTempDir()
     const ctx = templateEnv(dir)
     const template = await makeTemplate(dir)
     const layout = (await run(['template', 'inspect', template, '--json'], ctx)).json().detail
@@ -90,7 +110,6 @@ describe('genoffice template', () => {
     expect(r.json().detail.template.slideSize).toEqual({ w: 1280, h: 720 })
     const read = await run(['slides', 'read', out, '--json'], ctx)
     expect(read.json().detail.slides).toBe(2)
-
     await run(['template', 'add', 'base', template, '--json'], ctx)
     const spec2 = join(dir, 'deck2.json')
     writeFileSync(
@@ -122,7 +141,7 @@ describe('genoffice template', () => {
   })
 
   it('refuses unknown layouts and non-pptx or ops template builds', async () => {
-    const dir = tempDir()
+    const dir = ownedTempDir()
     const ctx = templateEnv(dir)
     const template = await makeTemplate(dir)
     const bad = join(dir, 'bad.json')
@@ -166,7 +185,7 @@ describe('genoffice template', () => {
   })
 
   it('checks outlines and pages in template mode and aliases slides layouts', async () => {
-    const dir = tempDir()
+    const dir = ownedTempDir()
     const ctx = templateEnv(dir)
     const template = await makeTemplate(dir)
     const layout = (await run(['template', 'inspect', template, '--json'], ctx)).json().detail
@@ -204,5 +223,138 @@ describe('genoffice template', () => {
     const layouts = await run(['slides', 'layouts', template, '--json'], ctx)
     expect(layouts.code).toBe(0)
     expect(layouts.json().summary).toContain('1 layouts')
+  })
+
+  it('guards copy destination, same-file copy and remove kept files', async () => {
+    const dir = ownedTempDir()
+    const ctx = templateEnv(dir)
+    const template = await makeTemplate(dir)
+    const templatesDir = ctx.env.GENOFFICE_TEMPLATES_DIR as string
+    await run(['template', 'add', 'guarded', template, '--copy', '--json'], ctx)
+    const dest = join(templatesDir, 'guarded.pptx')
+    expect(existsSync(dest)).toBe(true)
+    const before = readFileSync(dest)
+    const clash = await run(['template', 'add', 'guarded', template, '--copy', '--json'], ctx)
+    expect(clash.code).toBe(1)
+    expect(clash.json().message).toContain('--force')
+    expect(readFileSync(dest).equals(before)).toBe(true)
+    const forced = await run(
+      ['template', 'add', 'guarded', template, '--copy', '--force', '--json'],
+      ctx,
+    )
+    expect(forced.code).toBe(0)
+    const ownFile = join(templatesDir, 'users-own.pptx')
+    writeFileSync(ownFile, readFileSync(template))
+    const aliasAdded = await run(['template', 'add', 'alias', ownFile, '--json'], ctx)
+    expect(aliasAdded.code).toBe(0)
+    const removedAlias = await run(['template', 'remove', 'alias', '--json'], ctx)
+    expect(removedAlias.code).toBe(0)
+    expect(removedAlias.json().detail.keptFile).toBe(ownFile)
+    expect(existsSync(ownFile)).toBe(true)
+    const removedGuarded = await run(['template', 'remove', 'guarded', '--json'], ctx)
+    expect(removedGuarded.code).toBe(0)
+    expect(removedGuarded.json().detail.deletedFile).toBe(dest)
+    expect(existsSync(dest)).toBe(false)
+  })
+
+  it('validates start-layout and shows it in list', async () => {
+    const dir = ownedTempDir()
+    const ctx = templateEnv(dir)
+    const template = await makeTemplate(dir)
+    const layout = (await run(['template', 'inspect', template, '--json'], ctx)).json().detail
+      .masters[0].layouts[0].name as string
+    const ok = await run(
+      ['template', 'add', 'with-start', template, '--start-layout', layout, '--json'],
+      ctx,
+    )
+    expect(ok.code).toBe(0)
+    const listed = await run(['template', 'list', '--json'], ctx)
+    expect(listed.json().detail.templates).toMatchObject([
+      { name: 'with-start', startLayout: layout },
+    ])
+    const bad = await run(
+      ['template', 'add', 'bad-start', template, '--start-layout', 'No Such Layout XYZ', '--json'],
+      ctx,
+    )
+    expect(bad.code).toBe(1)
+    expect(bad.json().message).toContain('available layouts')
+  })
+
+  it('reports kept slides in the create summary', async () => {
+    const dir = ownedTempDir()
+    const ctx = templateEnv(dir)
+    const template = await makeTemplate(dir)
+    const layout = (await run(['template', 'inspect', template, '--json'], ctx)).json().detail
+      .masters[0].layouts[0].name as string
+    const spec = join(dir, 'deck.json')
+    writeFileSync(spec, JSON.stringify({ pages: [{ layout, elements: [textEl('New page')] }] }))
+    const out = join(dir, 'deck.pptx')
+    const r = await run(
+      [
+        'create',
+        '--type',
+        'pptx',
+        '--template',
+        template,
+        '--spec',
+        spec,
+        '--out',
+        out,
+        '--keep-template-slides',
+        '--json',
+      ],
+      ctx,
+    )
+    expect(r.code).toBe(0)
+    expect(r.json().summary).toContain('2 slides')
+    expect(r.json().summary).toContain('1 new')
+    expect(r.json().summary).toContain('kept from template')
+  })
+
+  it('rejects template paths with bad extension or missing files', async () => {
+    const dir = ownedTempDir()
+    const ctx = templateEnv(dir)
+    const template = await makeTemplate(dir)
+    const layout = (await run(['template', 'inspect', template, '--json'], ctx)).json().detail
+      .masters[0].layouts[0].name as string
+    const spec = join(dir, 'deck.json')
+    writeFileSync(spec, JSON.stringify({ pages: [{ layout, elements: [textEl('x')] }] }))
+    const badExt = join(dir, 'note.txt')
+    writeFileSync(badExt, 'hello')
+    const rExt = await run(
+      [
+        'create',
+        '--type',
+        'pptx',
+        '--template',
+        badExt,
+        '--spec',
+        spec,
+        '--out',
+        join(dir, 'o1.pptx'),
+        '--json',
+      ],
+      ctx,
+    )
+    expect(rExt.code).not.toBe(0)
+    expect(rExt.json().message).toContain('.pptx or .potx')
+    const missing = join(dir, 'missing.pptx')
+    const rMissing = await run(
+      [
+        'create',
+        '--type',
+        'pptx',
+        '--template',
+        missing,
+        '--spec',
+        spec,
+        '--out',
+        join(dir, 'o2.pptx'),
+        '--json',
+      ],
+      ctx,
+    )
+    expect(rMissing.code).not.toBe(0)
+    expect(rMissing.json().message).toContain('not found')
   })
 })

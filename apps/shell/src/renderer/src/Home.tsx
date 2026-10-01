@@ -2132,7 +2132,8 @@ export function Home() {
     const templateCard = (
       <div className="quick-card-wrap" ref={templateMenuWrapRef}>
         <button
-          className="quick-card"
+          className="quick-card template-card"
+          title={`${t('newSlideFromTemplate')} · ${t('templateCardSub')}`}
           aria-haspopup="menu"
           aria-expanded={templateMenuOpen}
           onClick={() => {
@@ -2152,7 +2153,6 @@ export function Home() {
           <span className="quick-text">
             <span className="quick-title-row">
               <span className="quick-title">{t('newSlideFromTemplate')}</span>
-              <span className="ai-chip">AI</span>
             </span>
             <span className="quick-sub">{t('templateCardSub')}</span>
           </span>

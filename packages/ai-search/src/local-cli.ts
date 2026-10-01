@@ -212,8 +212,17 @@ export function resolveAgyPath(settings: LocalCliSettingsInput = undefined): str
   return findOnPath('agy')
 }
 
+// Region for mmx: the one saved in settings, else MINIMAX_REGION from the
+// environment, else cn.
+export function effectiveMmxRegion(settings: LocalCliSettingsInput = undefined): 'cn' | 'global' {
+  const saved = eff(settings).mmxRegion
+  if (saved === 'cn' || saved === 'global') return saved
+  const env = (process.env.MINIMAX_REGION ?? '').trim().toLowerCase()
+  return env === 'global' ? 'global' : 'cn'
+}
+
 // The mmx-env wrapper reads the region from MINIMAX_REGION (it adds no
-// --region flag of its own), so the user's settings region must travel in the
+// --region flag of its own), so the effective region must travel in the
 // environment.
 export function mmxEnvWrapperEnv(region: string): NodeJS.ProcessEnv {
   return { ...process.env, MINIMAX_REGION: region }
@@ -243,15 +252,16 @@ export function resolveMmxInvocation(
   settings: LocalCliSettingsInput = undefined,
 ): MmxInvocation | null {
   const s = eff(settings)
+  const region = effectiveMmxRegion(settings)
   const override = (process.env.GENOFFICE_MMX_PATH ?? '').trim() || s.mmxPath
   if (override) {
     if (!existsSync(override)) return null
     if (basename(override) === 'mmx-env') {
-      return { cmd: override, baseArgs: [], env: mmxEnvWrapperEnv(s.mmxRegion), via: 'mmx-env' }
+      return { cmd: override, baseArgs: [], env: mmxEnvWrapperEnv(region), via: 'mmx-env' }
     }
     return {
       cmd: override,
-      baseArgs: ['--non-interactive', '--region', s.mmxRegion],
+      baseArgs: ['--non-interactive', '--region', region],
       env: { ...process.env },
       via: 'mmx',
     }
@@ -259,14 +269,14 @@ export function resolveMmxInvocation(
   const key = (process.env.MINIMAX_API_KEY ?? '').trim()
   const wrapper = join(homedir(), '.local', 'bin', 'mmx-env')
   if (key && existsSync(wrapper)) {
-    return { cmd: wrapper, baseArgs: [], env: mmxEnvWrapperEnv(s.mmxRegion), via: 'mmx-env' }
+    return { cmd: wrapper, baseArgs: [], env: mmxEnvWrapperEnv(region), via: 'mmx-env' }
   }
   const homeBin = join(homedir(), '.local', 'bin', 'mmx')
   const cmd = existsSync(homeBin) ? homeBin : findOnPath('mmx')
   if (!cmd) return null
   return {
     cmd,
-    baseArgs: ['--non-interactive', '--region', s.mmxRegion],
+    baseArgs: ['--non-interactive', '--region', region],
     env: { ...process.env },
     via: 'mmx',
   }

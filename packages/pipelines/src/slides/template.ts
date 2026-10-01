@@ -498,6 +498,25 @@ function resolveLayout(
   }
   if (typeof ref === 'string' && ref.trim()) {
     let name = ref.trim()
+    // Numeric strings are flat indexes, range-checked like numbers.
+    if (/^\d+$/.test(name)) {
+      const n = Number(name)
+      const layout = flat[n]
+      if (!layout) {
+        return {
+          ok: false,
+          error:
+            'unknown layout index ' +
+            n +
+            ' (this template has ' +
+            flat.length +
+            ' layouts, 0-' +
+            (flat.length - 1) +
+            ')',
+        }
+      }
+      return { ok: true, resolved: { index: n, layout } }
+    }
     let scope: number | undefined
     const scoped = /^(\d+)\s*:\s*(.+)$/.exec(name)
     if (scoped) {
@@ -886,6 +905,8 @@ export interface TemplateBuildResult {
   imageWarnings: { page: number; message: string }[]
   issues: TemplateDeckPageIssue[]
   layoutsUsed: TemplateLayoutUsed[]
+  totalSlides: number
+  keptSlides: number
 }
 
 export type TemplateBuildDeps = BuildPageDeps & { font?: string }
@@ -1304,5 +1325,13 @@ export async function buildTemplateDeck(
       bytes = (await growTextBoxesToContent(bytes, deps.fontMetrics, s)) ?? bytes
     }
   }
-  return { bytes, imageFailures, imageWarnings, issues: [], layoutsUsed }
+  return {
+    bytes,
+    imageFailures,
+    imageWarnings,
+    issues: [],
+    layoutsUsed,
+    totalSlides: current.deck.slides.length,
+    keptSlides: spec.keepSlides ? n0 : 0,
+  }
 }

@@ -484,11 +484,14 @@ body.vib .home {
   letter-spacing: 0.03em;
 }
 
+/* The wrap is the flex item for the template card. Plain cards are
+   content-box (flex basis 0 + 36px padding + 2px border), so the wrap starts
+   from that same 38px and caps at 280px + 38px: all cards share one width. */
 .quick-card-wrap {
   position: relative;
-  flex: 1;
-  min-width: 0;
-  max-width: 280px;
+  flex: 1 1 38px;
+  min-width: 38px;
+  max-width: calc(280px + 38px);
   display: flex;
 }
 
@@ -496,6 +499,18 @@ body.vib .home {
   flex: 1;
   width: 100%;
   max-width: none;
+}
+
+/* the template card has no AI chip; a long locale label wraps to a second line
+   instead of collapsing to an ellipsis */
+.template-card .quick-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
 }
 
 .template-menu {
@@ -537,7 +552,9 @@ body.vib .home {
     flex-wrap: wrap;
   }
 
+  /* border-box here so a card's basis is its whole width: two cards per row */
   .quick-card {
+    box-sizing: border-box;
     flex: 1 1 calc(50% - 5px);
     max-width: none;
   }

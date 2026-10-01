@@ -20,7 +20,7 @@ genoffice create --type pptx --spec deck.json --out deck.pptx --render deck/prev
 genoffice slides check deck/outline.json | deck/pages/03.json   # outline rules (exit 1 on errors) / build + audit one page file
 genoffice template inspect company-template.pptx --json   # slide size, masters, layouts with placeholder slots (usage hints); slides layouts <file> shows the same
 genoffice template list   # registered templates in ~/.genoffice/templates (GENOFFICE_TEMPLATES_DIR moves it)
-genoffice template add quarterly ./company-template.pptx --copy --master 1 --font "Microsoft YaHei" --description "QBR master" [--force]   # template remove <name> drops it again
+genoffice template add quarterly ./company-template.pptx --copy --master 1 --font "Microsoft YaHei" --description "QBR master" [--start-layout "Cover"] [--force]   # template remove <name> drops it again
 genoffice create --type pptx --template quarterly --spec deck.json --out deck.pptx --font "Microsoft YaHei" [--keep-template-slides]   # deck on the template layouts (the spec or outline may also name "template"); pages fill title/body/placeholder slots in template px
 genoffice slides check deck/outline.json --template quarterly   # outline layouts against the template; a page file builds on it before the audit
 genoffice slides replace deck.pptx --slide 2 --spec deck/pages/03.json   # rebuild one slide from its page file
@@ -92,7 +92,7 @@ ranges, available ids, sheet names, usage lines) come back as fields in
 
 ## Slide template decks
 
-`create --type pptx --spec` also builds on a corporate `.pptx` template so slides use its masters, layouts and theme instead of blank pages. `template inspect` reports the slide size, the theme colors and fonts per master, and every layout with its placeholder slots; a template page names its `layout` and fills `title`/`subtitle`/`body` plus single `placeholders[]` slots (`text`, `paragraphs`, `bullets`, `image`) with `elements` in template px (`guide slides spec` has the format). The `--template` flag wins over a `"template"` field in the spec, which wins over one in the outline; `--font` (else the spec `font`, else the registry default) retypes the theme and every run without an explicit font, and `--keep-template-slides` keeps the sample slides. Templates register with `template add` into `~/.genoffice/templates` (`GENOFFICE_TEMPLATES_DIR` moves it).
+`create --type pptx --spec` also builds on a corporate `.pptx` template so slides use its masters, layouts and theme instead of blank pages. `template inspect` reports the slide size, the theme colors and fonts per master, and every layout with its placeholder slots; a template page names its `layout` and fills `title`/`subtitle`/`body` plus single `placeholders[]` slots (`text`, `paragraphs`, `bullets`, `image`) with `elements` in template px (`guide slides spec` has the format). The `--template` flag wins over a `"template"` field in the spec, which wins over one in the outline; `--font` (else the spec `font`, else the registry default) retypes the theme and every run without an explicit font, and `--keep-template-slides` keeps the sample slides. Templates register with `template add` into `~/.genoffice/templates` (`GENOFFICE_TEMPLATES_DIR` moves it); `--start-layout <name>` records the GUI starter layout (a layout name, optionally qualified as `1:Name`).
 
 ## Template merge
 

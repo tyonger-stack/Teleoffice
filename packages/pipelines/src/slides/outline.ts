@@ -65,6 +65,9 @@ export interface ParseOutlineOptions {
   /** template layout names: layout checks run against them and the
       layout-variety rules are skipped (template decks reuse one content layout) */
   templateLayouts?: string[]
+  /** flat layout count across all masters: numeric layouts are range-checked
+      against it when present (slides.ts passes info.masters flat length) */
+  templateLayoutCount?: number
 }
 
 export function parseOutline(
@@ -145,7 +148,22 @@ function normalizePage(
   } else if (opts.templateLayouts) {
     if (!layout) {
       err('"layout" is missing; pick one of ' + opts.templateLayouts.join(', '))
-    } else if (!opts.templateLayouts.includes(layout) && !/^\d+$/.test(layout)) {
+    } else if (/^\d+$/.test(layout)) {
+      if (opts.templateLayoutCount !== undefined) {
+        const n = Number(layout)
+        if (!Number.isInteger(n) || n < 0 || n >= opts.templateLayoutCount) {
+          err(
+            '"layout" ' +
+              layout +
+              ' is out of range (this template has ' +
+              opts.templateLayoutCount +
+              ' layouts, 0-' +
+              (opts.templateLayoutCount - 1) +
+              ')',
+          )
+        }
+      }
+    } else if (!opts.templateLayouts.includes(layout)) {
       err(
         '"layout" ' +
           layout +

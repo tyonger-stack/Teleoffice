@@ -3,11 +3,12 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { randomBytes } from 'node:crypto'
 import { basename, extname, join } from 'node:path'
-import { buildTemplateDeck, inspectTemplate } from '@genoffice/pipelines/slides'
+import { buildTemplateDeck, inspectTemplate, type SpecElement } from '@genoffice/pipelines/slides'
+import { PackageArchive } from '@genoffice/pptx-engine'
 import {
   addTemplate,
   listTemplates,
-  resolveTemplate,
+  resolveRegisteredTemplate,
   templatesDir,
 } from '@genoffice/pipelines/slides/templates'
 
@@ -83,36 +84,130 @@ function uniqueDeckPath(dir: string, base: string): string {
   }
 }
 
+type TemplateInfoOf = Awaited<ReturnType<typeof inspectTemplate>>
+type TemplateLayoutOf = TemplateInfoOf['masters'][number]['layouts'][number]
+
+function hasTitlePlaceholder(layout: TemplateLayoutOf): boolean {
+  return layout.placeholders.some((p) => p.type === 'ctrTitle' || p.type === 'title')
+}
+
+/**
+ * The starter slide's layout: the registry startLayout when set; else, on the
+ * registry master, the first layout a sample slide uses there (the template
+ * author's own cover), then the most decorated title layout; without a
+ * registry master, the first sample slide's layout, then a title layout of the
+ * template's default master. Office default layouts that share a master with
+ * the branded ones often carry no decorations, so "first layout with a title"
+ * alone picks a blank page.
+ */
+export function pickStartLayout(
+  info: TemplateInfoOf,
+  pref: { master?: number; startLayout?: string },
+): TemplateLayoutOf {
+  const flat = info.masters.flatMap((m) => m.layouts)
+  if (pref.startLayout) {
+    // "Name", "<master>:Name" or a flat layout index, as `template add --start-layout` accepts
+    const raw = pref.startLayout.trim()
+    const scoped = /^(\d+)\s*:\s*(.+)$/.exec(raw)
+    const scope = scoped ? Number(scoped[1]) : pref.master
+    const wanted = (scoped ? scoped[2]! : raw).trim().toLowerCase()
+    const named = (l: TemplateLayoutOf): boolean => l.name.toLowerCase() === wanted
+    const hit = /^\d+$/.test(raw)
+      ? flat[Number(raw)]
+      : (flat.find((l) => named(l) && l.master === scope) ??
+        (scoped ? undefined : flat.find(named)))
+    if (hit) return hit
+  }
+  const masterIdx = pref.master !== undefined && info.masters[pref.master] ? pref.master : undefined
+  const sampleLayouts = info.slides
+    .map((s) => flat[s.layout])
+    .filter((l): l is TemplateLayoutOf => !!l)
+  if (masterIdx === undefined) {
+    const first = sampleLayouts[0]
+    if (first) return first
+  } else {
+    const first = sampleLayouts.find((l) => l.master === masterIdx)
+    if (first) return first
+  }
+  const master =
+    info.masters[masterIdx ?? info.defaultMaster] ??
+    info.masters[info.defaultMaster] ??
+    info.masters[0]!
+  const titled = master.layouts.filter(hasTitlePlaceholder)
+  const decorated = [...titled].sort((a, b) => b.decorations - a.decorations)[0]
+  const chosen = decorated ?? master.layouts[0]
+  if (!chosen) throw new Error('Template master has no layouts.')
+  return chosen
+}
+
+/**
+ * Title color for the added title box: the explicit color the template gives
+ * its title placeholders on this master (brand titles usually carry one), else
+ * the theme's dark text color.
+ */
+async function titleColor(
+  bytes: Uint8Array,
+  info: TemplateInfoOf,
+  master: number,
+): Promise<string> {
+  try {
+    const archive = await PackageArchive.open(bytes)
+    for (const layout of info.masters[master]?.layouts ?? []) {
+      const xml = archive.readText(layout.path) ?? ''
+      for (const sp of xml.split('<p:sp>').slice(1)) {
+        if (!/<p:ph[^>]*type="(title|ctrTitle)"/.test(sp)) continue
+        const hex = /<a:srgbClr val="([0-9A-Fa-f]{6})"/.exec(sp.split('</p:sp>')[0] ?? '')?.[1]
+        if (hex) return '#' + hex.toUpperCase()
+      }
+    }
+  } catch {
+    // unreadable layout parts: fall back to the theme color
+  }
+  const colors = info.masters[master]?.theme.colors ?? {}
+  const pick = colors.dk1 ?? colors.tx1 ?? '1F1F1F'
+  return '#' + pick.replace(/^#/, '').toUpperCase()
+}
+
 // Build a one-slide starter deck from a template and write it atomically.
 export async function createDeckFromTemplate(
   name: string,
   dir: string,
   untitledBase: string,
   env: NodeJS.ProcessEnv = process.env,
+  titleText: string = untitledBase,
 ): Promise<string> {
   if (typeof name !== 'string' || !name) throw new Error('Invalid template name.')
-  const resolved = resolveTemplate(name, { env })
+  // Only registered (or templates-dir) names: the renderer never hands a path.
+  const resolved = resolveRegisteredTemplate(name, { env })
   const bytes = new Uint8Array(readFileSync(resolved.path))
   const info = await inspectTemplate(bytes)
   if (info.masters.length === 0) throw new Error('Template has no masters.')
-  let layoutIndex: number | undefined
-  const firstSample = info.slides[0]?.layout
-  // A registry master wins over the sample slides, which may sit on another master.
-  if (resolved.master === undefined && typeof firstSample === 'number' && firstSample >= 0) {
-    layoutIndex = firstSample
-  } else {
-    const masterIdx = resolved.master ?? info.defaultMaster
-    const master = info.masters[masterIdx] ?? info.masters[info.defaultMaster] ?? info.masters[0]!
-    const withTitle = master.layouts.find((l) =>
-      l.placeholders.some((p) => p.type === 'ctrTitle' || p.type === 'title'),
-    )
-    const chosen = withTitle ?? master.layouts[0]
-    if (!chosen) throw new Error('Template master has no layouts.')
-    layoutIndex = chosen.index
-  }
-  const flat = info.masters.flatMap((m) => m.layouts)
-  const layout = flat[layoutIndex]
-  if (!layout) throw new Error('Unknown layout index ' + layoutIndex + '.')
+  const layout = pickStartLayout(info, {
+    ...(resolved.master !== undefined ? { master: resolved.master } : {}),
+    ...(resolved.startLayout ? { startLayout: resolved.startLayout } : {}),
+  })
+  const { w, h } = info.slideSize.px
+  // A layout without a title placeholder (a branded cover) gets a title text
+  // box so the starter slide is not empty.
+  const boxColor = hasTitlePlaceholder(layout) ? '' : await titleColor(bytes, info, layout.master)
+  const elements: SpecElement[] = hasTitlePlaceholder(layout)
+    ? []
+    : [
+        {
+          type: 'text',
+          x: Math.round(w * 0.1),
+          y: Math.round(h * 0.3),
+          w: Math.round(w * 0.8),
+          h: Math.round(h * 0.18),
+          valign: 'middle',
+          paragraphs: [
+            {
+              align: 'center',
+              runs: [{ text: titleText, sizePt: 40, bold: true, color: boxColor }],
+            },
+          ],
+        },
+      ]
   const built = await buildTemplateDeck(
     bytes,
     {
@@ -122,11 +217,11 @@ export async function createDeckFromTemplate(
       pages: [
         {
           page: 0,
-          layoutIndex,
+          layoutIndex: layout.index,
           layoutName: layout.name,
           master: layout.master,
           fills: [],
-          elements: [],
+          elements,
           emptyPlaceholders: true,
         },
       ],

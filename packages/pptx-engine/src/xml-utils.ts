@@ -106,8 +106,10 @@ export function creationIdXml(): string {
  * percent (80000 = 80%) or, in strict files, a "80%" string. Some generators
  * (python-pptx based tools among them) write the whole percent ("80"), which
  * read literally would shrink the bullet to 0.08% and make it vanish; values
- * below the schema minimum (25000) are therefore taken as whole percents.
- * The result is clamped to the schema range 25..400. Null when unparseable.
+ * below 1000 (far under the schema minimum of 25000, and a whole percent up to
+ * 999 still fits the 25..400 range after clamping) are therefore taken as whole
+ * percents, larger values as thousandths. The result is clamped to the schema
+ * range 25..400. Null when unparseable.
  */
 export function parseBulletSizePct(raw: unknown): number | null {
   if (raw == null) return null

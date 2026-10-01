@@ -105,6 +105,19 @@ describe('parseTemplateDeckSpec', () => {
     expect(badIdx.error).toContain('unknown layout index 9')
   })
 
+  it('rejects out-of-range numeric layout strings with a range error', async () => {
+    const info = await inspectTemplate(await makeTwoMasterTemplate())
+    const badStr = parseTemplateDeckSpec({ pages: [{ layout: '999' }] }, info)
+    expect(badStr.ok).toBe(false)
+    if (badStr.ok) return
+    expect(badStr.error).toContain('unknown layout index 999')
+    expect(badStr.error).toContain('0-4')
+    const okStr = parseTemplateDeckSpec({ pages: [{ layout: '1', elements: [] }] }, info)
+    expect(okStr.ok).toBe(true)
+    if (!okStr.ok) return
+    expect(okStr.spec.pages[0]!.layoutIndex).toBe(1)
+  })
+
   it('warns when the layout lacks the title slot and accepts blank pages', async () => {
     const info = await inspectTemplate(await makeTwoMasterTemplate())
     const r = parseTemplateDeckSpec(
@@ -383,6 +396,30 @@ describe('parseOutline in template mode', () => {
         (x) => x.level === 'error' && x.message.includes('not a layout of the template'),
       ),
     ).toBe(true)
+  })
+  it('range-checks numeric layouts against the flat count', () => {
+    const ok = parseOutline(outlineOf(['1']), {
+      templateLayouts: ['TitleAndContent', 'Cover'],
+      templateLayoutCount: 5,
+    })
+    expect(ok.ok).toBe(true)
+    if (!ok.ok) return
+    expect(ok.issues.filter((x) => x.level === 'error')).toEqual([])
+    const bad = parseOutline(outlineOf(['999']), {
+      templateLayouts: ['TitleAndContent', 'Cover'],
+      templateLayoutCount: 5,
+    })
+    expect(bad.ok).toBe(true)
+    if (!bad.ok) return
+    expect(bad.issues.some((x) => x.level === 'error' && x.message.includes('out of range'))).toBe(
+      true,
+    )
+  })
+  it('accepts any numeric layout without a count for compatibility', () => {
+    const r = parseOutline(outlineOf(['999']), { templateLayouts: ['TitleAndContent', 'Cover'] })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.issues.filter((x) => x.level === 'error')).toEqual([])
   })
 })
 

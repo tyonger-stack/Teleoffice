@@ -404,7 +404,7 @@ describe('local CLI settings', () => {
       mmxPath: '',
       agyModel: '',
       agyTimeoutSec: 300,
-      mmxRegion: 'cn',
+      mmxRegion: '',
       searchRouting: 'auto',
       fallback: true,
       agyVideo: false,
@@ -428,7 +428,9 @@ describe('local CLI settings', () => {
     } as never)
     expect(resolved.agyPath).toBe('/tmp/agy')
     expect(resolved.agyTimeoutSec).toBe(300)
-    expect(resolved.mmxRegion).toBe('cn')
+    expect(resolved.mmxRegion).toBe('')
+    expect(resolveAiLocalCliSettings({ mmxRegion: 'cn' } as never).mmxRegion).toBe('cn')
+    expect(resolveAiLocalCliSettings({ mmxRegion: 'global' } as never).mmxRegion).toBe('global')
     expect(resolved.searchRouting).toBe('auto')
     expect(resolved.fallback).toBe(true)
     expect(resolved.agyVideo).toBe(false)

@@ -15,7 +15,7 @@ export function defaultAiLocalCliSettings(): AiLocalCliSettings {
     mmxPath: '',
     agyModel: '',
     agyTimeoutSec: 300,
-    mmxRegion: 'cn',
+    mmxRegion: '',
     searchRouting: 'auto',
     fallback: true,
     agyVideo: false,
@@ -42,7 +42,7 @@ export function resolveAiLocalCliSettings(
     mmxPath: str(stored.mmxPath, defaults.mmxPath).trim(),
     agyModel: str(stored.agyModel, defaults.agyModel).trim(),
     agyTimeoutSec: num(stored.agyTimeoutSec, defaults.agyTimeoutSec),
-    mmxRegion: stored.mmxRegion === 'global' ? 'global' : 'cn',
+    mmxRegion: stored.mmxRegion === 'global' || stored.mmxRegion === 'cn' ? stored.mmxRegion : '',
     searchRouting:
       stored.searchRouting === 'mmx' || stored.searchRouting === 'antigravity'
         ? stored.searchRouting

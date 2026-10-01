@@ -81,7 +81,8 @@ export interface AiLocalCliSettings {
   /** '' = the agy CLI default model */
   agyModel: string
   agyTimeoutSec: number
-  mmxRegion: 'cn' | 'global'
+  /** '' = not chosen: MINIMAX_REGION from the environment, else cn */
+  mmxRegion: '' | 'cn' | 'global'
   searchRouting: 'auto' | 'mmx' | 'antigravity'
   fallback: boolean
   /** agy 1.2.13 has no video tool; true = still try agy first for video */

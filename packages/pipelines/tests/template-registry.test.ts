@@ -1,23 +1,44 @@
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { spawn } from 'node:child_process'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { afterEach, describe, expect, it } from 'vitest'
 import { createBlankPptx } from '@genoffice/pptx-engine'
 import {
   addTemplate,
   listTemplates,
   removeTemplate,
+  resolveRegisteredTemplate,
   resolveTemplate,
   templatesDir,
 } from '../src/slides/template-registry'
+import { inspectTemplate } from '../src/slides/template'
+
+const owned: string[] = []
+
+afterEach(() => {
+  for (const dir of owned.splice(0)) {
+    try {
+      rmSync(dir, { recursive: true, force: true })
+    } catch {
+      // ignore cleanup errors
+    }
+  }
+})
+
+function track(dir: string): string {
+  owned.push(dir)
+  return dir
+}
 
 function freshEnv(): { env: NodeJS.ProcessEnv; dir: string } {
-  const dir = mkdtempSync(join(tmpdir(), 'tmpl-reg-'))
+  const dir = track(mkdtempSync(join(tmpdir(), 'tmpl-reg-')))
   return { env: { ...process.env, GENOFFICE_TEMPLATES_DIR: dir }, dir }
 }
 
 function srcDir(): string {
-  return mkdtempSync(join(tmpdir(), 'tmpl-src-'))
+  return track(mkdtempSync(join(tmpdir(), 'tmpl-src-')))
 }
 
 async function writeDeck(path: string): Promise<void> {
@@ -54,7 +75,6 @@ describe('template registry', () => {
     })
     expect(resolveTemplate('QUARTERLY', { env }).path).toBe(join(dir, 'quarterly.pptx'))
     expect(resolveTemplate(join(dir, 'quarterly.pptx'), { env }).name).toBe('quarterly')
-    // removing deletes the copied file, not the source
     const removed = removeTemplate('quarterly', env)
     expect(removed).toMatchObject({ removed: true, deletedFile: join(dir, 'quarterly.pptx') })
     expect(listTemplates(env)).toEqual([])
@@ -69,6 +89,7 @@ describe('template registry', () => {
     addTemplate('ext', src, { force: true }, env)
     const removed = removeTemplate('ext', env)
     expect(removed.deletedFile).toBeUndefined()
+    expect(removed.keptFile).toBeUndefined()
   })
 
   it('lists bare files by stem and suggests near names', async () => {
@@ -78,4 +99,140 @@ describe('template registry', () => {
     expect(() => resolveTemplate('bored-deck', { env })).toThrow('did you mean "board-deck"?')
     expect(() => resolveTemplate('nothing-here', { env })).toThrow('registered templates')
   })
+
+  it('refuses to overwrite the copy destination without force', async () => {
+    const { env, dir } = freshEnv()
+    const srcA = join(srcDir(), 'a.pptx')
+    const srcB = join(srcDir(), 'b.pptx')
+    await writeDeck(srcA)
+    await writeDeck(srcB)
+    addTemplate('guarded', srcA, { copy: true }, env)
+    const dest = join(dir, 'guarded.pptx')
+    const before = readFileSync(dest)
+    expect(() => addTemplate('guarded', srcB, { copy: true }, env)).toThrow('--force')
+    expect(readFileSync(dest).equals(before)).toBe(true)
+    addTemplate('guarded', srcB, { copy: true, force: true }, env)
+    expect(existsSync(dest)).toBe(true)
+  })
+
+  it('treats same-file copy as a no-op', async () => {
+    const { env, dir } = freshEnv()
+    const dest = join(dir, 'mydeck.pptx')
+    await writeDeck(dest)
+    const added = addTemplate('mydeck', dest, { copy: true }, env)
+    expect(added.path).toBe(dest)
+    expect(existsSync(dest)).toBe(true)
+    expect(listTemplates(env)).toMatchObject([{ name: 'mydeck', source: 'registry' }])
+  })
+
+  it('refuses mutations on corrupt JSON without wiping it', async () => {
+    const { env, dir } = freshEnv()
+    const src = join(srcDir(), 'src.pptx')
+    await writeDeck(src)
+    addTemplate('good', src, {}, env)
+    await writeDeck(join(dir, 'bare.pptx'))
+    const regPath = join(dir, 'templates.json')
+    writeFileSync(regPath, 'not json {')
+    const before = readFileSync(regPath)
+    expect(() => addTemplate('next', src, {}, env)).toThrow('templates.json is not valid JSON')
+    expect(readFileSync(regPath).equals(before)).toBe(true)
+    expect(() => removeTemplate('good', env)).toThrow('templates.json is not valid JSON')
+    expect(readFileSync(regPath).equals(before)).toBe(true)
+    const listed = listTemplates(env)
+    expect(listed.some((t) => t.name === 'bare' && t.source === 'file')).toBe(true)
+  })
+
+  it('only deletes copied files inside the dir', async () => {
+    const { env, dir } = freshEnv()
+    const own = join(dir, 'users-own.pptx')
+    await writeDeck(own)
+    addTemplate('alias', own, {}, env)
+    const kept = removeTemplate('alias', env)
+    expect(kept.deletedFile).toBeUndefined()
+    expect(kept.keptFile).toBe(own)
+    expect(existsSync(own)).toBe(true)
+    const src = join(srcDir(), 'src.pptx')
+    await writeDeck(src)
+    addTemplate('managed', src, { copy: true }, env)
+    const managedPath = join(dir, 'managed.pptx')
+    const deleted = removeTemplate('managed', env)
+    expect(deleted.deletedFile).toBe(managedPath)
+    expect(existsSync(managedPath)).toBe(false)
+  })
+
+  it('stores startLayout (layout validation lives in the CLI)', async () => {
+    const { env } = freshEnv()
+    const src = join(srcDir(), 'src.pptx')
+    await writeDeck(src)
+    const info = await inspectTemplate(await createBlankPptx())
+    const valid = info.masters[0]?.layouts[0]?.name ?? ''
+    expect(valid).not.toBe('')
+    addTemplate('with-start', src, { startLayout: valid }, env)
+    expect(listTemplates(env)).toMatchObject([{ name: 'with-start', startLayout: valid }])
+    expect(resolveTemplate('with-start', { env }).startLayout).toBe(valid)
+    expect(resolveRegisteredTemplate('with-start', { env }).startLayout).toBe(valid)
+    expect(() => addTemplate('blank-start', src, { startLayout: '  ' }, env)).toThrow(
+      'invalid start layout',
+    )
+  })
+
+  it('resolveRegisteredTemplate rejects paths', async () => {
+    const { env } = freshEnv()
+    const src = join(srcDir(), 'src.pptx')
+    await writeDeck(src)
+    addTemplate('named', src, {}, env)
+    expect(resolveRegisteredTemplate('named', { env }).path).toBe(src)
+    expect(() => resolveRegisteredTemplate('a/b.pptx', { env })).toThrow(
+      'expected a registered template name',
+    )
+    expect(() => resolveRegisteredTemplate(src, { env })).toThrow(
+      'expected a registered template name',
+    )
+    expect(() => resolveRegisteredTemplate('missing-name', { env })).toThrow('unknown template')
+  })
+
+  it('keeps all entries under concurrent multi-process adds', async () => {
+    const { env, dir } = freshEnv()
+    const src = join(srcDir(), 'src.pptx')
+    await writeDeck(src)
+    const workerPath = join(
+      dirname(fileURLToPath(import.meta.url)),
+      'template-registry-concurrency-worker.ts',
+    )
+    const workers: Array<Promise<void>> = []
+    for (let i = 0; i < 8; i++) {
+      workers.push(
+        new Promise<void>((done, fail) => {
+          const child = spawn(
+            process.execPath,
+            ['--import', 'tsx', workerPath, dir, String(i), src],
+            { stdio: ['ignore', 'pipe', 'pipe'] },
+          )
+          let stderr = ''
+          const errStream = child.stderr
+          if (errStream) {
+            errStream.on('data', (d) => {
+              stderr += String(d)
+            })
+          }
+          child.on('error', fail)
+          child.on('exit', (code) => {
+            if (code === 0) done()
+            else fail(new Error('worker failed: ' + stderr))
+          })
+        }),
+      )
+    }
+    await Promise.all(workers)
+    const listed = listTemplates(env)
+    expect(listed).toHaveLength(160)
+    const names = new Set(listed.map((t) => t.name))
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 20; j++) {
+        expect(names.has('c-w' + i + '-n' + j)).toBe(true)
+      }
+    }
+    const parsed = JSON.parse(readFileSync(join(dir, 'templates.json'), 'utf-8'))
+    expect(Object.keys(parsed.templates)).toHaveLength(160)
+  }, 60000)
 })
