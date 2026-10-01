@@ -15,12 +15,7 @@
   /* lift for the active segment in gray-track tab pills */
   --shadow-pill: 0 1px 2px rgb(0 0 0 / 8%);
 
-<<<<<<< HEAD
   /* teleoffice-logo.svg is pure black-and-white; dark themes flip it to 1 */
-=======
-  /* genoffice-logo.svg is the brand-blue lockup; dark themes flip it to 1,
-     which inverts its lightness and rotates the hue back to blue */
->>>>>>> origin/main
   --logo-invert: 0;
 }
 
