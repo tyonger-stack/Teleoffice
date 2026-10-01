@@ -239,8 +239,12 @@ async function anthropicTurn(
       const pending = pendingTools.get(stopIndex)
       if (pending) {
         pendingTools.delete(stopIndex)
-        const { input, error } = parseToolInput(pending.json)
-        completedTools.push({ id: pending.id, name: pending.name, input, inputError: error })
+        // Match the OpenAI route: drop nameless tool calls instead of feeding
+        // an empty-name call to the loop (which would always fail as unknown)
+        if (pending.name) {
+          const { input, error } = parseToolInput(pending.json)
+          completedTools.push({ id: pending.id, name: pending.name, input, inputError: error })
+        }
       }
     } else if (event.type === 'message_delta') {
       if (event.delta?.stop_reason) stopReason = event.delta.stop_reason
