@@ -733,7 +733,7 @@ async function expandAltChunk(
   numbering: Map<string, NumberingDef>,
   sourcePath = 'word/document.xml',
 ): Promise<Block[]> {
-  const rId = /\br:id="([^"]+)"/.exec(xml)?.[1]
+  const rId = /\br:id\s*=\s*["']([^"']+)["']/.exec(xml)?.[1]
   if (!rId) return []
   try {
     const bytes = await altChunkToDocx(
