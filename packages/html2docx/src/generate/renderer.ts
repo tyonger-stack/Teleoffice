@@ -20,7 +20,7 @@ import {
   VerticalPositionAlign,
   WidthType,
 } from 'docx'
-import { withBookmarks } from './bookmarks'
+import { carryTableBookmarks, withBookmarks } from './bookmarks'
 import { createContentControlFactory } from './content-controls'
 import { orderedReference } from './numbering'
 import { renderCard, renderColorBar, renderKpiRow, renderTable } from './table-renderers'
@@ -501,7 +501,7 @@ class Generator {
         return this.collectFloatingImage(node)
 
       case 'table':
-        return renderTable(this, node, depth)
+        return renderTable(this, carryTableBookmarks(node), depth)
 
       case 'card':
         return renderCard(this, node, depth)
