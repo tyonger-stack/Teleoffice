@@ -172,23 +172,27 @@ function dashPreset(name: string | undefined, w: number): number[] | undefined {
   const u = w
   switch (name) {
     case 'dot':
+      return [u, 3 * u]
     case 'sysDot':
       return [u, u]
     case 'dash':
-    case 'sysDash':
       return [4 * u, 3 * u]
+    case 'sysDash':
+      return [3 * u, u]
     case 'lgDash':
       return [8 * u, 3 * u]
     case 'dashDot':
-    case 'sysDashDot':
       return [4 * u, 3 * u, u, 3 * u]
+    case 'sysDashDot':
+      return [3 * u, u, u, u]
     case 'lgDashDot':
       return [8 * u, 3 * u, u, 3 * u]
     case 'lgDashDotDot':
       return [8 * u, 3 * u, u, 3 * u, u, 3 * u]
     case 'dashDotDot':
-    case 'sysDashDotDot':
       return [4 * u, 3 * u, u, 3 * u, u, 3 * u]
+    case 'sysDashDotDot':
+      return [3 * u, u, u, u, u, u]
     default:
       return undefined
   }
