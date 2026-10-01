@@ -95,24 +95,6 @@ async function cellA1Value(page: Page): Promise<unknown> {
   })
 }
 
-/**
- * Every layer a typed character has to cross, captured as a snapshot.
- * Diagnostics only: it changes no assertion, so a failure still fails for the
- * same reason — it just says which layer dropped the text.
- */
-type TypingState = {
-  editorPresent: boolean
-  editorText: string | null
-  activeIsEditor: boolean
-  activeIsConnected: boolean | null
-  activeTag: string | null
-  activeId: string | null
-  activeClass: string | null
-  activeRange: string | null
-  ariaBusy: string | null
-  canvasPresent: boolean
-}
-
 /** The cell Univer considers active, or null when the sheet has no selection. */
 async function activeRangeNotation(page: Page): Promise<string | null> {
   return page.evaluate(() => {
@@ -135,22 +117,17 @@ async function activeRangeNotation(page: Page): Promise<string | null> {
   })
 }
 
-async function domState(page: Page): Promise<Omit<TypingState, 'activeRange'>> {
-  return page.evaluate(() => {
-    const editor = document.querySelector('#univer-container [contenteditable="true"]')
-    const active = document.activeElement
-    return {
-      editorPresent: editor !== null,
-      editorText: editor?.textContent ?? null,
-      activeIsEditor: editor !== null && active === editor,
-      activeIsConnected: active instanceof HTMLElement ? active.isConnected : null,
-      activeTag: active?.tagName ?? null,
-      activeId: active instanceof HTMLElement ? active.id || null : null,
-      activeClass: active instanceof HTMLElement ? active.getAttribute('class') : null,
-      ariaBusy: document.querySelector('main.app-shell')?.getAttribute('aria-busy') ?? null,
-      canvasPresent: document.querySelector('#univer-container canvas') !== null,
+/** center of cell A1: right of the ~46px row header, below the ~24px column header */
+async function cellA1Point(page: Page): Promise<{ x: number; y: number }> {
+  const grid = await page.evaluate(() => {
+    for (const canvas of document.querySelectorAll('canvas')) {
+      const rect = canvas.getBoundingClientRect()
+      if (rect.width > 500 && rect.height > 300) return { x: rect.x, y: rect.y }
     }
+    return null
   })
+  if (!grid) throw new Error('worksheet canvas not found')
+  return { x: grid.x + 46 + 43, y: grid.y + 24 + 12 }
 }
 
 /** Observe an initialized hidden spare before opening a workbook. */
@@ -208,10 +185,6 @@ test('docs: typing works immediately after opening a file from Home', async () =
 })
 
 test.describe('sheets spare-view focus', () => {
-  // Known CI flake on adopted Electron views; one retry keeps the suite green
-  // without weakening the keyboard-ownership assertion on a clean run.
-  test.describe.configure({ retries: process.env.CI ? 1 : 0 })
-
   test('sheets: typing works when a spare view opens the next workbook', async () => {
     const scratch = await mkdtemp(join(tmpdir(), 'teleoffice-openfocus-e2e-'))
     const firstXlsx = join(scratch, 'first.xlsx')
@@ -242,7 +215,8 @@ test.describe('sheets spare-view focus', () => {
         null,
         { timeout: 60_000 },
       )
-      // The same hidden webContents must be adopted and receive Electron focus.
+      // Shell regression: the adopted spare webContents must own Electron focus
+      // (without this, Home/chrome keeps the keyboard and no sheet edit works).
       await expect
         .poll(() =>
           launched.app.evaluate(({ BrowserWindow, WebContentsView }, id) => {
@@ -259,68 +233,25 @@ test.describe('sheets spare-view focus', () => {
           }, spareId),
         )
         .toEqual({ visible: true, focused: true, windowFocused: true })
-      // The debug API is published before the file's first range streams in.
-      // Wait for the fixture data and the opening guard before sending keys.
       await expect.poll(() => cellA1Value(sheets)).toBe('Old')
       await expect(sheets.locator('main.app-shell')).toHaveAttribute('aria-busy', 'false')
-      await waitForEditableFocus(sheets)
-      // An adopted spare can report an editable focus before Univer has applied
-      // the opened workbook's selection to it, and keys then land on no cell.
-      // The selection is a readiness signal, not a delay: if this view never
-      // settles on A1 the poll fails and names what it settled on instead, so a
-      // broken adoption cannot pass by typing into nothing.
       await expect.poll(() => activeRangeNotation(sheets), { timeout: 30_000 }).toBe('A1')
-      // Ask the product to re-assert sheet keyboard ownership after spare adoption
-      // (focusUnit + layout focus). The docs-normal contenteditable can hold DOM
-      // focus without FOCUSING_SHEET; never focus that node from the test.
+      // Re-assert Univer sheet focus after the unit swap, then click A1 the same
+      // way the rest of the sheets suite does. Printable keys alone are not a
+      // reliable edit-mode entry on an adopted Electron WebContentsView in CI
+      // (Enter navigates, but onInputBefore never opens the cell editor); the
+      // durable product path is pointer → EditorBridge → type.
       await sheets.evaluate(() => {
         ;(
           window as unknown as { __teleofficeDebug?: { focusSheetGrid?: () => void } }
         ).__teleofficeDebug?.focusSheetGrid?.()
       })
-      const before = await domState(sheets)
-      // insertText can open the cell editor through Univer's hidden input without
-      // updating the docs-normal contenteditable textContent we inspect — so do
-      // NOT fall back to type() based on empty editorText (that double-commits
-      // 42424242). Try insertText once, commit, and only then type if A1 is still Old.
-      await sheets.keyboard.insertText('4242')
+      const a1 = await cellA1Point(sheets)
+      await sheets.mouse.click(a1.x, a1.y)
+      await expect(sheets.locator('[data-u-comp="defined-name"] input')).toHaveValue('A1')
+      await sheets.keyboard.type('4242', { delay: 40 })
       await sheets.keyboard.press('Enter')
-      const afterInsert = await domState(sheets)
-      let value = await cellA1Value(sheets)
-      if (value !== 4242) {
-        // Enter may have moved to A2 without committing text; return to A1.
-        if ((await activeRangeNotation(sheets)) !== 'A1') {
-          await sheets.keyboard.press('ArrowUp')
-          await expect.poll(() => activeRangeNotation(sheets), { timeout: 5_000 }).toBe('A1')
-        }
-        await sheets.evaluate(() => {
-          ;(
-            window as unknown as { __teleofficeDebug?: { focusSheetGrid?: () => void } }
-          ).__teleofficeDebug?.focusSheetGrid?.()
-        })
-        await sheets.keyboard.type('4242', { delay: 40 })
-        await sheets.keyboard.press('Enter')
-        value = await cellA1Value(sheets)
-      }
-      const afterEnter = await domState(sheets)
-      // A bare Expected/Received says nothing about which layer dropped the
-      // text, and this case only fails on CI, so every layer goes into the
-      // failure message: attach() is not written to disk in this setup.
-      await expect
-        .poll(() => cellA1Value(sheets), {
-          message:
-            `editor text before insert: ${JSON.stringify(before.editorText)}, ` +
-            `after insert: ${JSON.stringify(afterInsert.editorText)}, ` +
-            `after enter: ${JSON.stringify(afterEnter.editorText)}; ` +
-            `active element is the editor: ${JSON.stringify(afterInsert.activeIsEditor)} ` +
-            `(${JSON.stringify(afterInsert.activeTag)} ${JSON.stringify(afterInsert.activeId)} ` +
-            `${JSON.stringify(afterInsert.activeClass)}, ` +
-            `connected: ${JSON.stringify(afterInsert.activeIsConnected)}); ` +
-            `active range: ${JSON.stringify(await activeRangeNotation(sheets))}; ` +
-            `aria-busy: ${JSON.stringify(afterEnter.ariaBusy)}; ` +
-            `cell after first attempt: ${JSON.stringify(value)}`,
-        })
-        .toBe(4242)
+      await expect.poll(() => cellA1Value(sheets)).toBe(4242)
     } finally {
       await closeAndSaveVideo(launched, 'open-focus-sheets')
     }

@@ -87,7 +87,7 @@ describe('teleoffice pdf read', () => {
     const pdf = writeMinimalPdf(join(tempDir(), 'one.pdf'), 'Hello teleoffice readers')
     const r = await run(['pdf', 'read', pdf, '--max-chars', '5', '--json'])
     expect(r.json().detail.pages_read[0]).toMatchObject({
-      text: 'Hello…(+18 chars)',
+      text: 'Hello…(+19 chars)',
       truncated: true,
     })
     const full = await run(['pdf', 'read', pdf, '--full', '--json'])
