@@ -24,7 +24,7 @@ function makeRoot() {
   const bin = join(root, 'usr', 'bin')
   mkdirSync(join(opt, 'resources', 'cli'), { recursive: true })
   mkdirSync(bin, { recursive: true })
-  const launcher = join(opt, 'resources', 'cli', 'genoffice')
+  const launcher = join(opt, 'resources', 'cli', 'teleoffice')
   writeFileSync(launcher, '#!/bin/sh\n')
   chmodSync(launcher, 0o755)
   const script = (name: string) => {
@@ -40,7 +40,7 @@ function makeRoot() {
   }
   return {
     launcher,
-    link: join(bin, 'genoffice'),
+    link: join(bin, 'teleoffice'),
     install: script('linux-after-install.sh'),
     remove: script('linux-after-remove.sh'),
   }
@@ -54,7 +54,7 @@ describe.skipIf(process.platform === 'win32')('linux cli link scripts (genoffice
 
     expect(t.remove('remove').code).toBe(0)
     expect(existsSync(t.link)).toBe(false)
-    symlinkSync('/nowhere/cli/genoffice', t.link)
+    symlinkSync('/nowhere/cli/teleoffice', t.link)
     expect(t.install()).toEqual({ code: 0, stderr: '' })
     expect(readlinkSync(t.link)).toBe(t.launcher)
 
@@ -76,7 +76,7 @@ describe.skipIf(process.platform === 'win32')('linux cli link scripts (genoffice
     expect(existsSync(t.link)).toBe(true)
 
     rmSync(t.link)
-    const vendor = join(t.launcher, '..', '..', '..', '..', 'vendor', 'cli', 'genoffice')
+    const vendor = join(t.launcher, '..', '..', '..', '..', 'vendor', 'cli', 'teleoffice')
     mkdirSync(join(vendor, '..'), { recursive: true })
     writeFileSync(vendor, '#!/bin/sh\n')
     symlinkSync(vendor, t.link)
@@ -97,3 +97,27 @@ describe.skipIf(process.platform === 'win32')('linux cli link scripts (genoffice
     expect(existsSync(t.link)).toBe(false)
   })
 })
+
+describe.skipIf(process.platform === 'win32')(
+  'linux cli link scripts: the old genoffice name',
+  () => {
+    it('drops our genoffice link on install and remove, but not a foreign one', () => {
+      const t = makeRoot()
+      const legacy = join(t.link, '..', 'genoffice')
+      symlinkSync(join(t.launcher, '..', 'genoffice'), legacy)
+      expect(t.install()).toEqual({ code: 0, stderr: '' })
+      expect(lstatSync(legacy, { throwIfNoEntry: false })).toBeUndefined()
+      expect(readlinkSync(t.link)).toBe(t.launcher)
+
+      symlinkSync(join(t.launcher, '..', 'genoffice'), legacy)
+      expect(t.remove('remove').code).toBe(0)
+      expect(lstatSync(legacy, { throwIfNoEntry: false })).toBeUndefined()
+
+      symlinkSync('/usr/lib/node_modules/genoffice/bin/genoffice', legacy)
+      expect(t.install().code).toBe(0)
+      expect(readlinkSync(legacy)).toBe('/usr/lib/node_modules/genoffice/bin/genoffice')
+      expect(t.remove('remove').code).toBe(0)
+      expect(readlinkSync(legacy)).toBe('/usr/lib/node_modules/genoffice/bin/genoffice')
+    })
+  },
+)

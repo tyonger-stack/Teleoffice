@@ -12,7 +12,7 @@ import type { CliRunner } from '../cli-runner'
  * Docx MCP tool surface.
  *
  * Headless generation/reading (create_docx, read_docx) delegates to the
- * bundled `genoffice` CLI — the same engines the app ships — instead of
+ * bundled `teleoffice` CLI — the same engines the app ships — instead of
  * reimplementing conversion here (see ../headless-cli.ts, ../cli-runner.ts).
  * The visible document session is the part the CLI cannot do: driving the
  * editor tab the user has open. Dependencies are injected so this module stays
@@ -32,7 +32,7 @@ export interface DocToolDeps {
   docs?: DocsControl
   /** extra formats other tool families can generate (reported by get_app_info) */
   extraFormats?: string[]
-  /** the bundled genoffice CLI, used by the headless tools */
+  /** the bundled teleoffice CLI, used by the headless tools */
   cli?: CliRunner
   /**
    * Resolve a caller-supplied document reference (tab id or path) to the
@@ -143,7 +143,7 @@ function createHeadlessDocxTool(deps: DocToolDeps): McpToolDefinition {
       'Create a Word .docx file from content and save it to disk without opening the app UI. ' +
       'Content is Markdown (headings, lists, bold/italic, links, code blocks, tables) or a ' +
       'restricted-HTML fragment (format:"html"), converted by the same docx engine the app and ' +
-      'the genoffice CLI use. Returns the absolute path of the written file.',
+      'the teleoffice CLI use. Returns the absolute path of the written file.',
     inputSchema: {
       title: z.string().describe('document title, used as the file name'),
       content: z.string().describe('Markdown source (default) or a restricted-HTML fragment'),
@@ -206,7 +206,7 @@ export function createDocumentTools(deps: DocToolDeps, host: SessionHost): McpTo
       },
     },
     {
-      name: 'open_in_genoffice',
+      name: 'open_in_teleoffice',
       description: 'Open an existing file in the running GenOffice app, focusing its tab.',
       inputSchema: {
         path: z.string().describe('absolute path to the file to open'),

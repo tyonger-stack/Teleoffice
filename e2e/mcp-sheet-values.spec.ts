@@ -231,7 +231,7 @@ test.describe('MCP sheet values and addressing', () => {
     execFileSync(
       process.execPath,
       [
-        join(APP_ROOT, 'packages', 'cli', 'dist', 'genoffice.cjs'),
+        join(APP_ROOT, 'packages', 'cli', 'dist', 'teleoffice.cjs'),
         'create',
         '--type',
         'xlsx',
@@ -261,7 +261,7 @@ test.describe('MCP sheet values and addressing', () => {
 
       // open the user's file through the app's own routing — NOT a session,
       // so its sheet ids are whatever that open produced
-      const opened = await call('open_in_genoffice', { path: workbookPath })
+      const opened = await call('open_in_teleoffice', { path: workbookPath })
       expect(opened.isError, opened.text).toBeFalsy()
       const editorTab = page.locator('.tab-bar .tab-item:not(.tab-home)')
       await expect(editorTab).toHaveCount(1)

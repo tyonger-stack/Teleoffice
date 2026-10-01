@@ -15,14 +15,17 @@ import { join } from 'node:path'
 import JSZip from 'jszip'
 
 /**
- * Installing the bundled `genoffice` skill into the coding agents found on this
- * machine, shared by Settings → Integrations and `genoffice skill`. Every write
+ * Installing the bundled `teleoffice` skill into the coding agents found on this
+ * machine, shared by Settings → Integrations and `teleoffice skill`. Every write
  * is a click in that pane or an explicit command; nothing installs on its own.
  * Pure functions over an injected home / env so the state table is
  * unit-testable without touching the real dotfolders.
  */
 
-export const SKILL_NAME = 'genoffice'
+export const SKILL_NAME = 'teleoffice'
+
+/** the skill's folder name before the command was renamed; our own unmodified copies are removed */
+export const LEGACY_SKILL_NAME = 'genoffice'
 
 /** app-settings.json key under which every install this machine's GenOffice wrote is remembered */
 export const LEDGER_KEY = 'agentSkillInstalls'
@@ -39,7 +42,7 @@ export interface AgentTarget {
 }
 
 export type SkillInstallStatus =
-  /** no genoffice/ folder in the skills directory */
+  /** no teleoffice/ folder in the skills directory */
   | 'missing'
   /** written by this app, same version and bytes as the bundled skill */
   | 'installed'
@@ -51,12 +54,12 @@ export type SkillInstallStatus =
   | 'foreign'
   /** a newer skill version than the one bundled, whoever wrote it */
   | 'newer'
-  /** genoffice/ exists but does not hold our skill */
+  /** teleoffice/ exists but does not hold our skill */
   | 'occupied'
 
 export interface SkillInstallState {
   status: SkillInstallStatus
-  /** `<skillsDir>/genoffice/SKILL.md` */
+  /** `<skillsDir>/teleoffice/SKILL.md` */
   path: string
   installedVersion?: string
   /** installed version is older than the bundled one (foreign rows offer an update then) */
@@ -270,13 +273,41 @@ export function installSkill(
     at: new Date().toISOString(),
     channel,
   }
+  removeLegacySkill(skillsDir, ledger)
   return path
+}
+
+/**
+ * Remove `<skillsDir>/genoffice/SKILL.md` left by an earlier version, but only
+ * when the ledger says this app wrote it and its bytes are unchanged; a
+ * folder that still holds other files keeps them. True when it was removed.
+ */
+export function removeLegacySkill(skillsDir: string, ledger: SkillLedger): boolean {
+  const dir = join(skillsDir, LEGACY_SKILL_NAME)
+  const path = join(dir, 'SKILL.md')
+  const ours = ledger[path]
+  if (!ours) return false
+  try {
+    if (lstatSync(path).isSymbolicLink()) return false
+    if (sha256(readFileSync(path)) !== ours.sha256) return false
+  } catch {
+    // already gone: just forget it
+    delete ledger[path]
+    return false
+  }
+  rmSync(path, { force: true })
+  try {
+    if (readdirSync(dir).length === 0) rmSync(dir, { recursive: true })
+  } catch {}
+  delete ledger[path]
+  return true
 }
 
 /** Remove only what this app wrote; a folder holding other files keeps them. */
 export function uninstallSkill(skillsDir: string, ledger: SkillLedger): boolean {
   const path = skillFilePath(skillsDir)
-  if (!ledger[path]) return false
+  const legacyRemoved = removeLegacySkill(skillsDir, ledger)
+  if (!ledger[path]) return legacyRemoved
   rmSync(path, { force: true })
   const dir = join(skillsDir, SKILL_NAME)
   try {
@@ -286,7 +317,7 @@ export function uninstallSkill(skillsDir: string, ledger: SkillLedger): boolean 
   return true
 }
 
-/** `genoffice/SKILL.md` inside a zip: the layout claude.ai and the desktop apps accept for an uploaded skill. */
+/** `teleoffice/SKILL.md` inside a zip: the layout claude.ai and the desktop apps accept for an uploaded skill. */
 export async function buildSkillZip(bundled: BundledSkill): Promise<Buffer> {
   const zip = new JSZip()
   zip.file(`${SKILL_NAME}/SKILL.md`, bundled.bytes, { date: new Date(0) })

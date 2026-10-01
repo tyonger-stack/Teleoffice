@@ -1,6 +1,7 @@
 /**
- * Named template registry: templates live in GENOFFICE_TEMPLATES_DIR (or
- * ~/.genoffice/templates) as <name>.pptx files plus a templates.json sidecar
+ * Named template registry: templates live in TELEOFFICE_TEMPLATES_DIR (or the
+ * legacy GENOFFICE_TEMPLATES_DIR, else <TeleOffice home>/templates, normally
+ * ~/.teleoffice/templates) as <name>.pptx files plus a templates.json sidecar
  * with per-template defaults. Node with fs; no engine access needed.
  */
 import {
@@ -17,8 +18,8 @@ import {
   writeFileSync,
   writeSync,
 } from 'node:fs'
-import { homedir } from 'node:os'
 import { basename, extname, isAbsolute, join, relative, resolve } from 'node:path'
+import { envValue, teleofficeHomeDir } from '@genoffice/electron-utils/teleoffice-home'
 
 export interface TemplateRegistryEntry {
   path: string
@@ -55,9 +56,9 @@ function validName(name: string): boolean {
 }
 
 export function templatesDir(env: NodeJS.ProcessEnv = process.env): string {
-  const dir = env.GENOFFICE_TEMPLATES_DIR
-  if (dir && dir.trim()) return resolve(dir.trim())
-  return join(homedir(), '.genoffice', 'templates')
+  const dir = envValue(env, 'TELEOFFICE_TEMPLATES_DIR', 'GENOFFICE_TEMPLATES_DIR')
+  if (dir) return resolve(dir)
+  return join(teleofficeHomeDir(env), 'templates')
 }
 
 function registryPath(dir: string): string {

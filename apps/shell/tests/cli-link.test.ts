@@ -8,10 +8,13 @@ vi.mock('electron', () => ({ app: { isPackaged: false, getVersion: () => '0.0.0'
 
 import { isEphemeralInstall, launcherFilePath, writeLauncherFile } from '../src/main/cli-link'
 
-describe('genoffice launcher file', () => {
-  it('lives in the genoffice auth directory, overridable like auth.json', () => {
-    expect(launcherFilePath({})).toBe(join(process.env.HOME ?? '', '.genoffice', 'launcher'))
+describe('teleoffice launcher file', () => {
+  it('lives in the teleoffice auth directory, overridable like auth.json', () => {
+    expect(launcherFilePath({ TELEOFFICE_AUTH_DIR: '/tmp/y' })).toBe(join('/tmp/y', 'launcher'))
     expect(launcherFilePath({ GENOFFICE_AUTH_DIR: '/tmp/x' })).toBe(join('/tmp/x', 'launcher'))
+    expect(launcherFilePath({ TELEOFFICE_AUTH_DIR: '/tmp/y', GENOFFICE_AUTH_DIR: '/tmp/x' })).toBe(
+      join('/tmp/y', 'launcher'),
+    )
   })
 
   it('writes one line, creates the directory, and only rewrites on change', () => {
@@ -24,8 +27,8 @@ describe('genoffice launcher file', () => {
       false,
     )
     expect(statSync(file).mtimeMs).toBe(before)
-    expect(writeLauncherFile(file, 'C:\\Programs\\GenOffice\\resources\\genoffice')).toBe(true)
-    expect(readFileSync(file, 'utf-8')).toBe('C:\\Programs\\GenOffice\\resources\\genoffice\n')
+    expect(writeLauncherFile(file, 'C:\\Programs\\GenOffice\\resources\\teleoffice')).toBe(true)
+    expect(readFileSync(file, 'utf-8')).toBe('C:\\Programs\\GenOffice\\resources\\teleoffice\n')
   })
 
   it('treats dmg and AppImage mounts as temporary', () => {

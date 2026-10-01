@@ -49,13 +49,13 @@ export const createCommand: CommandDef = {
       name: 'ops',
       value: 'file',
       description:
-        'pptx: JSON array of ops (or {"ops":[...]}) applied one by one to a blank one-slide deck (later ops can target slides added earlier); "-" reads stdin. See `genoffice guide slides`.',
+        'pptx: JSON array of ops (or {"ops":[...]}) applied one by one to a blank one-slide deck (later ops can target slides added earlier); "-" reads stdin. See `teleoffice guide slides`.',
     },
     {
       name: 'spec',
       value: 'file',
       description:
-        'pptx: a deck spec (pages of px-positioned text, shapes and images on a 1280x720 canvas) built into one slide per page, or a directory of one-page spec files taken in name order; "-" reads stdin. See `genoffice guide slides spec` and `genoffice guide slides design`.',
+        'pptx: a deck spec (pages of px-positioned text, shapes and images on a 1280x720 canvas) built into one slide per page, or a directory of one-page spec files taken in name order; "-" reads stdin. See `teleoffice guide slides spec` and `teleoffice guide slides design`.',
     },
     {
       name: 'outline',
@@ -84,7 +84,7 @@ export const createCommand: CommandDef = {
       name: 'from',
       value: 'file',
       description:
-        'xlsx: a .csv, or a .json holding a 2-D array of cell values or { "sheets": [{ "name", "rows" }] }; strings starting with "=" are formulas. docx: a .md file, or a .html file holding a restricted-HTML fragment (see `genoffice guide docs`). pdf: any .md/.html/.docx/.xlsx/.pptx file, printed by the GenOffice renderer',
+        'xlsx: a .csv, or a .json holding a 2-D array of cell values or { "sheets": [{ "name", "rows" }] }; strings starting with "=" are formulas. docx: a .md file, or a .html file holding a restricted-HTML fragment (see `teleoffice guide docs`). pdf: any .md/.html/.docx/.xlsx/.pptx file, printed by the GenOffice renderer',
     },
     {
       name: 'header',
@@ -269,10 +269,10 @@ async function createPptxFromSpec(
 }> {
   const spec = flagString(args, 'spec')!
   const next =
-    'genoffice slides audit <file> for the geometry audit; genoffice slides render <file> --out <dir> for PNGs; genoffice slides replace <file> --slide n --spec <page.json> to rebuild one page'
+    'teleoffice slides audit <file> for the geometry audit; teleoffice slides render <file> --out <dir> for PNGs; teleoffice slides replace <file> --slide n --spec <page.json> to rebuild one page'
   // slides replace rebuilds plain-spec pages only; template decks are rebuilt whole
   const templateNext =
-    'genoffice slides audit <file> for the geometry audit; genoffice slides render <file> --out <dir> for PNGs; fix the page spec and rerun create --template --force to rebuild'
+    'teleoffice slides audit <file> for the geometry audit; teleoffice slides render <file> --out <dir> for PNGs; fix the page spec and rerun create --template --force to rebuild'
   const outlinePath = flagString(args, 'outline')
   const dir = spec === '-' ? null : specDirectory(spec, ctx)
   const templateReq = {

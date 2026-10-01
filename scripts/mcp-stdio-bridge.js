@@ -16,9 +16,9 @@
  * Example mcp.json entry:
  *   {
  *     "mcpServers": {
- *       "genoffice": {
+ *       "teleoffice": {
  *         "command": "node",
- *         "args": ["/path/to/genoffice/scripts/mcp-stdio-bridge.js"]
+ *         "args": ["/path/to/teleoffice/scripts/mcp-stdio-bridge.js"]
  *       }
  *     }
  *   }

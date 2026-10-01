@@ -14,7 +14,7 @@ function fakeApp(dir: string, pdf: string): string {
   return fake
 }
 
-describe('genoffice render', () => {
+describe('teleoffice render', () => {
   it('rasterizes a PDF directly, one PNG per page, 1-based names and --page', async () => {
     const dir = tempDir()
     const pdf = writeMinimalPdf(join(dir, 'report.pdf'))

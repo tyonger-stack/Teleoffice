@@ -9,7 +9,7 @@ import type { InstallOutcome } from '@genoffice/cli/install'
 export type { AgentId, AgentTarget, SkillInstallState, SkillInstallStatus }
 
 export interface CliStatus extends InstallOutcome {
-  /** directory holding the genoffice launcher (what `~/.genoffice/launcher` points at) */
+  /** directory holding the teleoffice launcher (what `~/.teleoffice/launcher` points at) */
   launcherDir: string
   /** app runs from a dmg / AppImage mount: the launcher path will not survive a restart */
   ephemeral: boolean
@@ -19,7 +19,7 @@ export interface CliStatus extends InstallOutcome {
 
 export interface IntegrationsStatus {
   cli: CliStatus
-  /** version of the bundled skill (skills/genoffice/SKILL.md front matter) */
+  /** version of the bundled skill (skills/teleoffice/SKILL.md front matter) */
   skillVersion: string
   /** lowest CLI version that skill describes */
   skillNeedsCli: string

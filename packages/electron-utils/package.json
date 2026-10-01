@@ -15,7 +15,8 @@
     "./renderer-protocol": "./src/renderer-protocol.ts",
     "./renderer-scheme": "./src/renderer-scheme.ts",
     "./safe-external-url": "./src/safe-external-url.ts",
-    "./safe-remote-url": "./src/safe-remote-url.ts"
+    "./safe-remote-url": "./src/safe-remote-url.ts",
+    "./teleoffice-home": "./src/teleoffice-home.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

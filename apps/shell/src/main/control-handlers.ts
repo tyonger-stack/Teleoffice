@@ -58,7 +58,7 @@ export function controlHandler(host: ControlHost): (req: ControlRequest) => Prom
     const tab = host.findTab(req.path)
     if (!tab) {
       return fail('file_not_open_in_gui', `GenOffice does not have ${req.path} open`, {
-        suggestion: `genoffice open ${req.path}`,
+        suggestion: `teleoffice open ${req.path}`,
       })
     }
     return ask(tab.webContents, { cmd: 'selection' }, host.readyTimeoutMs)

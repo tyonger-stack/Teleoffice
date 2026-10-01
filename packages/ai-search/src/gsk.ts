@@ -26,8 +26,9 @@ import {
   type WebSearchResult,
 } from './shared'
 import { genofficeApiKey, genofficeAuthPath, reloadGenofficeAuth } from './genoffice-auth'
-// deep import: the package root re-exports Electron-bound modules, and this file also runs in the genoffice CLI
+// deep import: the package root re-exports Electron-bound modules, and this file also runs in the teleoffice CLI
 import { readBodyCapped } from '@genoffice/electron-utils/remote-image'
+import { teleofficeHomeDir } from '@genoffice/electron-utils/teleoffice-home'
 
 const SEARCH_TIMEOUT_MS = 60_000
 const GENERATE_TIMEOUT_MS = 600_000
@@ -69,7 +70,7 @@ function electronCompatArgs(): string[] {
   if (!process.versions.electron) return []
   if (compatPath === undefined) {
     try {
-      const dir = join(homedir(), '.genoffice', 'bin')
+      const dir = join(teleofficeHomeDir(), 'bin')
       mkdirSync(dir, { recursive: true })
       compatPath = join(dir, 'electron-compat.js')
       writeFileSync(compatPath, 'delete process.versions.electron;\n')

@@ -52,7 +52,7 @@ function templateEnv(dir: string): { cwd: string; env: NodeJS.ProcessEnv } {
   return { cwd: dir, env: { ...process.env, GENOFFICE_TEMPLATES_DIR: templates } }
 }
 
-describe('genoffice template', () => {
+describe('teleoffice template', () => {
   it('inspects a deck, manages the registry and reports the dir', async () => {
     const dir = ownedTempDir()
     const ctx = templateEnv(dir)

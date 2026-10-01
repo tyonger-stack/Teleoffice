@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -12,12 +13,13 @@ import {
   installSkill,
   parseSkillFrontmatter,
   readInstallState,
+  removeLegacySkill,
   uninstallSkill,
   type SkillLedger,
 } from '../src/agent-skills'
 
-const skillText = (version: string, body = 'Run `genoffice --version` first.') =>
-  `---\nname: genoffice\ndescription: test\nmetadata:\n  version: ${version}\n  cli: '>=0.4.0'\n---\n\n${body}\n`
+const skillText = (version: string, body = 'Run `teleoffice --version` first.') =>
+  `---\nname: teleoffice\ndescription: test\nmetadata:\n  version: ${version}\n  cli: '>=0.4.0'\n---\n\n${body}\n`
 
 const bundled = (version = '1.2.0') => bundledSkillFrom(Buffer.from(skillText(version)))
 
@@ -46,7 +48,7 @@ describe('detectAgents', () => {
 describe('parseSkillFrontmatter / compareVersions', () => {
   it('reads name and metadata.version', () => {
     expect(parseSkillFrontmatter(skillText('2.1.0'))).toEqual({
-      name: 'genoffice',
+      name: 'teleoffice',
       version: '2.1.0',
     })
     expect(parseSkillFrontmatter('---\nname: other\n---\nx')).toEqual({
@@ -73,7 +75,7 @@ describe('readInstallState', () => {
 
     // our install, current
     const path = installSkill(dir, b, ledger)
-    expect(path).toBe(join(dir, 'genoffice', 'SKILL.md'))
+    expect(path).toBe(join(dir, 'teleoffice', 'SKILL.md'))
     expect(readFileSync(path, 'utf-8')).toBe(b.text)
     expect(ledger[path]).toMatchObject({ version: '1.2.0', sha256: b.sha256, channel: 'app' })
     expect(readInstallState(dir, b, ledger)).toMatchObject({
@@ -112,7 +114,7 @@ describe('readInstallState', () => {
     // the folder holds something else
     writeFileSync(path, '---\nname: other-skill\n---\n')
     expect(readInstallState(dir, b, ledger).status).toBe('occupied')
-    mkdirSync(join(dir, 'genoffice', 'nested'))
+    mkdirSync(join(dir, 'teleoffice', 'nested'))
     writeFileSync(path, 'not a skill at all')
     expect(readInstallState(dir, b, ledger).status).toBe('occupied')
   })
@@ -124,16 +126,16 @@ describe('uninstallSkill', () => {
     const b = bundled()
     const ledger: SkillLedger = {}
     // foreign file: never touched
-    mkdirSync(join(dir, 'genoffice'), { recursive: true })
-    writeFileSync(join(dir, 'genoffice', 'SKILL.md'), skillText('1.0.0'))
+    mkdirSync(join(dir, 'teleoffice'), { recursive: true })
+    writeFileSync(join(dir, 'teleoffice', 'SKILL.md'), skillText('1.0.0'))
     expect(uninstallSkill(dir, ledger)).toBe(false)
-    expect(existsSync(join(dir, 'genoffice', 'SKILL.md'))).toBe(true)
+    expect(existsSync(join(dir, 'teleoffice', 'SKILL.md'))).toBe(true)
 
     const path = installSkill(dir, b, ledger)
-    writeFileSync(join(dir, 'genoffice', 'notes.txt'), 'mine')
+    writeFileSync(join(dir, 'teleoffice', 'notes.txt'), 'mine')
     expect(uninstallSkill(dir, ledger)).toBe(true)
     expect(existsSync(path)).toBe(false)
-    expect(existsSync(join(dir, 'genoffice', 'notes.txt'))).toBe(true)
+    expect(existsSync(join(dir, 'teleoffice', 'notes.txt'))).toBe(true)
     expect(ledger[path]).toBeUndefined()
 
     installSkill(dir, b, ledger)
@@ -141,16 +143,61 @@ describe('uninstallSkill', () => {
     const dir2 = join(home(), 'skills')
     const p2 = installSkill(dir2, b, ledger)
     expect(uninstallSkill(dir2, ledger)).toBe(true)
-    expect(existsSync(join(dir2, 'genoffice'))).toBe(false)
+    expect(existsSync(join(dir2, 'teleoffice'))).toBe(false)
     expect(existsSync(p2)).toBe(false)
   })
 })
 
 describe('buildSkillZip', () => {
-  it('holds genoffice/SKILL.md with the exact bundled bytes', async () => {
+  it('holds teleoffice/SKILL.md with the exact bundled bytes', async () => {
     const b = bundled('1.2.0')
     const zip = await JSZip.loadAsync(await buildSkillZip(b))
-    expect(Object.keys(zip.files).filter((f) => !zip.files[f]!.dir)).toEqual(['genoffice/SKILL.md'])
-    expect(await zip.file('genoffice/SKILL.md')!.async('string')).toBe(b.text)
+    expect(Object.keys(zip.files).filter((f) => !zip.files[f]!.dir)).toEqual([
+      'teleoffice/SKILL.md',
+    ])
+    expect(await zip.file('teleoffice/SKILL.md')!.async('string')).toBe(b.text)
+  })
+})
+
+describe('removeLegacySkill', () => {
+  const legacyText = skillText('2.70.0').replace('name: teleoffice', 'name: genoffice')
+  const sha = (text: string) => createHash('sha256').update(text).digest('hex')
+  const entry = (text: string) => ({
+    version: '2.70.0',
+    sha256: sha(text),
+    at: '2026-09-01T00:00:00.000Z',
+    channel: 'app' as const,
+  })
+
+  function legacy(dir: string, text = legacyText): string {
+    mkdirSync(join(dir, 'genoffice'), { recursive: true })
+    const path = join(dir, 'genoffice', 'SKILL.md')
+    writeFileSync(path, text)
+    return path
+  }
+
+  it('removes the genoffice skill this app wrote when the teleoffice one is installed', () => {
+    const dir = join(home(), 'skills')
+    const old = legacy(dir)
+    const ledger: SkillLedger = { [old]: entry(legacyText) }
+    const path = installSkill(dir, bundled(), ledger)
+    expect(existsSync(path)).toBe(true)
+    expect(existsSync(join(dir, 'genoffice'))).toBe(false)
+    expect(ledger[old]).toBeUndefined()
+  })
+
+  it('keeps a genoffice skill that was edited, not ours, or shares its folder', () => {
+    const dir = join(home(), 'skills')
+    const old = legacy(dir)
+    expect(removeLegacySkill(dir, {})).toBe(false)
+    const ledger: SkillLedger = { [old]: entry('something else') }
+    expect(removeLegacySkill(dir, ledger)).toBe(false)
+    expect(existsSync(old)).toBe(true)
+
+    const ours: SkillLedger = { [old]: entry(legacyText) }
+    writeFileSync(join(dir, 'genoffice', 'notes.txt'), 'mine')
+    expect(uninstallSkill(dir, ours)).toBe(true)
+    expect(existsSync(old)).toBe(false)
+    expect(readFileSync(join(dir, 'genoffice', 'notes.txt'), 'utf-8')).toBe('mine')
   })
 })

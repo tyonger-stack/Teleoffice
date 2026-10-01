@@ -482,7 +482,7 @@ export async function readSheet(path: string, opts: ReadOptions): Promise<SheetR
           pending.push({ row: c.row, column: c.column })
       }
     }
-    // formulas written without a cached value (e.g. by genoffice itself) are evaluated on the fly
+    // formulas written without a cached value (e.g. by teleoffice itself) are evaluated on the fly
     if (pending.length) {
       const box = boundingBox(pending)
       const cells = await recalcRange(client, path, meta.name, box)

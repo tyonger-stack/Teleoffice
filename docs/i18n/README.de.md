@@ -55,7 +55,7 @@ er verändert hat.
   OpenRouter, Requesty oder jeden OpenAI-kompatiblen Endpunkt mit – auch lokale Server
   werden unterstützt.
 - **Skriptbar und bereit für Agenten.** Die App bringt eine
-  `genoffice`-Befehlszeile und einen Skill für Claude Code, Codex, Cursor,
+  `teleoffice`-Befehlszeile und einen Skill für Claude Code, Codex, Cursor,
   Gemini CLI, GitHub Copilot, OpenCode und Windsurf mit, sodass ein
   Coding-Agent echte Office-Dateien auf deinem Rechner erstellen,
   konvertieren, lesen und bearbeiten kann, ohne ein Fenster zu öffnen.
@@ -170,7 +170,7 @@ nach diesen Vorgaben.
 
 ### 7 · CLI – dein Coding-Agent steuert GenOffice, auf deinem Rechner
 
-GenOffice bringt eine `genoffice`-Befehlszeile und einen Agent-Skill mit.
+GenOffice bringt eine `teleoffice`-Befehlszeile und einen Agent-Skill mit.
 Installiere den Skill, und Claude Code, Codex, Cursor, Gemini CLI, GitHub
 Copilot, OpenCode oder Windsurf können echte Office-Dateien über dieselben
 Engines wie die Apps erstellen, konvertieren, lesen und bearbeiten, ohne ein
@@ -184,15 +184,15 @@ Fenster zu öffnen.
 <td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="GenOffice-Einstellungen, Seite Integrationen: der genoffice-Skill ist in Claude Code installiert, mit Installieren-Schaltflächen neben Codex und Cursor"></td>
 </tr>
 <tr>
-<td><b>Ein Prompt an deinen Agenten</b> — „Erstelle eine Präsentation mit acht Folien über das Sonnensystem.“ Der Agent liest den Skill, schreibt ein Stylesheet, eine Gliederung und eine Seitenspezifikation pro Folie, generiert die beiden Fotos mit <code>genoffice image</code> und lässt <code>genoffice slides check</code> alles zurückweisen, was überläuft oder sich überlappt, bevor <code>genoffice create</code> die <code>.pptx</code> zusammensetzt und <code>slides render</code> pro Folie ein PNG zum Anschauen zurückgibt.</td>
+<td><b>Ein Prompt an deinen Agenten</b> — „Erstelle eine Präsentation mit acht Folien über das Sonnensystem.“ Der Agent liest den Skill, schreibt ein Stylesheet, eine Gliederung und eine Seitenspezifikation pro Folie, generiert die beiden Fotos mit <code>teleoffice image</code> und lässt <code>teleoffice slides check</code> alles zurückweisen, was überläuft oder sich überlappt, bevor <code>teleoffice create</code> die <code>.pptx</code> zusammensetzt und <code>slides render</code> pro Folie ein PNG zum Anschauen zurückgibt.</td>
 <td><b>Einmal installieren, unter Einstellungen → Integrationen</b> — GenOffice listet die Coding-Agenten auf, die es auf diesem Rechner findet, und schreibt den Skill in jeden, den du auswählst. Oder lade den Skill als Zip herunter oder führe <code>npx skills add genspark-ai/genoffice</code> aus. Befehle und der vollständige Workflow stehen unter <a href="#command-line-and-agent-skill">Befehlszeile und Agent-Skill</a>.</td>
 </tr>
 </table>
 
 ### 8 · MCP – dieselben Tools über das Model Context Protocol
 
-Jeder `genoffice`-Befehl ist auch ein MCP-Tool. Claude Code, Claude Desktop,
-Cursor und jeder andere MCP-Client können `genoffice mcp` selbst starten,
+Jeder `teleoffice`-Befehl ist auch ein MCP-Tool. Claude Code, Claude Desktop,
+Cursor und jeder andere MCP-Client können `teleoffice mcp` selbst starten,
 ganz ohne Skill-Installation und ohne geöffnetes Fenster, und erhalten 29
 Tools plus die Op-Referenzen als Ressourcen. Ein zweiter HTTP-Server in der
 App lässt einen Agenten ein Word-Dokument in einem sichtbaren Editor-Tab
@@ -230,7 +230,7 @@ aufbauen, während du zusiehst.
   in Word, Excel oder PowerPoint konvertieren, mit System-OCR für Scans.
 - **Auch Markdown und HTML**, mit demselben KI-Panel und lokalem Export nach
   Word.
-- **Skriptbar.** Eine `genoffice`-Befehlszeile, ein Agent-Skill und ein
+- **Skriptbar.** Eine `teleoffice`-Befehlszeile, ein Agent-Skill und ein
   MCP-Server stellen jede Engine in den Dienst von Claude Code, Claude
   Desktop, Codex, Cursor und anderen Agenten – weiterhin auf dem Gerät.
 - **Kostenlos**, für Einzelpersonen wie für Teams.
@@ -261,7 +261,7 @@ Farben des Dokuments.
 ## Befehlszeile und Agent-Skill
 
 Alles, was die Apps mit einer Datei tun können, kann die
-`genoffice`-Befehlszeile aus einem Terminal heraus: Word, Excel, PowerPoint,
+`teleoffice`-Befehlszeile aus einem Terminal heraus: Word, Excel, PowerPoint,
 PDF, Markdown und HTML inspizieren, konvertieren, erstellen, lesen und
 bearbeiten – auf denselben Engines, ohne Fenster. Sie wird mit GenOffice
 installiert, braucht keine eigene Laufzeitumgebung und schickt nie ein
@@ -283,26 +283,26 @@ MCP-Client.
 | `npx skills add genspark-ai/genoffice`        | Installiert aus diesem Repository in jeden Skills-kompatiblen Agenten.                                                                                                                                                   |
 
 Starte dann einen neuen Chat und bitte um ein Dokument. Der Skill bringt dem
-Agenten bei, wann er zu `genoffice` greifen soll, wie er eine Datei vor dem
+Agenten bei, wann er zu `teleoffice` greifen soll, wie er eine Datei vor dem
 Bearbeiten liest und wie er seine eigene Arbeit prüft.
 
 ### Schnellstart im Terminal
 
 ```bash
-genoffice --version
-genoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
-genoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
-genoffice create --type docx --from notes.md --out notes.docx
-genoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
-genoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
-genoffice render report.docx --out shots/          # one PNG per page, to look at what you made
-genoffice open sales.xlsx                          # hand the result to the editor
+teleoffice --version
+teleoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
+teleoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
+teleoffice create --type docx --from notes.md --out notes.docx
+teleoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
+teleoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
+teleoffice render report.docx --out shots/          # one PNG per page, to look at what you made
+teleoffice open sales.xlsx                          # hand the result to the editor
 ```
 
 Jeder Befehl gibt eine einzeilige Zusammenfassung aus, oder mit `--json` ein
 einzelnes JSON-Objekt. Bearbeitungen sind atomar: Eine zurückgewiesene
 Operation lässt die Datei unangetastet und kommt mit einer erklärenden
-Fehlermeldung zurück. `genoffice help` listet die aktuellen Befehle auf; die
+Fehlermeldung zurück. `teleoffice help` listet die aktuellen Befehle auf; die
 vollständige Referenz steht in
 [packages/cli/README.md](../../packages/cli/README.md).
 
@@ -313,20 +313,20 @@ in Claude Code. Dahinter folgte der Agent dem gestuften Workflow des Skills,
 und die CLI prüfte jede Stufe, bevor die nächste begann:
 
 ```bash
-genoffice capabilities --json                        # which cloud tools GenOffice has configured
-genoffice guide slides design                        # the deck workflow and layout library
-genoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
-genoffice slides check deck/outline.json --json      # 8 pages, no findings
-genoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
+teleoffice capabilities --json                        # which cloud tools GenOffice has configured
+teleoffice guide slides design                        # the deck workflow and layout library
+teleoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
+teleoffice slides check deck/outline.json --json      # 8 pages, no findings
+teleoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
 …                                                    # one page file per slide, fixed until each check is clean
-genoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
-genoffice slides render deck/solar-system.pptx --out deck/shots --json
-genoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
-genoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
-genoffice open deck/solar-system.pptx
+teleoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
+teleoffice slides render deck/solar-system.pptx --out deck/shots --json
+teleoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
+teleoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
+teleoffice open deck/solar-system.pptx
 ```
 
-Innerhalb von `genoffice` findet kein Modellaufruf statt: Der Agent denkt,
+Innerhalb von `teleoffice` findet kein Modellaufruf statt: Der Agent denkt,
 die CLI baut und prüft, und das Ergebnis öffnet sich in GenOffice oder
 PowerPoint als gewöhnliche `.pptx`.
 
@@ -340,26 +340,26 @@ Verfügung, für Assistenten, die kein Terminal ausführen können oder denen du
 lieber keins gibst. Es gibt zwei Wege hinein, beide mit kopierfertigen
 Snippets unter **Einstellungen → Integrationen → MCP**:
 
-| Weg                                 | Was es ist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A · `genoffice mcp`** (empfohlen) | Ein Stdio-Server, den der Assistent selbst startet; GenOffice muss dafür nicht geöffnet sein. Ein Tool pro Befehl (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus der gestufte Deck-Ablauf `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Ops, Specs und Markdown werden inline übergeben, sodass auch ein Client ohne Dateisystem funktioniert. |
-| **B · Lokaler HTTP-Server**         | Läuft innerhalb der GenOffice-App unter `http://127.0.0.1:3093/mcp` (Streamable HTTP, mit Legacy-SSE). Seine Tools steuern einen sichtbaren Word-Editor-Tab: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, und du siehst zu, wie das Dokument entsteht. Standardmäßig aus; im selben Einstellungsbereich einschalten.                                                                                                                                                |
+| Weg                                  | Was es ist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A · `teleoffice mcp`** (empfohlen) | Ein Stdio-Server, den der Assistent selbst startet; GenOffice muss dafür nicht geöffnet sein. Ein Tool pro Befehl (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus der gestufte Deck-Ablauf `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Ops, Specs und Markdown werden inline übergeben, sodass auch ein Client ohne Dateisystem funktioniert. |
+| **B · Lokaler HTTP-Server**          | Läuft innerhalb der GenOffice-App unter `http://127.0.0.1:3093/mcp` (Streamable HTTP, mit Legacy-SSE). Seine Tools steuern einen sichtbaren Word-Editor-Tab: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, und du siehst zu, wie das Dokument entsteht. Standardmäßig aus; im selben Einstellungsbereich einschalten.                                                                                                                                                |
 
 ```bash
 # Claude Code
-claude mcp add --transport stdio genoffice -- genoffice mcp
+claude mcp add --transport stdio teleoffice -- teleoffice mcp
 ```
 
 ```jsonc
 // Cursor, Claude Desktop oder ein anderer MCP-Client
-{ "mcpServers": { "genoffice": { "command": "genoffice", "args": ["mcp"] } } }
+{ "mcpServers": { "teleoffice": { "command": "teleoffice", "args": ["mcp"] } } }
 ```
 
-`genoffice` ist hier die CLI, die in der App enthalten ist (unter macOS
-`/Applications/GenOffice.app/Contents/Resources/cli/genoffice`; der
+`teleoffice` ist hier die CLI, die in der App enthalten ist (unter macOS
+`/Applications/GenOffice.app/Contents/Resources/cli/teleoffice`; der
 Einstellungsbereich zeigt den genauen Pfad für deine Installation an). Der
 Server bringt seine eigenen Workflow-Anweisungen mit und stellt die
-Op-Referenzen als `genoffice://guide/*`-Ressourcen bereit, sodass kein
+Op-Referenzen als `teleoffice://guide/*`-Ressourcen bereit, sodass kein
 Skill nötig ist; der Skill und der MCP-Server können nebeneinander
 bestehen, und der Assistent wählt einen davon. Cloud-Funktionen (`search`,
 `image`, `media`) laufen weiterhin über den in GenOffice konfigurierten
@@ -367,7 +367,7 @@ Anbieter; alles andere läuft lokal, und `GENOFFICE_ALLOWED_ROOTS`
 beschränkt jedes Tool auf die Ordner, die du angibst.
 
 Die Präsentation über erneuerbare Energien aus der Demo oben zeigt, wie ein
-einzelner Prompt in Claude Code mit nur dem `genoffice`-MCP-Server auf
+einzelner Prompt in Claude Code mit nur dem `teleoffice`-MCP-Server auf
 Protokollebene aussieht:
 
 ```text
@@ -567,7 +567,7 @@ Boxen) werden als Bilder eingebettet.
 <details>
 <summary><b>Kann ich GenOffice aus Claude Code, Codex, Cursor oder einem Skript steuern?</b></summary>
 
-Ja. GenOffice installiert eine `genoffice`-Befehlszeile, die dieselben
+Ja. GenOffice installiert eine `teleoffice`-Befehlszeile, die dieselben
 Engines ohne Fenster ausführt: Dokumente aus einem Terminal oder einem Skript
 inspizieren, konvertieren, erstellen, lesen und bearbeiten, mit
 `--json`-Ausgabe für Programme. Der mitgelieferte Agent-Skill bringt Claude

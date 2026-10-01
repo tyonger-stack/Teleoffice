@@ -53,7 +53,7 @@ aangepast.
   Kimi, GLM, Qwen, Doubao, MiniMax, Grok, Mistral, OpenRouter, Requesty, of elk
   OpenAI-compatibel endpoint, inclusief lokale servers.
 - **Scriptbaar en klaar voor agents.** De app levert een
-  `genoffice`-opdrachtregel en een skill voor Claude Code, Codex, Cursor,
+  `teleoffice`-opdrachtregel en een skill voor Claude Code, Codex, Cursor,
   Gemini CLI, GitHub Copilot, OpenCode en Windsurf mee, zodat een coding
   agent echte Office-bestanden op je eigen machine kan maken, converteren,
   lezen en bewerken zonder een venster te openen.
@@ -167,13 +167,13 @@ een **design brief** voor — hook, kleurenpalet, typografie en stijlrichtingen
 
 ### 7 · CLI — je coding agent stuurt GenOffice aan, op je eigen machine
 
-GenOffice levert een `genoffice`-opdrachtregel en een agent-skill mee.
+GenOffice levert een `teleoffice`-opdrachtregel en een agent-skill mee.
 Installeer de skill en Claude Code, Codex, Cursor, Gemini CLI, GitHub
 Copilot, OpenCode of Windsurf kunnen echte Office-bestanden maken,
 converteren, lezen en bewerken via dezelfde engines als de apps, zonder een
 venster te openen.
 
-<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides toont een deck van acht slides over het zonnestelsel dat een coding agent via de genoffice-opdrachtregel heeft gebouwd: de openingsslide op het canvas, acht miniaturen links en het AI-paneel geopend" width="100%">
+<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides toont een deck van acht slides over het zonnestelsel dat een coding agent via de teleoffice-opdrachtregel heeft gebouwd: de openingsslide op het canvas, acht miniaturen links en het AI-paneel geopend" width="100%">
 
 <table>
 <tr>
@@ -181,25 +181,25 @@ venster te openen.
 <td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="GenOffice-instellingen, pagina Integraties: de genoffice-skill geïnstalleerd in Claude Code, met Installeren-knoppen naast Codex en Cursor"></td>
 </tr>
 <tr>
-<td><b>Eén prompt aan je agent</b> — "Bouw een deck van acht slides over het zonnestelsel." De agent leest de skill, schrijft een stylesheet, een outline en één paginaspecificatie per slide, genereert de twee foto's met <code>genoffice image</code> en laat <code>genoffice slides check</code> alles afwijzen wat overloopt of overlapt, voordat <code>genoffice create</code> de <code>.pptx</code> samenstelt en <code>slides render</code> per slide een PNG teruggeeft om te bekijken.</td>
+<td><b>Eén prompt aan je agent</b> — "Bouw een deck van acht slides over het zonnestelsel." De agent leest de skill, schrijft een stylesheet, een outline en één paginaspecificatie per slide, genereert de twee foto's met <code>teleoffice image</code> en laat <code>teleoffice slides check</code> alles afwijzen wat overloopt of overlapt, voordat <code>teleoffice create</code> de <code>.pptx</code> samenstelt en <code>slides render</code> per slide een PNG teruggeeft om te bekijken.</td>
 <td><b>Eén keer installeren, via Instellingen → Integraties</b> — GenOffice toont de coding agents die het op deze computer vindt en schrijft de skill naar elke agent die je kiest. Of download de skill als zip, of voer <code>npx skills add genspark-ai/genoffice</code> uit. Commando's en de volledige workflow staan in <a href="#command-line-and-agent-skill">Opdrachtregel en agent-skill</a>.</td>
 </tr>
 </table>
 
 ### 8 · MCP — dezelfde tools via het Model Context Protocol
 
-Elk `genoffice`-commando is ook een MCP-tool. Claude Code, Claude Desktop,
-Cursor en elke andere MCP-client kunnen zelf `genoffice mcp` starten,
+Elk `teleoffice`-commando is ook een MCP-tool. Claude Code, Claude Desktop,
+Cursor en elke andere MCP-client kunnen zelf `teleoffice mcp` starten,
 zonder skill om te installeren en zonder venster te openen, en krijgen 29
 tools plus de op-referenties als resources. Een tweede, HTTP-server in de
 app laat een agent een Word-document opbouwen in een zichtbaar
 editortabblad terwijl je toekijkt.
 
-<img src="../assets/readme/mcp-deck-motion.webp" alt="Time-lapse van Claude Code dat via de genoffice MCP-server een investeerderspresentatie van acht slides over hernieuwbare energie bouwt: zoekt naar figuren en foto's, controleert elke kandidaat-afbeelding met media, deck_start schrijft de stylesheet en de outline, deck_page voegt telkens één gecontroleerde pagina toe, deck_build stelt de .pptx samen en slides_render geeft een afbeelding van elke slide terug; het afgeronde deck opent daarna in GenOffice Slides" width="100%">
+<img src="../assets/readme/mcp-deck-motion.webp" alt="Time-lapse van Claude Code dat via de teleoffice MCP-server een investeerderspresentatie van acht slides over hernieuwbare energie bouwt: zoekt naar figuren en foto's, controleert elke kandidaat-afbeelding met media, deck_start schrijft de stylesheet en de outline, deck_page voegt telkens één gecontroleerde pagina toe, deck_build stelt de .pptx samen en slides_render geeft een afbeelding van elke slide terug; het afgeronde deck opent daarna in GenOffice Slides" width="100%">
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides toont het deck Renewable Energy 2026 van acht slides dat Claude Code via de genoffice MCP-server heeft gebouwd: de openingsslide met een foto van een windmolenpark op het canvas en acht miniaturen links"></td>
+<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides toont het deck Renewable Energy 2026 van acht slides dat Claude Code via de teleoffice MCP-server heeft gebouwd: de openingsslide met een foto van een windmolenpark op het canvas en acht miniaturen links"></td>
 <td width="50%"><img src="../assets/readme/mcp-integrations.webp" alt="GenOffice-instellingen, pagina Integraties, MCP-onderdeel: het eenregelige commando claude mcp add voor Claude Code, het JSON-blok voor Cursor, Claude Desktop en andere MCP-clients, en de optie voor de lokale HTTP-server daaronder"></td>
 </tr>
 <tr>
@@ -227,7 +227,7 @@ editortabblad terwijl je toekijkt.
   naar Word, Excel of PowerPoint on-device, met systeem-OCR voor scans.
 - **Ook Markdown en HTML**, met hetzelfde AI-paneel en lokale export naar
   Word.
-- **Scriptbaar.** Een `genoffice`-opdrachtregel, een agent-skill en een
+- **Scriptbaar.** Een `teleoffice`-opdrachtregel, een agent-skill en een
   MCP-server stellen elke engine ter beschikking van Claude Code, Claude
   Desktop, Codex, Cursor en andere agents, nog altijd on-device.
 - **Gratis**, voor individuen en teams.
@@ -256,7 +256,7 @@ opgeslagen bestanden behouden altijd de eigen kleuren van het document.
 
 ## Opdrachtregel en agent-skill
 
-Alles wat de apps met een bestand kunnen, kan de `genoffice`-opdrachtregel
+Alles wat de apps met een bestand kunnen, kan de `teleoffice`-opdrachtregel
 vanuit een terminal: Word, Excel, PowerPoint, PDF, Markdown en HTML
 inspecteren, converteren, maken, lezen en bewerken op dezelfde engines,
 headless. Hij wordt samen met GenOffice geïnstalleerd, heeft geen eigen
@@ -279,25 +279,25 @@ MCP-client.
 | `npx skills add genspark-ai/genoffice`    | Installeert vanuit deze repository in elke agent die skills ondersteunt.                                                                                                                                                  |
 
 Start daarna een nieuwe chat en vraag om een document. De skill leert de
-agent wanneer hij naar `genoffice` moet grijpen, hoe hij een bestand leest
+agent wanneer hij naar `teleoffice` moet grijpen, hoe hij een bestand leest
 voordat hij het bewerkt en hoe hij zijn eigen werk controleert.
 
 ### Snelstart vanuit de terminal
 
 ```bash
-genoffice --version
-genoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
-genoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
-genoffice create --type docx --from notes.md --out notes.docx
-genoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
-genoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
-genoffice render report.docx --out shots/          # one PNG per page, to look at what you made
-genoffice open sales.xlsx                          # hand the result to the editor
+teleoffice --version
+teleoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
+teleoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
+teleoffice create --type docx --from notes.md --out notes.docx
+teleoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
+teleoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
+teleoffice render report.docx --out shots/          # one PNG per page, to look at what you made
+teleoffice open sales.xlsx                          # hand the result to the editor
 ```
 
 Elk commando print een samenvatting van één regel, of één JSON-object met
 `--json`. Bewerkingen zijn atomair: een afgewezen op laat het bestand
-onaangeroerd en komt terug met een begeleide foutmelding. `genoffice help`
+onaangeroerd en komt terug met een begeleide foutmelding. `teleoffice help`
 toont de huidige set commando's; de volledige referentie staat in
 [packages/cli/README.md](../../packages/cli/README.md).
 
@@ -308,20 +308,20 @@ Daarachter volgde de agent de gefaseerde workflow van de skill en
 controleerde de CLI elke fase voordat de volgende begon:
 
 ```bash
-genoffice capabilities --json                        # which cloud tools GenOffice has configured
-genoffice guide slides design                        # the deck workflow and layout library
-genoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
-genoffice slides check deck/outline.json --json      # 8 pages, no findings
-genoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
+teleoffice capabilities --json                        # which cloud tools GenOffice has configured
+teleoffice guide slides design                        # the deck workflow and layout library
+teleoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
+teleoffice slides check deck/outline.json --json      # 8 pages, no findings
+teleoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
 …                                                    # one page file per slide, fixed until each check is clean
-genoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
-genoffice slides render deck/solar-system.pptx --out deck/shots --json
-genoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
-genoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
-genoffice open deck/solar-system.pptx
+teleoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
+teleoffice slides render deck/solar-system.pptx --out deck/shots --json
+teleoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
+teleoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
+teleoffice open deck/solar-system.pptx
 ```
 
-Binnen `genoffice` vindt geen enkele modelaanroep plaats: de agent doet het
+Binnen `teleoffice` vindt geen enkele modelaanroep plaats: de agent doet het
 denkwerk, de CLI het bouwen en controleren, en het resultaat opent in
 GenOffice of PowerPoint als een gewone `.pptx`.
 
@@ -335,26 +335,26 @@ assistenten die geen terminal kunnen draaien of waaraan je liever geen
 terminal geeft. Er zijn twee manieren om te verbinden, allebei getoond met
 kant-en-klare snippets in **Instellingen → Integraties → MCP**:
 
-| Manier                               | Wat het is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A · `genoffice mcp`** (aanbevolen) | Een stdio-server die de assistent zelf start; GenOffice hoeft niet open te staan. Eén tool per commando (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus de gefaseerde deck-flow `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Ops, specs en Markdown worden inline doorgegeven, dus werkt ook een client zonder bestandssysteem. |
-| **B · Lokale HTTP-server**           | Draait binnen de GenOffice-app op `http://127.0.0.1:3093/mcp` (Streamable HTTP, met legacy SSE). De tools ervan sturen een zichtbaar Word-editortabblad aan: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, en je ziet het document vorm aannemen. Standaard uit; zet hem aan in hetzelfde instellingenscherm.                                                                                                                                         |
+| Manier                                | Wat het is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A · `teleoffice mcp`** (aanbevolen) | Een stdio-server die de assistent zelf start; GenOffice hoeft niet open te staan. Eén tool per commando (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus de gefaseerde deck-flow `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Ops, specs en Markdown worden inline doorgegeven, dus werkt ook een client zonder bestandssysteem. |
+| **B · Lokale HTTP-server**            | Draait binnen de GenOffice-app op `http://127.0.0.1:3093/mcp` (Streamable HTTP, met legacy SSE). De tools ervan sturen een zichtbaar Word-editortabblad aan: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, en je ziet het document vorm aannemen. Standaard uit; zet hem aan in hetzelfde instellingenscherm.                                                                                                                                         |
 
 ```bash
 # Claude Code
-claude mcp add --transport stdio genoffice -- genoffice mcp
+claude mcp add --transport stdio teleoffice -- teleoffice mcp
 ```
 
 ```jsonc
 // Cursor, Claude Desktop of een andere MCP-client
-{ "mcpServers": { "genoffice": { "command": "genoffice", "args": ["mcp"] } } }
+{ "mcpServers": { "teleoffice": { "command": "teleoffice", "args": ["mcp"] } } }
 ```
 
-`genoffice` is hier de CLI die met de app wordt meegeleverd (op macOS
-`/Applications/GenOffice.app/Contents/Resources/cli/genoffice`; het
+`teleoffice` is hier de CLI die met de app wordt meegeleverd (op macOS
+`/Applications/GenOffice.app/Contents/Resources/cli/teleoffice`; het
 instellingenscherm toont het exacte pad voor jouw installatie). De server
 draagt zijn eigen workflow-instructies mee en stelt de op-referenties
-beschikbaar als `genoffice://guide/*`-resources, dus is er geen skill
+beschikbaar als `teleoffice://guide/*`-resources, dus is er geen skill
 nodig; de skill en de MCP-server kunnen naast elkaar bestaan en de
 assistent kiest er één. Cloudfuncties (`search`, `image`, `media`) lopen
 nog steeds via de provider die in GenOffice is ingesteld; al het andere
@@ -362,7 +362,7 @@ draait lokaal, en `GENOFFICE_ALLOWED_ROOTS` beperkt elke tool tot de
 mappen die je opgeeft.
 
 Het deck over hernieuwbare energie uit de demo hierboven laat zien hoe één
-prompt in Claude Code met alleen de `genoffice` MCP-server aangesloten er
+prompt in Claude Code met alleen de `teleoffice` MCP-server aangesloten er
 aan de protocolkant uitziet:
 
 ```text
@@ -560,7 +560,7 @@ afbeelding ingevoegd.
 <details>
 <summary><b>Kan ik GenOffice aansturen vanuit Claude Code, Codex, Cursor of een script?</b></summary>
 
-Ja. GenOffice installeert een `genoffice`-opdrachtregel die dezelfde engines
+Ja. GenOffice installeert een `teleoffice`-opdrachtregel die dezelfde engines
 headless draait: documenten inspecteren, converteren, maken, lezen en
 bewerken vanuit een terminal of een script, met `--json`-uitvoer voor
 programma's. De meegeleverde agent-skill leert Claude Code, Codex, Cursor,

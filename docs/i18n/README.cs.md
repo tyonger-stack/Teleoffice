@@ -52,7 +52,7 @@ provede požadovanou úpravu a přesně vám ukáže, čeho se dotkl.
   Qwen, Doubao, MiniMax, Grok, Mistral, OpenRouter, Requesty nebo jakýkoli OpenAI
   kompatibilní endpoint, včetně lokálních serverů.
 - **Skriptovatelný a připravený pro agenty.** Aplikace obsahuje příkazový
-  řádek `genoffice` a skill pro Claude Code, Codex, Cursor, Gemini CLI,
+  řádek `teleoffice` a skill pro Claude Code, Codex, Cursor, Gemini CLI,
   GitHub Copilot, OpenCode a Windsurf, takže kódovací agent může na vašem
   počítači vytvářet, převádět, číst a upravovat skutečné soubory Office, aniž
   by otevřel jediné okno.
@@ -166,38 +166,38 @@ podle těchto tokenů vytvoří jeden samostatný soubor `.html`.
 
 ### 7 · CLI — váš kódovací agent řídí GenOffice, na vašem počítači
 
-GenOffice obsahuje příkazový řádek `genoffice` a agentní skill. Nainstalujte
+GenOffice obsahuje příkazový řádek `teleoffice` a agentní skill. Nainstalujte
 skill a Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode nebo
 Windsurf mohou vytvářet, převádět, číst a upravovat skutečné soubory Office
 přes stejné enginy jako aplikace, aniž by otevřely jediné okno.
 
-<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides zobrazuje osmisnímkovou prezentaci o sluneční soustavě, kterou kódovací agent vytvořil přes příkazový řádek genoffice: titulní snímek na ploše, osm miniatur vlevo a otevřený AI panel" width="100%">
+<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides zobrazuje osmisnímkovou prezentaci o sluneční soustavě, kterou kódovací agent vytvořil přes příkazový řádek teleoffice: titulní snímek na ploše, osm miniatur vlevo a otevřený AI panel" width="100%">
 
 <table>
 <tr>
 <td width="50%"><img src="../assets/readme/cli-slides-grid.webp" alt="Osm vykreslených snímků prezentace o sluneční soustavě vedle sebe: titul, časová osa průzkumu, čtyři klíčová čísla, sloupcový graf průměrů planet, kamenné světy versus obři, 99,8 % Slunce jako hlavní číslo, mřížka čtyř obrů a závěry"></td>
-<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="Nastavení GenOffice, stránka Integrace: skill genoffice nainstalovaný do Claude Code, s tlačítky Instalovat u položek Codex a Cursor"></td>
+<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="Nastavení GenOffice, stránka Integrace: skill teleoffice nainstalovaný do Claude Code, s tlačítky Instalovat u položek Codex a Cursor"></td>
 </tr>
 <tr>
-<td><b>Jeden prompt vašemu agentovi</b> — „Vytvoř osmisnímkovou prezentaci o sluneční soustavě.“ Agent si přečte skill, napíše stylový list, osnovu a jednu specifikaci stránky na snímek, vygeneruje obě fotografie pomocí <code>genoffice image</code> a nechá <code>genoffice slides check</code> odmítnout vše, co přetéká nebo se překrývá, než <code>genoffice create</code> sestaví soubor <code>.pptx</code> a <code>slides render</code> vrátí ke kontrole jeden PNG na snímek.</td>
+<td><b>Jeden prompt vašemu agentovi</b> — „Vytvoř osmisnímkovou prezentaci o sluneční soustavě.“ Agent si přečte skill, napíše stylový list, osnovu a jednu specifikaci stránky na snímek, vygeneruje obě fotografie pomocí <code>teleoffice image</code> a nechá <code>teleoffice slides check</code> odmítnout vše, co přetéká nebo se překrývá, než <code>teleoffice create</code> sestaví soubor <code>.pptx</code> a <code>slides render</code> vrátí ke kontrole jeden PNG na snímek.</td>
 <td><b>Nainstalujte jednou, v Nastavení → Integrace</b> — GenOffice vypíše kódovací agenty, které na tomto počítači najde, a zapíše skill do každého, který vyberete. Nebo si skill stáhněte jako zip, případně spusťte <code>npx skills add genspark-ai/genoffice</code>. Příkazy a celý pracovní postup najdete v sekci <a href="#command-line-and-agent-skill">Příkazový řádek a agentní skill</a>.</td>
 </tr>
 </table>
 
 ### 8 · MCP — stejné nástroje přes Model Context Protocol
 
-Každý příkaz `genoffice` je zároveň nástrojem MCP. Claude Code, Claude
-Desktop, Cursor a jakýkoli jiný MCP klient si mohou sami spustit `genoffice
+Každý příkaz `teleoffice` je zároveň nástrojem MCP. Claude Code, Claude
+Desktop, Cursor a jakýkoli jiný MCP klient si mohou sami spustit `teleoffice
 mcp` — bez instalace skillu a bez otevřeného okna — a získat 29 nástrojů
 plus referenční příručky k operacím jako zdroje (resources). Druhý,
 HTTP server uvnitř aplikace umožňuje agentovi sestavit dokument Word přímo
 ve viditelné záložce editoru, zatímco se díváte.
 
-<img src="../assets/readme/mcp-deck-motion.webp" alt="Zrychlený záznam toho, jak Claude Code staví osmislajdovou investorskou prezentaci o obnovitelné energii přes MCP server genoffice: hledá obrázky a fotografie, kontroluje každou kandidátní fotografii pomocí media, deck_start zapíše stylový list a osnovu, deck_page přidává vždy jednu zkontrolovanou stránku, deck_build sestaví .pptx a slides_render vrátí obrázek každého slajdu; hotová prezentace se pak otevře v GenOffice Slides" width="100%">
+<img src="../assets/readme/mcp-deck-motion.webp" alt="Zrychlený záznam toho, jak Claude Code staví osmislajdovou investorskou prezentaci o obnovitelné energii přes MCP server teleoffice: hledá obrázky a fotografie, kontroluje každou kandidátní fotografii pomocí media, deck_start zapíše stylový list a osnovu, deck_page přidává vždy jednu zkontrolovanou stránku, deck_build sestaví .pptx a slides_render vrátí obrázek každého slajdu; hotová prezentace se pak otevře v GenOffice Slides" width="100%">
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides zobrazuje osmislajdovou prezentaci Renewable Energy 2026, kterou Claude Code postavil přes MCP server genoffice: titulní slajd s fotografií větrné farmy na ploše a osm miniatur vlevo"></td>
+<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides zobrazuje osmislajdovou prezentaci Renewable Energy 2026, kterou Claude Code postavil přes MCP server teleoffice: titulní slajd s fotografií větrné farmy na ploše a osm miniatur vlevo"></td>
 <td width="50%"><img src="../assets/readme/mcp-integrations.webp" alt="Nastavení GenOffice, stránka Integrations, část MCP: jednořádkový příkaz claude mcp add pro Claude Code, blok JSON pro Cursor, Claude Desktop a další MCP klienty, a níže možnost lokálního HTTP serveru"></td>
 </tr>
 <tr>
@@ -224,7 +224,7 @@ ve viditelné záložce editoru, zatímco se díváte.
 - **PDF udělané správně.** Upravujte text přímo na stránce a převádějte PDF
   do Word, Excel nebo PowerPoint na zařízení, se systémovým OCR pro skeny.
 - **Také Markdown a HTML**, se stejným panelem AI a místním exportem do Word.
-- **Skriptovatelný.** Příkazový řádek `genoffice`, agentní skill a MCP
+- **Skriptovatelný.** Příkazový řádek `teleoffice`, agentní skill a MCP
   server dávají každý engine do služeb Claude Code, Claude Desktop, Codex,
   Cursor a dalších agentů, stále na zařízení.
 - **Zdarma**, pro jednotlivce i týmy.
@@ -253,7 +253,7 @@ vlastní barvy dokumentu.
 
 ## Příkazový řádek a agentní skill
 
-Vše, co aplikace umí se souborem, umí příkazový řádek `genoffice`
+Vše, co aplikace umí se souborem, umí příkazový řádek `teleoffice`
 z terminálu: prohlížet, převádět, vytvářet, číst a upravovat Word, Excel,
 PowerPoint, PDF, Markdown a HTML na stejných enginech, bez grafického
 rozhraní. Instaluje se spolu s GenOffice, nepotřebuje vlastní runtime
@@ -275,25 +275,25 @@ MCP klientem.
 | `npx skills add genspark-ai/genoffice` | Nainstaluje z tohoto repozitáře do jakéhokoli agenta podporujícího skilly.                                                                                                                 |
 
 Pak začněte nový chat a požádejte o dokument. Skill agenta naučí, kdy sáhnout
-po `genoffice`, jak si soubor přečíst před úpravou a jak zkontrolovat vlastní
+po `teleoffice`, jak si soubor přečíst před úpravou a jak zkontrolovat vlastní
 práci.
 
 ### Rychlý start z terminálu
 
 ```bash
-genoffice --version
-genoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
-genoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
-genoffice create --type docx --from notes.md --out notes.docx
-genoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
-genoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
-genoffice render report.docx --out shots/          # one PNG per page, to look at what you made
-genoffice open sales.xlsx                          # hand the result to the editor
+teleoffice --version
+teleoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
+teleoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
+teleoffice create --type docx --from notes.md --out notes.docx
+teleoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
+teleoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
+teleoffice render report.docx --out shots/          # one PNG per page, to look at what you made
+teleoffice open sales.xlsx                          # hand the result to the editor
 ```
 
 Každý příkaz vypíše jednořádkové shrnutí, nebo s `--json` jediný objekt JSON.
 Úpravy jsou atomické: odmítnutá operace nechá soubor nedotčený a vrátí se
-s návodnou chybovou hláškou. `genoffice help` vypíše aktuální sadu příkazů;
+s návodnou chybovou hláškou. `teleoffice help` vypíše aktuální sadu příkazů;
 úplná reference je v [packages/cli/README.md](../../packages/cli/README.md).
 
 ### Co agent ve skutečnosti spouští
@@ -303,20 +303,20 @@ v Claude Code. Agent za ní postupoval podle fázovaného pracovního postupu ze
 skillu a CLI zkontrolovalo každou fázi, než začala další:
 
 ```bash
-genoffice capabilities --json                        # which cloud tools GenOffice has configured
-genoffice guide slides design                        # the deck workflow and layout library
-genoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
-genoffice slides check deck/outline.json --json      # 8 pages, no findings
-genoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
+teleoffice capabilities --json                        # which cloud tools GenOffice has configured
+teleoffice guide slides design                        # the deck workflow and layout library
+teleoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
+teleoffice slides check deck/outline.json --json      # 8 pages, no findings
+teleoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
 …                                                    # one page file per slide, fixed until each check is clean
-genoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
-genoffice slides render deck/solar-system.pptx --out deck/shots --json
-genoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
-genoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
-genoffice open deck/solar-system.pptx
+teleoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
+teleoffice slides render deck/solar-system.pptx --out deck/shots --json
+teleoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
+teleoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
+teleoffice open deck/solar-system.pptx
 ```
 
-Uvnitř `genoffice` neprobíhá žádné volání modelu: agent přemýšlí, CLI staví
+Uvnitř `teleoffice` neprobíhá žádné volání modelu: agent přemýšlí, CLI staví
 a kontroluje a výsledek se otevře v GenOffice nebo PowerPointu jako obyčejný
 soubor `.pptx`.
 
@@ -329,33 +329,33 @@ pro asistenty, kteří neumí spustit terminál nebo kterým byste ho raději
 nedávali. Vedou k tomu dvě cesty, obě ukázané s připravenými fragmenty ke
 zkopírování v **Nastavení → Integrace → MCP**:
 
-| Cesta                                | Co to je                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **A · `genoffice mcp`** (doporučeno) | stdio server, který si asistent spustí sám; GenOffice nemusí být otevřené. Jeden nástroj na příkaz (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus fázovaný postup sestavování prezentace `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Operace, specifikace a Markdown se předávají přímo v argumentech, takže funguje i klient bez souborového systému. |
-| **B · Lokální HTTP server**          | Běží uvnitř aplikace GenOffice na `http://127.0.0.1:3093/mcp` (Streamable HTTP, se starším SSE). Jeho nástroje ovládají viditelnou záložku editoru Word: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session` — a vy sledujete, jak dokument vzniká. Ve výchozím stavu vypnutý; zapíná se ve stejném panelu nastavení.                                                                                                                                                                 |
+| Cesta                                 | Co to je                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **A · `teleoffice mcp`** (doporučeno) | stdio server, který si asistent spustí sám; GenOffice nemusí být otevřené. Jeden nástroj na příkaz (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus fázovaný postup sestavování prezentace `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Operace, specifikace a Markdown se předávají přímo v argumentech, takže funguje i klient bez souborového systému. |
+| **B · Lokální HTTP server**           | Běží uvnitř aplikace GenOffice na `http://127.0.0.1:3093/mcp` (Streamable HTTP, se starším SSE). Jeho nástroje ovládají viditelnou záložku editoru Word: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session` — a vy sledujete, jak dokument vzniká. Ve výchozím stavu vypnutý; zapíná se ve stejném panelu nastavení.                                                                                                                                                                 |
 
 ```bash
 # Claude Code
-claude mcp add --transport stdio genoffice -- genoffice mcp
+claude mcp add --transport stdio teleoffice -- teleoffice mcp
 ```
 
 ```jsonc
 // Cursor, Claude Desktop nebo jakýkoli jiný MCP klient
-{ "mcpServers": { "genoffice": { "command": "genoffice", "args": ["mcp"] } } }
+{ "mcpServers": { "teleoffice": { "command": "teleoffice", "args": ["mcp"] } } }
 ```
 
-`genoffice` je tady CLI dodávané uvnitř aplikace (na macOS
-`/Applications/GenOffice.app/Contents/Resources/cli/genoffice`; panel
+`teleoffice` je tady CLI dodávané uvnitř aplikace (na macOS
+`/Applications/GenOffice.app/Contents/Resources/cli/teleoffice`; panel
 nastavení vypíše přesnou cestu pro vaši instalaci). Server nese vlastní
 instrukce k pracovnímu postupu a zpřístupňuje referenční příručky k operacím
-jako zdroje `genoffice://guide/*`, takže skill není potřeba; skill a MCP
+jako zdroje `teleoffice://guide/*`, takže skill není potřeba; skill a MCP
 server mohou koexistovat a asistent si jeden z nich vybere. Cloudové funkce
 (`search`, `image`, `media`) stále jdou přes poskytovatele nastaveného v
 GenOffice; všechno ostatní běží lokálně a `GENOFFICE_ALLOWED_ROOTS` omezuje
 každý nástroj na složky, které uvedete.
 
 Prezentace o obnovitelné energii z dema výše je to, jak jeden prompt v
-Claude Code s připojeným pouze MCP serverem `genoffice` vypadá ze strany
+Claude Code s připojeným pouze MCP serverem `teleoffice` vypadá ze strany
 protokolu:
 
 ```text
@@ -547,7 +547,7 @@ obrázky.
 <details>
 <summary><b>Můžu GenOffice ovládat z nástrojů Claude Code, Codex, Cursor nebo ze skriptu?</b></summary>
 
-Ano. GenOffice nainstaluje příkazový řádek `genoffice`, který spouští stejné
+Ano. GenOffice nainstaluje příkazový řádek `teleoffice`, který spouští stejné
 enginy bez grafického rozhraní: prohlížejte, převádějte, vytvářejte, čtěte
 a upravujte dokumenty z terminálu nebo ze skriptu, s výstupem `--json` pro
 programy. Přibalený agentní skill naučí Claude Code, Codex, Cursor, Gemini

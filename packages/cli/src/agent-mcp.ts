@@ -5,22 +5,25 @@ import { realizedPath, writeOutput } from './fs'
 import type { McpLaunch } from './mcp-launch'
 
 /**
- * Registering `genoffice mcp` (stdio) in each coding agent's MCP config, the
+ * Registering `teleoffice mcp` (stdio) in each coding agent's MCP config, the
  * MCP twin of agent-skills.ts. One key per file is set or removed; an entry
- * named genoffice that starts something other than a genoffice launcher is
+ * named teleoffice that starts something other than a teleoffice launcher is
  * never replaced unless forced. Paths and shapes follow each agent's docs.
  */
 
-export const MCP_SERVER_NAME = 'genoffice'
+export const MCP_SERVER_NAME = 'teleoffice'
+
+/** the server name before the command was renamed; our own old entries are cleaned up */
+export const LEGACY_MCP_SERVER_NAME = 'genoffice'
 
 export type McpEntryStatus =
-  /** no genoffice entry in the file */
+  /** no teleoffice entry in the file */
   | 'absent'
-  /** genoffice entry starting our launcher, exactly as this CLI would write it */
+  /** teleoffice entry starting our launcher, exactly as this CLI would write it */
   | 'registered'
-  /** a genoffice launcher, but another path or extra fields */
+  /** a teleoffice launcher, but another path or extra fields */
   | 'stale'
-  /** an entry named genoffice that starts something else */
+  /** an entry named teleoffice that starts something else */
   | 'occupied'
   /** the file cannot be edited safely (unparsable, or a shape we do not know) */
   | 'manual'
@@ -149,7 +152,7 @@ export function mcpConfigFile(id: AgentId, opts: McpConfigOptions = {}): string 
 }
 
 function homeOf(env: NodeJS.ProcessEnv): string {
-  return env.GENOFFICE_HOME || env.HOME || env.USERPROFILE || ''
+  return env.TELEOFFICE_HOME || env.GENOFFICE_HOME || env.HOME || env.USERPROFILE || ''
 }
 
 /** What a person pastes when the file cannot be edited for them. */
@@ -187,12 +190,12 @@ export function readMcpEntry(id: AgentId, file: string, launch: McpLaunch): McpE
   return { status: isGenofficeLauncher(command, args) ? 'stale' : 'occupied', command }
 }
 
-/** Set the genoffice entry (replacing any existing one); the caller has already decided that is allowed. */
+/** Set the teleoffice entry (replacing any existing one); the caller has already decided that is allowed. */
 export function writeMcpEntry(id: AgentId, file: string, launch: McpLaunch): void {
   const def = MCP_AGENTS.find((a) => a.id === id)!
   const text = existsSync(file) ? readFileSync(file, 'utf-8') : ''
   if (def.shape.kind === 'toml') {
-    const stripped = removeTomlTable(text)
+    const stripped = removeLegacyTomlTable(removeTomlTable(text))
     const body = stripped.length && !stripped.endsWith('\n') ? `${stripped}\n` : stripped
     save(file, `${body}${body.trim().length ? '\n' : ''}${tomlTable(launch)}`)
     return
@@ -200,17 +203,32 @@ export function writeMcpEntry(id: AgentId, file: string, launch: McpLaunch): voi
   const doc = text.trim() ? parseJsonObject(text) : {}
   if (!doc) throw new Error(`${file} is not a JSON object`)
   const map = isRecord(doc[def.shape.key]) ? (doc[def.shape.key] as Record<string, unknown>) : {}
-  doc[def.shape.key] = { ...map, [MCP_SERVER_NAME]: def.shape.entry(launch) }
+  doc[def.shape.key] = {
+    ...withoutLegacyEntry(def.shape, map),
+    [MCP_SERVER_NAME]: def.shape.entry(launch),
+  }
   save(file, `${JSON.stringify(doc, null, 2)}\n`)
 }
 
-/** Remove the genoffice entry; false when there was none. Other keys stay. */
+/** the map without a legacy `genoffice` entry, when that entry starts one of our old launchers */
+function withoutLegacyEntry(
+  shape: JsonShape,
+  map: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!(LEGACY_MCP_SERVER_NAME in map)) return map
+  const { command, args } = shape.launchOf(map[LEGACY_MCP_SERVER_NAME])
+  if (!isLegacyLauncher(command, args)) return map
+  const { [LEGACY_MCP_SERVER_NAME]: _legacy, ...rest } = map
+  return rest
+}
+
+/** Remove the teleoffice entry; false when there was none. Other keys stay. */
 export function removeMcpEntry(id: AgentId, file: string): boolean {
   const def = MCP_AGENTS.find((a) => a.id === id)!
   if (!existsSync(file)) return false
   const text = readFileSync(file, 'utf-8')
   if (def.shape.kind === 'toml') {
-    const next = removeTomlTable(text)
+    const next = removeLegacyTomlTable(removeTomlTable(text))
     if (next === text) return false
     save(file, next)
     return true
@@ -219,21 +237,32 @@ export function removeMcpEntry(id: AgentId, file: string): boolean {
   const doc = parseJsonObject(text)
   if (!doc) throw new Error(`${file} is not a JSON object`)
   const map = doc[def.shape.key]
-  if (!isRecord(map) || !(MCP_SERVER_NAME in map)) return false
-  const { [MCP_SERVER_NAME]: _dropped, ...rest } = map
+  if (!isRecord(map)) return false
+  const cleaned = withoutLegacyEntry(def.shape, map)
+  if (!(MCP_SERVER_NAME in cleaned) && cleaned === map) return false
+  const { [MCP_SERVER_NAME]: _dropped, ...rest } = cleaned
   doc[def.shape.key] = rest
   save(file, `${JSON.stringify(doc, null, 2)}\n`)
   return true
 }
 
-const LAUNCHER_NAMES = new Set(['genoffice', 'genoffice.cmd', 'genoffice.exe'])
+// genoffice.exe is the Windows app itself (run as Node), which keeps its name
+const LAUNCHER_NAMES = new Set(['teleoffice', 'teleoffice.cmd', 'genoffice.exe'])
 
 /**
- * Any genoffice launcher, whatever install it came from (an older app path is
- * ours to update): the launcher scripts, or the app run as Node on genoffice.cjs.
+ * Any teleoffice launcher, whatever install it came from (an older app path is
+ * ours to update): the launcher scripts, or the app run as Node on teleoffice.cjs.
  */
 export function isGenofficeLauncher(command: string | null, args: string[] = []): boolean {
   if (command && LAUNCHER_NAMES.has(fileName(command))) return true
+  return args.some((a) => fileName(a) === 'teleoffice.cjs')
+}
+
+const LEGACY_LAUNCHER_NAMES = new Set(['genoffice', 'genoffice.cmd'])
+
+/** a launcher of the app from before the rename: the genoffice scripts, or the app run as Node on genoffice.cjs */
+export function isLegacyLauncher(command: string | null, args: string[] = []): boolean {
+  if (command && LEGACY_LAUNCHER_NAMES.has(fileName(command))) return true
   return args.some((a) => fileName(a) === 'genoffice.cjs')
 }
 
@@ -287,10 +316,14 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === 'object' && !Array.isArray(v)
 }
 
-const TOML_HEADER =
-  /^\s*\[\s*mcp_servers\s*\.\s*(?:"genoffice"|'genoffice'|genoffice)\s*(\.[^\]]*)?\]/
+const tomlHeader = (name: string) =>
+  new RegExp(
+    `^\\s*\\[\\s*mcp_servers\\s*\\.\\s*(?:"${name}"|'${name}'|${name})\\s*(\\.[^\\]]*)?\\]`,
+  )
+const TOML_HEADER = tomlHeader(MCP_SERVER_NAME)
+const LEGACY_TOML_HEADER = tomlHeader(LEGACY_MCP_SERVER_NAME)
 
-/** `env` becomes the `[mcp_servers.genoffice.env]` sub-table Codex reads its `env` map from. */
+/** `env` becomes the `[mcp_servers.teleoffice.env]` sub-table Codex reads its `env` map from. */
 function tomlTable(launch: McpLaunch): string {
   const head = `[mcp_servers.${MCP_SERVER_NAME}]\ncommand = ${JSON.stringify(launch.command)}\nargs = ${JSON.stringify(launch.args)}\n`
   const env = Object.entries(launch.env ?? {})
@@ -299,11 +332,11 @@ function tomlTable(launch: McpLaunch): string {
   return `${head}\n[mcp_servers.${MCP_SERVER_NAME}.env]\n${body}\n`
 }
 
-/** The `[mcp_servers.genoffice]` table and its sub-tables (`[mcp_servers.genoffice.env]`), as line ranges. */
-function tomlTableLines(lines: string[]): Array<[number, number]> {
+/** The `[mcp_servers.teleoffice]` table and its sub-tables (`[mcp_servers.teleoffice.env]`), as line ranges. */
+function tomlTableLines(lines: string[], header: RegExp = TOML_HEADER): Array<[number, number]> {
   const out: Array<[number, number]> = []
   for (let i = 0; i < lines.length; i++) {
-    if (!TOML_HEADER.test(lines[i]!)) continue
+    if (!header.test(lines[i]!)) continue
     let end = i + 1
     while (end < lines.length && !/^\s*\[/.test(lines[end]!)) end++
     out.push([i, end])
@@ -357,9 +390,20 @@ function tomlStrings(block: string[], key: string): string[] {
   }
 }
 
-function removeTomlTable(text: string): string {
+/** Drop the legacy `[mcp_servers.genoffice]` tables, but only when they start one of our old launchers. */
+function removeLegacyTomlTable(text: string): string {
   const lines = text.split('\n')
-  const ranges = tomlTableLines(lines)
+  const ranges = tomlTableLines(lines, LEGACY_TOML_HEADER)
+  if (!ranges.length) return text
+  const own = ranges.find(([start]) => !LEGACY_TOML_HEADER.exec(lines[start]!)?.[1])
+  const block = own ? lines.slice(own[0], own[1]) : []
+  if (!isLegacyLauncher(tomlString(block, 'command'), tomlStrings(block, 'args'))) return text
+  return removeTomlTable(text, LEGACY_TOML_HEADER)
+}
+
+function removeTomlTable(text: string, header: RegExp = TOML_HEADER): string {
+  const lines = text.split('\n')
+  const ranges = tomlTableLines(lines, header)
   if (!ranges.length) return text
   const keep: string[] = []
   let i = 0

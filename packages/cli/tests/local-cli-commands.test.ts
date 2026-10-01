@@ -52,7 +52,7 @@ function settingsFile(dir: string): string {
   return path
 }
 
-describe('genoffice search --via/--region', () => {
+describe('teleoffice search --via/--region', () => {
   it('passes the backend override through to web search', async () => {
     const dir = tempDir()
     const web = vi
@@ -79,7 +79,7 @@ describe('genoffice search --via/--region', () => {
   })
 })
 
-describe('genoffice tts', () => {
+describe('teleoffice tts', () => {
   it('synthesizes to the requested file', async () => {
     const dir = tempDir()
     const out = join(dir, 'hello.mp3')
@@ -129,7 +129,7 @@ describe('genoffice tts', () => {
   })
 })
 
-describe('genoffice asr', () => {
+describe('teleoffice asr', () => {
   it('prints the transcript with provider detail', async () => {
     const dir = tempDir()
     const audio = join(dir, 'a.wav')
@@ -149,7 +149,7 @@ describe('genoffice asr', () => {
   })
 })
 
-describe('genoffice video', () => {
+describe('teleoffice video', () => {
   it('generates to a file and reports the task', async () => {
     const dir = tempDir()
     const out = join(dir, 'clip.mp4')

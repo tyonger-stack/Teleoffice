@@ -41,7 +41,7 @@ const DEFAULT_NAMES = [
   'get_app_info',
   'insert_content',
   'open_documents',
-  'open_in_genoffice',
+  'open_in_teleoffice',
   'read_deck',
   'read_document',
   'read_docx',
@@ -371,16 +371,16 @@ describe('MCP surface over Streamable HTTP (/mcp)', () => {
       expect(savedSheet.isError).toBe(false)
       expect(sheets.saved).toEqual([join(workDir, 'book.xlsx')])
 
-      // ── 8. open_in_genoffice routes .docx, refuses others ────────────────
+      // ── 8. open_in_teleoffice routes .docx, refuses others ────────────────
       const openableDocx = join(workDir, 'open-me.docx')
       await writeFile(openableDocx, 'placeholder')
-      const opened = await call(client, 'open_in_genoffice', { path: openableDocx })
+      const opened = await call(client, 'open_in_teleoffice', { path: openableDocx })
       expect(opened.isError).toBe(false)
       expect(openedPaths).toContain(openableDocx)
 
       const notOpenable = join(workDir, 'note.txt')
       await writeFile(notOpenable, 'x')
-      const refusedOpen = await call(client, 'open_in_genoffice', { path: notOpenable })
+      const refusedOpen = await call(client, 'open_in_teleoffice', { path: notOpenable })
       expect(refusedOpen.isError).toBe(true)
       expect(refusedOpen.text).toMatch(/could not open/)
 

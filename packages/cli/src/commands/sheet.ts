@@ -70,7 +70,7 @@ export const sheetCommand: CommandDef = {
       name: 'ops',
       value: 'file',
       description:
-        'apply: JSON array of workbook DSL ops (the in-app propose_operations vocabulary; `genoffice guide sheets`); "-" reads stdin',
+        'apply: JSON array of workbook DSL ops (the in-app propose_operations vocabulary; `teleoffice guide sheets`); "-" reads stdin',
     },
     { name: 'dry-run', description: 'apply --ops: validate and print the plan without writing' },
     ...BATCH_OPTIONS,
@@ -97,7 +97,7 @@ export const sheetCommand: CommandDef = {
           undefined,
           {
             reason: verb === undefined ? 'missing_argument' : 'invalid_argument',
-            suggestion: 'run `genoffice help sheet`',
+            suggestion: 'run `teleoffice help sheet`',
           },
         )
     }

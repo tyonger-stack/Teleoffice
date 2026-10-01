@@ -36,7 +36,7 @@ GenOffice, macOS, Windows और Linux के लिए Microsoft Office का 
 - **AI जिसे आप रिव्यू कर सकते हैं।** एडिट्स ट्रैक्ड चेंजेस और डिफ़ के रूप में आते हैं, जिन्हें एक क्लिक में रोलबैक किया जा सकता है। स्प्रेडशीट में पेस्ट किए गए नंबर नहीं, बल्कि लाइव फ़ॉर्मूला मिलते हैं। डेक और पेज कैनवस पर जनरेट होते हैं और पूरी तरह एडिटेबल बने रहते हैं।
 - **डिज़ाइन से ही लोकल।** फ़ाइलें आपकी मशीन पर ही खुलती, एडिट होती, सेव होती और कन्वर्ट होती हैं। PDF → Word / Excel / PowerPoint, Markdown → Word और HTML → Word — यह सभी कन्वर्शन ऑन-डिवाइस होते हैं। मशीन से बाहर सिर्फ़ AI कॉल्स जाती हैं, और वह भी आपके चुने हुए प्रोवाइडर तक।
 - **आपकी कीज़ या कोई कीज़ नहीं।** Genspark से साइन इन करें और कीज़ की झंझट से बचें, या Claude, OpenAI, Gemini, DeepSeek, Kimi, GLM, Qwen, Doubao, MiniMax, Grok, Mistral, OpenRouter, Requesty या किसी भी OpenAI-compatible endpoint के लिए अपनी खुद की key लाएँ — लोकल सर्वर भी शामिल हैं।
-- **स्क्रिप्ट करने योग्य और एजेंट के लिए तैयार।** ऐप के साथ एक `genoffice` कमांड लाइन और Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode और Windsurf के लिए एक skill आती है, ताकि कोई कोडिंग एजेंट बिना कोई विंडो खोले आपकी मशीन पर असली Office फ़ाइलें बना, कन्वर्ट, पढ़ और एडिट कर सके।
+- **स्क्रिप्ट करने योग्य और एजेंट के लिए तैयार।** ऐप के साथ एक `teleoffice` कमांड लाइन और Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode और Windsurf के लिए एक skill आती है, ताकि कोई कोडिंग एजेंट बिना कोई विंडो खोले आपकी मशीन पर असली Office फ़ाइलें बना, कन्वर्ट, पढ़ और एडिट कर सके।
 
 **पाएँ:** [macOS](https://github.com/genspark-ai/genoffice/releases/latest) (Apple Silicon और Intel) ·
 [Windows](https://github.com/genspark-ai/genoffice/releases/latest) (x64 और Arm) ·
@@ -143,35 +143,35 @@ GenOffice, macOS, Windows और Linux के लिए Microsoft Office का 
 
 ### 7 · CLI — आपका कोडिंग एजेंट GenOffice चलाता है, आपकी मशीन पर
 
-GenOffice के साथ एक `genoffice` कमांड लाइन और एक एजेंट skill आती है। skill इंस्टॉल करें, और Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode या Windsurf उन्हीं इंजनों के ज़रिए, जिन पर ऐप्स चलते हैं, बिना कोई विंडो खोले असली Office फ़ाइलें बना, कन्वर्ट, पढ़ और एडिट कर सकते हैं।
+GenOffice के साथ एक `teleoffice` कमांड लाइन और एक एजेंट skill आती है। skill इंस्टॉल करें, और Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode या Windsurf उन्हीं इंजनों के ज़रिए, जिन पर ऐप्स चलते हैं, बिना कोई विंडो खोले असली Office फ़ाइलें बना, कन्वर्ट, पढ़ और एडिट कर सकते हैं।
 
-<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides में सोलर सिस्टम पर आठ स्लाइड का एक डेक दिखाया गया है, जिसे एक कोडिंग एजेंट ने genoffice कमांड लाइन के ज़रिए बनाया: कैनवस पर कवर स्लाइड, बाईं ओर आठ थंबनेल और AI पैनल खुला हुआ" width="100%">
+<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides में सोलर सिस्टम पर आठ स्लाइड का एक डेक दिखाया गया है, जिसे एक कोडिंग एजेंट ने teleoffice कमांड लाइन के ज़रिए बनाया: कैनवस पर कवर स्लाइड, बाईं ओर आठ थंबनेल और AI पैनल खुला हुआ" width="100%">
 
 <table>
 <tr>
 <td width="50%"><img src="../assets/readme/cli-slides-grid.webp" alt="सोलर सिस्टम डेक की आठ रेंडर की गई स्लाइड्स एक साथ: कवर, एक्सप्लोरेशन टाइमलाइन, चार मुख्य आँकड़े, ग्रहों के व्यास का बार चार्ट, चट्टानी ग्रह बनाम विशाल ग्रह, सूर्य का 99.8% हीरो नंबर, चार विशाल ग्रहों का ग्रिड और मुख्य निष्कर्ष"></td>
-<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="GenOffice Settings का Integrations पेज: genoffice skill Claude Code में इंस्टॉल है, और Codex व Cursor के बगल में Install बटन हैं"></td>
+<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="GenOffice Settings का Integrations पेज: teleoffice skill Claude Code में इंस्टॉल है, और Codex व Cursor के बगल में Install बटन हैं"></td>
 </tr>
 <tr>
-<td><b>अपने एजेंट को एक प्रॉम्प्ट</b> — "सोलर सिस्टम पर आठ स्लाइड का डेक बनाएँ।" एजेंट skill पढ़ता है, एक स्टाइल शीट, एक आउटलाइन और हर स्लाइड के लिए एक पेज स्पेक लिखता है, <code>genoffice image</code> से दो फ़ोटो जनरेट करता है, और <code>genoffice slides check</code> को ओवरफ़्लो या ओवरलैप करने वाली हर चीज़ रिजेक्ट करने देता है; इसके बाद <code>genoffice create</code> <code>.pptx</code> असेंबल करता है और <code>slides render</code> देखने के लिए हर स्लाइड का एक PNG वापस देता है।</td>
+<td><b>अपने एजेंट को एक प्रॉम्प्ट</b> — "सोलर सिस्टम पर आठ स्लाइड का डेक बनाएँ।" एजेंट skill पढ़ता है, एक स्टाइल शीट, एक आउटलाइन और हर स्लाइड के लिए एक पेज स्पेक लिखता है, <code>teleoffice image</code> से दो फ़ोटो जनरेट करता है, और <code>teleoffice slides check</code> को ओवरफ़्लो या ओवरलैप करने वाली हर चीज़ रिजेक्ट करने देता है; इसके बाद <code>teleoffice create</code> <code>.pptx</code> असेंबल करता है और <code>slides render</code> देखने के लिए हर स्लाइड का एक PNG वापस देता है।</td>
 <td><b>एक बार इंस्टॉल करें, सेटिंग्स → इंटीग्रेशन से</b> — GenOffice इस कंप्यूटर पर मिले कोडिंग एजेंट्स की सूची दिखाता है और आपके चुने हुए हर एजेंट में skill लिख देता है। या skill को zip के रूप में डाउनलोड करें, या <code>npx skills add genspark-ai/genoffice</code> चलाएँ। कमांड और पूरा वर्कफ़्लो <a href="#command-line-and-agent-skill">कमांड लाइन और एजेंट skill</a> में हैं।</td>
 </tr>
 </table>
 
 ### 8 · MCP — Model Context Protocol पर वही टूल्स
 
-हर `genoffice` कमांड एक MCP टूल भी है। Claude Code, Claude Desktop,
-Cursor और कोई भी अन्य MCP क्लाइंट खुद `genoffice mcp` शुरू कर सकते हैं, न कोई
+हर `teleoffice` कमांड एक MCP टूल भी है। Claude Code, Claude Desktop,
+Cursor और कोई भी अन्य MCP क्लाइंट खुद `teleoffice mcp` शुरू कर सकते हैं, न कोई
 skill इंस्टॉल करने की ज़रूरत, न कोई विंडो खोलने की, और इसके बदले 29 टूल्स
 और resources के रूप में मिलने वाले ऑप रेफ़रेंस मिलते हैं। ऐप के भीतर मौजूद
 दूसरा, HTTP सर्वर किसी एजेंट को एक दिखने वाले एडिटर टैब में Word डॉक्यूमेंट
 बनाने देता है, जबकि आप देखते रहते हैं।
 
-<img src="../assets/readme/mcp-deck-motion.webp" alt="Claude Code का genoffice MCP सर्वर के ज़रिए आठ स्लाइड के रिन्यूएबल एनर्जी इन्वेस्टर ब्रीफ़िंग डेक बनाने का टाइम-लैप्स: यह search से आँकड़े और तस्वीरें ढूँढ़ता है, media से हर उम्मीदवार तस्वीर को जाँचता है, deck_start स्टाइल शीट और आउटलाइन लिखता है, deck_page एक बार में एक जाँची गई पेज जोड़ता है, deck_build .pptx असेंबल करता है और slides_render हर स्लाइड की तस्वीर वापस देता है; बना हुआ डेक फिर GenOffice Slides में खुलता है" width="100%">
+<img src="../assets/readme/mcp-deck-motion.webp" alt="Claude Code का teleoffice MCP सर्वर के ज़रिए आठ स्लाइड के रिन्यूएबल एनर्जी इन्वेस्टर ब्रीफ़िंग डेक बनाने का टाइम-लैप्स: यह search से आँकड़े और तस्वीरें ढूँढ़ता है, media से हर उम्मीदवार तस्वीर को जाँचता है, deck_start स्टाइल शीट और आउटलाइन लिखता है, deck_page एक बार में एक जाँची गई पेज जोड़ता है, deck_build .pptx असेंबल करता है और slides_render हर स्लाइड की तस्वीर वापस देता है; बना हुआ डेक फिर GenOffice Slides में खुलता है" width="100%">
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides में आठ स्लाइड का रिन्यूएबल एनर्जी 2026 डेक दिखाया गया है जिसे Claude Code ने genoffice MCP सर्वर के ज़रिए बनाया: कैनवस पर विंड फ़ार्म की तस्वीर वाली कवर स्लाइड और बाईं ओर आठ थंबनेल"></td>
+<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides में आठ स्लाइड का रिन्यूएबल एनर्जी 2026 डेक दिखाया गया है जिसे Claude Code ने teleoffice MCP सर्वर के ज़रिए बनाया: कैनवस पर विंड फ़ार्म की तस्वीर वाली कवर स्लाइड और बाईं ओर आठ थंबनेल"></td>
 <td width="50%"><img src="../assets/readme/mcp-integrations.webp" alt="GenOffice Settings का Integrations पेज, MCP हिस्सा: Claude Code के लिए एक-लाइन का claude mcp add कमांड, Cursor, Claude Desktop और दूसरे MCP क्लाइंट्स के लिए JSON ब्लॉक, और नीचे लोकल HTTP सर्वर का विकल्प"></td>
 </tr>
 <tr>
@@ -197,7 +197,7 @@ skill इंस्टॉल करने की ज़रूरत, न को�
   ऑन-डिवाइस Word, Excel या PowerPoint में कन्वर्ट करें, स्कैन के लिए सिस्टम OCR के
   साथ।
 - **Markdown और HTML भी**, उसी AI पैनल और Word में लोकल एक्सपोर्ट के साथ।
-- **स्क्रिप्ट करने योग्य।** एक `genoffice` कमांड लाइन, एक एजेंट skill और एक
+- **स्क्रिप्ट करने योग्य।** एक `teleoffice` कमांड लाइन, एक एजेंट skill और एक
   MCP सर्वर हर इंजन को Claude Code, Claude Desktop, Codex, Cursor और दूसरे
   एजेंट्स की सेवा में लगा देते हैं, वह भी ऑन-डिवाइस।
 - **फ़्री**, व्यक्तियों और टीमों दोनों के लिए।
@@ -214,7 +214,7 @@ skill इंस्टॉल करने की ज़रूरत, न को�
 
 ## कमांड लाइन और एजेंट skill
 
-ऐप्स किसी फ़ाइल के साथ जो कुछ कर सकते हैं, वह सब `genoffice` कमांड लाइन टर्मिनल से
+ऐप्स किसी फ़ाइल के साथ जो कुछ कर सकते हैं, वह सब `teleoffice` कमांड लाइन टर्मिनल से
 कर सकती है: Word, Excel, PowerPoint, PDF, Markdown और HTML को उन्हीं इंजनों पर,
 हेडलेस, इंस्पेक्ट, कन्वर्ट, क्रिएट, रीड और एडिट करना। यह GenOffice के साथ इंस्टॉल
 होती है, इसे अपना कोई अलग रनटाइम नहीं चाहिए, और यह कोई डॉक्यूमेंट कहीं नहीं भेजती।
@@ -236,25 +236,25 @@ OpenCode और Windsurf के साथ बिना किसी अतिर
 | `npx skills add genspark-ai/genoffice` | इस रिपॉज़िटरी से किसी भी skills-compatible एजेंट में इंस्टॉल करता है।                                                                                                                       |
 
 फिर एक नई चैट शुरू करें और कोई डॉक्यूमेंट माँगें। skill एजेंट को सिखाती है कि
-`genoffice` का सहारा कब लेना है, एडिट करने से पहले फ़ाइल कैसे पढ़नी है, और अपना
+`teleoffice` का सहारा कब लेना है, एडिट करने से पहले फ़ाइल कैसे पढ़नी है, और अपना
 काम खुद कैसे जाँचना है।
 
 ### टर्मिनल से क्विकस्टार्ट
 
 ```bash
-genoffice --version
-genoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
-genoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
-genoffice create --type docx --from notes.md --out notes.docx
-genoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
-genoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
-genoffice render report.docx --out shots/          # one PNG per page, to look at what you made
-genoffice open sales.xlsx                          # hand the result to the editor
+teleoffice --version
+teleoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
+teleoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
+teleoffice create --type docx --from notes.md --out notes.docx
+teleoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
+teleoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
+teleoffice render report.docx --out shots/          # one PNG per page, to look at what you made
+teleoffice open sales.xlsx                          # hand the result to the editor
 ```
 
 हर कमांड एक लाइन का सारांश प्रिंट करती है, या `--json` के साथ एक सिंगल JSON
 ऑब्जेक्ट। एडिट्स एटॉमिक हैं: रिजेक्ट किया गया op फ़ाइल को अछूता छोड़ देता है और
-एक गाइडेड एरर के साथ वापस आता है। `genoffice help` मौजूदा कमांड सरफ़ेस की सूची
+एक गाइडेड एरर के साथ वापस आता है। `teleoffice help` मौजूदा कमांड सरफ़ेस की सूची
 देता है; पूरा रेफ़रेंस [packages/cli/README.md](../../packages/cli/README.md) में है।
 
 ### एजेंट असल में क्या चलाता है
@@ -264,20 +264,20 @@ genoffice open sales.xlsx                          # hand the result to the edit
 चरण शुरू होने से पहले हर चरण की जाँच की:
 
 ```bash
-genoffice capabilities --json                        # which cloud tools GenOffice has configured
-genoffice guide slides design                        # the deck workflow and layout library
-genoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
-genoffice slides check deck/outline.json --json      # 8 pages, no findings
-genoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
+teleoffice capabilities --json                        # which cloud tools GenOffice has configured
+teleoffice guide slides design                        # the deck workflow and layout library
+teleoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
+teleoffice slides check deck/outline.json --json      # 8 pages, no findings
+teleoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
 …                                                    # one page file per slide, fixed until each check is clean
-genoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
-genoffice slides render deck/solar-system.pptx --out deck/shots --json
-genoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
-genoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
-genoffice open deck/solar-system.pptx
+teleoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
+teleoffice slides render deck/solar-system.pptx --out deck/shots --json
+teleoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
+teleoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
+teleoffice open deck/solar-system.pptx
 ```
 
-`genoffice` के भीतर कोई मॉडल कॉल नहीं होती: सोचने का काम एजेंट करता है, बनाने
+`teleoffice` के भीतर कोई मॉडल कॉल नहीं होती: सोचने का काम एजेंट करता है, बनाने
 और जाँचने का काम CLI करती है, और नतीजा GenOffice या PowerPoint में एक सामान्य
 `.pptx` के रूप में खुलता है।
 
@@ -290,32 +290,32 @@ genoffice open deck/solar-system.pptx
 जिन्हें आप टर्मिनल नहीं देना चाहते। इसमें आने के दो तरीके हैं, दोनों
 **सेटिंग्स → इंटीग्रेशन → MCP** में कॉपी-रेडी स्निपेट्स के साथ दिखाए गए हैं:
 
-| तरीका                                | क्या है                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A · `genoffice mcp`** (सुझाया गया) | एक stdio सर्वर जिसे असिस्टेंट खुद शुरू करता है; GenOffice का खुला होना ज़रूरी नहीं। हर कमांड के लिए एक टूल (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) है, साथ ही चरणबद्ध डेक फ़्लो `deck_start` → `deck_page` → `deck_build` → `deck_replace`। Ops, spec और Markdown सब इनलाइन पास होते हैं, इसलिए बिना फ़ाइल सिस्टम वाला क्लाइंट भी काम करता है। |
-| **B · लोकल HTTP सर्वर**              | GenOffice ऐप के भीतर `http://127.0.0.1:3093/mcp` पर चलता है (Streamable HTTP, लेगेसी SSE के साथ)। इसके टूल्स एक दिखने वाले Word एडिटर टैब को चलाते हैं: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, और आप डॉक्यूमेंट को आकार लेते देख सकते हैं। डिफ़ॉल्ट रूप से बंद; उसी सेटिंग्स पैनल में चालू करें।                                                                                                                                                  |
+| तरीका                                 | क्या है                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A · `teleoffice mcp`** (सुझाया गया) | एक stdio सर्वर जिसे असिस्टेंट खुद शुरू करता है; GenOffice का खुला होना ज़रूरी नहीं। हर कमांड के लिए एक टूल (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) है, साथ ही चरणबद्ध डेक फ़्लो `deck_start` → `deck_page` → `deck_build` → `deck_replace`। Ops, spec और Markdown सब इनलाइन पास होते हैं, इसलिए बिना फ़ाइल सिस्टम वाला क्लाइंट भी काम करता है। |
+| **B · लोकल HTTP सर्वर**               | GenOffice ऐप के भीतर `http://127.0.0.1:3093/mcp` पर चलता है (Streamable HTTP, लेगेसी SSE के साथ)। इसके टूल्स एक दिखने वाले Word एडिटर टैब को चलाते हैं: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, और आप डॉक्यूमेंट को आकार लेते देख सकते हैं। डिफ़ॉल्ट रूप से बंद; उसी सेटिंग्स पैनल में चालू करें।                                                                                                                                                  |
 
 ```bash
 # Claude Code
-claude mcp add --transport stdio genoffice -- genoffice mcp
+claude mcp add --transport stdio teleoffice -- teleoffice mcp
 ```
 
 ```jsonc
 // Cursor, Claude Desktop या कोई भी अन्य MCP क्लाइंट
-{ "mcpServers": { "genoffice": { "command": "genoffice", "args": ["mcp"] } } }
+{ "mcpServers": { "teleoffice": { "command": "teleoffice", "args": ["mcp"] } } }
 ```
 
-यहाँ `genoffice` वही CLI है जो ऐप के भीतर आती है (macOS पर
-`/Applications/GenOffice.app/Contents/Resources/cli/genoffice`; सेटिंग्स
+यहाँ `teleoffice` वही CLI है जो ऐप के भीतर आती है (macOS पर
+`/Applications/GenOffice.app/Contents/Resources/cli/teleoffice`; सेटिंग्स
 पैनल आपकी इंस्टॉल की सटीक path दिखाता है)। सर्वर अपने साथ अपनी वर्कफ़्लो
-इंस्ट्रक्शंस लेकर आता है और ऑप रेफ़रेंस को `genoffice://guide/*` resources
+इंस्ट्रक्शंस लेकर आता है और ऑप रेफ़रेंस को `teleoffice://guide/*` resources
 के रूप में एक्सपोज़ करता है, इसलिए किसी skill की ज़रूरत नहीं; skill और
 MCP सर्वर साथ रह सकते हैं और असिस्टेंट खुद एक चुन लेता है। क्लाउड फ़ीचर्स
 (`search`, `image`, `media`) अब भी GenOffice में कॉन्फ़िगर किए गए प्रोवाइडर
 से होकर जाते हैं; बाक़ी सब कुछ लोकल चलता है, और `GENOFFICE_ALLOWED_ROOTS`
 हर टूल को आपके बताए फ़ोल्डर्स तक सीमित रखता है।
 
-ऊपर दिए गए डेमो का रिन्यूएबल एनर्जी डेक यही है कि सिर्फ़ `genoffice` MCP
+ऊपर दिए गए डेमो का रिन्यूएबल एनर्जी डेक यही है कि सिर्फ़ `teleoffice` MCP
 सर्वर अटैच किए हुए Claude Code में एक प्रॉम्प्ट प्रोटोकॉल की तरफ़ से कैसा
 दिखता है:
 
@@ -500,7 +500,7 @@ Word स्ट्रक्चर में बदला जाता है: ह
 <details>
 <summary><b>क्या मैं Claude Code, Codex, Cursor या किसी स्क्रिप्ट से GenOffice चला सकता हूँ?</b></summary>
 
-हाँ। GenOffice एक `genoffice` कमांड लाइन इंस्टॉल करता है जो उन्हीं इंजनों को
+हाँ। GenOffice एक `teleoffice` कमांड लाइन इंस्टॉल करता है जो उन्हीं इंजनों को
 हेडलेस चलाती है: टर्मिनल या स्क्रिप्ट से डॉक्यूमेंट इंस्पेक्ट, कन्वर्ट, क्रिएट,
 रीड और एडिट करें, प्रोग्राम्स के लिए `--json` आउटपुट के साथ। बंडल की गई एजेंट
 skill Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode और

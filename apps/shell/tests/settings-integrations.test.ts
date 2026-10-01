@@ -62,9 +62,9 @@ function baseStatus(): IntegrationsStatus {
   return {
     cli: {
       status: 'missing',
-      location: '/usr/local/bin/genoffice',
+      location: '/usr/local/bin/teleoffice',
       manual:
-        'sudo ln -sf /Applications/GenOffice.app/Contents/Resources/cli/genoffice /usr/local/bin/genoffice',
+        'sudo ln -sf /Applications/GenOffice.app/Contents/Resources/cli/teleoffice /usr/local/bin/teleoffice',
       launcherDir: '/Applications/GenOffice.app/Contents/Resources/cli',
       ephemeral: false,
       version: '0.4.0',
@@ -76,7 +76,7 @@ function baseStatus(): IntegrationsStatus {
         id: 'claude-code',
         label: 'Claude Code',
         skillsDir: '/home/u/.claude/skills',
-        state: { status: 'missing', path: '/home/u/.claude/skills/genoffice/SKILL.md' },
+        state: { status: 'missing', path: '/home/u/.claude/skills/teleoffice/SKILL.md' },
       },
       {
         id: 'codex',
@@ -84,7 +84,7 @@ function baseStatus(): IntegrationsStatus {
         skillsDir: '/home/u/.codex/skills',
         state: {
           status: 'outdated',
-          path: '/home/u/.codex/skills/genoffice/SKILL.md',
+          path: '/home/u/.codex/skills/teleoffice/SKILL.md',
           installedVersion: '2.0.0',
           older: true,
         },
@@ -95,7 +95,7 @@ function baseStatus(): IntegrationsStatus {
         skillsDir: '/home/u/.cursor/skills',
         state: {
           status: 'foreign',
-          path: '/home/u/.cursor/skills/genoffice/SKILL.md',
+          path: '/home/u/.cursor/skills/teleoffice/SKILL.md',
           installedVersion: '2.1.0',
         },
       },
@@ -161,15 +161,15 @@ describe('Settings → Integrations', () => {
     // the same three prompts appear under both the CLI and the MCP part
     expect(host.querySelectorAll('.set-intg-example')).toHaveLength(6)
     expect(host.textContent).toContain('npx skills add genspark-ai/genoffice')
-    // MCP block: the launcher itself while genoffice is not on the PATH, as a command and as JSON
+    // MCP block: the launcher itself while teleoffice is not on the PATH, as a command and as JSON
     const mcp = [...host.querySelectorAll('.set-intg-mcp code')].map((c) => c.textContent)
     expect(mcp[0]).toBe(
-      'claude mcp add --transport stdio genoffice -- /Applications/GenOffice.app/Contents/Resources/cli/genoffice mcp',
+      'claude mcp add --transport stdio teleoffice -- /Applications/GenOffice.app/Contents/Resources/cli/teleoffice mcp',
     )
     expect(JSON.parse(mcp[1]!)).toEqual({
       mcpServers: {
-        genoffice: {
-          command: '/Applications/GenOffice.app/Contents/Resources/cli/genoffice',
+        teleoffice: {
+          command: '/Applications/GenOffice.app/Contents/Resources/cli/teleoffice',
           args: ['mcp'],
         },
       },
@@ -177,29 +177,29 @@ describe('Settings → Integrations', () => {
     expect(host.textContent).toContain('assistant picks one')
   })
 
-  it('names the bare command once genoffice is on the PATH and runs the app as Node on Windows', () => {
+  it('names the bare command once teleoffice is on the PATH and runs the app as Node on Windows', () => {
     expect(
       mcpLaunch({
         status: 'present',
         launcherDir: '/Applications/GenOffice.app/Contents/Resources/cli',
       }),
-    ).toEqual({ command: 'genoffice', args: ['mcp'] })
+    ).toEqual({ command: 'teleoffice', args: ['mcp'] })
     const winDir = 'C:\\Users\\Jane Doe\\AppData\\Local\\Programs\\GenOffice\\resources\\cli'
     const win = {
       command: `${winDir}\\..\\..\\GenOffice.exe`,
-      args: [`${winDir}\\genoffice.cjs`, 'mcp'],
+      args: [`${winDir}\\teleoffice.cjs`, 'mcp'],
       env: { ELECTRON_RUN_AS_NODE: '1' },
     }
     expect(mcpLaunch({ status: 'missing', launcherDir: winDir })).toEqual(win)
     expect(mcpLaunch({ status: 'present', launcherDir: winDir })).toEqual(win)
     expect(mcpClaudeCommand(win)).toBe(
-      `claude mcp add -e ELECTRON_RUN_AS_NODE=1 --transport stdio genoffice -- "${win.command}" "${win.args[0]}" mcp`,
+      `claude mcp add -e ELECTRON_RUN_AS_NODE=1 --transport stdio teleoffice -- "${win.command}" "${win.args[0]}" mcp`,
     )
-    expect(JSON.parse(mcpConfigJson(win))).toEqual({ mcpServers: { genoffice: win } })
+    expect(JSON.parse(mcpConfigJson(win))).toEqual({ mcpServers: { teleoffice: win } })
     expect(
-      mcpClaudeCommand({ command: '/Applications/Gen Office.app/cli/genoffice', args: ['mcp'] }),
+      mcpClaudeCommand({ command: '/Applications/Gen Office.app/cli/teleoffice', args: ['mcp'] }),
     ).toBe(
-      'claude mcp add --transport stdio genoffice -- "/Applications/Gen Office.app/cli/genoffice" mcp',
+      'claude mcp add --transport stdio teleoffice -- "/Applications/Gen Office.app/cli/teleoffice" mcp',
     )
   })
 
@@ -217,7 +217,7 @@ describe('Settings → Integrations', () => {
     const row = host.querySelector('[data-agent="claude-code"]')!
     await click(buttonWithText('Install', row))
     expect(install).not.toHaveBeenCalled()
-    expect(row.textContent).toContain('Will write: /home/u/.claude/skills/genoffice/SKILL.md')
+    expect(row.textContent).toContain('Will write: /home/u/.claude/skills/teleoffice/SKILL.md')
 
     await click(buttonWithText('Cancel', row))
     expect(row.querySelector('.set-intg-confirm')).toBeNull()
@@ -235,7 +235,7 @@ describe('Settings → Integrations', () => {
   it('installs into a picked folder and saves the zip through the main process', async () => {
     const install = vi.fn(async () => ({
       status: 'installed' as const,
-      path: '/x/genoffice/SKILL.md',
+      path: '/x/teleoffice/SKILL.md',
       installedVersion: '2.1.0',
     }))
     const saveZip = vi.fn(async () => '/Users/u/Downloads/genoffice-skill-2.1.0.zip')
@@ -246,7 +246,7 @@ describe('Settings → Integrations', () => {
       saveSkillZip: saveZip,
     })
     await click(buttonWithText('Install into another folder…'))
-    expect(host.textContent).toContain('Will write: /x/genoffice/SKILL.md')
+    expect(host.textContent).toContain('Will write: /x/teleoffice/SKILL.md')
     await click(buttonWithText('Confirm'))
     expect(install).toHaveBeenCalledWith({ dir: '/x' })
 

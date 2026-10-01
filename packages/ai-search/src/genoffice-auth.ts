@@ -2,7 +2,7 @@
  * GenOffice's own Genspark identity: device-code login (office_addin_auth,
  * app_type=genoffice) minting a gsk API key named "genoffice" — the key_name
  * lands in billing as billing_tag, attributing all traffic (incl. gsk CLI
- * subprocesses) to GenOffice. Stored in ~/.genoffice/auth.json, deliberately
+ * subprocesses) to GenOffice. Stored in ~/.teleoffice/auth.json, deliberately
  * NOT the shared config.json that Claw Desktop overwrites on every launch.
  *
  * Flow: POST /device_code → browser approve → poll /token for a 30-day Bearer
@@ -12,8 +12,8 @@
 
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
+import { teleofficeHomeDir } from '@genoffice/electron-utils/teleoffice-home'
 import { asRecord, gskProxyUrl } from './shared'
 
 /** Progress event for the browser login flow. */
@@ -108,9 +108,9 @@ async function loginFetchChannels(): Promise<(typeof fetch)[]> {
   return proxyFallbackPreferred ? [fallback, primary] : [primary, fallback]
 }
 
-/** Override dir via GENOFFICE_AUTH_DIR (test isolation). */
+/** Override dir via TELEOFFICE_AUTH_DIR, or the legacy GENOFFICE_AUTH_DIR (test isolation). */
 export function genofficeAuthPath(): string {
-  return join(process.env.GENOFFICE_AUTH_DIR || join(homedir(), '.genoffice'), 'auth.json')
+  return join(teleofficeHomeDir(), 'auth.json')
 }
 
 export interface GenofficeAuth {

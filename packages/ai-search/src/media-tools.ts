@@ -22,7 +22,7 @@ import {
   type LegacyAiSettings,
   type MediaBlob,
 } from '@genoffice/ai-provider'
-// deep imports: the package root re-exports Electron-bound modules, and this file also runs in the genoffice CLI
+// deep imports: the package root re-exports Electron-bound modules, and this file also runs in the teleoffice CLI
 import { readGeneratedImage, storeGeneratedImage } from '@genoffice/electron-utils/generated-images'
 import {
   ResponseTooLargeError,

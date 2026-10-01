@@ -54,7 +54,7 @@ perubahan, dan menunjukkan dengan tepat bagian mana yang diubah.
   Mistral, OpenRouter, Requesty, atau endpoint apa pun yang kompatibel dengan OpenAI,
   termasuk server lokal.
 - **Dapat dijalankan lewat skrip dan siap untuk agen.** Aplikasi ini
-  menyertakan baris perintah `genoffice` dan sebuah skill untuk Claude Code,
+  menyertakan baris perintah `teleoffice` dan sebuah skill untuk Claude Code,
   Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode, dan Windsurf, sehingga
   coding agent bisa membuat, mengonversi, membaca, dan mengedit file Office
   asli di mesin Anda tanpa membuka satu jendela pun.
@@ -168,38 +168,38 @@ lalu membangun satu file `.html` mandiri berdasarkan token-token tersebut.
 
 ### 7 · CLI — coding agent Anda menjalankan GenOffice, di mesin Anda
 
-GenOffice menyertakan baris perintah `genoffice` dan sebuah skill agen. Pasang
+GenOffice menyertakan baris perintah `teleoffice` dan sebuah skill agen. Pasang
 skill itu, dan Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode,
 atau Windsurf bisa membuat, mengonversi, membaca, dan mengedit file Office asli
 lewat engine yang sama dengan aplikasinya, tanpa membuka satu jendela pun.
 
-<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides menampilkan deck Tata Surya delapan slide yang dibuat coding agent lewat baris perintah genoffice: slide sampul di kanvas, delapan thumbnail di kiri, dan panel AI terbuka" width="100%">
+<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides menampilkan deck Tata Surya delapan slide yang dibuat coding agent lewat baris perintah teleoffice: slide sampul di kanvas, delapan thumbnail di kiri, dan panel AI terbuka" width="100%">
 
 <table>
 <tr>
 <td width="50%"><img src="../assets/readme/cli-slides-grid.webp" alt="Delapan slide hasil render dari deck Tata Surya berdampingan: sampul, linimasa eksplorasi, empat angka kunci, grafik batang diameter planet, planet berbatu versus planet raksasa, angka utama 99,8% milik Matahari, grid empat planet raksasa, dan kesimpulan"></td>
-<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="GenOffice Settings, halaman Integrations: skill genoffice terpasang di Claude Code, dengan tombol Install di samping Codex dan Cursor"></td>
+<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="GenOffice Settings, halaman Integrations: skill teleoffice terpasang di Claude Code, dengan tombol Install di samping Codex dan Cursor"></td>
 </tr>
 <tr>
-<td><b>Satu prompt ke agen Anda</b> — "Buat deck delapan slide tentang Tata Surya." Agen membaca skill, menulis style sheet, outline, dan satu spesifikasi halaman per slide, menghasilkan dua foto dengan <code>genoffice image</code>, dan membiarkan <code>genoffice slides check</code> menolak apa pun yang meluap atau tumpang tindih sebelum <code>genoffice create</code> merakit <code>.pptx</code> dan <code>slides render</code> mengembalikan satu PNG per slide untuk dilihat.</td>
+<td><b>Satu prompt ke agen Anda</b> — "Buat deck delapan slide tentang Tata Surya." Agen membaca skill, menulis style sheet, outline, dan satu spesifikasi halaman per slide, menghasilkan dua foto dengan <code>teleoffice image</code>, dan membiarkan <code>teleoffice slides check</code> menolak apa pun yang meluap atau tumpang tindih sebelum <code>teleoffice create</code> merakit <code>.pptx</code> dan <code>slides render</code> mengembalikan satu PNG per slide untuk dilihat.</td>
 <td><b>Pasang sekali, dari Pengaturan → Integrasi</b> — GenOffice menampilkan coding agent yang ditemukannya di komputer ini dan menulis skill ke setiap agen yang Anda pilih. Atau unduh skill sebagai zip, atau jalankan <code>npx skills add genspark-ai/genoffice</code>. Perintah dan alur kerja lengkapnya ada di <a href="#command-line-and-agent-skill">Baris perintah dan skill agen</a>.</td>
 </tr>
 </table>
 
 ### 8 · MCP — alat yang sama lewat Model Context Protocol
 
-Setiap perintah `genoffice` juga merupakan alat MCP. Claude Code, Claude
-Desktop, Cursor, dan MCP client lainnya bisa menjalankan sendiri `genoffice
+Setiap perintah `teleoffice` juga merupakan alat MCP. Claude Code, Claude
+Desktop, Cursor, dan MCP client lainnya bisa menjalankan sendiri `teleoffice
 mcp`, tanpa perlu memasang skill dan tanpa membuka jendela, lalu mendapatkan
 29 alat plus referensi op sebagai resource. Server HTTP kedua di dalam
 aplikasi memungkinkan agen membangun dokumen Word di tab editor yang
 terlihat sambil Anda menyaksikannya.
 
-<img src="../assets/readme/mcp-deck-motion.webp" alt="Rekaman time-lapse Claude Code membangun briefing investor delapan slide tentang energi terbarukan lewat MCP server genoffice: mencari figur dan foto, memeriksa setiap foto kandidat dengan media, deck_start menulis style sheet dan outline, deck_page menambahkan satu halaman yang sudah diperiksa setiap kalinya, deck_build merakit .pptx dan slides_render mengembalikan gambar setiap slide; deck yang sudah jadi kemudian terbuka di GenOffice Slides" width="100%">
+<img src="../assets/readme/mcp-deck-motion.webp" alt="Rekaman time-lapse Claude Code membangun briefing investor delapan slide tentang energi terbarukan lewat MCP server teleoffice: mencari figur dan foto, memeriksa setiap foto kandidat dengan media, deck_start menulis style sheet dan outline, deck_page menambahkan satu halaman yang sudah diperiksa setiap kalinya, deck_build merakit .pptx dan slides_render mengembalikan gambar setiap slide; deck yang sudah jadi kemudian terbuka di GenOffice Slides" width="100%">
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides menampilkan deck Renewable Energy 2026 delapan slide yang dibangun Claude Code lewat MCP server genoffice: slide sampul dengan foto ladang angin di kanvas dan delapan thumbnail di kiri"></td>
+<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides menampilkan deck Renewable Energy 2026 delapan slide yang dibangun Claude Code lewat MCP server teleoffice: slide sampul dengan foto ladang angin di kanvas dan delapan thumbnail di kiri"></td>
 <td width="50%"><img src="../assets/readme/mcp-integrations.webp" alt="GenOffice Settings, halaman Integrations, bagian MCP: perintah satu baris claude mcp add untuk Claude Code, blok JSON untuk Cursor, Claude Desktop, dan MCP client lain, serta opsi server HTTP lokal di bawahnya"></td>
 </tr>
 <tr>
@@ -227,7 +227,7 @@ terlihat sambil Anda menyaksikannya.
   sistem untuk hasil pindaian.
 - **Markdown dan HTML juga**, dengan panel AI yang sama dan ekspor lokal ke
   Word.
-- **Dapat dijalankan lewat skrip.** Baris perintah `genoffice`, skill agen,
+- **Dapat dijalankan lewat skrip.** Baris perintah `teleoffice`, skill agen,
   dan server MCP menempatkan setiap engine untuk melayani Claude Code,
   Claude Desktop, Codex, Cursor, dan agen lainnya, tetap on-device.
 - **Gratis**, untuk individu maupun tim.
@@ -257,7 +257,7 @@ mempertahankan warna asli dokumen.
 ## Baris perintah dan skill agen
 
 Semua yang bisa dilakukan aplikasi terhadap sebuah file, bisa dilakukan baris
-perintah `genoffice` dari terminal: memeriksa, mengonversi, membuat, membaca,
+perintah `teleoffice` dari terminal: memeriksa, mengonversi, membuat, membaca,
 dan mengedit Word, Excel, PowerPoint, PDF, Markdown, dan HTML dengan engine
 yang sama, secara headless. Ia terpasang bersama GenOffice, tidak memerlukan
 runtime sendiri, dan tidak pernah mengirim dokumen ke mana pun. Dipadukan
@@ -279,25 +279,25 @@ semua MCP client.
 | `npx skills add genspark-ai/genoffice`     | Memasang dari repositori ini ke agen mana pun yang kompatibel dengan skill.                                                                                                           |
 
 Lalu mulai chat baru dan minta sebuah dokumen. Skill ini mengajari agen kapan
-harus menggunakan `genoffice`, bagaimana membaca file sebelum mengeditnya,
+harus menggunakan `teleoffice`, bagaimana membaca file sebelum mengeditnya,
 dan bagaimana memeriksa hasil kerjanya sendiri.
 
 ### Mulai cepat dari terminal
 
 ```bash
-genoffice --version
-genoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
-genoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
-genoffice create --type docx --from notes.md --out notes.docx
-genoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
-genoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
-genoffice render report.docx --out shots/          # one PNG per page, to look at what you made
-genoffice open sales.xlsx                          # hand the result to the editor
+teleoffice --version
+teleoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
+teleoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
+teleoffice create --type docx --from notes.md --out notes.docx
+teleoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
+teleoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
+teleoffice render report.docx --out shots/          # one PNG per page, to look at what you made
+teleoffice open sales.xlsx                          # hand the result to the editor
 ```
 
 Setiap perintah mencetak ringkasan satu baris, atau satu objek JSON dengan
 `--json`. Pengeditan bersifat atomik: op yang ditolak membiarkan file tak
-tersentuh dan mengembalikan pesan kesalahan berpanduan. `genoffice help`
+tersentuh dan mengembalikan pesan kesalahan berpanduan. `teleoffice help`
 mencantumkan daftar perintah saat ini; referensi lengkapnya ada di
 [packages/cli/README.md](../../packages/cli/README.md).
 
@@ -308,20 +308,20 @@ baliknya, agen mengikuti alur kerja bertahap dari skill dan CLI memeriksa
 setiap tahap sebelum tahap berikutnya dimulai:
 
 ```bash
-genoffice capabilities --json                        # which cloud tools GenOffice has configured
-genoffice guide slides design                        # the deck workflow and layout library
-genoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
-genoffice slides check deck/outline.json --json      # 8 pages, no findings
-genoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
+teleoffice capabilities --json                        # which cloud tools GenOffice has configured
+teleoffice guide slides design                        # the deck workflow and layout library
+teleoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
+teleoffice slides check deck/outline.json --json      # 8 pages, no findings
+teleoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
 …                                                    # one page file per slide, fixed until each check is clean
-genoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
-genoffice slides render deck/solar-system.pptx --out deck/shots --json
-genoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
-genoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
-genoffice open deck/solar-system.pptx
+teleoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
+teleoffice slides render deck/solar-system.pptx --out deck/shots --json
+teleoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
+teleoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
+teleoffice open deck/solar-system.pptx
 ```
 
-Tidak ada panggilan model yang terjadi di dalam `genoffice`: agen yang
+Tidak ada panggilan model yang terjadi di dalam `teleoffice`: agen yang
 berpikir, CLI yang membangun dan memeriksa, dan hasilnya terbuka di GenOffice
 atau PowerPoint sebagai `.pptx` biasa.
 
@@ -334,26 +334,26 @@ untuk asisten yang tidak bisa menjalankan terminal, atau yang tidak ingin
 Anda beri akses terminal. Ada dua cara masuk, keduanya ditampilkan dengan
 cuplikan siap salin di **Pengaturan → Integrasi → MCP**:
 
-| Cara                                 | Apa itu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A · `genoffice mcp`** (disarankan) | Server stdio yang dijalankan sendiri oleh asisten; GenOffice tidak perlu terbuka. Satu alat per perintah (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus alur deck bertahap `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Ops, spesifikasi, dan Markdown dikirim inline, jadi client tanpa sistem file pun tetap bisa jalan. |
-| **B · Server HTTP lokal**            | Berjalan di dalam aplikasi GenOffice pada `http://127.0.0.1:3093/mcp` (Streamable HTTP, dengan SSE lama). Alatnya menjalankan tab editor Word yang terlihat: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, dan Anda menyaksikan dokumen terbentuk. Mati secara default; nyalakan di panel pengaturan yang sama.                                                                                                                                   |
+| Cara                                  | Apa itu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A · `teleoffice mcp`** (disarankan) | Server stdio yang dijalankan sendiri oleh asisten; GenOffice tidak perlu terbuka. Satu alat per perintah (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus alur deck bertahap `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Ops, spesifikasi, dan Markdown dikirim inline, jadi client tanpa sistem file pun tetap bisa jalan. |
+| **B · Server HTTP lokal**             | Berjalan di dalam aplikasi GenOffice pada `http://127.0.0.1:3093/mcp` (Streamable HTTP, dengan SSE lama). Alatnya menjalankan tab editor Word yang terlihat: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, dan Anda menyaksikan dokumen terbentuk. Mati secara default; nyalakan di panel pengaturan yang sama.                                                                                                                                   |
 
 ```bash
 # Claude Code
-claude mcp add --transport stdio genoffice -- genoffice mcp
+claude mcp add --transport stdio teleoffice -- teleoffice mcp
 ```
 
 ```jsonc
 // Cursor, Claude Desktop, atau MCP client lain mana pun
-{ "mcpServers": { "genoffice": { "command": "genoffice", "args": ["mcp"] } } }
+{ "mcpServers": { "teleoffice": { "command": "teleoffice", "args": ["mcp"] } } }
 ```
 
-`genoffice` di sini adalah CLI yang disertakan di dalam aplikasi (di macOS
-`/Applications/GenOffice.app/Contents/Resources/cli/genoffice`; panel
+`teleoffice` di sini adalah CLI yang disertakan di dalam aplikasi (di macOS
+`/Applications/GenOffice.app/Contents/Resources/cli/teleoffice`; panel
 pengaturan menampilkan path persis untuk instalasi Anda). Server ini
 membawa instruksi alur kerjanya sendiri dan mengekspos referensi op sebagai
-resource `genoffice://guide/*`, jadi skill tidak diperlukan; skill dan
+resource `teleoffice://guide/*`, jadi skill tidak diperlukan; skill dan
 server MCP bisa berdampingan dan asisten memilih salah satunya. Fitur cloud
 (`search`, `image`, `media`) tetap lewat provider yang dikonfigurasi di
 GenOffice; sisanya berjalan lokal, dan `GENOFFICE_ALLOWED_ROOTS` membatasi
@@ -361,7 +361,7 @@ setiap alat hanya ke folder yang Anda daftarkan.
 
 Deck energi terbarukan dalam demo di atas adalah gambaran, dari sisi
 protokol, satu prompt di Claude Code yang hanya menyambungkan server MCP
-`genoffice`:
+`teleoffice`:
 
 ```text
 capabilities · guide(slides, spec) · guide(slides, design)
@@ -559,7 +559,7 @@ bergaya dekoratif) yang disematkan sebagai gambar.
 <details>
 <summary><b>Bisakah saya menjalankan GenOffice dari Claude Code, Codex, Cursor, atau skrip?</b></summary>
 
-Ya. GenOffice memasang baris perintah `genoffice` yang menjalankan engine yang
+Ya. GenOffice memasang baris perintah `teleoffice` yang menjalankan engine yang
 sama secara headless: memeriksa, mengonversi, membuat, membaca, dan mengedit
 dokumen dari terminal atau skrip, dengan output `--json` untuk program. Skill
 agen yang disertakan mengajari Claude Code, Codex, Cursor, Gemini CLI, GitHub

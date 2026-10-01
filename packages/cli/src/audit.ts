@@ -1,12 +1,13 @@
 import { appendFileSync, mkdirSync, renameSync, statSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
+import { envValue, teleofficeHomeDir } from '@genoffice/electron-utils/teleoffice-home'
 
 /**
  * One JSON line per executed command, so the person who let an agent loose
- * with genoffice can see afterwards what it touched. Default location
- * ~/.genoffice/cli-audit.jsonl; GENOFFICE_AUDIT_LOG=<path> redirects, `off`
- * disables. Never throws: a failed audit write must not fail the command.
+ * with teleoffice can see afterwards what it touched. Default location
+ * ~/.teleoffice/cli-audit.jsonl; TELEOFFICE_AUDIT_LOG=<path> (or the legacy
+ * GENOFFICE_AUDIT_LOG) redirects, `off` disables. Never throws: a failed audit
+ * write must not fail the command.
  */
 export interface AuditRecord {
   command: string
@@ -21,10 +22,10 @@ export interface AuditRecord {
 const MAX_BYTES = 2_000_000
 
 export function auditLogPath(env: NodeJS.ProcessEnv): string | null {
-  const raw = env.GENOFFICE_AUDIT_LOG?.trim()
+  const raw = envValue(env, 'TELEOFFICE_AUDIT_LOG', 'GENOFFICE_AUDIT_LOG')
   if (raw?.toLowerCase() === 'off') return null
   if (raw) return raw
-  return join(env.GENOFFICE_AUTH_DIR || join(homedir(), '.genoffice'), 'cli-audit.jsonl')
+  return join(teleofficeHomeDir(env), 'cli-audit.jsonl')
 }
 
 export function appendAudit(env: NodeJS.ProcessEnv, record: AuditRecord): void {

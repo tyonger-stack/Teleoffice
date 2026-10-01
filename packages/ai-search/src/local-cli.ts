@@ -2,7 +2,7 @@
 // GenOffice search / image / media backends.
 //
 // Node-only: child_process.spawn with an args array (never a shell string),
-// no Electron imports - this file runs inside the genoffice CLI bundle AND
+// no Electron imports - this file runs inside the teleoffice CLI bundle AND
 // the Electron main process. stdin is ignored. stdout/stderr are captured
 // with size caps; a timeout kills the child with SIGTERM, then SIGKILL.
 import { spawn } from 'node:child_process'

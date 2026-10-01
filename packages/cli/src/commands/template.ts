@@ -44,7 +44,7 @@ export const templateCommand: CommandDef = {
           { supported: ['inspect', 'list', 'add', 'remove', 'path'] },
           {
             reason: verb === undefined ? 'missing_argument' : 'invalid_argument',
-            suggestion: 'run genoffice help template',
+            suggestion: 'run teleoffice help template',
           },
         )
     }

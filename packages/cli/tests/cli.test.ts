@@ -10,15 +10,15 @@ const DOCX = join(REPO, 'apps/docs/tests/pagination-corpus/docx/01-simple-englis
 const PPTX = join(REPO, 'packages/pptx-engine/tests/fixtures/01_standard_business.pptx')
 const XLSX = join(REPO, 'apps/sheets/fixtures/generated/compatibility-basic.xlsx')
 
-describe('genoffice cli', () => {
+describe('teleoffice cli', () => {
   it('prints help and usage errors with the documented exit codes', async () => {
     expect((await run([])).code).toBe(1)
     expect((await run(['--help'])).code).toBe(0)
-    expect((await run(['help', 'convert'])).stdout).toContain('Usage: genoffice convert')
+    expect((await run(['help', 'convert'])).stdout).toContain('Usage: teleoffice convert')
     const unknown = await run(['frobnicate', '--json'])
     expect(unknown.code).toBe(1)
     expect(unknown.json()).toMatchObject({ status: 'error', code: 1, command: 'frobnicate' })
-    expect((await run(['--version'])).stdout).toMatch(/^genoffice \d/)
+    expect((await run(['--version'])).stdout).toMatch(/^teleoffice \d/)
   })
 
   it('reports a missing file as exit code 2', async () => {
@@ -87,7 +87,7 @@ describe('genoffice cli', () => {
 
   it('converts pdf to docx through the local engine', async () => {
     const dir = tempDir()
-    const pdf = writeMinimalPdf(join(dir, 'one.pdf'), 'Converted by genoffice')
+    const pdf = writeMinimalPdf(join(dir, 'one.pdf'), 'Converted by teleoffice')
     const r = await run([
       'convert',
       pdf,
@@ -103,7 +103,7 @@ describe('genoffice cli', () => {
     expect(existsSync(out)).toBe(true)
     const zip = await JSZip.loadAsync(readFileSync(out))
     const doc = await zip.file('word/document.xml')!.async('string')
-    expect(doc).toContain('Converted by genoffice')
+    expect(doc).toContain('Converted by teleoffice')
   })
 
   it.skipIf(!xlsxSidecarPath())('info reads workbook sheets through the xlsx sidecar', async () => {

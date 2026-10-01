@@ -38,6 +38,7 @@ import {
   type Warning,
 } from './result'
 import { didYouMean } from './suggest'
+import { migrateLegacyHome } from '@genoffice/electron-utils/teleoffice-home'
 
 declare const __GENOFFICE_VERSION__: string | undefined
 
@@ -111,7 +112,7 @@ export async function runCli(argv: readonly string[], opts: RunOptions = {}): Pr
   }
 
   if (flagBool(args, 'version')) {
-    io.stdout(json ? JSON.stringify({ status: 'ok', version: VERSION }) : `genoffice ${VERSION}`)
+    io.stdout(json ? JSON.stringify({ status: 'ok', version: VERSION }) : `teleoffice ${VERSION}`)
     return EXIT.ok
   }
   if (name === null || (name === 'help' && args.positionals.length === 0)) {
@@ -132,7 +133,7 @@ export async function runCli(argv: readonly string[], opts: RunOptions = {}): Pr
               name,
               registry.list().map((d) => d.name),
             ),
-            'run `genoffice help` for the command list',
+            'run `teleoffice help` for the command list',
           ),
         },
       ),
@@ -153,7 +154,7 @@ export async function runCli(argv: readonly string[], opts: RunOptions = {}): Pr
           reason: 'unknown_option',
           suggestion: withGuess(
             didYouMean(unknown[0]!, known),
-            `run \`genoffice help ${def.name}\` for its options`,
+            `run \`teleoffice help ${def.name}\` for its options`,
             '--',
           ),
         },
@@ -237,9 +238,9 @@ function globalHelp(registry: CommandRegistry): string {
   const defs = registry.list()
   const width = Math.max(...defs.map((d) => d.name.length))
   return [
-    `genoffice ${VERSION} — GenOffice command line`,
+    `teleoffice ${VERSION} — GenOffice command line`,
     '',
-    'Usage: genoffice <command> [options]',
+    'Usage: teleoffice <command> [options]',
     '',
     'Commands:',
     ...defs.map((d) => `  ${d.name.padEnd(width)}  ${d.summary}`),
@@ -261,9 +262,16 @@ if (isMain) {
   // stdout is async on a pipe: exiting right after write() drops everything past the
   // 64 KiB pipe buffer, so a `--json` consumer would see a cut JSON object
   const exit = (code: number) => process.stdout.write('', () => process.exit(code))
+  // one-time move of ~/.genoffice (the pre-rename directory) to ~/.teleoffice
+  const moved = migrateLegacyHome()
+  if (moved.status === 'failed') {
+    process.stderr.write(
+      `teleoffice: could not move ${moved.from} to ${moved.to}, still using it (${moved.error})\n`,
+    )
+  }
   runCli(process.argv.slice(2)).then(exit, (err) => {
     process.stderr.write(
-      `genoffice: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}\n`,
+      `teleoffice: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}\n`,
     )
     exit(EXIT.conversion)
   })

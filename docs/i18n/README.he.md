@@ -50,7 +50,7 @@ Windows ו-Linux. היא פותחת ושומרת קבצי `.docx`,‏ `.xlsx` ו
   במפתח, או הביאו מפתח משלכם עבור Claude,‏ OpenAI,‏ Gemini,‏ DeepSeek,‏
   Kimi,‏ GLM,‏ Qwen,‏ Doubao,‏ MiniMax,‏ Grok,‏ Mistral,‏ OpenRouter,‏ Requesty, או כל
   endpoint תואם-OpenAI, כולל שרתים מקומיים.
-- **ניתן לסקריפטים ומוכן לסוכנים.** האפליקציה מגיעה עם שורת פקודה `genoffice`
+- **ניתן לסקריפטים ומוכן לסוכנים.** האפליקציה מגיעה עם שורת פקודה `teleoffice`
   ועם skill עבור Claude Code,‏ Codex,‏ Cursor,‏ Gemini CLI,‏ GitHub Copilot,‏
   OpenCode ו-Windsurf, כך שסוכן קוד יכול ליצור, להמיר, לקרוא ולערוך קבצי
   Office אמיתיים על המחשב שלכם בלי לפתוח חלון.
@@ -163,37 +163,37 @@ brief) — משפט פתיחה, פלטת צבעים, טיפוגרפיה וכיו
 
 ### 7 · CLI — סוכן הקוד שלכם מפעיל את GenOffice, על המחשב שלכם
 
-GenOffice מגיעה עם שורת פקודה `genoffice` ועם skill לסוכנים. התקינו את
+GenOffice מגיעה עם שורת פקודה `teleoffice` ועם skill לסוכנים. התקינו את
 ה-skill, ו-Claude Code,‏ Codex,‏ Cursor,‏ Gemini CLI,‏ GitHub Copilot,‏ OpenCode
 או Windsurf יוכלו ליצור, להמיר, לקרוא ולערוך קבצי Office אמיתיים דרך אותם
 מנועים שמפעילים את האפליקציות, בלי לפתוח חלון.
 
-<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides מציג מצגת בת שמונה שקופיות על מערכת השמש שסוכן קוד בנה דרך שורת הפקודה genoffice: שקופית השער על הקנבס, שמונה תמונות ממוזערות בצד שמאל ופאנל ה-AI פתוח" width="100%">
+<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides מציג מצגת בת שמונה שקופיות על מערכת השמש שסוכן קוד בנה דרך שורת הפקודה teleoffice: שקופית השער על הקנבס, שמונה תמונות ממוזערות בצד שמאל ופאנל ה-AI פתוח" width="100%">
 
 <table>
 <tr>
 <td width="50%"><img src="../assets/readme/cli-slides-grid.webp" alt="שמונה השקופיות המרונדרות של מצגת מערכת השמש זו לצד זו: שער, ציר זמן של החקר, ארבעה מספרים מרכזיים, תרשים עמודות של קוטרי כוכבי הלכת, עולמות סלעיים מול ענקים, המספר הבולט 99.8% של השמש, רשת ארבעת הענקים ומסקנות"></td>
-<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="הגדרות GenOffice, עמוד Integrations: ה-skill של genoffice מותקן ב-Claude Code, עם כפתורי Install ליד Codex ו-Cursor"></td>
+<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="הגדרות GenOffice, עמוד Integrations: ה-skill של teleoffice מותקן ב-Claude Code, עם כפתורי Install ליד Codex ו-Cursor"></td>
 </tr>
 <tr>
-<td dir="rtl"><b>פרומפט אחד לסוכן שלכם</b> — ״בנו מצגת בת שמונה שקופיות על מערכת השמש.״ הסוכן קורא את ה-skill, כותב גיליון סטייל, מתווה ומפרט עמוד אחד לכל שקופית, מייצר את שתי התמונות עם <code>genoffice image</code>, ונותן ל-<code>genoffice slides check</code> לדחות כל דבר שגולש או חופף לפני ש-<code>genoffice create</code> מרכיב את ה-<code>.pptx</code> ו-<code>slides render</code> מחזיר PNG לכל שקופית להתרשמות.</td>
+<td dir="rtl"><b>פרומפט אחד לסוכן שלכם</b> — ״בנו מצגת בת שמונה שקופיות על מערכת השמש.״ הסוכן קורא את ה-skill, כותב גיליון סטייל, מתווה ומפרט עמוד אחד לכל שקופית, מייצר את שתי התמונות עם <code>teleoffice image</code>, ונותן ל-<code>teleoffice slides check</code> לדחות כל דבר שגולש או חופף לפני ש-<code>teleoffice create</code> מרכיב את ה-<code>.pptx</code> ו-<code>slides render</code> מחזיר PNG לכל שקופית להתרשמות.</td>
 <td dir="rtl"><b>התקינו פעם אחת, מתוך הגדרות → שילובים</b> — GenOffice מציגה את סוכני הקוד שהיא מוצאת על המחשב הזה וכותבת את ה-skill לכל אחד שתבחרו. או הורידו את ה-skill כ-zip, או הריצו <code>npx skills add genspark-ai/genoffice</code>. הפקודות ותהליך העבודה המלא נמצאים ב<a href="#command-line-and-agent-skill">שורת הפקודה וה-skill לסוכנים</a>.</td>
 </tr>
 </table>
 
 ### 8 · MCP — אותם כלים דרך Model Context Protocol
 
-כל פקודת `genoffice` היא גם כלי MCP. Claude Code,‏ Claude Desktop,‏ Cursor
-וכל לקוח MCP אחר יכולים להפעיל בעצמם את `genoffice mcp`, בלי צורך להתקין
+כל פקודת `teleoffice` היא גם כלי MCP. Claude Code,‏ Claude Desktop,‏ Cursor
+וכל לקוח MCP אחר יכולים להפעיל בעצמם את `teleoffice mcp`, בלי צורך להתקין
 skill ובלי לפתוח חלון, ולקבל 29 כלים בתוספת מדריכי הפעולות כמשאבים
 (resources). שרת HTTP שני בתוך האפליקציה מאפשר לסוכן לבנות מסמך Word
 בלשונית עורך גלויה בזמן שאתם צופים.
 
-<img src="../assets/readme/mcp-deck-motion.webp" alt="צילום מואץ של Claude Code בונה תדריך משקיעים בן שמונה שקופיות על אנרגיה מתחדשת דרך שרת ה-MCP של genoffice: מחפש איורים ותמונות, בודק כל תמונה מועמדת עם media, deck_start כותב את גיליון הסטייל והתווה, deck_page מוסיף עמוד מאומת אחד בכל פעם, deck_build מרכיב את קובץ ה-.pptx ו-slides_render מחזיר תמונה של כל שקופית; המצגת המוגמרת נפתחת לאחר מכן ב-GenOffice Slides" width="100%">
+<img src="../assets/readme/mcp-deck-motion.webp" alt="צילום מואץ של Claude Code בונה תדריך משקיעים בן שמונה שקופיות על אנרגיה מתחדשת דרך שרת ה-MCP של teleoffice: מחפש איורים ותמונות, בודק כל תמונה מועמדת עם media, deck_start כותב את גיליון הסטייל והתווה, deck_page מוסיף עמוד מאומת אחד בכל פעם, deck_build מרכיב את קובץ ה-.pptx ו-slides_render מחזיר תמונה של כל שקופית; המצגת המוגמרת נפתחת לאחר מכן ב-GenOffice Slides" width="100%">
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides מציג את מצגת Renewable Energy 2026 בת שמונה השקופיות ש-Claude Code בנה דרך שרת ה-MCP של genoffice: שקופית השער עם תצלום של חוות רוח על הקנבס ושמונה תמונות ממוזערות בצד שמאל"></td>
+<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides מציג את מצגת Renewable Energy 2026 בת שמונה השקופיות ש-Claude Code בנה דרך שרת ה-MCP של teleoffice: שקופית השער עם תצלום של חוות רוח על הקנבס ושמונה תמונות ממוזערות בצד שמאל"></td>
 <td width="50%"><img src="../assets/readme/mcp-integrations.webp" alt="הגדרות GenOffice, עמוד Integrations, חלק ה-MCP: פקודת claude mcp add בשורה אחת עבור Claude Code, בלוק ה-JSON עבור Cursor,‏ Claude Desktop ולקוחות MCP אחרים, ואפשרות שרת ה-HTTP המקומי מתחת"></td>
 </tr>
 <tr>
@@ -218,7 +218,7 @@ skill ובלי לפתוח חלון, ולקבל 29 כלים בתוספת מדרי
 - **PDF שמטופל כמו שצריך.** ערכו טקסט ישירות בתוך העמוד, והמירו PDF ל-Word,
   Excel או PowerPoint במכשיר עצמו, עם OCR מובנה למסמכים סרוקים.
 - **גם Markdown ו-HTML**, עם אותו פאנל AI וייצוא מקומי ל-Word.
-- **ניתן לסקריפטים.** שורת פקודה `genoffice`, skill לסוכנים ושרת MCP
+- **ניתן לסקריפטים.** שורת פקודה `teleoffice`, skill לסוכנים ושרת MCP
   מעמידים כל מנוע לרשות Claude Code,‏ Claude Desktop,‏ Codex,‏ Cursor וסוכנים
   אחרים, עדיין על המכשיר.
 - **חינם**, גם ליחידים וגם לצוותים.
@@ -245,7 +245,7 @@ OpenRouter,‏ Requesty ו-OpenCode Zen/Go, ובנוסף שדה מותאם אי�
 
 ## שורת הפקודה וה-skill לסוכנים
 
-כל מה שהאפליקציות יכולות לעשות לקובץ, שורת הפקודה `genoffice` יכולה לעשות
+כל מה שהאפליקציות יכולות לעשות לקובץ, שורת הפקודה `teleoffice` יכולה לעשות
 מהטרמינל: לבדוק, להמיר, ליצור, לקרוא ולערוך Word,‏ Excel,‏ PowerPoint,‏ PDF,‏
 Markdown ו-HTML על אותם מנועים, ללא ממשק גרפי. היא מותקנת יחד עם GenOffice,
 לא דורשת סביבת הרצה משלה, ולעולם לא שולחת מסמך לשום מקום. יחד עם **ה-skill
@@ -265,25 +265,25 @@ OpenCode ו-Windsurf ישר מהקופסה, עם כל סוכן אחר שקורא
 | `npx skills add genspark-ai/genoffice` | מתקין מהמאגר הזה לכל סוכן שתומך ב-skills.                                                                                                           |
 
 לאחר מכן פתחו צ'אט חדש ובקשו מסמך. ה-skill מלמד את הסוכן מתי לפנות
-ל-`genoffice`, איך לקרוא קובץ לפני שעורכים אותו, ואיך לבדוק את העבודה של
+ל-`teleoffice`, איך לקרוא קובץ לפני שעורכים אותו, ואיך לבדוק את העבודה של
 עצמו.
 
 ### התחלה מהירה מהטרמינל
 
 ```bash
-genoffice --version
-genoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
-genoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
-genoffice create --type docx --from notes.md --out notes.docx
-genoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
-genoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
-genoffice render report.docx --out shots/          # one PNG per page, to look at what you made
-genoffice open sales.xlsx                          # hand the result to the editor
+teleoffice --version
+teleoffice info report.docx --json                  # headings and blocks; or sheets, slides, pages
+teleoffice convert report.md --to pdf               # md/html/docx/xlsx/pptx → pdf, pdf → docx/xlsx/pptx, …
+teleoffice create --type docx --from notes.md --out notes.docx
+teleoffice create --type xlsx --from table.json --out sales.xlsx   # "=SUM(B2:B9)" cells stay live formulas
+teleoffice docs read report.docx --range 0-9 --json # then `docs apply --ops edits.json` edits in place
+teleoffice render report.docx --out shots/          # one PNG per page, to look at what you made
+teleoffice open sales.xlsx                          # hand the result to the editor
 ```
 
 כל פקודה מדפיסה סיכום בשורה אחת, או אובייקט JSON יחיד עם `--json`. השינויים
 אטומיים: פעולה שנדחתה משאירה את הקובץ ללא שינוי וחוזרת עם שגיאה מנחה.
-`genoffice help` מציג את מערך הפקודות הנוכחי; התיעוד המלא נמצא
+`teleoffice help` מציג את מערך הפקודות הנוכחי; התיעוד המלא נמצא
 ב-[packages/cli/README.md](../../packages/cli/README.md).
 
 ### מה הסוכן מריץ בפועל
@@ -293,20 +293,20 @@ genoffice open sales.xlsx                          # hand the result to the edit
 לפני שהשלב הבא התחיל:
 
 ```bash
-genoffice capabilities --json                        # which cloud tools GenOffice has configured
-genoffice guide slides design                        # the deck workflow and layout library
-genoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
-genoffice slides check deck/outline.json --json      # 8 pages, no findings
-genoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
+teleoffice capabilities --json                        # which cloud tools GenOffice has configured
+teleoffice guide slides design                        # the deck workflow and layout library
+teleoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
+teleoffice slides check deck/outline.json --json      # 8 pages, no findings
+teleoffice slides check deck/pages/01.json --json     # builds one slide, audits overflow and overlap
 …                                                    # one page file per slide, fixed until each check is clean
-genoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
-genoffice slides render deck/solar-system.pptx --out deck/shots --json
-genoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
-genoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
-genoffice open deck/solar-system.pptx
+teleoffice create --type pptx --spec deck/pages --outline deck/outline.json --out deck/solar-system.pptx --json
+teleoffice slides render deck/solar-system.pptx --out deck/shots --json
+teleoffice slides audit deck/solar-system.pptx --json    # 8 slides, no layout issues
+teleoffice slides replace deck/solar-system.pptx --slide 4 --spec deck/pages/05.json --json
+teleoffice open deck/solar-system.pptx
 ```
 
-שום קריאה למודל לא מתבצעת בתוך `genoffice`: הסוכן חושב, ה-CLI בונה ובודק,
+שום קריאה למודל לא מתבצעת בתוך `teleoffice`: הסוכן חושב, ה-CLI בונה ובודק,
 והתוצאה נפתחת ב-GenOffice או ב-PowerPoint כקובץ `.pptx` רגיל.
 
 <a id="mcp-server"></a>
@@ -318,32 +318,32 @@ genoffice open deck/solar-system.pptx
 שתי דרכים להתחבר, שתיהן מוצגות עם קטעי קוד מוכנים להעתקה ב-**הגדרות →
 שילובים → MCP**:
 
-| דרך                              | מה זה                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **A ·‏ `genoffice mcp`** (מומלץ) | שרת stdio שהעוזר מפעיל בעצמו; אין צורך ש-GenOffice יהיה פתוח. כלי אחד לכל פקודה (`info`,‏ `convert`,‏ `create_docx`,‏ `create_xlsx`,‏ `create_pptx`,‏ `create_pdf`,‏ `docs_read` / `docs_apply` / `docs_check`,‏ `sheet_*`,‏ `slides_*`,‏ `render`,‏ `guide`,‏ `search`,‏ `image`,‏ `media`,‏ `open`) ובנוסף תהליך המצגת המדורג `deck_start` → `deck_page` → `deck_build` → `deck_replace`. פעולות, מפרטים ו-Markdown מועברים ישירות בקריאה, כך שגם לקוח בלי מערכת קבצים עובד. |
-| **B · שרת HTTP מקומי**           | רץ בתוך אפליקציית GenOffice בכתובת `http://127.0.0.1:3093/mcp` (Streamable HTTP, עם SSE ישן לתאימות). הכלים שלו מפעילים לשונית עורך Word גלויה: `create_session`,‏ `insert_content`,‏ `replace_blocks`,‏ `apply_ops`,‏ `read_document`,‏ `save_session`, ואתם צופים במסמך מקבל צורה. כבוי כברירת מחדל; הפעילו אותו באותה חלונית הגדרות.                                                                                                                                        |
+| דרך                               | מה זה                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **A ·‏ `teleoffice mcp`** (מומלץ) | שרת stdio שהעוזר מפעיל בעצמו; אין צורך ש-GenOffice יהיה פתוח. כלי אחד לכל פקודה (`info`,‏ `convert`,‏ `create_docx`,‏ `create_xlsx`,‏ `create_pptx`,‏ `create_pdf`,‏ `docs_read` / `docs_apply` / `docs_check`,‏ `sheet_*`,‏ `slides_*`,‏ `render`,‏ `guide`,‏ `search`,‏ `image`,‏ `media`,‏ `open`) ובנוסף תהליך המצגת המדורג `deck_start` → `deck_page` → `deck_build` → `deck_replace`. פעולות, מפרטים ו-Markdown מועברים ישירות בקריאה, כך שגם לקוח בלי מערכת קבצים עובד. |
+| **B · שרת HTTP מקומי**            | רץ בתוך אפליקציית GenOffice בכתובת `http://127.0.0.1:3093/mcp` (Streamable HTTP, עם SSE ישן לתאימות). הכלים שלו מפעילים לשונית עורך Word גלויה: `create_session`,‏ `insert_content`,‏ `replace_blocks`,‏ `apply_ops`,‏ `read_document`,‏ `save_session`, ואתם צופים במסמך מקבל צורה. כבוי כברירת מחדל; הפעילו אותו באותה חלונית הגדרות.                                                                                                                                        |
 
 ```bash
 # Claude Code
-claude mcp add --transport stdio genoffice -- genoffice mcp
+claude mcp add --transport stdio teleoffice -- teleoffice mcp
 ```
 
 ```jsonc
 // Cursor,‏ Claude Desktop או כל לקוח MCP אחר
-{ "mcpServers": { "genoffice": { "command": "genoffice", "args": ["mcp"] } } }
+{ "mcpServers": { "teleoffice": { "command": "teleoffice", "args": ["mcp"] } } }
 ```
 
-`genoffice` כאן הוא ה-CLI המצורף בתוך האפליקציה (ב-macOS
-`/Applications/GenOffice.app/Contents/Resources/cli/genoffice`; חלונית
+`teleoffice` כאן הוא ה-CLI המצורף בתוך האפליקציה (ב-macOS
+`/Applications/GenOffice.app/Contents/Resources/cli/teleoffice`; חלונית
 ההגדרות מציגה את הנתיב המדויק להתקנה שלכם). השרת נושא הוראות תהליך עבודה
-משלו וחושף את מדריכי הפעולות כמשאבי `genoffice://guide/*`, כך שאין צורך
+משלו וחושף את מדריכי הפעולות כמשאבי `teleoffice://guide/*`, כך שאין צורך
 ב-skill; ה-skill ושרת ה-MCP יכולים להתקיים זה לצד זה, והעוזר בוחר אחד
 מהם. יכולות הענן (`search`,‏ `image`,‏ `media`) עדיין עוברות דרך הספק
 שהוגדר ב-GenOffice; כל השאר רץ מקומית, ו-`GENOFFICE_ALLOWED_ROOTS` מגביל
 כל כלי לתיקיות שציינתם.
 
 מצגת האנרגיה המתחדשת בהדגמה למעלה היא איך שנראה פרומפט אחד ב-Claude Code
-עם שרת ה-MCP של `genoffice` בלבד מחובר, מצד הפרוטוקול:
+עם שרת ה-MCP של `teleoffice` בלבד מחובר, מצד הפרוטוקול:
 
 ```text
 capabilities · guide(slides, spec) · guide(slides, design)
@@ -532,7 +532,7 @@ KPI, שדות טופס ורקעי עמוד; רק אלמנטים ויזואליי
 <details>
 <summary><b>האם אפשר להפעיל את GenOffice מתוך Claude Code,‏ Codex,‏ Cursor או מסקריפט?</b></summary>
 
-כן. GenOffice מתקינה שורת פקודה `genoffice` שמריצה את אותם מנועים ללא ממשק
+כן. GenOffice מתקינה שורת פקודה `teleoffice` שמריצה את אותם מנועים ללא ממשק
 גרפי: בדיקה, המרה, יצירה, קריאה ועריכה של מסמכים מהטרמינל או מסקריפט, עם
 פלט `--json` לתוכנות. ה-skill המצורף לסוכנים מלמד את Claude Code,‏ Codex,‏
 Cursor,‏ Gemini CLI,‏ GitHub Copilot,‏ OpenCode ו-Windsurf להשתמש בה; התקינו

@@ -34,7 +34,7 @@ function track(dir: string): string {
 
 function freshEnv(): { env: NodeJS.ProcessEnv; dir: string } {
   const dir = track(mkdtempSync(join(tmpdir(), 'tmpl-reg-')))
-  return { env: { ...process.env, GENOFFICE_TEMPLATES_DIR: dir }, dir }
+  return { env: { ...process.env, TELEOFFICE_TEMPLATES_DIR: dir }, dir }
 }
 
 function srcDir(): string {
@@ -46,10 +46,24 @@ async function writeDeck(path: string): Promise<void> {
 }
 
 describe('template registry', () => {
-  it('honors GENOFFICE_TEMPLATES_DIR and starts empty', () => {
+  it('honors TELEOFFICE_TEMPLATES_DIR and starts empty', () => {
     const { env, dir } = freshEnv()
     expect(templatesDir(env)).toBe(dir)
     expect(listTemplates(env)).toEqual([])
+  })
+
+  it('still honors the legacy GENOFFICE_TEMPLATES_DIR, below TELEOFFICE_TEMPLATES_DIR', () => {
+    const legacy = track(mkdtempSync(join(tmpdir(), 'tmpl-legacy-')))
+    const current = track(mkdtempSync(join(tmpdir(), 'tmpl-current-')))
+    expect(templatesDir({ GENOFFICE_TEMPLATES_DIR: legacy })).toBe(legacy)
+    expect(
+      templatesDir({ TELEOFFICE_TEMPLATES_DIR: current, GENOFFICE_TEMPLATES_DIR: legacy }),
+    ).toBe(current)
+  })
+
+  it('defaults to templates/ in the per-user directory', () => {
+    const home = track(mkdtempSync(join(tmpdir(), 'tmpl-home-')))
+    expect(templatesDir({ TELEOFFICE_AUTH_DIR: home })).toBe(join(home, 'templates'))
   })
 
   it('adds, lists, resolves and removes a copied template', async () => {

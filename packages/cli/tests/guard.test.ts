@@ -181,10 +181,16 @@ describe('audit log', () => {
     expect(redactArgv(['info', 'a.pdf', '--password'])).toEqual(['info', 'a.pdf', '--password'])
   })
 
-  it('defaults under ~/.genoffice and honours GENOFFICE_AUDIT_LOG', () => {
-    expect(auditLogPath({})).toMatch(/[\\/]\.genoffice[\\/]cli-audit\.jsonl$/)
+  it('defaults into the per-user dir and honours TELEOFFICE_AUDIT_LOG over GENOFFICE_AUDIT_LOG', () => {
+    const home = tempDir()
+    expect(auditLogPath({ TELEOFFICE_AUTH_DIR: home })).toBe(join(home, 'cli-audit.jsonl'))
+    expect(auditLogPath({ TELEOFFICE_AUDIT_LOG: 'off' })).toBeNull()
+    expect(auditLogPath({ TELEOFFICE_AUDIT_LOG: '/x/y.jsonl' })).toBe('/x/y.jsonl')
     expect(auditLogPath({ GENOFFICE_AUDIT_LOG: 'off' })).toBeNull()
     expect(auditLogPath({ GENOFFICE_AUDIT_LOG: '/x/y.jsonl' })).toBe('/x/y.jsonl')
+    expect(
+      auditLogPath({ TELEOFFICE_AUDIT_LOG: '/new.jsonl', GENOFFICE_AUDIT_LOG: '/old.jsonl' }),
+    ).toBe('/new.jsonl')
   })
 
   it('appends one line per executed command, success or failure', async () => {

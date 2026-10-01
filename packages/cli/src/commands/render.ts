@@ -229,7 +229,7 @@ function locate(
         reason: 'target_not_found',
         suggestion: guess
           ? `did you mean ${guess}?`
-          : 'run `genoffice slides read <file>` for the ids',
+          : 'run `teleoffice slides read <file>` for the ids',
       },
     )
   }
