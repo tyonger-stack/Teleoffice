@@ -287,6 +287,7 @@ import {
   pageRecentPaths,
   statPathEntries,
 } from './recent-files'
+import { isUserVisibleFile, type FileTargetSources } from './file-targets'
 import { isSameFile, pdfSaveAsTarget, isValidRawRenameName } from './rename-validation'
 import {
   FolderWatcher,
@@ -384,7 +385,7 @@ if (app.isPackaged) {
   const newDir = app.getPath('userData')
   const newEmpty = !existsSync(newDir) || readdirSync(newDir).length === 0
   if (newEmpty) {
-    for (const legacy of ['GenOffice', 'AI Office']) {
+    for (const legacy of ['TeleOffice', 'AI Office']) {
       const oldDir = join(app.getPath('appData'), legacy)
       if (existsSync(oldDir)) {
         cpSync(oldDir, newDir, { recursive: true })
@@ -395,7 +396,7 @@ if (app.isPackaged) {
 }
 
 // The CLI rename from genoffice to teleoffice moved the per-user directory
-// (auth.json, launcher, audit log, templates) from ~/.genoffice to
+// (auth.json, launcher, audit log, templates) from ~/.teleoffice to
 // ~/.teleoffice; move it once, before anything below reads or writes it
 {
   const moved = migrateLegacyHome()
@@ -2906,6 +2907,30 @@ function trackedFilesUnder(dir: string): string[] {
   ])
 }
 
+/** stat that tolerates races: the answer is only advisory for the delete gate */
+function statMaybeFile(path: string): { isFile: () => boolean } | null {
+  try {
+    return statSync(path)
+  } catch {
+    return null
+  }
+}
+
+/** the union trackedFilesUnder uses, as a membership check for the file IPCs */
+function fileTargetSources(): FileTargetSources {
+  return {
+    insideAnyRoot: (p) => insideAnyRoot(p),
+    trackedPaths: [
+      ...readRecentFiles(),
+      ...readStarredFiles(),
+      ...projectFilePaths(),
+      ...readSlidesRecentFiles(),
+      ...(tabManager?.openFilePaths() ?? []),
+      ...detachedFilePaths(),
+    ],
+  }
+}
+
 /** a folder moved/renamed: re-key every tracked file that lived under it */
 function afterFolderMoved(oldDir: string, newDir: string, filesBefore: readonly string[]): void {
   for (const file of filesBefore) afterFileMoved(file, rebasePath(file, oldDir, newDir))
@@ -4028,6 +4053,10 @@ function registerHomeIpc(): void {
       // with the localized gate instead of renaming to a different
       // name than requested.
       if (!isValidRawRenameName(newName)) return { ok: false, error: tm('errBadName') }
+      // only paths the UI could have shown: a compromised renderer must not
+      // rename arbitrary files outside every tracked source
+      if (!isUserVisibleFile(path, fileTargetSources()))
+        return { ok: false, error: tm('errBadArgs') }
       const name = newName.trim()
       if (!existsSync(path)) return { ok: false, error: tm('errMissing') }
       const target = join(dirname(path), name)
@@ -4049,6 +4078,7 @@ function registerHomeIpc(): void {
 
   ipcMain.handle(HOME_CHANNELS.duplicateFile, async (_event, path: unknown) => {
     if (typeof path !== 'string' || !existsSync(path)) return
+    if (!isUserVisibleFile(path, fileTargetSources())) return
     const ext = extname(path)
     const base = basename(path, ext)
     const dir = dirname(path)
@@ -4067,7 +4097,10 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.deleteFiles, async (_event, paths: unknown) => {
-    const list = stringPaths(paths)
+    const targets = fileTargetSources()
+    const list = stringPaths(paths).filter(
+      (p) => isUserVisibleFile(p, targets) && statMaybeFile(p)?.isFile() === true,
+    )
     for (const p of list) {
       try {
         await shell.trashItem(p)
