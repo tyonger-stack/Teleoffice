@@ -75,8 +75,9 @@ describe('slides audit', () => {
       suggest?: { op: string; target: { slide: string; el: string }; box: Record<string, number> }
     }[]
     const oob = issues.find((i) => i.code === 'out_of_bounds')!
-    expect(oob).toMatchObject({ level: 'error', id: 'E1' })
+    expect(oob).toMatchObject({ level: 'error', id: 'E1', slide: 0, page: 1 })
     expect(oob.path).toMatch(/^s_\d+\/e_/)
+    expect(detail.slides[0]).toMatchObject({ slide: 0, page: 1 })
     expect(oob.suggest).toMatchObject({ op: 'setTransform', target: { el: oob.el } })
     expect(oob.suggest!.target.slide).toMatch(/^s_/)
     expect((oob.suggest as { rotDeg?: number }).rotDeg).toBe(15)

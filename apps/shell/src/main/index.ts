@@ -26,6 +26,12 @@ import {
 } from 'electron'
 import type { MenuItemConstructorOptions, NativeImage, WebContents } from 'electron'
 import { atomicCopyFile, atomicWriteFile } from './atomic-write'
+import {
+  createDeckFromTemplate,
+  ensureTemplatesDir,
+  importSlideTemplate as importSlideTemplateFile,
+  listSlideTemplates,
+} from './slide-templates'
 import { tabStripOverlay } from './title-bar-overlay'
 import menuDocxIcon1x from './assets/menu-docx.png?asset'
 import menuDocxIcon2x from './assets/menu-docx@2x.png?asset'
@@ -732,10 +738,12 @@ const tMain = createI18n({
     menuHome: '首页',
     backToHome: '返回首页',
     dlgOpenTitle: '打开文件',
+    dlgImportTemplate: '导入模板',
     filterSupported: '支持的文件',
     filterWord: 'Word 文档',
     filterExcel: 'Excel 工作簿',
     filterPpt: 'PowerPoint 演示文稿',
+    filterTemplate: 'PowerPoint 模板',
     filterMarkdown: 'Markdown 文档',
     filterHtml: 'HTML 文档',
     filterPdf: 'PDF 文档',
@@ -824,10 +832,12 @@ const tMain = createI18n({
     menuHome: 'Home',
     backToHome: 'Back to Home',
     dlgOpenTitle: 'Open File',
+    dlgImportTemplate: 'Import Template',
     filterSupported: 'Supported Files',
     filterWord: 'Word Documents',
     filterExcel: 'Excel Workbooks',
     filterPpt: 'PowerPoint Presentations',
+    filterTemplate: 'PowerPoint Templates',
     filterMarkdown: 'Markdown Documents',
     filterHtml: 'HTML Documents',
     filterPdf: 'PDF Documents',
@@ -924,10 +934,12 @@ const tMain = createI18n({
     menuHome: 'Trang chủ',
     backToHome: 'Quay lại Trang chủ',
     dlgOpenTitle: 'Mở tệp',
+    dlgImportTemplate: 'Nhập mẫu',
     filterSupported: 'Các tệp được hỗ trợ',
     filterWord: 'Tài liệu Word',
     filterExcel: 'Sổ làm việc Excel',
     filterPpt: 'Bản trình bày PowerPoint',
+    filterTemplate: 'Mẫu PowerPoint',
     filterMarkdown: 'Tài liệu Markdown',
     filterHtml: 'Tài liệu HTML',
     filterPdf: 'Tài liệu PDF',
@@ -1024,10 +1036,12 @@ const tMain = createI18n({
     menuHome: 'ホーム',
     backToHome: 'ホームに戻る',
     dlgOpenTitle: 'ファイルを開く',
+    dlgImportTemplate: 'テンプレートをインポート',
     filterSupported: '対応ファイル',
     filterWord: 'Word 文書',
     filterExcel: 'Excel ブック',
     filterPpt: 'PowerPoint プレゼンテーション',
+    filterTemplate: 'PowerPoint テンプレート',
     filterMarkdown: 'Markdown ドキュメント',
     filterHtml: 'HTML ドキュメント',
     filterPdf: 'PDF ドキュメント',
@@ -1124,10 +1138,12 @@ const tMain = createI18n({
     menuHome: '홈',
     backToHome: '홈으로 돌아가기',
     dlgOpenTitle: '파일 열기',
+    dlgImportTemplate: '템플릿 가져오기',
     filterSupported: '지원되는 파일',
     filterWord: 'Word 문서',
     filterExcel: 'Excel 통합 문서',
     filterPpt: 'PowerPoint 프레젠테이션',
+    filterTemplate: 'PowerPoint 템플릿',
     filterMarkdown: 'Markdown 문서',
     filterHtml: 'HTML 문서',
     filterPdf: 'PDF 문서',
@@ -1223,10 +1239,12 @@ const tMain = createI18n({
     menuHome: 'Accueil',
     backToHome: "Retour à l'accueil",
     dlgOpenTitle: 'Ouvrir un fichier',
+    dlgImportTemplate: 'Importer un modèle',
     filterSupported: 'Fichiers pris en charge',
     filterWord: 'Documents Word',
     filterExcel: 'Classeurs Excel',
     filterPpt: 'Présentations PowerPoint',
+    filterTemplate: 'Modèles PowerPoint',
     filterMarkdown: 'Documents Markdown',
     filterHtml: 'Documents HTML',
     filterPdf: 'Documents PDF',
@@ -1324,10 +1342,12 @@ const tMain = createI18n({
     menuHome: 'Startseite',
     backToHome: 'Zurück zur Startseite',
     dlgOpenTitle: 'Datei öffnen',
+    dlgImportTemplate: 'Vorlage importieren',
     filterSupported: 'Unterstützte Dateien',
     filterWord: 'Word-Dokumente',
     filterExcel: 'Excel-Arbeitsmappen',
     filterPpt: 'PowerPoint-Präsentationen',
+    filterTemplate: 'PowerPoint-Vorlagen',
     filterMarkdown: 'Markdown-Dokumente',
     filterHtml: 'HTML-Dokumente',
     filterPdf: 'PDF-Dokumente',
@@ -1425,10 +1445,12 @@ const tMain = createI18n({
     menuHome: 'Inicio',
     backToHome: 'Volver al inicio',
     dlgOpenTitle: 'Abrir archivo',
+    dlgImportTemplate: 'Importar plantilla',
     filterSupported: 'Archivos compatibles',
     filterWord: 'Documentos de Word',
     filterExcel: 'Libros de Excel',
     filterPpt: 'Presentaciones de PowerPoint',
+    filterTemplate: 'Plantillas de PowerPoint',
     filterMarkdown: 'Documentos Markdown',
     filterHtml: 'Documentos HTML',
     filterPdf: 'Documentos PDF',
@@ -1526,10 +1548,12 @@ const tMain = createI18n({
     menuHome: 'หน้าแรก',
     backToHome: 'กลับไปหน้าแรก',
     dlgOpenTitle: 'เปิดไฟล์',
+    dlgImportTemplate: 'นำเข้าเทมเพลต',
     filterSupported: 'ไฟล์ที่รองรับ',
     filterWord: 'เอกสาร Word',
     filterExcel: 'เวิร์กบุ๊ก Excel',
     filterPpt: 'งานนำเสนอ PowerPoint',
+    filterTemplate: 'เทมเพลต PowerPoint',
     filterMarkdown: 'เอกสาร Markdown',
     filterHtml: 'เอกสาร HTML',
     filterPdf: 'เอกสาร PDF',
@@ -1623,10 +1647,12 @@ const tMain = createI18n({
     menuHome: 'Beranda',
     backToHome: 'Kembali ke Beranda',
     dlgOpenTitle: 'Buka File',
+    dlgImportTemplate: 'Impor Templat',
     filterSupported: 'File yang Didukung',
     filterWord: 'Dokumen Word',
     filterExcel: 'Buku Kerja Excel',
     filterPpt: 'Presentasi PowerPoint',
+    filterTemplate: 'Templat PowerPoint',
     filterMarkdown: 'Dokumen Markdown',
     filterHtml: 'Dokumen HTML',
     filterPdf: 'Dokumen PDF',
@@ -1724,10 +1750,12 @@ const tMain = createI18n({
     menuHome: 'Главная',
     backToHome: 'Вернуться на главную',
     dlgOpenTitle: 'Открытие файла',
+    dlgImportTemplate: 'Импорт шаблона',
     filterSupported: 'Поддерживаемые файлы',
     filterWord: 'Документы Word',
     filterExcel: 'Книги Excel',
     filterPpt: 'Презентации PowerPoint',
+    filterTemplate: 'Шаблоны PowerPoint',
     filterMarkdown: 'Документы Markdown',
     filterHtml: 'Документы HTML',
     filterPdf: 'Документы PDF',
@@ -1825,10 +1853,12 @@ const tMain = createI18n({
     menuHome: 'الصفحة الرئيسية',
     backToHome: 'العودة إلى الصفحة الرئيسية',
     dlgOpenTitle: 'فتح ملف',
+    dlgImportTemplate: 'استيراد قالب',
     filterSupported: 'الملفات المدعومة',
     filterWord: 'مستندات Word',
     filterExcel: 'مصنفات Excel',
     filterPpt: 'عروض PowerPoint التقديمية',
+    filterTemplate: 'قوالب PowerPoint',
     filterMarkdown: 'مستندات Markdown',
     filterHtml: 'مستندات HTML',
     filterPdf: 'مستندات PDF',
@@ -1922,10 +1952,12 @@ const tMain = createI18n({
     menuHome: 'Início',
     backToHome: 'Voltar ao início',
     dlgOpenTitle: 'Abrir arquivo',
+    dlgImportTemplate: 'Importar modelo',
     filterSupported: 'Arquivos compatíveis',
     filterWord: 'Documentos do Word',
     filterExcel: 'Pastas de trabalho do Excel',
     filterPpt: 'Apresentações do PowerPoint',
+    filterTemplate: 'Modelos do PowerPoint',
     filterMarkdown: 'Documentos Markdown',
     filterHtml: 'Documentos HTML',
     filterPdf: 'Documentos PDF',
@@ -2023,10 +2055,12 @@ const tMain = createI18n({
     menuHome: 'Home',
     backToHome: 'Torna alla Home',
     dlgOpenTitle: 'Apri file',
+    dlgImportTemplate: 'Importa modello',
     filterSupported: 'File supportati',
     filterWord: 'Documenti Word',
     filterExcel: 'Cartelle di lavoro Excel',
     filterPpt: 'Presentazioni PowerPoint',
+    filterTemplate: 'Modelli PowerPoint',
     filterMarkdown: 'Documenti Markdown',
     filterHtml: 'Documenti HTML',
     filterPdf: 'Documenti PDF',
@@ -2124,10 +2158,12 @@ const tMain = createI18n({
     menuHome: 'Strona główna',
     backToHome: 'Wróć do strony głównej',
     dlgOpenTitle: 'Otwieranie pliku',
+    dlgImportTemplate: 'Importuj szablon',
     filterSupported: 'Obsługiwane pliki',
     filterWord: 'Dokumenty programu Word',
     filterExcel: 'Skoroszyty programu Excel',
     filterPpt: 'Prezentacje programu PowerPoint',
+    filterTemplate: 'Szablony programu PowerPoint',
     filterMarkdown: 'Dokumenty Markdown',
     filterHtml: 'Dokumenty HTML',
     filterPdf: 'Dokumenty PDF',
@@ -2225,10 +2261,12 @@ const tMain = createI18n({
     menuHome: 'Domů',
     backToHome: 'Zpět na domovskou stránku',
     dlgOpenTitle: 'Otevřít soubor',
+    dlgImportTemplate: 'Importovat šablonu',
     filterSupported: 'Podporované soubory',
     filterWord: 'Dokumenty Word',
     filterExcel: 'Sešity Excel',
     filterPpt: 'Prezentace PowerPoint',
+    filterTemplate: 'Šablony PowerPoint',
     filterMarkdown: 'Dokumenty Markdown',
     filterHtml: 'Dokumenty HTML',
     filterPdf: 'Dokumenty PDF',
@@ -2324,10 +2362,12 @@ const tMain = createI18n({
     menuHome: 'Start',
     backToHome: 'Terug naar start',
     dlgOpenTitle: 'Bestand openen',
+    dlgImportTemplate: 'Sjabloon importeren',
     filterSupported: 'Ondersteunde bestanden',
     filterWord: 'Word-documenten',
     filterExcel: 'Excel-werkmappen',
     filterPpt: 'PowerPoint-presentaties',
+    filterTemplate: 'PowerPoint-sjablonen',
     filterMarkdown: 'Markdown-documenten',
     filterHtml: 'HTML-documenten',
     filterPdf: 'PDF-documenten',
@@ -2425,10 +2465,12 @@ const tMain = createI18n({
     menuHome: 'Laman Utama',
     backToHome: 'Kembali ke Laman Utama',
     dlgOpenTitle: 'Buka Fail',
+    dlgImportTemplate: 'Import Templat',
     filterSupported: 'Fail yang Disokong',
     filterWord: 'Dokumen Word',
     filterExcel: 'Buku Kerja Excel',
     filterPpt: 'Persembahan PowerPoint',
+    filterTemplate: 'Templat PowerPoint',
     filterMarkdown: 'Dokumen Markdown',
     filterHtml: 'Dokumen HTML',
     filterPdf: 'Dokumen PDF',
@@ -2525,10 +2567,12 @@ const tMain = createI18n({
     menuHome: 'דף הבית',
     backToHome: 'חזרה לדף הבית',
     dlgOpenTitle: 'פתיחת קובץ',
+    dlgImportTemplate: 'ייבוא תבנית',
     filterSupported: 'קבצים נתמכים',
     filterWord: 'מסמכי Word',
     filterExcel: 'חוברות עבודה של Excel',
     filterPpt: 'מצגות PowerPoint',
+    filterTemplate: 'תבניות PowerPoint',
     filterMarkdown: 'מסמכי Markdown',
     filterHtml: 'מסמכי HTML',
     filterPdf: 'מסמכי PDF',
@@ -2623,10 +2667,12 @@ const tMain = createI18n({
     menuHome: 'होम',
     backToHome: 'होम पर वापस जाएँ',
     dlgOpenTitle: 'फ़ाइल खोलें',
+    dlgImportTemplate: 'टेम्पलेट आयात करें',
     filterSupported: 'समर्थित फ़ाइलें',
     filterWord: 'Word दस्तावेज़',
     filterExcel: 'Excel वर्कबुक',
     filterPpt: 'PowerPoint प्रस्तुतियाँ',
+    filterTemplate: 'PowerPoint टेम्पलेट',
     filterMarkdown: 'Markdown दस्तावेज़',
     filterHtml: 'HTML दस्तावेज़',
     filterPdf: 'PDF दस्तावेज़',
@@ -2724,10 +2770,12 @@ const tMain = createI18n({
     menuHome: '首頁',
     backToHome: '返回首頁',
     dlgOpenTitle: '開啟檔案',
+    dlgImportTemplate: '匯入範本',
     filterSupported: '支援的檔案',
     filterWord: 'Word 文件',
     filterExcel: 'Excel 活頁簿',
     filterPpt: 'PowerPoint 簡報',
+    filterTemplate: 'PowerPoint 範本',
     filterMarkdown: 'Markdown 文件',
     filterHtml: 'HTML 文件',
     filterPdf: 'PDF 文件',
@@ -3907,6 +3955,44 @@ function registerHomeIpc(): void {
   ipcMain.handle(HOME_CHANNELS.newSlide, (_event, opts?: NewFileOpts) => {
     rememberPendingDir('slide', opts)
     newSlideTab()
+  })
+
+  ipcMain.handle(HOME_CHANNELS.listSlideTemplates, () => listSlideTemplates())
+
+  ipcMain.handle(
+    HOME_CHANNELS.newSlideFromTemplate,
+    async (_event, name: unknown, opts?: NewFileOpts) => {
+      if (typeof name !== 'string' || !name || name.length > 128) {
+        throw new Error(tm('errBadArgs'))
+      }
+      rememberPendingDir('slide', opts)
+      try {
+        const path = await createDeckFromTemplate(name, newFileDir('slide'), tm('untitledDeck'))
+        if (routeDocumentPath(path)) recordStarPromptDocOpen()
+        analytics.track('file_new', { kind: 'pptx' })
+      } catch (err) {
+        surfaceNewTabError(err)
+      }
+    },
+  )
+
+  ipcMain.handle(HOME_CHANNELS.importSlideTemplate, async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender) ?? shellWindow
+    if (!win) return null
+    const result = await showOpenDialogWithMemory(dialog, win, {
+      title: tm('dlgImportTemplate'),
+      filters: [{ name: tm('filterTemplate'), extensions: ['pptx'] }],
+      properties: ['openFile'],
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    const source = result.filePaths[0]
+    if (!source) return null
+    const imported = importSlideTemplateFile(source)
+    return { name: imported.name }
+  })
+
+  ipcMain.handle(HOME_CHANNELS.openTemplatesFolder, async () => {
+    await shell.openPath(ensureTemplatesDir())
   })
 
   ipcMain.handle(HOME_CHANNELS.newMarkdown, (_event, opts?: NewFileOpts) => {

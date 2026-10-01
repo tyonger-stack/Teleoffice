@@ -18,7 +18,9 @@ import {
   openPptx,
   promoteSlideBackground,
   savePptx,
+  type OpenedPptx,
   type Paragraph,
+  type Slide,
   type TextElement,
   type TextRun,
 } from '@genoffice/pptx-engine'
@@ -31,6 +33,8 @@ export const SPEC_CANVAS_H = 720
 const MAX_ELEMENTS = 48
 const MAX_IMAGES = 8
 const MAX_TEXT_LEN = 4000
+/** Default list indent unit (EMU); bullet levels stack multiples of it. */
+export const SPEC_INDENT_EMU = 228600
 
 /** Preset geometries the spec may use; unknown kinds fall back to rect instead of emitting invalid prst XML. */
 const SHAPE_KINDS = new Set([
@@ -72,7 +76,16 @@ export interface SpecParagraph {
   lineSpacingPct?: number
   spaceBeforePt?: number
   spaceAfterPt?: number
-  bullet?: boolean
+  /** true = the default bullet; a one-character string is the bullet glyph */
+  bullet?: boolean | string
+  /** bullet glyph color (#RRGGBB) */
+  bulletColor?: string
+  /** bullet size in percent of the text size (25..400) */
+  bulletSizePct?: number
+  /** bullet glyph typeface (symbol fonts for custom glyphs) */
+  bulletFont?: string
+  /** list level 0..8; stacks the hanging indent, one indent unit per level */
+  level?: number
 }
 
 interface SpecBase {
@@ -93,6 +106,8 @@ export interface SpecShape extends SpecBase {
   flipH?: boolean
   /** mirror vertically; a `line` box draws bottom-left to top-right */
   flipV?: boolean
+  /** roundRect corner radius in px (default: the preset's 1/6 of the short side) */
+  radius?: number
 }
 
 export interface SpecText extends SpecBase {
@@ -104,6 +119,8 @@ export interface SpecText extends SpecBase {
 export interface SpecImage extends SpecBase {
   type: 'image'
   url: string
+  /** cover (default): center-crop to fill the box; contain: shrink the box to the picture aspect, no crop */
+  fit?: 'cover' | 'contain'
 }
 
 export type SpecElement = SpecShape | SpecText | SpecImage
@@ -165,6 +182,8 @@ function matchingBrace(text: string, start: number): number {
 export interface ParseSpecOptions {
   /** Accept local file paths and data: URLs as image sources (the CLI); default http(s) only. */
   localImages?: boolean
+  /** Template pages may carry no elements at all (placeholders do the work); default still requires elements. */
+  allowEmptyElements?: boolean
 }
 
 export function parsePageSpec(
@@ -192,6 +211,72 @@ export function parsePageSpec(
 }
 
 /** Same validation as parsePageSpec for an already-parsed JSON value (one page of a deck spec). */
+export function parseSpecParagraphs(v: unknown): SpecParagraph[] {
+  if (!Array.isArray(v)) return []
+  const out: SpecParagraph[] = []
+  for (const p of v) {
+    const pr = asRecord(p)
+    const runsRaw = Array.isArray(pr.runs) ? pr.runs : []
+    const runs: SpecRun[] = []
+    for (const r of runsRaw) {
+      const rr = asRecord(r)
+      const t = typeof rr.text === 'string' ? rr.text.slice(0, MAX_TEXT_LEN) : ''
+      const sizePt = num(rr.sizePt)
+      runs.push({
+        text: t,
+        ...(sizePt ? { sizePt: Math.min(Math.max(sizePt, 6), 160) } : {}),
+        ...(rr.bold === true ? { bold: true } : {}),
+        ...(rr.italic === true ? { italic: true } : {}),
+        ...(normColor(rr.color) ? { color: normColor(rr.color) } : {}),
+        ...(typeof rr.font === 'string' && rr.font.trim()
+          ? { font: rr.font.trim().slice(0, 80) }
+          : {}),
+      })
+    }
+    if (runs.length === 0) runs.push({ text: '' })
+    const align = pr.align
+    const lineSpacingPct = num(pr.lineSpacingPct)
+    const spaceBeforePt = num(pr.spaceBeforePt)
+    const spaceAfterPt = num(pr.spaceAfterPt)
+    const bullet =
+      pr.bullet === true || (typeof pr.bullet === 'string' && [...pr.bullet].length === 1)
+        ? pr.bullet
+        : undefined
+    const bulletColor = normColor(pr.bulletColor)
+    const bulletSizePct = num(pr.bulletSizePct)
+    const bulletFont =
+      typeof pr.bulletFont === 'string' && pr.bulletFont.trim()
+        ? pr.bulletFont.trim().slice(0, 80)
+        : undefined
+    const levelRaw = num(pr.level)
+    const level =
+      levelRaw !== undefined && Number.isInteger(levelRaw) && levelRaw >= 0 && levelRaw <= 8
+        ? levelRaw
+        : undefined
+    out.push({
+      runs,
+      ...(align === 'left' || align === 'center' || align === 'right' || align === 'justify'
+        ? { align }
+        : {}),
+      ...(lineSpacingPct ? { lineSpacingPct: Math.min(Math.max(lineSpacingPct, 60), 300) } : {}),
+      ...(spaceBeforePt !== undefined
+        ? { spaceBeforePt: Math.min(Math.max(spaceBeforePt, 0), 96) }
+        : {}),
+      ...(spaceAfterPt !== undefined
+        ? { spaceAfterPt: Math.min(Math.max(spaceAfterPt, 0), 96) }
+        : {}),
+      ...(bullet !== undefined ? { bullet } : {}),
+      ...(bullet !== undefined && bulletColor ? { bulletColor } : {}),
+      ...(bullet !== undefined && bulletSizePct !== undefined
+        ? { bulletSizePct: Math.min(Math.max(Math.round(bulletSizePct), 25), 400) }
+        : {}),
+      ...(bullet !== undefined && bulletFont ? { bulletFont } : {}),
+      ...(level !== undefined ? { level } : {}),
+    })
+  }
+  return out
+}
+
 export function parsePageSpecObject(
   parsed: unknown,
   canvasW = SPEC_CANVAS_W,
@@ -200,7 +285,9 @@ export function parsePageSpecObject(
 ): { ok: true; spec: PageSpec; warnings: string[] } | { ok: false; error: string } {
   const root = asRecord(parsed)
   const rawEls = Array.isArray(root.elements) ? root.elements : []
-  if (rawEls.length === 0) return { ok: false, error: 'the "elements" array is missing or empty' }
+  if (rawEls.length === 0 && !opts.allowEmptyElements) {
+    return { ok: false, error: 'the "elements" array is missing or empty' }
+  }
 
   const warnings: string[] = []
   const elements: SpecElement[] = []
@@ -213,50 +300,7 @@ export function parsePageSpecObject(
   }
   let images = 0
 
-  const parseParagraphs = (v: unknown): SpecParagraph[] => {
-    if (!Array.isArray(v)) return []
-    const out: SpecParagraph[] = []
-    for (const p of v) {
-      const pr = asRecord(p)
-      const runsRaw = Array.isArray(pr.runs) ? pr.runs : []
-      const runs: SpecRun[] = []
-      for (const r of runsRaw) {
-        const rr = asRecord(r)
-        const t = typeof rr.text === 'string' ? rr.text.slice(0, MAX_TEXT_LEN) : ''
-        const sizePt = num(rr.sizePt)
-        runs.push({
-          text: t,
-          ...(sizePt ? { sizePt: Math.min(Math.max(sizePt, 6), 160) } : {}),
-          ...(rr.bold === true ? { bold: true } : {}),
-          ...(rr.italic === true ? { italic: true } : {}),
-          ...(normColor(rr.color) ? { color: normColor(rr.color) } : {}),
-          ...(typeof rr.font === 'string' && rr.font.trim()
-            ? { font: rr.font.trim().slice(0, 80) }
-            : {}),
-        })
-      }
-      if (runs.length === 0) runs.push({ text: '' })
-      const align = pr.align
-      const lineSpacingPct = num(pr.lineSpacingPct)
-      const spaceBeforePt = num(pr.spaceBeforePt)
-      const spaceAfterPt = num(pr.spaceAfterPt)
-      out.push({
-        runs,
-        ...(align === 'left' || align === 'center' || align === 'right' || align === 'justify'
-          ? { align }
-          : {}),
-        ...(lineSpacingPct ? { lineSpacingPct: Math.min(Math.max(lineSpacingPct, 60), 300) } : {}),
-        ...(spaceBeforePt !== undefined
-          ? { spaceBeforePt: Math.min(Math.max(spaceBeforePt, 0), 96) }
-          : {}),
-        ...(spaceAfterPt !== undefined
-          ? { spaceAfterPt: Math.min(Math.max(spaceAfterPt, 0), 96) }
-          : {}),
-        ...(pr.bullet === true ? { bullet: true } : {}),
-      })
-    }
-    return out
-  }
+  const parseParagraphs = parseSpecParagraphs
 
   for (const [i, rawEl] of rawEls.entries()) {
     if (elements.length >= MAX_ELEMENTS) {
@@ -302,7 +346,15 @@ export function parsePageSpecObject(
         continue
       }
       images += 1
-      keep({ type: 'image', url, ...base }, i)
+      keep(
+        {
+          type: 'image',
+          url,
+          ...base,
+          ...(el.fit === 'contain' ? { fit: 'contain' as const } : {}),
+        },
+        i,
+      )
       continue
     }
 
@@ -345,6 +397,7 @@ export function parsePageSpecObject(
       }
       const paragraphs = parseParagraphs(el.paragraphs)
       const valign = el.valign
+      const radius = num(el.radius)
       keep(
         {
           type: 'shape',
@@ -356,6 +409,7 @@ export function parsePageSpecObject(
           ...(valign === 'top' || valign === 'middle' || valign === 'bottom' ? { valign } : {}),
           ...(el.flipH === true ? { flipH: true } : {}),
           ...(el.flipV === true ? { flipV: true } : {}),
+          ...(shape === 'roundRect' && radius != null && radius >= 0 ? { radius } : {}),
         },
         i,
       )
@@ -365,7 +419,9 @@ export function parsePageSpecObject(
     warnings.push(`element ${i}: unknown type "${String(type)}", dropped`)
   }
 
-  if (elements.length === 0) {
+  // Template pages may leave every text box to the layout's placeholders, so
+  // an empty element list is a blank layout page there, not a failure.
+  if (elements.length === 0 && !opts.allowEmptyElements) {
     return {
       ok: false,
       error: `no valid elements (${warnings.join('; ') || 'all dropped'})`,
@@ -467,12 +523,13 @@ export interface BuildPageDeps {
  * anchored boxes shift up so the rendered glyphs stay exactly where they were.
  * Returns the re-saved bytes, or null when every box already fits.
  */
-async function growTextBoxesToContent(
+export async function growTextBoxesToContent(
   bytes: Uint8Array,
   metrics: FontMetricsProvider,
+  slideIndex = 0,
 ): Promise<Uint8Array | null> {
   const opened = await openPptx(bytes)
-  const slide = opened.deck.slides[0]
+  const slide = opened.deck.slides[slideIndex]
   if (!slide) return null
   const baseWidthPx = opened.deck.size.cx / EMU_PER_PX_96 // native px → vp.scale = 1
   const rendered = buildRenderSlide(slide, opened.deck.size, { fitWidthPx: baseWidthPx, metrics })
@@ -496,7 +553,9 @@ async function growTextBoxesToContent(
   return changed ? savePptx(opened) : null
 }
 
-function toEngineParagraphs(paragraphs: SpecParagraph[]): Paragraph[] {
+// Spec paragraphs to engine paragraphs. Runs without an explicit font inherit
+// defaultFont (the template font override); an explicit run font always wins.
+export function toEngineParagraphs(paragraphs: SpecParagraph[], defaultFont?: string): Paragraph[] {
   return paragraphs.map((p) => {
     const runs: TextRun[] = p.runs.map((r) => ({
       text: r.text,
@@ -504,34 +563,83 @@ function toEngineParagraphs(paragraphs: SpecParagraph[]): Paragraph[] {
       ...(r.bold ? { bold: true } : {}),
       ...(r.italic ? { italic: true } : {}),
       ...(r.color ? { color: r.color } : {}),
-      ...(r.font ? { fontFamily: r.font, latinFont: r.font, eaFont: r.font } : {}),
+      ...(r.font
+        ? { fontFamily: r.font, latinFont: r.font, eaFont: r.font, csFont: r.font }
+        : defaultFont
+          ? {
+              fontFamily: defaultFont,
+              latinFont: defaultFont,
+              eaFont: defaultFont,
+              csFont: defaultFont,
+            }
+          : {}),
     }))
+    const bulleted = p.bullet === true || typeof p.bullet === 'string'
     return {
       runs,
+      ...(p.level !== undefined ? { level: p.level } : {}),
       ...(p.align ? { align: p.align } : {}),
       ...(p.lineSpacingPct ? { lineHeight: p.lineSpacingPct } : {}),
       ...(p.spaceBeforePt !== undefined ? { spaceBefore: p.spaceBeforePt } : {}),
       ...(p.spaceAfterPt !== undefined ? { spaceAfter: p.spaceAfterPt } : {}),
-      ...(p.bullet
-        ? { bullet: { type: 'char' as const, char: '•' }, marL: 228600, indent: -228600 }
+      ...(bulleted || p.level !== undefined
+        ? {
+            marL: ((p.level ?? 0) + 1) * SPEC_INDENT_EMU,
+            indent: -SPEC_INDENT_EMU,
+            ...(bulleted
+              ? {
+                  bullet: {
+                    type: 'char' as const,
+                    char: typeof p.bullet === 'string' ? p.bullet : '•',
+                    ...(p.bulletColor ? { color: p.bulletColor } : {}),
+                    ...(p.bulletSizePct !== undefined ? { sizePct: p.bulletSizePct } : {}),
+                    ...(p.bulletFont ? { font: p.bulletFont } : {}),
+                  },
+                }
+              : {}),
+          }
         : {}),
     }
   })
 }
 
-/**
- * Builds a one-slide PPTX from the spec. Elements are added in array order
- * (spec order = z-order); a background color becomes a full-bleed rect that
- * the landing pipeline's promoteSlideBackground lifts to the slide background.
- */
-export async function buildPagePptx(
-  spec: PageSpec,
-  deps: BuildPageDeps,
-  canvasW = SPEC_CANVAS_W,
-): Promise<{ bytes: Uint8Array; imageFailures: string[]; imageWarnings: string[] }> {
-  const opened = await openPptx(await createBlankPptx())
-  const slide = opened.deck.slides[0]!
-  const scale = opened.deck.size.cx / canvasW
+// Options for addSpecElements: where on the slide a spec px lands.
+export interface AddSpecElementsOptions {
+  /** EMU per spec px (deck width / canvas width) */
+  scale: number
+  deps: BuildPageDeps
+  /** Default typeface for runs without an explicit font */
+  font?: string
+}
+
+// The picture box shrunk to the picture aspect and centered in the given box
+// (contain fit: the whole picture stays visible, no crop), in spec px.
+function containBox(
+  el: SpecImage,
+  dims: { width: number; height: number },
+): { x: number; y: number; w: number; h: number } {
+  if (el.w <= 0 || el.h <= 0 || dims.width <= 0 || dims.height <= 0) {
+    return { x: el.x, y: el.y, w: el.w, h: el.h }
+  }
+  const imgAspect = dims.width / dims.height
+  const boxAspect = el.w / el.h
+  if (imgAspect > boxAspect) {
+    const h = el.w / imgAspect
+    return { x: el.x, y: el.y + (el.h - h) / 2, w: el.w, h }
+  }
+  const w = el.h * imgAspect
+  return { x: el.x + (el.w - w) / 2, y: el.y, w, h: el.h }
+}
+
+// The element loop of buildPagePptx, shared with the template builder: elements
+// are added in array order (spec order = z-order) at scale EMU per spec px.
+export async function addSpecElements(
+  opened: OpenedPptx,
+  slide: Slide,
+  elements: SpecElement[],
+  opts: AddSpecElementsOptions,
+): Promise<{ imageFailures: string[]; imageWarnings: string[] }> {
+  const { scale, deps } = opts
   const toEmu = (px: number) => Math.round(px * scale)
   const anchorOf = (
     v: 'top' | 'middle' | 'bottom' | undefined,
@@ -545,46 +653,39 @@ export async function buildPagePptx(
   const imageWarnings: string[] = []
   const fetched = new Map<string, { bytes: Uint8Array; ext: string } | null>()
   await Promise.all(
-    [
-      ...new Set(spec.elements.filter((e) => e.type === 'image').map((e) => (e as SpecImage).url)),
-    ].map(async (url) => {
-      try {
-        fetched.set(url, await deps.fetchImage(url))
-      } catch {
-        fetched.set(url, null)
-      }
-    }),
+    [...new Set(elements.filter((e) => e.type === 'image').map((e) => (e as SpecImage).url))].map(
+      async (url) => {
+        try {
+          fetched.set(url, await deps.fetchImage(url))
+        } catch {
+          fetched.set(url, null)
+        }
+      },
+    ),
   )
 
-  if (spec.background) {
-    addElement(slide, {
-      kind: 'rect',
-      offset: { x: 0, y: 0, cx: opened.deck.size.cx, cy: opened.deck.size.cy },
-      fillColor: spec.background,
-    })
-  }
-
-  for (const el of spec.elements) {
-    const offset = {
-      x: toEmu(el.x),
-      y: toEmu(el.y),
-      cx: Math.max(1, toEmu(el.w)),
-      cy: Math.max(1, toEmu(el.h)),
-    }
+  for (const el of elements) {
     if (el.type === 'image') {
       const img = fetched.get(el.url)
       if (!img) {
         imageFailures.push(el.url)
         continue
       }
+      const dims = deps.imageDims?.(img.bytes) ?? null
+      const box = el.fit === 'contain' && dims ? containBox(el, dims) : el
+      const offset = {
+        x: toEmu(box.x),
+        y: toEmu(box.y),
+        cx: Math.max(1, toEmu(box.w)),
+        cy: Math.max(1, toEmu(box.h)),
+      }
       const pic = addPicture(opened, slide, { bytes: img.bytes, ext: img.ext, offset })
       if (!pic) {
         imageFailures.push(el.url)
         continue
       }
-      const dims = deps.imageDims?.(img.bytes) ?? null
-      if (dims) {
-        const crop = coverCropFractions(dims.width, dims.height, el.w, el.h)
+      if (dims && el.fit !== 'contain') {
+        const crop = coverCropFractions(dims.width, dims.height, box.w, box.h)
         if (crop) {
           editPictureSrcRect(slide, pic.id, crop)
           const warning = heavyCropWarning(el, dims, crop)
@@ -593,11 +694,17 @@ export async function buildPagePptx(
       }
       continue
     }
+    const offset = {
+      x: toEmu(el.x),
+      y: toEmu(el.y),
+      cx: Math.max(1, toEmu(el.w)),
+      cy: Math.max(1, toEmu(el.h)),
+    }
     if (el.type === 'text') {
       addElement(slide, {
         kind: 'textbox',
         offset,
-        paragraphs: toEngineParagraphs(el.paragraphs),
+        paragraphs: toEngineParagraphs(el.paragraphs, opts.font),
         bodyPr: { wrap: 'square', anchor: anchorOf(el.valign, 't'), insetsEmu: zeroInsets },
       })
       continue
@@ -616,13 +723,45 @@ export async function buildPagePptx(
         : {}),
       ...(el.flipH ? { flipH: true } : {}),
       ...(el.flipV ? { flipV: true } : {}),
-      ...(el.paragraphs ? { paragraphs: toEngineParagraphs(el.paragraphs) } : {}),
+      ...(el.radius != null ? { adjustments: { adj: roundRectAdj(el.radius, el.w, el.h) } } : {}),
+      ...(el.paragraphs ? { paragraphs: toEngineParagraphs(el.paragraphs, opts.font) } : {}),
       ...(el.paragraphs
         ? { bodyPr: { wrap: 'square', anchor: anchorOf(el.valign, 'ctr'), insetsEmu: zeroInsets } }
         : {}),
     })
   }
+  return { imageFailures, imageWarnings }
+}
 
+/** roundRect adj (1/100000 of the short side, capped at 50000) for a corner radius in px. */
+export function roundRectAdj(radiusPx: number, w: number, h: number): number {
+  const short = Math.min(w, h)
+  if (!(short > 0)) return 0
+  return Math.round(Math.min(50000, Math.max(0, (radiusPx / short) * 100000)))
+}
+
+// Builds a one-slide PPTX from the spec. A background color becomes a
+// full-bleed rect that the landing pipeline's promoteSlideBackground lifts to
+// the slide background.
+export async function buildPagePptx(
+  spec: PageSpec,
+  deps: BuildPageDeps,
+  canvasW = SPEC_CANVAS_W,
+): Promise<{ bytes: Uint8Array; imageFailures: string[]; imageWarnings: string[] }> {
+  const opened = await openPptx(await createBlankPptx())
+  const slide = opened.deck.slides[0]!
+  const scale = opened.deck.size.cx / canvasW
+  if (spec.background) {
+    addElement(slide, {
+      kind: 'rect',
+      offset: { x: 0, y: 0, cx: opened.deck.size.cx, cy: opened.deck.size.cy },
+      fillColor: spec.background,
+    })
+  }
+  const { imageFailures, imageWarnings } = await addSpecElements(opened, slide, spec.elements, {
+    scale,
+    deps,
+  })
   promoteSlideBackground(slide, opened.deck.size)
   let bytes = await savePptx(opened)
   if (deps.fontMetrics) bytes = (await growTextBoxesToContent(bytes, deps.fontMetrics)) ?? bytes

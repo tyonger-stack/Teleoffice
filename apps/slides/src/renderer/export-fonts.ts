@@ -35,6 +35,21 @@ function faceRule(family: string, weight: string, style: string, b64: string): s
 
 const bundledCache = new Map<string, Promise<string | null>>()
 
+/**
+ * A built sheet's url() is relative to the sheet (vite emits `./Font-hash.ttf`
+ * next to assets/index.css); fetch() would resolve it against the page instead
+ * and miss, leaving the print window on system fallbacks.
+ */
+export function resolveSheetUrl(src: string, sheetHref: string | null | undefined): string {
+  const base = sheetHref || (typeof document !== 'undefined' ? document.baseURI : undefined)
+  if (!base) return src
+  try {
+    return new URL(src, base).href
+  } catch {
+    return src
+  }
+}
+
 /** Bundled @font-face rules (styles.css) whose family the page uses, with their bytes inlined. */
 async function bundledFaces(names: Set<string>): Promise<string[]> {
   const jobs: Array<Promise<string | null>> = []
@@ -54,8 +69,9 @@ async function bundledFaces(names: Set<string>): Promise<string[]> {
         .trim()
         .replace(/^['"]|['"]$/g, '')
       if (!names.has(family.normalize('NFKC').toLowerCase())) continue
-      const url = /url\(\s*['"]?([^'")]+)['"]?\s*\)/.exec(style.getPropertyValue('src'))?.[1]
-      if (!url) continue
+      const src = /url\(\s*['"]?([^'")]+)['"]?\s*\)/.exec(style.getPropertyValue('src'))?.[1]
+      if (!src) continue
+      const url = resolveSheetUrl(src, sheet.href)
       const weight = style.getPropertyValue('font-weight') || 'normal'
       const fontStyle = style.getPropertyValue('font-style') || 'normal'
       let data = bundledCache.get(url)

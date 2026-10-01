@@ -1,4 +1,5 @@
 import type {
+  GlyphRun,
   GroupRenderNode,
   PictureRenderNode,
   RenderNode,
@@ -44,6 +45,36 @@ function textPreview(node: ShapeRenderNode): string {
   return t.length > PREVIEW_MAX ? `${t.slice(0, PREVIEW_MAX)}…` : t
 }
 
+// Closing punctuation that word-wrapped CJK text may hang past the right edge
+// (PowerPoint hanging punctuation / line-end kinsoku), so it is not overflow.
+const HANGING_PUNCT_RE =
+  /[\s,.;:!?\u3001\u3002\uFF0C\uFF0E\uFF1A\uFF1B\uFF01\uFF1F\uFF09\u300D\u300F\u3011\u300B\u3009\u201D\u2019]+$/u
+
+/**
+ * Right edge of a laid-out line's visible content. With wrapping on, the line
+ * breaker lets trailing spaces and line-end closing punctuation hang past the
+ * box (as PowerPoint does), so those are not counted; nowrap lines keep the
+ * plain right edge of every run.
+ */
+function lineInkRight(runs: readonly GlyphRun[], wrap: boolean): number {
+  let right = -Infinity
+  for (const r of runs) right = Math.max(right, r.x + r.widthPx)
+  if (!wrap) return right
+  let i = runs.length - 1
+  while (i >= 0 && !runs[i]!.text.trim()) i--
+  if (i < 0) return -Infinity
+  const last = runs[i]!
+  let lastRight = last.x + last.widthPx
+  const chars = [...last.text]
+  const kept = [...last.text.replace(HANGING_PUNCT_RE, '')]
+  if (kept.length < chars.length && chars.length > 0) {
+    lastRight = last.x + (last.widthPx * kept.length) / chars.length
+  }
+  let visible = lastRight
+  for (let j = 0; j < i; j++) visible = Math.max(visible, runs[j]!.x + runs[j]!.widthPx)
+  return visible
+}
+
 /** Collect the top-level nodes that take part in the audit (skip master/layout decoration; a group counts as one box). */
 function collectEntries(nodes: RenderNode[]): AuditEntry[] {
   const out: AuditEntry[] = []
@@ -74,12 +105,9 @@ function collectEntries(nodes: RenderNode[]): AuditEntry[] {
         if (sn.text.vert) {
           overflowXPx = 0
         } else {
+          const wrap = sn.text.wrap
           const widest = sn.text.lines.reduce(
-            (acc, ln) =>
-              Math.max(
-                acc,
-                ln.runs.reduce((m, r) => Math.max(m, r.x + r.widthPx), -Infinity),
-              ),
+            (acc, ln) => Math.max(acc, lineInkRight(ln.runs, wrap)),
             -Infinity,
           )
           overflowXPx = Math.round(Number.isFinite(widest) ? widest - innerW : 0)

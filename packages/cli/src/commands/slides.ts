@@ -16,13 +16,24 @@ import { outputDirectory, parseScale, renderToPngs } from '../formats/render'
 import {
   auditDeckBytes,
   checkPageSpec,
+  checkTemplatePageSpec,
+  deckSpecNamesTemplate,
   deckAuditDetail,
+  templateOutlineFindings,
   findStageFiles,
   pageIndexOf,
   replaceSlideFromSpec,
   stageContext,
+  templateBytesAndInfo,
+  type StageContext,
 } from '../formats/slide-spec'
-import { parseOutline } from '@genoffice/pipelines/slides'
+import {
+  offPaletteColors,
+  parseOutline,
+  type OutlineIssue,
+  type TemplateInfo,
+} from '@genoffice/pipelines/slides'
+import { inspectTemplateFile } from './template'
 import { readOpsInput } from '../ops-input'
 import type { TxnResult } from '@genoffice/pptx-ops'
 import type { CommandContext, CommandDef } from '../registry'
@@ -37,7 +48,7 @@ export const slidesCommand: CommandDef = {
   summary:
     'Read, edit, audit or render a .pptx with the ops and layout audit the in-app AI uses; check an outline or page spec; rebuild one slide from its spec.',
   usage:
-    'slides <read|apply|audit|render|replace> <file.pptx> [options] | slides check <outline.json|page.json>',
+    'slides <read|apply|audit|render|replace|layouts> <file.pptx> [options] | slides check <outline.json|page.json> [--template <file|name>]',
   options: [
     {
       name: 'slide',
@@ -71,6 +82,12 @@ export const slidesCommand: CommandDef = {
       value: 'file',
       description:
         'check <page.json> / replace: the outline the page is checked against (default: outline.json beside the page file or one folder up)',
+    },
+    {
+      name: 'template',
+      value: 'file|name',
+      description:
+        'check: validate the outline or page against a corporate template (a .pptx path or a registered name); pages build on the template layouts',
     },
     { name: 'dry-run', description: 'apply: validate and print the plan without writing' },
     ...BATCH_OPTIONS,
@@ -112,14 +129,16 @@ export const slidesCommand: CommandDef = {
         return check(file, args, ctx)
       case 'replace':
         return replace(file, args, ctx)
+      case 'layouts':
+        return layouts(file, ctx)
       default:
         throw new CliError(
           EXIT.usage,
-          'expected "slides read|apply|audit|render|replace <file.pptx>" or "slides check <outline.json|page.json>"',
+          'expected "slides read|apply|audit|render|replace|layouts <file.pptx>" or "slides check <outline.json|page.json>"',
           undefined,
           {
             reason: verb === undefined ? 'missing_argument' : 'invalid_argument',
-            suggestion: 'run `genoffice help slides`',
+            suggestion: 'run genoffice help slides',
           },
         )
     }
@@ -308,7 +327,12 @@ async function check(
   const text = readFileSync(path, 'utf-8')
   const dir = dirname(path)
   if (looksLikeOutline(text)) {
-    const r = parseOutline(text)
+    const templateRef = flagString(args, 'template') ?? outlineTemplateField(text)
+    const tmpl = templateRef ? await templateBytesAndInfo(templateRef, ctx) : null
+    const r = parseOutline(
+      text,
+      tmpl ? { templateLayouts: templateCheckLayouts(tmpl.info, tmpl.resolved.master) } : {},
+    )
     if (!r.ok) {
       throw new CliError(EXIT.usage, `${basename(path)}: ${r.error}`, undefined, {
         reason: 'invalid_argument',
@@ -320,6 +344,16 @@ async function check(
       kind: 'outline',
       pages: r.outline.pages.length,
       issues: r.issues,
+      ...(tmpl
+        ? {
+            template: {
+              ...(tmpl.resolved.name ? { name: tmpl.resolved.name } : {}),
+              path: tmpl.resolved.path,
+              master: tmpl.resolved.master ?? tmpl.info.defaultMaster,
+              slideSize: tmpl.info.slideSize.px,
+            },
+          }
+        : {}),
       notes: style
         ? []
         : ['no style.md beside the outline: write the style sheet before the pages'],
@@ -340,6 +374,15 @@ async function check(
   const explicit = flagString(args, 'outline')
   const stage = stageContext(dir, ctx, explicit ? resolveInput(explicit, ctx) : undefined)
   const page = pageFlagValue(args) ?? pageIndexOf(path)
+  const templateFlag = flagString(args, 'template')
+  const outlineTemplate = stage.outline?.outline.template
+  if (
+    templateFlag !== undefined ||
+    deckSpecNamesTemplate(text) ||
+    (outlineTemplate !== undefined && outlineTemplate !== '')
+  ) {
+    return checkTemplatePage(path, text, ctx, stage, page, templateFlag, outlineTemplate)
+  }
   const r = await checkPageSpec(text, path, ctx, { context: stage, page })
   const outline = r.stage?.outline ?? []
   const offPalette = r.stage?.offPalette ?? []
@@ -377,9 +420,134 @@ async function check(
   return {
     summary: count
       ? `${basename(path)}: ${count} finding(s)`
-      : `${basename(path)}: page builds clean`,
+      : basename(path) + ': page builds clean',
     detail,
   }
+}
+
+// The "template" field of an outline, if it names one.
+function outlineTemplateField(text: string): string | undefined {
+  try {
+    const v = JSON.parse(text) as { template?: unknown }
+    return typeof v?.template === 'string' && v.template.trim() ? v.template.trim() : undefined
+  } catch {
+    return undefined
+  }
+}
+
+// Layout names a template check validates against: the preferred master
+// (registry default, else the template own default), deduplicated.
+function templateCheckLayouts(info: TemplateInfo, master?: number): string[] {
+  const mi = master ?? info.defaultMaster
+  const seen = new Set<string>()
+  const names: string[] = []
+  for (const l of info.masters[mi]?.layouts ?? []) {
+    if (!seen.has(l.name)) {
+      seen.add(l.name)
+      names.push(l.name)
+    }
+  }
+  if (names.length) return names
+  for (const m of info.masters) {
+    for (const l of m.layouts) {
+      if (!seen.has(l.name)) {
+        seen.add(l.name)
+        names.push(l.name)
+      }
+    }
+  }
+  return names
+}
+
+// One template page spec built on its template and audited, then compared
+// against its outline entry (echo-only: title, type, layout).
+async function checkTemplatePage(
+  path: string,
+  text: string,
+  ctx: CommandContext,
+  stage: StageContext,
+  page: number,
+  templateFlag: string | undefined,
+  outlineTemplate: string | undefined,
+): Promise<CommandResult> {
+  const r = await checkTemplatePageSpec(text, path, ctx, {
+    ...(templateFlag !== undefined ? { template: templateFlag } : {}),
+    ...(outlineTemplate ? { outlineTemplate } : {}),
+  })
+  const entry = stage.outline?.outline.pages[page]
+  const findings: OutlineIssue[] = stage.outline
+    ? entry
+      ? templateOutlineFindings(r.raw, r.page, entry, page)
+      : [
+          {
+            page,
+            level: 'error' as const,
+            message:
+              'no outline entry for page ' +
+              page +
+              ' (the outline has ' +
+              stage.outline.outline.pages.length +
+              ' pages)',
+          },
+        ]
+    : []
+  const offPalette = stage.style
+    ? offPaletteColors({ elements: r.page.elements }, stage.style.palette)
+    : []
+  const count =
+    r.warnings.length +
+    r.imageFailures.length +
+    r.audit.length +
+    findings.length +
+    offPalette.length
+  const detail = {
+    kind: 'page',
+    page,
+    template: r.template,
+    warnings: r.warnings,
+    imageFailures: r.imageFailures,
+    audit: r.audit,
+    outline: stage.outline ? { file: stage.outline.file, findings } : null,
+    style: stage.style
+      ? {
+          file: stage.style.file,
+          offPalette,
+          ...(offPalette.length
+            ? {
+                note: 'colors the style sheet does not name; add them to style.md or use the palette',
+              }
+            : {}),
+        }
+      : null,
+    notes: stage.notes,
+    metrics: 'heuristic glyph widths; overflow figures are approximate',
+  }
+  const errors = findings.filter((o) => o.level === 'error')
+  if (errors.length) {
+    throw new CliError(
+      EXIT.usage,
+      basename(path) +
+        ': ' +
+        errors.length +
+        ' error(s) against ' +
+        basename(stage.outline!.file) +
+        ' pages[' +
+        page +
+        ']',
+      detail,
+    )
+  }
+  return {
+    summary: count
+      ? basename(path) + ': ' + count + ' finding(s)'
+      : basename(path) + ': page builds clean',
+    detail,
+  }
+}
+
+// Same output as template inspect: the layouts a template build can use.
+async function layouts(file: string | undefined, ctx: CommandContext): Promise<CommandResult> {
+  return inspectTemplateFile(file, ctx)
 }
 
 function pageFlagValue(args: Parameters<CommandDef['run']>[0]): number | undefined {

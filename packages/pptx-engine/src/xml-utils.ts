@@ -100,3 +100,22 @@ export function creationIdExtXml(): string {
 export function creationIdXml(): string {
   return `<a:extLst>${creationIdExtXml()}</a:extLst>`
 }
+
+/**
+ * <a:buSzPct val> → whole percent. The schema value is thousandths of a
+ * percent (80000 = 80%) or, in strict files, a "80%" string. Some generators
+ * (python-pptx based tools among them) write the whole percent ("80"), which
+ * read literally would shrink the bullet to 0.08% and make it vanish; values
+ * below the schema minimum (25000) are therefore taken as whole percents.
+ * The result is clamped to the schema range 25..400. Null when unparseable.
+ */
+export function parseBulletSizePct(raw: unknown): number | null {
+  if (raw == null) return null
+  const text = String(raw).trim()
+  if (!text) return null
+  const isPercent = text.endsWith('%')
+  const v = parseFloat(isPercent ? text.slice(0, -1) : text)
+  if (!Number.isFinite(v) || v <= 0) return null
+  const pct = isPercent || v < 1000 ? v : v / 1000
+  return Math.min(400, Math.max(25, pct))
+}

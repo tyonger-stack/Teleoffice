@@ -3,9 +3,12 @@ import { basename, extname, join, resolve } from 'node:path'
 import {
   auditDeck,
   buildDeckPptx,
+  buildTemplateDeck,
   checkPageAgainstOutline,
+  inspectTemplate,
   offPaletteColors,
   parseDeckSpec,
+  parseTemplateDeckSpec,
   parseOutline,
   stylePalette,
   type BuildPageDeps,
@@ -13,8 +16,12 @@ import {
   type DeckOutline,
   type DeckPageIssue,
   type OutlineIssue,
+  type OutlinePage,
   type PageSpec,
+  type TemplateLayoutUsed,
+  type TemplatePageSpec,
 } from '@genoffice/pipelines/slides'
+import { listTemplates, resolveTemplate } from '@genoffice/pipelines/slides/templates'
 import {
   deleteSlide,
   mergeSlideFromPptx,
@@ -24,7 +31,7 @@ import {
 } from '@genoffice/pptx-engine'
 import { HeuristicMetrics } from '@genoffice/pptx-render'
 import { extract } from '@genoffice/pdf2docx'
-import { assertAllowed, type PathContext } from '../fs'
+import { assertAllowed, readInput, resolveInput, type PathContext } from '../fs'
 import { CliError, EXIT, type ErrorHints } from '../result'
 
 const INVALID: ErrorHints = { reason: 'invalid_argument' }
@@ -415,7 +422,10 @@ export function deckAuditDetail(pages: DeckAuditPage[]) {
     code: f.code,
     level: f.level,
     path: `${page.id}/${f.el}`,
+    // slide: 0-based position (what --slide takes); page: 1-based (the PNG
+    // page number). The s_<n> in path is a durable id, not a position.
     slide: page.slide,
+    page: page.slide + 1,
     el: f.el,
     ...(f.els ? { els: f.els } : {}),
     message: f.message,
@@ -433,7 +443,7 @@ export function deckAuditDetail(pages: DeckAuditPage[]) {
   return {
     counts,
     issues,
-    slides: pages.map((p) => ({ slide: p.slide, id: p.id, issues: p.issues })),
+    slides: pages.map((p) => ({ slide: p.slide, page: p.slide + 1, id: p.id, issues: p.issues })),
   }
 }
 
@@ -467,9 +477,342 @@ export async function rasterizePdf(
     for (let i = 0; i < count; i++) {
       if (only !== undefined && i !== only) continue
       const r = extract.renderPageByIndexPng(m, doc, i, scale)
-      if (!r) throw new CliError(EXIT.conversion, `could not render page ${i + 1}`)
+      if (!r) throw new CliError(EXIT.conversion, 'could not render page ' + (i + 1))
       out.push({ index: i, png: r.data, width: r.pixelWidth, height: r.pixelHeight })
     }
     return out
   })
+}
+
+// ---- Template mode ----
+
+/** A template reference resolved to a file: registry name or .pptx/.potx path. */
+export interface TemplateSource {
+  name?: string
+  path: string
+  master?: number
+  font?: string
+}
+
+// An existing deck path (relative to the working directory) wins over a
+// registered name; otherwise the name resolves through the registry.
+export function resolveTemplateSource(ref: string, ctx: PathContext): TemplateSource {
+  if (ref.includes('/') || ref.includes('\\') || /\.potx?$/i.test(ref)) {
+    const path = resolveInput(ref, ctx)
+    const known = listTemplates(ctx.env).find((t) => t.path === path)
+    return {
+      ...(known?.name ? { name: known.name } : {}),
+      path,
+      ...(known?.master !== undefined ? { master: known.master } : {}),
+      ...(known?.font !== undefined ? { font: known.font } : {}),
+    }
+  }
+  try {
+    return resolveTemplate(ref, { cwd: ctx.cwd, env: ctx.env })
+  } catch (err) {
+    throw new CliError(
+      EXIT.usage,
+      err instanceof Error ? err.message : String(err),
+      undefined,
+      INVALID,
+    )
+  }
+}
+
+export interface TemplateDeckDetail {
+  name?: string
+  path: string
+  master: number
+  slideSize: { w: number; h: number }
+  layoutsUsed: TemplateLayoutUsed[]
+}
+
+function deckTemplateField(text: string): unknown {
+  try {
+    const v: unknown = JSON.parse(text)
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      return (v as Record<string, unknown>).template
+    }
+    return undefined
+  } catch {
+    return undefined
+  }
+}
+
+// True when a deck spec file names its own template (template mode without the flag).
+export function deckSpecNamesTemplate(text: string): boolean {
+  return typeof deckTemplateField(text) === 'string'
+}
+
+export interface TemplateBuildRequest {
+  /** --template flag (wins over the spec and outline fields) */
+  template?: string
+  /** --font flag (wins over the spec font and the registry default) */
+  font?: string
+  keepSlides?: boolean
+  /** outline "template" field (weakest fallback) */
+  outlineTemplate?: string
+}
+
+function templateRefOf(text: string, req: TemplateBuildRequest): string {
+  const fromSpec = deckTemplateField(text)
+  const ref =
+    req.template ?? (typeof fromSpec === 'string' ? fromSpec : undefined) ?? req.outlineTemplate
+  if (!ref) {
+    throw new CliError(
+      EXIT.usage,
+      'template mode needs --template <file|name> (or "template" in the spec or outline)',
+      undefined,
+      INVALID,
+    )
+  }
+  return ref
+}
+
+export async function templateBytesAndInfo(
+  ref: string,
+  ctx: PathContext,
+): Promise<{
+  resolved: TemplateSource
+  bytes: Uint8Array
+  info: Awaited<ReturnType<typeof inspectTemplate>>
+}> {
+  const resolved = resolveTemplateSource(ref, ctx)
+  const bytes = new Uint8Array(readInput(resolved.path))
+  return { resolved, bytes, info: await inspectTemplate(bytes) }
+}
+
+// Deck spec JSON in template mode: every page fills the named template layout.
+export async function buildDeckFromTemplateText(
+  text: string,
+  source: string,
+  ctx: PathContext,
+  specDir: string | undefined,
+  req: TemplateBuildRequest,
+): Promise<BuiltDeck & { template: TemplateDeckDetail }> {
+  const { resolved, bytes, info } = await templateBytesAndInfo(templateRefOf(text, req), ctx)
+  const parsed = parseTemplateDeckSpec(text, info, { localImages: true, master: resolved.master })
+  if (!parsed.ok) throw new CliError(EXIT.usage, source + ': ' + parsed.error, undefined, INVALID)
+  if (req.keepSlides) parsed.spec.keepSlides = true
+  const font = req.font ?? parsed.spec.font ?? resolved.font
+  const built = await buildTemplateDeck(bytes, parsed.spec, {
+    ...specDeps(ctx, specDir),
+    ...(font ? { font } : {}),
+  })
+  return {
+    bytes: built.bytes,
+    pages: parsed.spec.pages.length,
+    issues: withImageWarnings(parsed.issues, built.imageWarnings),
+    imageFailures: built.imageFailures,
+    template: {
+      ...(resolved.name ? { name: resolved.name } : {}),
+      path: resolved.path,
+      master: parsed.spec.master,
+      slideSize: info.slideSize.px,
+      layoutsUsed: built.layoutsUsed,
+    },
+  }
+}
+
+export interface BuiltTemplateDeckFromDir extends BuiltDeck {
+  files: string[]
+  template: TemplateDeckDetail
+  outlineFindings: (OutlineIssue & { file: string })[]
+}
+
+// A directory of single-page template spec files: same page-file listing and
+// outline count checks as the plain flow, echo-only outline comparison.
+export async function buildDeckFromTemplateDir(
+  dir: string,
+  ctx: PathContext,
+  stage: StageContext,
+  req: TemplateBuildRequest,
+): Promise<BuiltTemplateDeckFromDir> {
+  const files = listPageFiles(dir)
+  if (files.length === 0)
+    throw new CliError(EXIT.usage, dir + ': no page files (*.json)', undefined, INVALID)
+  const outline = stage.outline?.outline
+  if (outline && outline.pages.length !== files.length) {
+    throw new CliError(
+      EXIT.usage,
+      dir +
+        ': ' +
+        files.length +
+        ' page file(s) for ' +
+        outline.pages.length +
+        ' outline page(s); write every page before building',
+      { files: files.map((f) => basename(f)), outline_pages: outline.pages.map((p) => p.title) },
+    )
+  }
+  const ref = req.template ?? outline?.template ?? req.outlineTemplate
+  if (!ref) {
+    throw new CliError(
+      EXIT.usage,
+      dir + ': template mode needs --template <file|name> (or "template" in the outline)',
+      undefined,
+      INVALID,
+    )
+  }
+  const { resolved, bytes, info } = await templateBytesAndInfo(ref, ctx)
+  const pages: unknown[] = []
+  for (const file of files) {
+    try {
+      pages.push(JSON.parse(readFileSync(file, 'utf-8')))
+    } catch (err) {
+      throw new CliError(
+        EXIT.usage,
+        file + ': invalid JSON (' + (err as Error).message + ')',
+        undefined,
+        { reason: 'invalid_json' },
+      )
+    }
+  }
+  const parsed = parseTemplateDeckSpec(JSON.stringify({ pages }), info, {
+    localImages: true,
+    master: resolved.master,
+  })
+  if (!parsed.ok) throw new CliError(EXIT.usage, dir + ': ' + parsed.error, undefined, INVALID)
+  if (req.keepSlides) parsed.spec.keepSlides = true
+  const named = (i: number): { file: string } => ({ file: basename(files[i]!) })
+  const outlineFindings: BuiltTemplateDeckFromDir['outlineFindings'] = []
+  if (outline) {
+    for (const page of parsed.spec.pages) {
+      const entry = outline.pages[page.page]
+      if (!entry) {
+        outlineFindings.push({
+          page: page.page,
+          level: 'error',
+          message: 'no outline entry for page ' + page.page,
+          ...named(page.page),
+        })
+        continue
+      }
+      outlineFindings.push(
+        ...templateOutlineFindings(pages[page.page], page, entry, page.page).map((o) => ({
+          ...o,
+          ...named(page.page),
+        })),
+      )
+    }
+    const bad = new Set(outlineFindings.filter((o) => o.level === 'error').map((o) => o.file))
+    if (bad.size) {
+      throw new CliError(
+        EXIT.usage,
+        dir +
+          ': ' +
+          bad.size +
+          ' page(s) disagree with ' +
+          basename(stage.outline!.file) +
+          '; fix the page files (or the outline) before building',
+        { outline: stage.outline!.file, findings: outlineFindings },
+      )
+    }
+  }
+  const font = req.font ?? resolved.font
+  const built = await buildTemplateDeck(bytes, parsed.spec, {
+    ...specDeps(ctx, dir),
+    ...(font ? { font } : {}),
+  })
+  return {
+    bytes: built.bytes,
+    pages: parsed.spec.pages.length,
+    issues: withImageWarnings(parsed.issues, built.imageWarnings).map((x) => ({
+      ...x,
+      ...named(x.page),
+    })),
+    imageFailures: built.imageFailures.map((f) => ({ ...f, ...named(f.page) })),
+    files,
+    template: {
+      ...(resolved.name ? { name: resolved.name } : {}),
+      path: resolved.path,
+      master: parsed.spec.master,
+      slideSize: info.slideSize.px,
+      layoutsUsed: built.layoutsUsed,
+    },
+    outlineFindings,
+  }
+}
+
+// Echo-only outline comparison for template pages: title, type and layout must
+// match the entry word for word (layout = the template layout name).
+export function templateOutlineFindings(
+  raw: unknown,
+  page: TemplatePageSpec,
+  entry: OutlinePage,
+  index: number,
+): OutlineIssue[] {
+  void page
+  const issues: OutlineIssue[] = []
+  const root = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
+  for (const field of ['title', 'type', 'layout'] as const) {
+    const declared = typeof root[field] === 'string' ? (root[field] as string).trim() : ''
+    if (declared && declared !== entry[field]) {
+      issues.push({
+        page: index,
+        level: 'error',
+        message:
+          'the page file\u2019s ' +
+          field +
+          ' "' +
+          declared +
+          '" is not outline pages[' +
+          index +
+          ']\u2019s "' +
+          entry[field] +
+          '"',
+      })
+    }
+  }
+  return issues
+}
+
+export interface TemplatePageCheck {
+  warnings: string[]
+  imageFailures: string[]
+  audit: string[]
+  page: TemplatePageSpec
+  raw: unknown
+  template: Omit<TemplateDeckDetail, 'layoutsUsed'>
+}
+
+// One template page spec built on its template and audited, so a page is fixed
+// before the next one is written. Canvas = the template own slide size.
+export async function checkTemplatePageSpec(
+  text: string,
+  source: string,
+  ctx: PathContext,
+  req: TemplateBuildRequest,
+): Promise<TemplatePageCheck> {
+  const { resolved, bytes, info } = await templateBytesAndInfo(templateRefOf(text, req), ctx)
+  const parsed = parseTemplateDeckSpec(text, info, { localImages: true, master: resolved.master })
+  if (!parsed.ok) throw new CliError(EXIT.usage, source + ': ' + parsed.error, undefined, INVALID)
+  if (parsed.spec.pages.length !== 1) {
+    throw new CliError(
+      EXIT.usage,
+      source + ': a page file holds exactly one page object, not ' + parsed.spec.pages.length,
+    )
+  }
+  if (req.keepSlides) parsed.spec.keepSlides = true
+  const font = req.font ?? parsed.spec.font ?? resolved.font
+  const built = await buildTemplateDeck(bytes, parsed.spec, {
+    ...specDeps(ctx, dirnameOf(source)),
+    ...(font ? { font } : {}),
+  })
+  const audit = await auditDeckBytes(built.bytes)
+  return {
+    warnings: [
+      ...parsed.issues.flatMap((x) => x.warnings ?? []),
+      ...built.imageWarnings.map((w) => w.message),
+    ],
+    imageFailures: built.imageFailures.map((f) => f.url),
+    audit: audit[0]?.issues ?? [],
+    page: parsed.spec.pages[0]!,
+    raw: JSON.parse(text) as unknown,
+    template: {
+      ...(resolved.name ? { name: resolved.name } : {}),
+      path: resolved.path,
+      master: parsed.spec.master,
+      slideSize: info.slideSize.px,
+    },
+  }
 }

@@ -1,7 +1,7 @@
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('../src/gsk', () => ({
   gskGenerateImage: vi.fn(),
@@ -27,11 +27,22 @@ function dataUrl(bytes: number, mime = 'image/png'): string {
   return `data:${mime};base64,${'A'.repeat(Math.ceil((bytes * 4) / 3))}`
 }
 
+// Temp dirs made by these tests, removed once the file is done.
+const ownedDirs: string[] = []
+function ownedDir(prefix: string): string {
+  const dir = mkdtempSync(join(tmpdir(), prefix))
+  ownedDirs.push(dir)
+  return dir
+}
+afterAll(() => {
+  for (const dir of ownedDirs.splice(0)) rmSync(dir, { recursive: true, force: true })
+})
+
 /** The production budget is 200 MB per item and in total, which no test should allocate. */
 const TINY = { maxItems: 3, maxItemBytes: 64, maxTotalBytes: 128, concurrency: 2 }
 
 function writeSettings(mediaProvider: string): string {
-  const dir = mkdtempSync(join(tmpdir(), 'genoffice-media-budget-'))
+  const dir = ownedDir('genoffice-media-budget-')
   const path = join(dir, 'ai-settings.json')
   writeFileSync(
     path,
@@ -86,7 +97,7 @@ describe('loadMediaReferences budget', () => {
 
   it('rejects a total that only crosses the cap once the bytes have landed', async () => {
     // local files declare no encoded size, so only the running total can catch this
-    const dir = mkdtempSync(join(tmpdir(), 'genoffice-media-files-'))
+    const dir = ownedDir('genoffice-media-files-')
     const refs = Array.from({ length: 3 }, (_, i) => {
       const path = join(dir, `shot-${i}.png`)
       writeFileSync(path, Buffer.alloc(50, 1))

@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest'
 import { openPptx, type TextElement, type PictureElement } from '@genoffice/pptx-engine'
 import { HeuristicMetrics } from '@genoffice/pptx-render'
-import { parsePageSpec, buildPagePptx, type PageSpec } from '../src/slides/page-spec'
+import { parsePageSpec, buildPagePptx, roundRectAdj, type PageSpec } from '../src/slides/page-spec'
 
 // 1x1 red PNG
 const PNG_1PX = Uint8Array.from(
@@ -474,5 +474,48 @@ describe('buildPagePptx shape flip', () => {
     ) as TextElement | undefined
     expect(el?.transform.flipV).toBe(true)
     expect(el?.anchor.originalXml).toContain('flipV="1"')
+  })
+})
+
+describe('roundRect radius', () => {
+  it('parses radius only for roundRect and converts it to the adj value', async () => {
+    const r = parsePageSpec(
+      JSON.stringify({
+        elements: [
+          {
+            type: 'shape',
+            shape: 'roundRect',
+            x: 40,
+            y: 40,
+            w: 400,
+            h: 200,
+            fill: '#FFFFFF',
+            radius: 10,
+          },
+          {
+            type: 'shape',
+            shape: 'rect',
+            x: 40,
+            y: 300,
+            w: 400,
+            h: 200,
+            fill: '#FFFFFF',
+            radius: 10,
+          },
+        ],
+      }),
+    )
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.spec.elements[0]).toMatchObject({ radius: 10 })
+    expect(r.spec.elements[1]).not.toHaveProperty('radius')
+    expect(roundRectAdj(10, 400, 200)).toBe(5000)
+    expect(roundRectAdj(500, 400, 200)).toBe(50000)
+    const { bytes } = await buildPagePptx(r.spec, { fetchImage: async () => null })
+    const opened = await openPptx(bytes)
+    const card = opened.deck.slides[0]!.elements.find(
+      (e) => (e as TextElement).presetGeometry === 'roundRect',
+    ) as TextElement | undefined
+    expect(card?.anchor.originalXml).toContain('name="adj" fmla="val 5000"')
   })
 })

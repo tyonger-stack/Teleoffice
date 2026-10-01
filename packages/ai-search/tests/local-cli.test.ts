@@ -1037,3 +1037,37 @@ describe('testSearchProvider settings', () => {
     expect(seen[0]?.[regionIdx + 1]).toBe('global')
   })
 })
+
+describe('local CLI subprocess environment', () => {
+  it('passes the settings mmx region to the mmx-env wrapper', () => {
+    const dir = ownedDir('genoffice-mmxenv-')
+    const wrapper = join(dir, 'mmx-env')
+    writeFileSync(wrapper, '')
+    process.env.GENOFFICE_MMX_PATH = wrapper
+    const inv = resolveMmxInvocation({
+      localCli: { ...defaultAiLocalCliSettings(), mmxRegion: 'global' },
+    })
+    expect(inv?.via).toBe('mmx-env')
+    expect(inv?.baseArgs).toEqual([])
+    expect(inv?.env.MINIMAX_REGION).toBe('global')
+    expect(resolveMmxInvocation(null)?.env.MINIMAX_REGION).toBe('cn')
+  })
+
+  it('keeps MiniMax credentials out of agy subprocesses', async () => {
+    process.env.MINIMAX_API_KEY = 'secret-key'
+    process.env.MMX_CONFIG_DIR = '/tmp/mmx-config'
+    const envs: NodeJS.ProcessEnv[] = []
+    setLocalCliRunner(async (_cmd, _args, opts) => {
+      envs.push(opts.env ?? {})
+      return okResult(agyEnvelope('[{"title":"T","url":"https://t.com","snippet":""}]'))
+    })
+    await agySearch('q', 6, null)
+    expect(envs.length).toBeGreaterThan(0)
+    for (const env of envs) {
+      expect(env.MINIMAX_API_KEY).toBeUndefined()
+      expect(env.MMX_CONFIG_DIR).toBeUndefined()
+      expect(env.AGY_CLI_DISABLE_AUTO_UPDATE).toBe('true')
+    }
+    expect(process.env.MINIMAX_API_KEY).toBe('secret-key')
+  })
+})

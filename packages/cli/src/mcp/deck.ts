@@ -70,18 +70,31 @@ export const DECK_TOOLS: DeckTool[] = [
       outline: jsonObject.describe(
         'the outline object: { "core_hook", "pages": [{ "title", "type": cover|content|data|closing, "layout", "brief" with the real figures, "image_queries": [] }] } (format: guide slides spec)',
       ),
+      template: z
+        .string()
+        .optional()
+        .describe(
+          'a .pptx template path or registered name to build on; stored in the outline as "template" and checked with template_inspect',
+        ),
     },
     async run(args, ctx) {
       const dir = deckDir(args.dir, ctx)
       mkdirSync(join(dir, 'pages'), { recursive: true })
       writeFileSync(join(dir, 'style.md'), String(args.style))
-      writeFileSync(join(dir, 'outline.json'), JSON.stringify(args.outline, null, 2))
+      const outline =
+        typeof args.template === 'string' && args.template
+          ? { ...(args.outline as Record<string, unknown>), template: args.template }
+          : args.outline
+      writeFileSync(join(dir, 'outline.json'), JSON.stringify(outline, null, 2))
       const check = await runJson(['slides', 'check', join(dir, 'outline.json')], ctx)
       if (check.error) return check
-      const [design, spec, caps] = await Promise.all([
+      const [design, spec, caps, tmpl] = await Promise.all([
         runJson(['guide', 'slides', 'design'], ctx),
         runJson(['guide', 'slides', 'spec'], ctx),
         runJson(['capabilities'], ctx),
+        typeof args.template === 'string' && args.template
+          ? runJson(['template', 'inspect', args.template], ctx)
+          : Promise.resolve(null),
       ])
       const pages = outlinePages(dir)
       return {
@@ -93,7 +106,8 @@ export const DECK_TOOLS: DeckTool[] = [
             pages: pages.map((title, index) => ({ index, title, file: pageFile(dir, index) })),
             guides: { design: design.ok?.summary ?? null, spec: spec.ok?.summary ?? null },
             capabilities: caps.ok?.detail ?? caps.error?.message ?? null,
-            next: `write page 0 ("${pages[0] ?? ''}") with deck_page; one page per call, in order, re-reading style.md's palette and the page's outline entry each time`,
+            ...(tmpl?.ok ? { template: { summary: tmpl.ok.summary, detail: tmpl.ok.detail } } : {}),
+            next: 'write the first missing page with deck_page; one page per call, in order, re-reading style.md and the outline entry each time',
           },
         },
       }
@@ -190,6 +204,8 @@ export const DECK_TOOLS: DeckTool[] = [
         '--out',
         out,
       ]
+      const outlineTemplate = readOutlineTemplate(dir)
+      if (outlineTemplate) argv.push('--template', outlineTemplate)
       if (!args.out) argv.push('--force')
       const built = await runJson(argv, ctx)
       if (built.error) return built
@@ -303,6 +319,18 @@ function outlinePages(dir: string): string[] {
     return (raw.pages ?? []).map((p) => (typeof p?.title === 'string' ? p.title : ''))
   } catch {
     return []
+  }
+}
+
+// The "template" field deck_start stored in the outline, if it names one.
+function readOutlineTemplate(dir: string): string | undefined {
+  try {
+    const raw = JSON.parse(readFileSync(join(dir, 'outline.json'), 'utf-8')) as {
+      template?: unknown
+    }
+    return typeof raw.template === 'string' && raw.template.trim() ? raw.template : undefined
+  } catch {
+    return undefined
   }
 }
 

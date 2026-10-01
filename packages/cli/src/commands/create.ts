@@ -7,7 +7,10 @@ import {
   auditDeckBytes,
   buildDeckFromDir,
   buildDeckFromSpec,
+  buildDeckFromTemplateDir,
+  buildDeckFromTemplateText,
   deckAuditDetail,
+  deckSpecNamesTemplate,
   stageContext,
 } from '../formats/slide-spec'
 import { outputDirectory, renderToPngs } from '../formats/render'
@@ -61,6 +64,23 @@ export const createCommand: CommandDef = {
         'pptx --spec <dir>: the deck outline the pages were written from (default: outline.json in or beside the directory); every page file is checked against its entry and the build refuses to run until every outline page has its file',
     },
     {
+      name: 'template',
+      value: 'file|name',
+      description:
+        'pptx --spec: build on a corporate template (a .pptx path or a registered name) so slides use its masters, layouts and theme; the spec may also name "template" itself and the outline may carry it (the flag wins). See template inspect.',
+    },
+    {
+      name: 'font',
+      value: 'family',
+      description:
+        'pptx --spec --template: default typeface for the built deck (overrides the template theme fonts and the spec font)',
+    },
+    {
+      name: 'keep-template-slides',
+      description:
+        'pptx --spec --template: keep the template sample slides in front of the new ones',
+    },
+    {
       name: 'from',
       value: 'file',
       description:
@@ -112,6 +132,23 @@ export const createCommand: CommandDef = {
         undefined,
         { reason: 'invalid_argument' },
       )
+    }
+    if (flagString(args, 'template') !== undefined) {
+      if (type !== 'pptx') {
+        throw new CliError(EXIT.usage, '--template only builds --type pptx decks', undefined, {
+          reason: 'invalid_argument',
+        })
+      }
+      if (flagString(args, 'ops') !== undefined) {
+        throw new CliError(EXIT.usage, '--template goes with --spec, not --ops', undefined, {
+          reason: 'invalid_argument',
+        })
+      }
+      if (flagString(args, 'spec') === undefined) {
+        throw new CliError(EXIT.usage, '--template needs --spec <file|dir>', undefined, {
+          reason: 'missing_argument',
+        })
+      }
     }
     const output = resolveOutput(flagString(args, 'out'), ctx, {
       force: flagBool(args, 'force'),
@@ -220,10 +257,45 @@ async function createPptxFromSpec(
   const spec = flagString(args, 'spec')!
   const next =
     'genoffice slides audit <file> for the geometry audit; genoffice slides render <file> --out <dir> for PNGs; genoffice slides replace <file> --slide n --spec <page.json> to rebuild one page'
+  // slides replace rebuilds plain-spec pages only; template decks are rebuilt whole
+  const templateNext =
+    'genoffice slides audit <file> for the geometry audit; genoffice slides render <file> --out <dir> for PNGs; fix the page spec and rerun create --template --force to rebuild'
   const outlinePath = flagString(args, 'outline')
   const dir = spec === '-' ? null : specDirectory(spec, ctx)
+  const templateReq = {
+    ...(flagString(args, 'template') !== undefined
+      ? { template: flagString(args, 'template')! }
+      : {}),
+    ...(flagString(args, 'font') !== undefined ? { font: flagString(args, 'font')! } : {}),
+    ...(flagBool(args, 'keep-template-slides') ? { keepSlides: true } : {}),
+  }
   if (dir) {
     const stage = stageContext(dir, ctx, outlinePath ? resolveInput(outlinePath, ctx) : undefined)
+    if (
+      templateReq.template !== undefined ||
+      (stage.outline?.outline.template !== undefined && stage.outline.outline.template !== '')
+    ) {
+      const built = await buildDeckFromTemplateDir(dir, ctx, stage, {
+        ...templateReq,
+        outlineTemplate: stage.outline?.outline.template,
+      })
+      return {
+        bytes: built.bytes,
+        slides: built.pages,
+        detail: {
+          via: 'template deck spec directory',
+          template: built.template,
+          files: built.files.map((f) => basename(f)),
+          issues: built.issues,
+          imageFailures: built.imageFailures,
+          outline: stage.outline
+            ? { file: stage.outline.file, findings: built.outlineFindings }
+            : null,
+          notes: stage.notes,
+          next: templateNext,
+        },
+      }
+    }
     const built = await buildDeckFromDir(dir, ctx, stage)
     return {
       bytes: built.bytes,
@@ -248,6 +320,26 @@ async function createPptxFromSpec(
     })
   const source = spec === '-' ? 'stdin' : resolveInput(spec, ctx)
   const text = spec === '-' ? readFileSync(0, 'utf-8') : readFileSync(source, 'utf-8')
+  if (templateReq.template !== undefined || deckSpecNamesTemplate(text)) {
+    const built = await buildDeckFromTemplateText(
+      text,
+      source,
+      ctx,
+      spec === '-' ? undefined : dirname(source),
+      templateReq,
+    )
+    return {
+      bytes: built.bytes,
+      slides: built.pages,
+      detail: {
+        via: 'template deck spec',
+        template: built.template,
+        issues: built.issues,
+        imageFailures: built.imageFailures,
+        next: templateNext,
+      },
+    }
+  }
   const built = await buildDeckFromSpec(
     text,
     source,

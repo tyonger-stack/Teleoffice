@@ -17,6 +17,7 @@ import type {
   HomeApi,
   MoveConflictPolicy,
   RecentEntry,
+  SlideTemplateItem,
   FileSearchHit,
   FileSearchPage,
   FileSearchRerank,
@@ -1426,6 +1427,10 @@ export function Home() {
   const [rowMenu, setRowMenu] = useState<string | null>(null)
   // actions cell (… button + menu) of the row whose menu is open — the dismissal guard root
   const rowMenuWrapRef = useRef<HTMLSpanElement>(null)
+  // template picker anchored to the quick card (loads listSlideTemplates on open)
+  const [templateMenuOpen, setTemplateMenuOpen] = useState(false)
+  const templateMenuWrapRef = useRef<HTMLDivElement>(null)
+  const [slideTemplates, setSlideTemplates] = useState<SlideTemplateItem[] | null>(null)
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set())
   const [renaming, setRenaming] = useState<{ path: string; value: string } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string[] | null>(null)
@@ -1725,6 +1730,9 @@ export function Home() {
   useDismissablePopover(folderMenu !== null, () => setFolderMenu(null), {
     inside: () => [folderMenuWrapRef.current],
   })
+  useDismissablePopover(templateMenuOpen, () => setTemplateMenuOpen(false), {
+    inside: () => [templateMenuWrapRef.current],
+  })
   // the fixed-position folder menu would detach from its row while the tree scrolls
   useEffect(() => {
     if (!folderMenu) return
@@ -1738,6 +1746,7 @@ export function Home() {
     if (
       rowMenu === null &&
       folderMenu === null &&
+      !templateMenuOpen &&
       confirmDelete === null &&
       confirmMissing === null &&
       confirmDeleteFolder === null
@@ -1747,6 +1756,7 @@ export function Home() {
       if (event.key === 'Escape') {
         setRowMenu(null)
         setFolderMenu(null)
+        setTemplateMenuOpen(false)
         setConfirmDelete(null)
         setConfirmMissing(null)
         setConfirmDeleteFolder(null)
@@ -1754,7 +1764,7 @@ export function Home() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [rowMenu, folderMenu, confirmDelete, confirmMissing, confirmDeleteFolder])
+  }, [rowMenu, folderMenu, templateMenuOpen, confirmDelete, confirmMissing, confirmDeleteFolder])
 
   // WPS-style sortable "modified" column header, shared by both file tables
   const renderModifiedHeader = () => (
@@ -2119,9 +2129,105 @@ export function Home() {
   ]
 
   function renderQuickCards() {
+    const templateCard = (
+      <div className="quick-card-wrap" ref={templateMenuWrapRef}>
+        <button
+          className="quick-card"
+          aria-haspopup="menu"
+          aria-expanded={templateMenuOpen}
+          onClick={() => {
+            if (templateMenuOpen) {
+              setTemplateMenuOpen(false)
+              return
+            }
+            setTemplateMenuOpen(true)
+            setSlideTemplates(null)
+            void window.aiOffice.listSlideTemplates().then(
+              (list) => setSlideTemplates(list),
+              () => setSlideTemplates([]),
+            )
+          }}
+        >
+          <FileBadge ext="pptx" size={30} />
+          <span className="quick-text">
+            <span className="quick-title-row">
+              <span className="quick-title">{t('newSlideFromTemplate')}</span>
+              <span className="ai-chip">AI</span>
+            </span>
+            <span className="quick-sub">{t('templateCardSub')}</span>
+          </span>
+        </button>
+        {templateMenuOpen && (
+          <div className="cloud-sort-menu template-menu" role="menu">
+            {slideTemplates !== null && slideTemplates.length > 0
+              ? slideTemplates.map((tpl) => (
+                  <button
+                    key={tpl.name}
+                    role="menuitem"
+                    disabled={!tpl.exists}
+                    title={tpl.path}
+                    onClick={() => {
+                      setTemplateMenuOpen(false)
+                      void window.aiOffice.newSlideFromTemplate(tpl.name, newFileOpts)
+                    }}
+                  >
+                    <span className="template-name">{tpl.name}</span>
+                    {tpl.description ? (
+                      <span className="template-desc">{tpl.description}</span>
+                    ) : null}
+                  </button>
+                ))
+              : null}
+            {slideTemplates !== null && slideTemplates.length === 0 ? (
+              <div className="template-empty">{t('noTemplates')}</div>
+            ) : null}
+            <div className="row-menu-divider" />
+            <button
+              role="menuitem"
+              onClick={() => {
+                void window.aiOffice.importSlideTemplate().then(
+                  (imported) => {
+                    if (imported) {
+                      void window.aiOffice.listSlideTemplates().then(
+                        (list) => setSlideTemplates(list),
+                        () => setSlideTemplates([]),
+                      )
+                    }
+                  },
+                  (err: unknown) => console.warn('template import failed', err),
+                )
+              }}
+            >
+              {t('importTemplate')}
+            </button>
+            <button
+              role="menuitem"
+              onClick={() => {
+                void window.aiOffice.openTemplatesFolder()
+              }}
+            >
+              {t('openTemplatesFolder')}
+            </button>
+          </div>
+        )}
+      </div>
+    )
     return (
       <div className="quick-cards">
-        {NEW_ITEMS.map((item) => (
+        {NEW_ITEMS.slice(0, 3).map((item) => (
+          <button key={item.ext} className="quick-card" onClick={() => void item.action()}>
+            <FileBadge ext={item.ext} size={30} />
+            <span className="quick-text">
+              <span className="quick-title-row">
+                <span className="quick-title">{item.title}</span>
+                <span className="ai-chip">AI</span>
+              </span>
+              <span className="quick-sub">{item.sub}</span>
+            </span>
+          </button>
+        ))}
+        {templateCard}
+        {NEW_ITEMS.slice(3).map((item) => (
           <button key={item.ext} className="quick-card" onClick={() => void item.action()}>
             <FileBadge ext={item.ext} size={30} />
             <span className="quick-text">

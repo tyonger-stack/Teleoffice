@@ -205,8 +205,11 @@ export function prepareInsertSlideWithLayout(
   sourceIndex: number,
   layoutPath: string,
 ): string | null {
-  const src = deck.slides[sourceIndex]
-  if (!src) return null
+  // sourceIndex -1 appends to an empty deck (a template whose sample slides
+  // were all removed still has its masters and layouts, but no sldIdLst entry
+  // to insert after).
+  const src = sourceIndex >= 0 ? deck.slides[sourceIndex] : undefined
+  if (sourceIndex >= 0 && !src) return null
   if (!archive.readText(layoutPath)) return null
 
   // Parse the layout placeholders and build the new slide XML with placeholder text boxes
@@ -267,16 +270,32 @@ export function prepareInsertSlideWithLayout(
 
   const newSldTag = `<p:sldId id="${nextSlideId(pres)}" r:id="${newRid}"/>`
 
-  // Insert after the source slide's sldId
-  const srcRid = [...archive.readRels(presPath).values()].find(
-    (r) => resolveTarget(presPath, r.target) === src.path,
-  )?.id
+  // Insert after the source slide's sldId (append at the end for sourceIndex -1)
+  const srcRid = src
+    ? [...archive.readRels(presPath).values()].find(
+        (r) => resolveTarget(presPath, r.target) === src.path,
+      )?.id
+    : undefined
   const srcTag = srcRid
     ? new RegExp(`<p:sldId\\s[^>]*r:id="${srcRid}"[^>]*/>`).exec(pres)?.[0]
     : undefined
-  const nextPres = srcTag
-    ? pres.replace(srcTag, () => `${srcTag}${newSldTag}`)
-    : pres.replace('</p:sldIdLst>', () => `${newSldTag}</p:sldIdLst>`)
+  let nextPres: string | null = null
+  if (srcTag) {
+    nextPres = pres.replace(srcTag, () => `${srcTag}${newSldTag}`)
+  } else if (pres.includes('</p:sldIdLst>')) {
+    nextPres = pres.replace('</p:sldIdLst>', () => `${newSldTag}</p:sldIdLst>`)
+  } else if (pres.includes('</p:sldMasterIdLst>')) {
+    nextPres = pres.replace(
+      '</p:sldMasterIdLst>',
+      () => `</p:sldMasterIdLst><p:sldIdLst>${newSldTag}</p:sldIdLst>`,
+    )
+  } else if (pres.includes('</p:presentation>')) {
+    nextPres = pres.replace(
+      '</p:presentation>',
+      () => `<p:sldIdLst>${newSldTag}</p:sldIdLst></p:presentation>`,
+    )
+  }
+  if (nextPres === null) return null
   archive.entries.set(presPath, Buffer.from(nextPres, 'utf8'))
 
   return newPath

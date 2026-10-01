@@ -276,6 +276,35 @@ describe('auditSlideLayout text overflow', () => {
   })
 })
 
+describe('auditSlideLayout wrapped width check', () => {
+  it('ignores trailing spaces and hanging punctuation on wrapped lines', () => {
+    // 20 chars at 15px = 300px; the trailing 7 spaces (105px) hang past the box
+    const spaces = slide([
+      textNode('sp', 100, 100, 200, 80, { text: 'Quarterly win       ', runWidth: 300 }),
+    ])
+    expect(auditSlideFindings(spaces)).toEqual([])
+    const cjk = slide([
+      textNode('cjk', 100, 100, 200, 80, { text: '\u4E00\u4E8C\u3002', runWidth: 210 }),
+    ])
+    expect(auditSlideFindings(cjk)).toEqual([])
+  })
+
+  it('still flags nowrap lines and wrapped tokens wider than the box', () => {
+    const nowrap = slide([
+      textNode('nw', 100, 100, 200, 80, {
+        text: 'Quarterly wins      ',
+        runWidth: 300,
+        wrap: false,
+      }),
+    ])
+    expect(auditSlideFindings(nowrap).map((f) => f.code)).toEqual(['text_overflow_width'])
+    const token = slide([
+      textNode('tk', 100, 100, 200, 80, { text: 'Supercalifragilistic.', runWidth: 300 }),
+    ])
+    expect(auditSlideFindings(token).map((f) => f.code)).toEqual(['text_overflow_width'])
+  })
+})
+
 describe('auditSlideLayout overlap', () => {
   it('flags two intersecting text boxes', () => {
     const s = slide([textNode('a', 100, 100, 200, 100), textNode('b', 150, 120, 200, 100)])

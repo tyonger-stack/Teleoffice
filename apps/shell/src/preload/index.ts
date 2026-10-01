@@ -154,6 +154,29 @@ const homeApi: HomeApi = {
   async newSlide(opts) {
     await ipcRenderer.invoke(HOME_CHANNELS.newSlide, opts)
   },
+  async listSlideTemplates() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.listSlideTemplates)
+    return Array.isArray(result) ? result : []
+  },
+  async newSlideFromTemplate(name, opts) {
+    if (typeof name !== 'string' || !name) throw new Error('Invalid template name.')
+    await ipcRenderer.invoke(HOME_CHANNELS.newSlideFromTemplate, name, opts)
+  },
+  async importSlideTemplate() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.importSlideTemplate)
+    if (result === null) return null
+    if (
+      result &&
+      typeof result === 'object' &&
+      typeof (result as { name?: unknown }).name === 'string'
+    ) {
+      return result as { name: string }
+    }
+    return null
+  },
+  async openTemplatesFolder() {
+    await ipcRenderer.invoke(HOME_CHANNELS.openTemplatesFolder)
+  },
   async newMarkdown(opts) {
     await ipcRenderer.invoke(HOME_CHANNELS.newMarkdown, opts)
   },

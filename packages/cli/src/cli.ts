@@ -25,6 +25,7 @@ import { renderCommand } from './commands/render'
 import { sheetCommand } from './commands/sheet'
 import { skillCommand } from './commands/skill'
 import { slidesCommand } from './commands/slides'
+import { templateCommand } from './commands/template'
 import { CommandRegistry, commandHelp, type CommandContext } from './registry'
 import {
   CliError,
@@ -77,6 +78,7 @@ export function defaultRegistry(): CommandRegistry {
     .register(installCommand)
     .register(mcpCommand)
     .register(skillCommand)
+    .register(templateCommand)
 }
 
 export interface RunIo {

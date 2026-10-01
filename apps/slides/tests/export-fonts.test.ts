@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { collectExportFontCss, familyNames } from '../src/renderer/export-fonts'
+import { collectExportFontCss, familyNames, resolveSheetUrl } from '../src/renderer/export-fonts'
 
 const BYTES = new Uint8Array([0x00, 0x01, 0x00, 0x00, 0x41]).buffer
 const B64 = 'AAEAAEE='
 
 /** jsdom's CSSOM drops @font-face src descriptors, so the sheet is faked at the CSSOM level. */
-function installSheet(faces: Array<Record<string, string>>): void {
+function installSheet(faces: Array<Record<string, string>>, href: string | null = null): void {
   const rules = faces.map((decl) => ({
     cssText: `@font-face { ${Object.entries(decl)
       .map(([k, v]) => `${k}: ${v};`)
@@ -15,7 +15,7 @@ function installSheet(faces: Array<Record<string, string>>): void {
   }))
   Object.defineProperty(document, 'styleSheets', {
     configurable: true,
-    value: [{ cssRules: rules }],
+    value: [{ cssRules: rules, href }],
   })
 }
 
@@ -66,6 +66,43 @@ describe('export fonts', () => {
     expect(css).toBe(
       `@font-face{font-family:"Carlito";src:url(data:font/ttf;base64,${B64});font-weight:bold;font-style:normal;font-display:block}`,
     )
+  })
+
+  it('resolves a relative url() against the sheet, not the page', async () => {
+    installSheet(
+      [
+        {
+          'font-family': '"Carlito GO"',
+          src: 'url("./Carlito-Regular-abc.ttf")',
+          'font-weight': 'normal',
+          'font-style': 'normal',
+        },
+      ],
+      'genoffice-app://slides/assets/index-x.css',
+    )
+    const fetchMock = vi.fn(async (url: string) => ({
+      ok: true,
+      arrayBuffer: async () => BYTES,
+      url,
+    }))
+    vi.stubGlobal('fetch', fetchMock)
+    ;(window as { slidesApi?: unknown }).slidesApi = { privateFontFaces: async () => [] }
+
+    const css = await collectExportFontCss(["'Carlito GO', 'PingFang SC', sans-serif"])
+    expect(fetchMock.mock.calls[0]![0]).toBe(
+      'genoffice-app://slides/assets/Carlito-Regular-abc.ttf',
+    )
+    expect(css).toContain('font-family:"Carlito GO"')
+  })
+
+  it('resolveSheetUrl keeps absolute and data URLs and falls back to the page base', () => {
+    expect(resolveSheetUrl('data:font/ttf;base64,AA', 'genoffice-app://slides/assets/a.css')).toBe(
+      'data:font/ttf;base64,AA',
+    )
+    expect(resolveSheetUrl('/assets/F.ttf', 'genoffice-app://slides/assets/a.css')).toBe(
+      'genoffice-app://slides/assets/F.ttf',
+    )
+    expect(resolveSheetUrl('F.ttf', null)).toBe(new URL('F.ttf', document.baseURI).href)
   })
 
   it('inlines Office-private faces by family with their weight and style', async () => {

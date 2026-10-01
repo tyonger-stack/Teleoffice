@@ -13,6 +13,7 @@
       "@genoffice/pptx-ops": ["../pptx-ops/src/index.ts"],
       "@genoffice/pptx-render": ["../pptx-render/src/index.ts"],
       "@genoffice/pipelines/slides": ["../pipelines/src/slides/index.ts"],
+      "@genoffice/pipelines/slides/templates": ["../pipelines/src/slides/template-registry.ts"],
       "@genoffice/pptx-ops/op-docs": ["../pptx-ops/src/op-docs.ts"],
       "@genoffice/pptx-ops/font-size": ["../pptx-ops/src/font-size.ts"],
       "@genoffice/xlsx-gateway/*": ["../xlsx-gateway/src/*"],

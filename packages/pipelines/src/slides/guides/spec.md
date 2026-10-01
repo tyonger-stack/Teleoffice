@@ -61,7 +61,7 @@ deck/pages/02.json   { "title": "Where the margin went", "type": "content", "lay
 }
 ```
 
-`shape` is one of `rect`, `roundRect`, `ellipse`, `triangle`, `rightArrow`, `leftArrow`, `upArrow`, `downArrow`, `chevron`, `diamond`, `parallelogram`, `trapezoid`, `hexagon`, `pentagon`, `pie`, `donut`, `star5`, `heart`, `cloud`, `line`, `lineArrow`. `line` and `lineArrow` draw the diagonal of their box from top-left to bottom-right and need a `stroke`; add `"flipV": true` to draw it from bottom-left to top-right instead, or `"flipH": true` to mirror it horizontally; a horizontal rule is a box with `h: 1`. The two flags mirror any shape — a `rightArrow` with `"flipH": true` points left. A shape needs a `fill` or a `stroke` (or both). `paragraphs` is optional label text, vertically centered unless `valign` says otherwise.
+`shape` is one of `rect`, `roundRect`, `ellipse`, `triangle`, `rightArrow`, `leftArrow`, `upArrow`, `downArrow`, `chevron`, `diamond`, `parallelogram`, `trapezoid`, `hexagon`, `pentagon`, `pie`, `donut`, `star5`, `heart`, `cloud`, `line`, `lineArrow`. `line` and `lineArrow` draw the diagonal of their box from top-left to bottom-right and need a `stroke`; add `"flipV": true` to draw it from bottom-left to top-right instead, or `"flipH": true` to mirror it horizontally; a horizontal rule is a box with `h: 1`. The two flags mirror any shape — a `rightArrow` with `"flipH": true` points left. A `roundRect` takes an optional `radius` (corner radius in px; default one sixth of the short side, which is very round on large cards). A shape needs a `fill` or a `stroke` (or both). `paragraphs` is optional label text, vertically centered unless `valign` says otherwise.
 
 **Text**
 
@@ -93,7 +93,7 @@ deck/pages/02.json   { "title": "Where the margin went", "type": "content", "lay
 }
 ```
 
-Run fields: `text` (required), `sizePt` (6 to 160), `bold`, `italic`, `color`, `font`. Paragraph fields: `runs` (required), `align` (`left` `center` `right` `justify`), `lineSpacingPct` (60 to 300), `spaceBeforePt` and `spaceAfterPt` (0 to 96), `bullet` (true = a • bullet with a hanging indent). A paragraph may mix runs of different size, weight and color (a big number run beside a small unit run). Text boxes have zero inner padding and wrap at their width; the builder measures every plain text box and grows it downwards when the content is taller (it never shrinks a box).
+Run fields: `text` (required), `sizePt` (6 to 160), `bold`, `italic`, `color`, `font`. Paragraph fields: `runs` (required), `align` (`left` `center` `right` `justify`), `lineSpacingPct` (60 to 300), `spaceBeforePt` and `spaceAfterPt` (0 to 96), `bullet` (true = the default bullet, or a one-character string for a custom glyph), `bulletColor` (#hex), `bulletSizePct` (25 to 400), `bulletFont`, `level` (0 to 8, one indent step per level). A paragraph may mix runs of different size, weight and color (a big number run beside a small unit run). Text boxes have zero inner padding and wrap at their width; the builder measures every plain text box and grows it downwards when the content is taller (it never shrinks a box).
 
 **Image**
 
@@ -101,11 +101,31 @@ Run fields: `text` (required), `sizePt` (6 to 160), `bold`, `italic`, `color`, `
 { "type": "image", "url": "./assets/hero.jpg", "x": 660, "y": 80, "w": 540, "h": 560 }
 ```
 
-`url` is a local file path (absolute, or relative to the current directory and then to the spec file's folder), a `data:` URL, or an `http(s)` URL that genoffice downloads. The image is center-cropped to fill its box (object-fit: cover), so give the box roughly the picture's aspect ratio: a box that keeps less than half of the picture (a portrait product shot in a flat strip) lands but is reported as a warning. Up to 8 images per page. An image that cannot be read is dropped and listed in `detail.imageFailures`.
+`url` is a local file path (absolute, or relative to the current directory and then to the spec file's folder), a `data:` URL, or an `http(s)` URL that genoffice downloads. The image is center-cropped to fill its box (object-fit: cover; `fit: "contain"` shrinks the box to the picture aspect instead, no crop: use it for charts), so give the box roughly the picture's aspect ratio: a box that keeps less than half of the picture (a portrait product shot in a flat strip) lands but is reported as a warning. Up to 8 images per page. An image that cannot be read is dropped and listed in `detail.imageFailures`.
 
 ## Validation
 
 Elements missing numeric geometry, lying fully outside the canvas, or of an unknown type are dropped with a warning; boxes that stick out are clamped to the canvas. Text elements without any text and shapes without fill or stroke are dropped. Two text boxes on one page with identical or near-identical text (a subtitle restating the chart caption) are kept but warned about, as is an image box that crops away more than half of its picture. A page with no surviving element fails; the deck fails only when no page survives. Everything dropped or warned about is reported in `detail.issues` per page. Up to 48 elements per page.
+
+## Template mode
+
+Build on a corporate `.pptx` instead of blank pages so slides use its masters, layouts and theme. `genoffice template inspect <file|name>` reports the slide size, the masters with theme colors and fonts, every layout in order with its placeholder slots, and one usage hint per layout (`layout "Name" (index N, master M): placeholders title(0) ...`). A template page fills the named layout:
+
+```json
+{
+  "layout": "Content layout",
+  "title": "Where the margin went",
+  "subtitle": "Q3 review",
+  "body": ["First point", { "text": "Nested point", "level": 1 }, ["Deeper point"]],
+  "placeholders": [{ "type": "pic", "image": "./assets/chart.png", "fit": "contain" }],
+  "notes": "Speaker notes, one paragraph per line",
+  "elements": []
+}
+```
+
+`layout` is required: a layout name from `template inspect` (exact name in the page `master`, else any master, case-insensitive fallback; or `"1:Name"` for master 1, or a flat index). `title` fills the title/ctrTitle placeholder, `subtitle` the subTitle (or a spare body box), `body` the first body/obj placeholder as plain leveled bullets (nested arrays nest one level, `level` 0 to 8) in the layout own style. `placeholders[]` targets one slot by `idx` or `type` with `text`, `paragraphs`, `bullets` or `image` (`fit: cover|contain`); an entry for a slot the layout lacks is dropped with a warning, and so is a title on a title-less layout (the title stays only the outline echo then). `elements` are px-positioned exactly like plain specs but on the template own canvas (`template inspect` reports it) and may be empty; a page with neither fills nor elements is a blank layout page. `notes` is plain text. `type`, `brief` and friends are allowed (outline echo) and ignored by the builder.
+
+`genoffice slides check` validates an outline with `"template"` against the template layouts (repeat layouts across pages are fine there) and builds a template page on its template before auditing it; canvas is the template size. `genoffice create --type pptx --template <file|name> --spec <dir|file> [--outline f] --out deck.pptx [--font F] [--keep-template-slides]` builds the deck: `--font` (else the spec `font`, else the registry default) retypes the theme and every run without an explicit font, sample slides are removed unless kept, and metadata is scrubbed. `slides replace` only rebuilds pages of plain-spec decks; template decks rebuild with `create --template`.
 
 ## After building
 

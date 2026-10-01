@@ -42,6 +42,8 @@ export interface DeckOutline {
   topic?: string
   core_hook: string
   pages: OutlinePage[]
+  /** template deck name or path this outline builds on (template mode) */
+  template?: string
 }
 
 export interface OutlineIssue {
@@ -59,8 +61,15 @@ const MAX_OUTLINE_RAW_CHARS = 512_000
 /** Per-page image query budget; extras are dropped with a warning. */
 const MAX_IMAGE_QUERIES_PER_PAGE = 8
 
+export interface ParseOutlineOptions {
+  /** template layout names: layout checks run against them and the
+      layout-variety rules are skipped (template decks reuse one content layout) */
+  templateLayouts?: string[]
+}
+
 export function parseOutline(
   raw: string,
+  opts: ParseOutlineOptions = {},
 ): { ok: true; outline: DeckOutline; issues: OutlineIssue[] } | { ok: false; error: string } {
   // LLM output is untrusted: refuse a megabyte dump before JSON.parse builds
   // a giant object graph from it.
@@ -91,7 +100,7 @@ export function parseOutline(
     }
   }
   const issues: OutlineIssue[] = []
-  const pages: OutlinePage[] = root.pages.map((p, i) => normalizePage(p, i, issues))
+  const pages: OutlinePage[] = root.pages.map((p, i) => normalizePage(p, i, issues, opts))
   const coreHook = typeof root.core_hook === 'string' ? root.core_hook.trim() : ''
   if (!coreHook)
     issues.push({
@@ -100,11 +109,27 @@ export function parseOutline(
         '"core_hook" is missing: one sentence with tension, a number or a counter-intuitive contrast',
     })
   const topic = typeof root.topic === 'string' ? root.topic.trim() : undefined
-  checkDeck(pages, issues)
-  return { ok: true, outline: { ...(topic ? { topic } : {}), core_hook: coreHook, pages }, issues }
+  const template =
+    typeof root.template === 'string' && root.template.trim() ? root.template.trim() : undefined
+  checkDeck(pages, issues, opts)
+  return {
+    ok: true,
+    outline: {
+      ...(topic ? { topic } : {}),
+      core_hook: coreHook,
+      pages,
+      ...(template ? { template } : {}),
+    },
+    issues,
+  }
 }
 
-function normalizePage(raw: unknown, i: number, issues: OutlineIssue[]): OutlinePage {
+function normalizePage(
+  raw: unknown,
+  i: number,
+  issues: OutlineIssue[],
+  opts: ParseOutlineOptions,
+): OutlinePage {
   const p = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
   const title = typeof p.title === 'string' ? p.title.trim() : ''
   const type = typeof p.type === 'string' ? (p.type.trim() as PageType) : ('' as PageType)
@@ -116,12 +141,28 @@ function normalizePage(raw: unknown, i: number, issues: OutlineIssue[]): Outline
 
   if (!title) err('"title" is missing')
   if (!(PAGE_TYPES as readonly string[]).includes(type)) {
-    err(`"type" must be one of ${PAGE_TYPES.join(', ')}`)
+    err('"type" must be one of ' + PAGE_TYPES.join(', '))
+  } else if (opts.templateLayouts) {
+    if (!layout) {
+      err('"layout" is missing; pick one of ' + opts.templateLayouts.join(', '))
+    } else if (!opts.templateLayouts.includes(layout) && !/^\d+$/.test(layout)) {
+      err(
+        '"layout" ' +
+          layout +
+          ' is not a layout of the template; pick one of ' +
+          opts.templateLayouts.join(', '),
+      )
+    }
   } else if (!layout) {
-    err(`"layout" is missing; pick one of ${LAYOUT_VARIANTS[type].join(', ')}`)
+    err('"layout" is missing; pick one of ' + LAYOUT_VARIANTS[type].join(', '))
   } else if (!LAYOUT_VARIANTS[type].includes(layout)) {
     err(
-      `"layout" ${layout} is not a ${type} variant; pick one of ${LAYOUT_VARIANTS[type].join(', ')}`,
+      '"layout" ' +
+        layout +
+        ' is not a ' +
+        type +
+        ' variant; pick one of ' +
+        LAYOUT_VARIANTS[type].join(', '),
     )
   }
   if (!brief) err('"brief" is missing: what goes in each region, with the real facts and figures')
@@ -155,7 +196,7 @@ function normalizePage(raw: unknown, i: number, issues: OutlineIssue[]): Outline
   return { title, type, layout, brief, image_queries }
 }
 
-function checkDeck(pages: OutlinePage[], issues: OutlineIssue[]): void {
+function checkDeck(pages: OutlinePage[], issues: OutlineIssue[], opts: ParseOutlineOptions): void {
   if (pages[0] && pages[0].type !== 'cover') {
     issues.push({ page: 0, level: 'warning', message: 'the first page is not a cover' })
   }
@@ -163,6 +204,8 @@ function checkDeck(pages: OutlinePage[], issues: OutlineIssue[]): void {
   if (pages.length > 2 && pages[last] && pages[last].type !== 'closing') {
     issues.push({ page: last, level: 'warning', message: 'the last page is not a closing page' })
   }
+  // Template decks legitimately reuse the one content layout on every page.
+  if (opts.templateLayouts) return
   const body = pages
     .map((p, i) => ({ p, i }))
     .filter(({ p }) => p.type === 'content' || p.type === 'data')

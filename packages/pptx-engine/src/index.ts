@@ -2209,7 +2209,8 @@ function importLayoutChain(archive: PackageArchive, source: MergeSlideSource): v
 
 /**
  * Insert a blank slide after the sourceIndex slide, with rels pointing at the
- * given layoutPath (from listSlideLayouts). The layout itself is read-only, never
+ * given layoutPath (from listSlideLayouts). sourceIndex -1 appends at the end of
+ * an empty deck (creating <p:sldIdLst> when it is missing). The layout itself is read-only, never
  * written back. Returns the new Slide, or null on failure.
  */
 export function insertSlideWithLayout(

@@ -69,7 +69,7 @@ import {
   type TablePartStyle,
   type TableStyleFlags,
 } from './table-style'
-import { decodeNumericCharRefs } from './xml-utils'
+import { decodeNumericCharRefs, parseBulletSizePct } from './xml-utils'
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -3652,8 +3652,8 @@ function parseParagraph(
     }
     if (pPr['a:buFont']?.['@_typeface']) bullet.font = String(pPr['a:buFont']['@_typeface'])
     if (pPr['a:buSzPct']?.['@_val']) {
-      const v = parseInt(pPr['a:buSzPct']['@_val'], 10)
-      if (Number.isFinite(v)) bullet.sizePct = v / 1000
+      const v = parseBulletSizePct(pPr['a:buSzPct']['@_val'])
+      if (v != null) bullet.sizePct = v
     }
     if (pPr['a:buSzPts']?.['@_val']) {
       const v = parseInt(pPr['a:buSzPts']['@_val'], 10)

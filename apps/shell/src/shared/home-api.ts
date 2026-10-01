@@ -186,6 +186,14 @@ export interface HomeApi {
   newSheet(opts?: NewFileOpts): Promise<void>
   /** open a slides tab at its start screen (open-a-pptx) */
   newSlide(opts?: NewFileOpts): Promise<void>
+  /** templates registered for starter decks */
+  listSlideTemplates(): Promise<SlideTemplateItem[]>
+  /** build a one-slide starter deck from a template and open it */
+  newSlideFromTemplate(name: string, opts?: NewFileOpts): Promise<void>
+  /** import a .pptx file into the template registry; null when cancelled */
+  importSlideTemplate(): Promise<{ name: string } | null>
+  /** reveal the templates folder in the file manager */
+  openTemplatesFolder(): Promise<void>
   /** open a blank markdown editor tab */
   newMarkdown(opts?: NewFileOpts): Promise<void>
   /** open a blank html editor tab */
@@ -407,6 +415,15 @@ export interface NewFileOpts {
   dir?: string
 }
 
+/** a .pptx template registered for the new-from-template picker */
+export interface SlideTemplateItem {
+  name: string
+  path: string
+  exists: boolean
+  description?: string
+  source: 'registry' | 'file'
+}
+
 // ── Folder tree (home "Folders" panel: the default save folder plus any folder the user added) ──
 
 export interface FolderRoot {
@@ -478,6 +495,10 @@ export const HOME_CHANNELS = {
   newDoc: 'home:new-doc',
   newSheet: 'home:new-sheet',
   newSlide: 'home:new-slide',
+  listSlideTemplates: 'home:list-slide-templates',
+  newSlideFromTemplate: 'home:new-slide-from-template',
+  importSlideTemplate: 'home:import-slide-template',
+  openTemplatesFolder: 'home:open-templates-folder',
   newMarkdown: 'home:new-markdown',
   newHtml: 'home:new-html',
   newPdf: 'home:new-pdf',

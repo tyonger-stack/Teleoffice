@@ -187,6 +187,16 @@ export const TOOLS: ToolSpec[] = [
           'path of a directory of one-page spec files taken in name order (the deck_* tools write one)',
       },
       'outline',
+      {
+        key: 'template',
+        description:
+          'a .pptx template path or registered name to build on (template inspect lists its layouts); pages fill the named layouts instead of blank pages',
+      },
+      {
+        key: 'font',
+        description: 'default typeface for a template build (overrides the template theme fonts)',
+      },
+      'keep-template-slides',
       { key: 'out', description: 'output .pptx path (required)', required: true },
       'force',
       {
@@ -411,7 +421,15 @@ export const TOOLS: ToolSpec[] = [
     description:
       'Check a deck-flow file on disk: an outline.json (core hook and page plan) or one page spec, which is checked against outline.json and style.md beside it or one folder up. The deck_* tools call this for you; use it directly when the files were written by other means.',
     positionals: [{ key: 'file', description: 'path of outline.json or a page .json' }],
-    options: ['outline', 'page'],
+    options: [
+      'outline',
+      'page',
+      {
+        key: 'template',
+        description:
+          'a .pptx template path or registered name to check the outline or page against',
+      },
+    ],
   },
   {
     name: 'slides_replace',
@@ -427,6 +445,23 @@ export const TOOLS: ToolSpec[] = [
       'out',
       'force',
     ],
+  },
+  {
+    name: 'template_inspect',
+    command: 'template',
+    verb: 'inspect',
+    readOnly: true,
+    description:
+      'Inspect a .pptx template (file path or registered name): slide size, masters with theme colors and fonts, every layout with its placeholder slots, and one usage hint line per layout. Read before writing a template deck spec.',
+    positionals: [{ key: 'file', description: 'path of the .pptx template or a registered name' }],
+  },
+  {
+    name: 'template_list',
+    command: 'template',
+    verb: 'list',
+    readOnly: true,
+    description:
+      'List the registered .pptx templates (name, path, default master and font) in the templates directory.',
   },
   {
     name: 'render',

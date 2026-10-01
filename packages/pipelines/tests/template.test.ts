@@ -1,0 +1,422 @@
+import { existsSync } from 'node:fs'
+import { describe, expect, it } from 'vitest'
+import { buildTemplateDeck, inspectTemplate, parseTemplateDeckSpec } from '../src/slides/template'
+import { toEngineParagraphs } from '../src/slides/page-spec'
+import { parseOutline } from '../src/slides/outline'
+import { PackageArchive, getSlideNotes, openPptx } from '@genoffice/pptx-engine'
+import { makeTwoMasterTemplate } from './template-fixture'
+
+const PNG_1PX = Uint8Array.from(
+  atob(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  ),
+  (c) => c.charCodeAt(0),
+)
+
+const deps = {
+  fetchImage: async () => ({ bytes: PNG_1PX, ext: 'png' }),
+  imageDims: () => ({ width: 1, height: 1 }),
+}
+
+describe('inspectTemplate on a synthetic two-master template', () => {
+  it('reads size, master order, sldLayoutIdLst layout order and samples', async () => {
+    const info = await inspectTemplate(await makeTwoMasterTemplate())
+    expect(info.slideSize.px).toEqual({ w: 1280, h: 720 })
+    expect(info.slideSize.cm).toEqual({ w: 33.87, h: 19.05 })
+    expect(info.masters.map((m) => m.name)).toEqual(['MasterOne', 'MasterTwo'])
+    // flat order follows each master sldLayoutIdLst, not the rels order
+    expect(info.masters.flatMap((m) => m.layouts.map((l) => l.name))).toEqual([
+      'Blank',
+      'TitleAndContent',
+      'TitleOnly',
+      'TitleAndContent',
+      'Cover',
+    ])
+    expect(info.masters.flatMap((m) => m.layouts.map((l) => l.master))).toEqual([0, 0, 0, 1, 1])
+    expect(info.slides.map((s) => s.layout)).toEqual([0, 3, 4])
+    expect(info.slides.map((s) => s.layoutName)).toEqual(['Blank', 'TitleAndContent', 'Cover'])
+    // two of three samples live on master 1
+    expect(info.defaultMaster).toBe(1)
+    expect(info.duplicateLayoutNames).toEqual(['TitleAndContent'])
+  })
+
+  it('resolves theme colors and fonts, inherited boxes and decorations', async () => {
+    const info = await inspectTemplate(await makeTwoMasterTemplate())
+    const office = info.masters[0]!.theme
+    expect(office.name).toBe('Office')
+    expect(office.colors.accent1).toBe('#C43E1C')
+    expect(office.colors.dk1).toBe('#000000')
+    expect(office.colors.lt1).toBe('#FFFFFF')
+    expect(office.fonts.major.latin).toBe('Calibri Light')
+    expect(office.fonts.minor.ea).toBe('Microsoft YaHei')
+    expect(info.masters[1]!.theme.colors.accent1).toBe('#C00000')
+    const byName = new Map(info.masters.flatMap((m) => m.layouts).map((l) => [l.index, l]))
+    // layout 1 has its own title box; layout 2 inherits the master title box
+    expect(byName.get(1)!.placeholders[0]!.inherited).toBeUndefined()
+    expect(byName.get(1)!.placeholders[0]!.box).toMatchObject({ x: 500000, y: 500000 })
+    const inherited = byName.get(2)!.placeholders[0]!
+    expect(inherited.inherited).toBe(true)
+    expect(inherited.box).toMatchObject({ x: 914400, y: 685800, cx: 8229600 })
+    expect(inherited.px).toMatchObject({ x: 96, y: 72 })
+    expect(byName.get(1)!.decorations).toBe(1)
+    expect(byName.get(4)!.decorations).toBe(2)
+    expect(byName.get(4)!.placeholders).toEqual([])
+  })
+})
+
+describe('parseTemplateDeckSpec', () => {
+  it('resolves names, indexes, scopes and masters; errors list the names', async () => {
+    const info = await inspectTemplate(await makeTwoMasterTemplate())
+    const ok = parseTemplateDeckSpec(
+      {
+        master: 1,
+        pages: [
+          { layout: 'TitleAndContent', title: 'Hello', body: ['a', ['b']] },
+          { layout: 4, title: 'Cover page' },
+        ],
+      },
+      info,
+    )
+    expect(ok.ok).toBe(true)
+    if (!ok.ok) return
+    expect(ok.spec.master).toBe(1)
+    // preferred master 1 wins for the duplicated name
+    expect(ok.spec.pages[0]!.layoutIndex).toBe(3)
+    expect(ok.spec.pages[0]!.master).toBe(1)
+    expect(ok.spec.pages[1]!.layoutIndex).toBe(4)
+    // page master beats the deck master
+    const scoped = parseTemplateDeckSpec(
+      { pages: [{ layout: '0:TitleAndContent', master: 0, title: 'M0' }] },
+      info,
+      { master: 1 },
+    )
+    expect(scoped.ok).toBe(true)
+    if (!scoped.ok) return
+    expect(scoped.spec.pages[0]!.layoutIndex).toBe(1)
+    // unknown names error with the preferred master names
+    const bad = parseTemplateDeckSpec({ pages: [{ layout: 'Nope' }] }, info)
+    expect(bad.ok).toBe(false)
+    if (bad.ok) return
+    expect(bad.error).toContain('unknown layout "Nope"')
+    expect(bad.error).toContain('TitleAndContent')
+    const badIdx = parseTemplateDeckSpec({ pages: [{ layout: 9 }] }, info)
+    expect(badIdx.ok).toBe(false)
+    if (badIdx.ok) return
+    expect(badIdx.error).toContain('unknown layout index 9')
+  })
+
+  it('warns when the layout lacks the title slot and accepts blank pages', async () => {
+    const info = await inspectTemplate(await makeTwoMasterTemplate())
+    const r = parseTemplateDeckSpec(
+      { pages: [{ layout: 'Cover', title: 'Only an echo', elements: [] }] },
+      info,
+    )
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.spec.pages[0]!.fills).toEqual([])
+    expect(r.issues[0]!.warnings!.join(' ')).toContain('has no title placeholder')
+  })
+})
+
+describe('buildTemplateDeck', () => {
+  it('fills placeholders with inheriting markup, drops samples, writes notes', async () => {
+    const bytes = await makeTwoMasterTemplate()
+    const info = await inspectTemplate(bytes)
+    const parsed = parseTemplateDeckSpec(
+      {
+        title: 'Deck title',
+        pages: [
+          {
+            layout: 'TitleAndContent',
+            master: 0,
+            title: 'Page one',
+            body: ['First', { text: 'Second', level: 1 }],
+            notes: 'Say hello',
+          },
+          {
+            layout: 'Cover',
+            elements: [
+              {
+                type: 'text',
+                x: 640,
+                y: 600,
+                w: 640,
+                h: 100,
+                paragraphs: [{ runs: [{ text: 'Cover note' }] }],
+              },
+            ],
+          },
+        ],
+      },
+      info,
+    )
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    const built = await buildTemplateDeck(bytes, parsed.spec, deps)
+    expect(built.layoutsUsed).toEqual([
+      { page: 0, layout: 1, layoutName: 'TitleAndContent', master: 0 },
+      { page: 1, layout: 4, layoutName: 'Cover', master: 1 },
+    ])
+    const opened = await openPptx(built.bytes)
+    expect(opened.deck.slides).toHaveLength(2)
+    const archive = await PackageArchive.open(built.bytes)
+    // sample slides are gone and the new parts are renumbered from slide1.xml
+    expect(
+      [...archive.entries.keys()].filter((k) => /^ppt\/slides\/slide\d+\.xml$/.test(k)).sort(),
+    ).toEqual(['ppt/slides/slide1.xml', 'ppt/slides/slide2.xml'])
+    expect(archive.readText('[Content_Types].xml')).not.toContain('slide4.xml')
+    const slide1 = archive.readText('ppt/slides/slide1.xml') ?? ''
+    expect(slide1).toContain('<p:ph type="title" idx="0"/>')
+    expect(slide1).toContain('<p:spPr/>')
+    expect(slide1).toContain('Page one')
+    expect(slide1).toContain('lvl="1"')
+    expect(slide1).not.toContain('marL')
+    const rels1 = archive.readText('ppt/slides/_rels/slide1.xml.rels') ?? ''
+    expect(rels1).toContain('slideLayout2.xml')
+    expect(getSlideNotes(archive, 'ppt/slides/slide1.xml')).toBe('Say hello')
+    const slide2 = archive.readText('ppt/slides/slide2.xml') ?? ''
+    expect(slide2).toContain('Cover note')
+    expect(slide2).toContain('x="6096000"')
+    const core = archive.readText('docProps/core.xml') ?? ''
+    expect(core).toContain('<dc:creator/>')
+    expect(core).toContain('<cp:revision>1</cp:revision>')
+    expect(core).toContain('<dc:title>Deck title</dc:title>')
+    const app = archive.readText('docProps/app.xml') ?? ''
+    expect(app).toContain('<Slides>2</Slides>')
+    expect(app).not.toContain('TitlesOfParts')
+    expect(app).not.toContain('HeadingPairs')
+    expect(archive.readText('ppt/commentAuthors.xml')).toContain('<p:cmAuthorLst')
+    expect(archive.readText('ppt/commentAuthors.xml')).not.toContain('cmAuthor id')
+  })
+
+  it('keeps samples with keepSlides and applies the font override', async () => {
+    const bytes = await makeTwoMasterTemplate()
+    const info = await inspectTemplate(bytes)
+    const parsed = parseTemplateDeckSpec(
+      {
+        keepSlides: true,
+        font: 'Microsoft YaHei',
+        pages: [{ layout: 'TitleOnly', title: 'Kept' }],
+      },
+      info,
+    )
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    const built = await buildTemplateDeck(bytes, parsed.spec, deps)
+    const opened = await openPptx(built.bytes)
+    expect(opened.deck.slides).toHaveLength(4)
+    const archive = await PackageArchive.open(built.bytes)
+    const theme = archive.readText('ppt/theme/theme1.xml') ?? ''
+    expect(theme).toContain('<a:latin typeface="Microsoft YaHei"/>')
+    expect(theme).toContain('<a:ea typeface="Microsoft YaHei"/>')
+    const slide = archive.readText('ppt/slides/slide4.xml') ?? ''
+    expect(slide).toContain('<a:latin typeface="Microsoft YaHei"/>')
+    expect(slide).toContain('<a:cs typeface="Microsoft YaHei"/>')
+  })
+
+  it('fills picture placeholders and reports image failures per page', async () => {
+    const bytes = await makeTwoMasterTemplate()
+    const info = await inspectTemplate(bytes)
+    const parsed = parseTemplateDeckSpec(
+      {
+        pages: [
+          {
+            layout: 'TitleAndContent',
+            master: 1,
+            title: 'Pics',
+            placeholders: [{ type: 'pic', image: 'chart.png', fit: 'contain' }],
+          },
+        ],
+      },
+      info,
+    )
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    const built = await buildTemplateDeck(bytes, parsed.spec, deps)
+    const archive = await PackageArchive.open(built.bytes)
+    const slide = archive.readText('ppt/slides/slide1.xml') ?? ''
+    expect(slide).toContain('<p:pic>')
+    expect(slide).toContain('<p:ph type="pic" idx="2"/>')
+    expect(slide).not.toContain('srcRect')
+    const failing = await buildTemplateDeck(bytes, parsed.spec, { fetchImage: async () => null })
+    expect(failing.imageFailures).toEqual([{ page: 0, url: 'chart.png' }])
+  })
+
+  it('emits unfilled placeholders as empty inheriting shapes', async () => {
+    const bytes = await makeTwoMasterTemplate()
+    const info = await inspectTemplate(bytes)
+    const parsed = parseTemplateDeckSpec(
+      {
+        pages: [
+          {
+            layout: 'TitleAndContent',
+            master: 1,
+            title: 'Only title',
+            emptyPlaceholders: true,
+          },
+        ],
+      },
+      info,
+    )
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    expect(parsed.spec.pages[0]!.emptyPlaceholders).toBe(true)
+    const built = await buildTemplateDeck(bytes, parsed.spec, deps)
+    const archive = await PackageArchive.open(built.bytes)
+    const slide = archive.readText('ppt/slides/slide1.xml') ?? ''
+    expect(slide).toContain('Only title')
+    // Unfilled body placeholder appears as an empty inheriting shape.
+    expect(slide).toContain('<p:ph type="body" idx="1"/>')
+    expect(slide).toContain('<p:spPr/>')
+    expect(slide).toContain('<p:txBody><a:bodyPr/><a:lstStyle/><a:p/></p:txBody>')
+    // Pic placeholders stay an empty sp with the pic ph, never a pic element.
+    expect(slide).toContain('<p:ph type="pic" idx="2"/>')
+    expect(slide).not.toContain('<p:pic>')
+    // Without the flag the unfilled placeholders stay absent.
+    const plain = parseTemplateDeckSpec(
+      {
+        pages: [{ layout: 'TitleAndContent', master: 1, title: 'Only title' }],
+      },
+      info,
+    )
+    expect(plain.ok).toBe(true)
+    if (!plain.ok) return
+    expect(plain.spec.pages[0]!.emptyPlaceholders).toBeUndefined()
+    const builtPlain = await buildTemplateDeck(bytes, plain.spec, deps)
+    const archivePlain = await PackageArchive.open(builtPlain.bytes)
+    const slidePlain = archivePlain.readText('ppt/slides/slide1.xml') ?? ''
+    expect(slidePlain).not.toContain('type="body"')
+    expect(slidePlain).not.toContain('type="pic"')
+  })
+})
+
+describe('page-spec extensions', () => {
+  it('maps bullet glyph, color, size, font and level', () => {
+    const one = toEngineParagraphs([
+      {
+        runs: [{ text: 'Hi' }],
+        bullet: 'X',
+        bulletColor: '#C00000',
+        bulletSizePct: 80,
+        bulletFont: 'Wingdings',
+        level: 2,
+      },
+    ])
+    const p = one[0]!
+    expect(p.bullet).toMatchObject({
+      type: 'char',
+      char: 'X',
+      color: '#C00000',
+      sizePct: 80,
+      font: 'Wingdings',
+    })
+    expect(p.marL).toBe(3 * 228600)
+    expect(p.indent).toBe(-228600)
+    expect(p.level).toBe(2)
+    const two = toEngineParagraphs([{ runs: [{ text: 'Hi' }], bullet: true }])
+    expect(two[0]!.bullet).toMatchObject({ type: 'char', char: '•' })
+    expect(two[0]!.marL).toBe(228600)
+    expect(two[0]!.level).toBeUndefined()
+  })
+
+  it('writes the bullet glyph and level into slide XML and shrinks contain images', async () => {
+    const pageSpec = await import('../src/slides/page-spec')
+    const built = await pageSpec.buildPagePptx(
+      {
+        elements: [
+          {
+            type: 'text',
+            x: 80,
+            y: 60,
+            w: 800,
+            h: 90,
+            paragraphs: [{ runs: [{ text: 'Point' }], bullet: 'X', level: 1 }],
+          },
+          { type: 'image', url: 'pic.png', x: 0, y: 0, w: 200, h: 100, fit: 'contain' },
+        ],
+      },
+      {
+        fetchImage: async () => ({ bytes: PNG_1PX, ext: 'png' }),
+        imageDims: () => ({ width: 50, height: 100 }),
+      },
+    )
+    const archive = await PackageArchive.open(built.bytes)
+    const slide = archive.readText('ppt/slides/slide1.xml') ?? ''
+    expect(slide).toContain('buChar char="X"')
+    expect(slide).toContain('lvl="1"')
+    const opened = await openPptx(built.bytes)
+    const pic = opened.deck.slides[0]!.elements.find((e) => e.type === 'picture')
+    expect(pic).toBeDefined()
+    expect(pic!.transform.offset).toMatchObject({ x: 75 * 9525, cx: 50 * 9525, cy: 100 * 9525 })
+  })
+})
+
+describe('parseOutline in template mode', () => {
+  const outlineOf = (layouts: string[]) =>
+    JSON.stringify({
+      core_hook: 'Margins fell while volume grew',
+      pages: layouts.map((layout, i) => ({
+        title: 'Page ' + (i + 1),
+        type: 'content',
+        layout,
+        brief: 'Main title plus three supporting facts with the real figures for this page.',
+        image_queries: [],
+      })),
+    })
+  it('accepts template layouts and skips the variety rules', () => {
+    const r = parseOutline(
+      outlineOf(['TitleAndContent', 'TitleAndContent', 'Cover', 'TitleAndContent']),
+      {
+        templateLayouts: ['TitleAndContent', 'Cover'],
+      },
+    )
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.issues.filter((x) => x.level === 'error')).toEqual([])
+  })
+  it('rejects unknown layouts with the template names', () => {
+    const r = parseOutline(outlineOf(['Nope']), { templateLayouts: ['TitleAndContent', 'Cover'] })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(
+      r.issues.some(
+        (x) => x.level === 'error' && x.message.includes('not a layout of the template'),
+      ),
+    ).toBe(true)
+  })
+})
+
+describe('company template', () => {
+  const REAL = '/home/box/shared/ppt-master/company-template.pptx'
+  it.skipIf(!existsSync(REAL))('matches the documented shape', async () => {
+    const fs = await import('node:fs')
+    const info = await inspectTemplate(new Uint8Array(fs.readFileSync(REAL)))
+    expect(info.masters).toHaveLength(2)
+    expect(info.masters.flatMap((m) => m.layouts)).toHaveLength(22)
+    // 18 of the 25 samples sit on master 0 copies, 7 on master 1: most-used wins
+    expect(info.defaultMaster).toBe(0)
+    expect(info.slideSize.px).toEqual({ w: 1280, h: 720 })
+    expect(info.duplicateLayoutNames.length).toBeGreaterThan(0)
+  })
+})
+describe('empty template deck', () => {
+  it('appends the first slide past an empty sldIdLst', async () => {
+    const full = await makeTwoMasterTemplate()
+    const opened = await openPptx(full)
+    const pres = opened.archive.readText('ppt/presentation.xml') ?? ''
+    opened.archive.entries.set(
+      'ppt/presentation.xml',
+      Buffer.from(pres.replace(/<p:sldIdLst>[\s\S]*?<\/p:sldIdLst>/, ''), 'utf8'),
+    )
+    const engine = await import('@genoffice/pptx-engine')
+    const empty = await engine.savePptx(opened)
+    const info = await inspectTemplate(empty)
+    expect(info.slides).toEqual([])
+    expect(info.defaultMaster).toBe(0)
+    const parsed = parseTemplateDeckSpec({ pages: [{ layout: 'Cover' }] }, info)
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    const built = await buildTemplateDeck(empty, parsed.spec, deps)
+    expect((await openPptx(built.bytes)).deck.slides).toHaveLength(1)
+  })
+})

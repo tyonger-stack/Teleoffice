@@ -212,6 +212,23 @@ export function resolveAgyPath(settings: LocalCliSettingsInput = undefined): str
   return findOnPath('agy')
 }
 
+// The mmx-env wrapper reads the region from MINIMAX_REGION (it adds no
+// --region flag of its own), so the user's settings region must travel in the
+// environment.
+export function mmxEnvWrapperEnv(region: string): NodeJS.ProcessEnv {
+  return { ...process.env, MINIMAX_REGION: region }
+}
+
+// Environment for agy subprocesses: agy never needs the MiniMax credentials,
+// so they are not leaked into the agent's environment.
+export function agyEnv(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, AGY_CLI_DISABLE_AUTO_UPDATE: 'true' }
+  delete env.MINIMAX_API_KEY
+  delete env.MINIMAX_REGION
+  delete env.MMX_CONFIG_DIR
+  return env
+}
+
 export interface MmxInvocation {
   cmd: string
   baseArgs: string[]
@@ -230,7 +247,7 @@ export function resolveMmxInvocation(
   if (override) {
     if (!existsSync(override)) return null
     if (basename(override) === 'mmx-env') {
-      return { cmd: override, baseArgs: [], env: { ...process.env }, via: 'mmx-env' }
+      return { cmd: override, baseArgs: [], env: mmxEnvWrapperEnv(s.mmxRegion), via: 'mmx-env' }
     }
     return {
       cmd: override,
@@ -242,7 +259,7 @@ export function resolveMmxInvocation(
   const key = (process.env.MINIMAX_API_KEY ?? '').trim()
   const wrapper = join(homedir(), '.local', 'bin', 'mmx-env')
   if (key && existsSync(wrapper)) {
-    return { cmd: wrapper, baseArgs: [], env: { ...process.env }, via: 'mmx-env' }
+    return { cmd: wrapper, baseArgs: [], env: mmxEnvWrapperEnv(s.mmxRegion), via: 'mmx-env' }
   }
   const homeBin = join(homedir(), '.local', 'bin', 'mmx')
   const cmd = existsSync(homeBin) ? homeBin : findOnPath('mmx')
@@ -400,7 +417,7 @@ async function runAgy(
     if (opts.jsonSchema !== undefined) args.push('--json-schema', JSON.stringify(opts.jsonSchema))
     const r = await runner(agy, args, {
       cwd,
-      env: { ...process.env, AGY_CLI_DISABLE_AUTO_UPDATE: 'true' },
+      env: agyEnv(),
       timeoutMs,
     })
     if (r.timedOut) {
@@ -838,7 +855,7 @@ export async function agyGenerateImage(
     if (model) args.push('--model', model)
     const r = await runner(agy, args, {
       cwd,
-      env: { ...process.env, AGY_CLI_DISABLE_AUTO_UPDATE: 'true' },
+      env: agyEnv(),
       timeoutMs: timeout.ms,
     })
     if (r.timedOut) {

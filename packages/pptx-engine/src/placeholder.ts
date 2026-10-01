@@ -19,7 +19,13 @@ import { XMLParser } from 'fast-xml-parser'
 import type { Transform, TextAlign } from './types'
 import { type EaScript, type Theme, eaScriptOfLang, resolveFontRef } from './theme'
 import { resolveColorNode } from './color'
-import { asXmlNode, decodeNumericCharRefs, xmlArray, type XmlNode } from './xml-utils'
+import {
+  asXmlNode,
+  decodeNumericCharRefs,
+  parseBulletSizePct,
+  xmlArray,
+  type XmlNode,
+} from './xml-utils'
 
 const phParser = new XMLParser({
   ignoreAttributes: false,
@@ -310,7 +316,8 @@ function parseLvlPPr(
     const buColor = resolveColorNode(pPr['a:buClr'], theme)
     if (buColor) out.bullet.color = buColor
     const buSz = asXmlNode(pPr['a:buSzPct'])['@_val']
-    if (buSz != null) out.bullet.sizePct = (parseInt(String(buSz), 10) || 0) / 1000
+    const buSzPct = parseBulletSizePct(buSz)
+    if (buSzPct != null) out.bullet.sizePct = buSzPct
     const buSzPts = asXmlNode(pPr['a:buSzPts'])['@_val']
     if (buSzPts != null) out.bullet.sizePt = (parseInt(String(buSzPts), 10) || 0) / 100
   }
