@@ -319,6 +319,32 @@ describe('imageSearch (Serper)', () => {
   })
 })
 
+describe('imageSearch (DuckDuckGo)', () => {
+  it('filters copyright hosts over the full list instead of slicing first', async () => {
+    mockFetch((url) => {
+      if (url.includes('duckduckgo.com/?q=')) {
+        return { ok: true, text: '<html><body>vqd="123-456"</body></html>' }
+      }
+      return {
+        ok: true,
+        json: {
+          results: [
+            { image: 'https://media.gettyimages.com/1.jpg', title: 'g1' },
+            { image: 'https://www.shutterstock.com/2.jpg', title: 's1' },
+            { image: 'https://cdn.example.com/3.jpg', title: 'ok1' },
+            { image: 'https://cdn.example.com/4.jpg', title: 'ok2' },
+            { image: 'https://cdn.example.com/5.jpg', title: 'ok3' },
+            { image: 'https://cdn.example.com/6.jpg', title: 'ok4' },
+          ],
+        },
+      }
+    })
+    const r = await imageSearch('cats', 4)
+    expect(r.method).toBe('duckduckgo')
+    expect(r.images.map((i) => i.title)).toEqual(['ok1', 'ok2', 'ok3', 'ok4'])
+  })
+})
+
 describe('webSearch (SearchOptions)', () => {
   it('uses a caller-supplied Serper key instead of the env var', async () => {
     const seen: string[] = []
