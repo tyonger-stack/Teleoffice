@@ -41,7 +41,7 @@ genoffice capabilities --json                        # which cloud features GenO
 genoffice search "electron headless export" [--images] [--max 6] [--via auto|mmx|agy] [--region cn|intl] --json
 genoffice image "isometric office, soft light" --aspect 16:9 --out hero.png
 genoffice media photo.jpg --ask "What text is in this picture?" --json
-genoffice tts "你好，世界" --out hello.mp3 --voice male-qn-qingse --format mp3 --speed 1 --emotion neutral --language zh
+genoffice tts "hello world, this is a test" --out hello.mp3 --voice male-qn-qingse --format mp3 --speed 1 --emotion neutral --language en
 genoffice tts --text-file notes.txt --out notes.mp3
 genoffice asr interview.wav --language zh
 genoffice video "aerial harbor at dawn" --out harbor.mp4 --image first.png --model MiniMax-H3 --duration 6 --ratio 16:9
@@ -245,6 +245,19 @@ HTTPS_PROXY / HTTP_PROXY / ALL_PROXY are honoured. Search results, image
 bytes and analysis text come back in the JSON detail (method plus attempts on
 local-CLI fallbacks); image, tts and video also write files. These are the
 only commands that send data off the machine.
+
+### Changed defaults
+
+Settings without a stored search or media choice (new installs, and older
+settings files that never picked a provider) now default to the local CLIs
+instead of Genspark: search uses local-cli (mmx for Chinese, agy for
+foreign), image generation and media analysis use antigravity with mmx as
+fallback, tts and video use mmx and asr uses agy. Genspark and every BYOK
+provider stay selectable in Settings (AI Media & Search). When neither the
+agy nor the mmx binary is installed and Genspark is signed in with cloud
+tools on, search, image generation and media analysis fall back to the
+Genspark route automatically (the CLI failures stay in `attempts`), and
+`capabilities` reports `via: "genspark"` for them.
 
 ## Build and run in a checkout
 

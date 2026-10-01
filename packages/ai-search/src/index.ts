@@ -14,9 +14,10 @@ import {
   type WebSearchResult,
 } from './shared'
 import { gskImageSearch, gskWebSearch, hasGskAuth } from './gsk'
-import { localCliSettingsOf } from '@genoffice/ai-provider'
+import { cloudToolsEnabled, localCliSettingsOf, type AiSettings } from '@genoffice/ai-provider'
 import {
   agySearch,
+  localCliBinariesMissing,
   mmxSearch,
   pickSearchProvider,
   type LocalCliSettingsInput,
@@ -55,7 +56,9 @@ export interface SearchOptions {
 
 export interface LocalCliSearchOptions {
   provider: 'local-cli' | 'mmx' | 'antigravity'
-  settings: LocalCliSettingsInput
+  // Full settings when known (lets the missing-binary fallback honour the
+  // cloud-tools toggle); local-only settings or null otherwise.
+  settings: LocalCliSettingsInput | AiSettings
   /** explicit per-call override (auto | mmx | agy | cn | intl | ...) */
   via?: string
 }
@@ -309,6 +312,19 @@ async function localCliWebSearch(
       attempts.push({ provider: id, error: 'no results' })
     } catch (err) {
       attempts.push({ provider: id, error: err instanceof Error ? err.message : String(err) })
+    }
+  }
+  // Neither CLI binary exists while Genspark is signed in with cloud tools
+  // on: use the gsk route before the keyless chain, and record it in attempts.
+  const gskOn =
+    hasGskAuth() && (!localCli.settings || cloudToolsEnabled(localCli.settings as AiSettings))
+  if (attempts.length > 0 && localCliBinariesMissing(localCli.settings) && gskOn) {
+    try {
+      const r = await gskWebSearch(query, max)
+      if (r.results.length) return { ...r, method: 'gsk', attempts }
+      attempts.push({ provider: 'gsk', error: 'no results' })
+    } catch (err) {
+      attempts.push({ provider: 'gsk', error: err instanceof Error ? err.message : String(err) })
     }
   }
   const free = await parallelWebSearch(parallelKey, query, max)

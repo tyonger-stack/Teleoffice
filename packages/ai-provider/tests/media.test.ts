@@ -673,10 +673,18 @@ describe('local CLI media providers', () => {
     expect(() => assertHttpMediaProvider('antigravity')).toThrow(/local CLI backend/)
     expect(() => assertHttpMediaProvider('mmx')).toThrow(/local CLI backend/)
     await expect(
-      generateImageWithProvider('antigravity' as never, { apiKey: '', imageModel: '', analysisModel: '' }, { prompt: 'x' }),
+      generateImageWithProvider(
+        'antigravity' as never,
+        { apiKey: '', imageModel: '', analysisModel: '' },
+        { prompt: 'x' },
+      ),
     ).rejects.toThrow(/local CLI/)
     await expect(
-      analyzeMediaWithProvider('mmx' as never, { apiKey: '', imageModel: '', analysisModel: '' }, { media: [], requirements: 'x' }),
+      analyzeMediaWithProvider(
+        'mmx' as never,
+        { apiKey: '', imageModel: '', analysisModel: '' },
+        { media: [], requirements: 'x' },
+      ),
     ).rejects.toThrow(/local CLI/)
     expect(
       await testMediaProvider('mmx' as never, { apiKey: '', imageModel: '', analysisModel: '' }),

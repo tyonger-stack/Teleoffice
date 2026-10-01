@@ -1,12 +1,16 @@
-// ai:web-search / ai:image-search for the editors main processes: reads
-// ai-settings.json live and turns the search provider choice into
-// SearchOptions - Genspark keeps the historic chain (gsk when signed in and
-// cloud tools are on, then env keys, then free Parallel MCP, then DuckDuckGo);
-// a selected custom provider runs first and skips gsk; a selected local CLI
-// provider routes to agy/mmx first, then the free chain (gsk skipped).
+/**
+ * ai:web-search / ai:image-search for the editors' main processes: reads
+ * ai-settings.json live and turns the search provider choice into
+ * SearchOptions — Genspark keeps the historic chain (gsk when signed in and
+ * cloud tools are on, then env keys, then free Parallel MCP, then DuckDuckGo);
+ * a selected custom provider runs first and skips gsk; a selected local CLI
+ * provider routes to agy/mmx first, then the free chain (gsk skipped).
+ */
+
 import {
   activeSearchProvider,
   cloudToolsEnabled,
+  defaultAiLocalCliSettings,
   type AiSearchProviderId,
   type AiSettings,
 } from '@genoffice/ai-provider'
@@ -44,30 +48,49 @@ export function imageSearchTool(settingsPath: string, query: string, maxResults 
   return imageSearch(query, maxResults, searchOptionsFromSettings(readAiSettingsFile(settingsPath)))
 }
 
-// settings-UI test: the selected backend must answer one minimal query.
-// Local CLI backends run one tiny real search (foreign for agy, Chinese for mmx).
+/**
+ * settings-UI test: the selected backend must answer one minimal query.
+ * Local CLI backends run one tiny real search (foreign for agy, Chinese for mmx).
+ */
 export async function testSearchProvider(
   provider: AiSearchProviderId,
   apiKey: string,
+  settings?: Pick<AiSettings, 'localCli'>,
 ): Promise<{ ok: boolean; error?: string }> {
   if (provider === 'genspark') return { ok: true }
   if (provider === 'local-cli' || provider === 'mmx' || provider === 'antigravity') {
     const query = provider === 'mmx' ? '深圳天气' : 'GenOffice'
+    // mmx/antigravity must answer by themselves: no fallback, and the method
+    // has to match, so a dead mmx cannot pass on agy's back. local-cli keeps
+    // the auto routing with fallback.
     const r = await webSearch(query, 1, {
       useGsk: false,
       localCli: {
         provider,
-        settings: null,
+        settings:
+          provider === 'local-cli'
+            ? (settings ?? null)
+            : {
+                localCli: {
+                  ...defaultAiLocalCliSettings(),
+                  ...settings?.localCli,
+                  fallback: false,
+                },
+              },
         ...(provider === 'local-cli' ? {} : { via: provider }),
       },
     })
-    if (r.method === 'mmx' || r.method === 'antigravity') return { ok: true }
+    if (provider === 'local-cli') {
+      if (r.method === 'mmx' || r.method === 'antigravity') return { ok: true }
+    } else if (r.method === provider) {
+      return { ok: true }
+    }
     return {
       ok: false,
       error:
         r.method === 'error'
           ? (r.error ?? 'search failed')
-          : provider + ' did not answer (unavailable); fell back to ' + r.method,
+          : `${provider} did not answer (unavailable); fell back to ${r.method}`,
     }
   }
   apiKey = apiKey.trim()
@@ -87,6 +110,6 @@ export async function testSearchProvider(
     error:
       r.method === 'error'
         ? (r.error ?? 'search failed')
-        : provider + ' did not answer (service unavailable, key rejected or quota exhausted); fell back to ' + r.method,
+        : `${provider} did not answer (service unavailable, key rejected or quota exhausted); fell back to ${r.method}`,
   }
 }

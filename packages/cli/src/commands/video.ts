@@ -9,7 +9,8 @@ import { CliError, EXIT } from '../result'
 
 export const videoCommand: CommandDef = {
   name: 'video',
-  summary: 'Generate a video from a prompt with the MiniMax CLI (mmx); query tasks and download files.',
+  summary:
+    'Generate a video from a prompt with the MiniMax CLI (mmx); query tasks and download files.',
   usage:
     'video <prompt> [--out <file>] [--image <path>] [--model <id>] [--duration <n>] [--ratio <r>] [--async] [--force] | video --task <id> [--model <id>] | video --file-id <id> --out <file> [--force]',
   options: [
@@ -20,7 +21,11 @@ export const videoCommand: CommandDef = {
     { name: 'ratio', value: 'r', description: 'aspect ratio (model permitting)' },
     { name: 'async', description: 'return the task id immediately without downloading' },
     { name: 'task', value: 'id', description: 'query a video task status instead of generating' },
-    { name: 'file-id', value: 'id', description: 'download a finished video file instead of generating' },
+    {
+      name: 'file-id',
+      value: 'id',
+      description: 'download a finished video file instead of generating',
+    },
     { name: 'force', description: 'overwrite an existing output file' },
   ],
   async run(args, ctx) {
@@ -35,8 +40,7 @@ export const videoCommand: CommandDef = {
           ? { model: flagString(args, 'model') as string }
           : {}),
       })
-      if (r.result === undefined)
-        throw new CliError(EXIT.app, r.error ?? 'video task query failed')
+      if (r.result === undefined) throw new CliError(EXIT.app, r.error ?? 'video task query failed')
       const status =
         r.result && typeof r.result === 'object'
           ? String((r.result as Record<string, unknown>).status ?? 'see detail')

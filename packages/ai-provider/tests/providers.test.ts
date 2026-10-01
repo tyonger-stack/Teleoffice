@@ -412,10 +412,7 @@ describe('local CLI settings', () => {
       asrLanguage: 'zh',
     })
     expect(defaultAiSettings().localCli).toEqual(defaultAiLocalCliSettings())
-    const resolved = resolveAiSettings(
-      { providers: {} as never },
-      defaultAiSettings(),
-    )
+    const resolved = resolveAiSettings({ providers: {} as never }, defaultAiSettings())
     expect(resolved.localCli).toEqual(defaultAiLocalCliSettings())
   })
 
@@ -440,8 +437,9 @@ describe('local CLI settings', () => {
 
   it('reads the effective settings with localCliSettingsOf', () => {
     expect(localCliSettingsOf(null).searchRouting).toBe('auto')
-    expect(localCliSettingsOf({ localCli: { ...defaultAiLocalCliSettings(), fallback: false } }).fallback).toBe(
-      false,
-    )
+    expect(
+      localCliSettingsOf({ localCli: { ...defaultAiLocalCliSettings(), fallback: false } })
+        .fallback,
+    ).toBe(false)
   })
 })

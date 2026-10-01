@@ -29,6 +29,7 @@ import {
   stripCodeFences,
   stripAgyStagingRefs,
   testLocalCliMedia,
+  windowsCommand,
   type LocalCliSpawnResult,
 } from '../src/local-cli'
 import {
@@ -37,7 +38,10 @@ import {
   generateVideoTool,
   transcribeAudioTool,
 } from '../src/media-tools'
+import { testSearchProvider } from '../src/search-tools'
 import { webSearch } from '../src/index'
+import { defaultAiLocalCliSettings } from '@genoffice/ai-provider'
+import * as gsk from '../src/gsk'
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0])
 const PNG_B64 = PNG.toString('base64')
@@ -77,7 +81,13 @@ function agyEnvelope(response: unknown, extra: Record<string, unknown> = {}): st
 }
 
 beforeEach(() => {
-  for (const k of ['GENOFFICE_AGY_PATH', 'GENOFFICE_MMX_PATH', 'MINIMAX_API_KEY', 'MMX_CONFIG_DIR']) {
+  for (const k of [
+    'GENOFFICE_AGY_PATH',
+    'GENOFFICE_MMX_PATH',
+    'MINIMAX_API_KEY',
+    'MMX_CONFIG_DIR',
+    'AI_SEARCH_DISABLE_GSK',
+  ]) {
     savedEnv[k] = process.env[k]
   }
   const dir = ownedDir('genoffice-localcli-')
@@ -87,12 +97,15 @@ beforeEach(() => {
   process.env.GENOFFICE_MMX_PATH = dummyBin
   delete process.env.MINIMAX_API_KEY
   delete process.env.MMX_CONFIG_DIR
+  // No Genspark in these tests: the gsk backend stays off unless a test enables it.
+  process.env.AI_SEARCH_DISABLE_GSK = '1'
 })
 
 afterEach(() => {
   setLocalCliRunner(null)
   setAgyRedirectResolver(null)
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
   for (const [k, v] of Object.entries(savedEnv)) {
     if (v === undefined) delete process.env[k]
     else process.env[k] = v
@@ -145,6 +158,7 @@ describe('pickSearchProvider', () => {
     expect(pickSearchProvider('hello', 'auto', 'domestic')).toBe('mmx')
     expect(pickSearchProvider('hello', 'auto', 'foreign')).toBe('antigravity')
     expect(pickSearchProvider('深圳天气', 'auto', 'agy')).toBe('antigravity')
+    expect(pickSearchProvider('hello', 'auto', 'antigravity')).toBe('antigravity')
   })
 
   it('honours the settings routing, then auto by query', () => {
@@ -193,7 +207,9 @@ describe('agySearch', () => {
   it('reads the schema-shaped object response', async () => {
     setLocalCliRunner(async () =>
       okResult(
-        agyEnvelope(JSON.stringify({ results: [{ title: 'T', url: 'u', snippet: '' }], answer: 'hi' })),
+        agyEnvelope(
+          JSON.stringify({ results: [{ title: 'T', url: 'u', snippet: '' }], answer: 'hi' }),
+        ),
       ),
     )
     const r = await agySearch('q', 6, null)
@@ -203,7 +219,9 @@ describe('agySearch', () => {
 
   it('treats denied actions with an empty response as failure', async () => {
     setLocalCliRunner(async () =>
-      okResult(agyEnvelope('', { denied_actions: [{ action: 'command', display_name: 'RunCommand' }] })),
+      okResult(
+        agyEnvelope('', { denied_actions: [{ action: 'command', display_name: 'RunCommand' }] }),
+      ),
     )
     await expect(agySearch('q', 6, null)).rejects.toThrow(/auto-denied/)
   })
@@ -230,7 +248,12 @@ describe('mmxSearch', () => {
     await expect(mmxSearch('q', 1, null)).rejects.toThrow(/not logged in/)
     setLocalCliRunner(async () => okResult(JSON.stringify({ error: { code: 9, message: 'boom' } })))
     await expect(mmxSearch('q', 1, null)).rejects.toThrow(/boom/)
-    setLocalCliRunner(async () => ({ stdout: '', stderr: 'bad args', exitCode: 1, timedOut: false }))
+    setLocalCliRunner(async () => ({
+      stdout: '',
+      stderr: 'bad args',
+      exitCode: 1,
+      timedOut: false,
+    }))
     await expect(mmxSearch('q', 1, null)).rejects.toThrow(/failed/)
   })
 })
@@ -242,7 +265,9 @@ describe('local webSearch routing', () => {
       if (args.includes('-p')) {
         return okResult(agyEnvelope('', { denied_actions: [{ action: 'command' }] }))
       }
-      return okResult(JSON.stringify({ organic: [{ title: 'T', link: 'https://t.com', snippet: 's' }] }))
+      return okResult(
+        JSON.stringify({ organic: [{ title: 'T', link: 'https://t.com', snippet: 's' }] }),
+      )
     })
     const r = await webSearch('GenOffice', 3, {
       useGsk: false,
@@ -258,7 +283,9 @@ describe('local webSearch routing', () => {
     const seen: string[][] = []
     setLocalCliRunner(async (_cmd, args) => {
       seen.push(args)
-      return okResult(JSON.stringify({ organic: [{ title: 'T', link: 'https://t.com', snippet: 's' }] }))
+      return okResult(
+        JSON.stringify({ organic: [{ title: 'T', link: 'https://t.com', snippet: 's' }] }),
+      )
     })
     const r = await webSearch('深圳天气', 3, {
       useGsk: false,
@@ -286,6 +313,45 @@ describe('local webSearch routing', () => {
     expect(r.results).toHaveLength(1)
     expect(seen[0]).toContain('-p')
   })
+
+  it('fails the mmx Test button when only agy would answer', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+    let calls = 0
+    setLocalCliRunner(async (_cmd, args) => {
+      calls++
+      if (args.includes('-p')) {
+        return okResult(agyEnvelope('[{"title":"T","url":"https://t.com","snippet":"s"}]'))
+      }
+      throw new Error('mmx down')
+    })
+    const r = await testSearchProvider('mmx', '')
+    expect(r.ok).toBe(false)
+    // mmx failed and neither agy (fallback off) nor the network was usable
+    expect(calls).toBe(1)
+  })
+
+  it('calls agy for an explicit antigravity provider without fallback', async () => {
+    const seen: string[][] = []
+    setLocalCliRunner(async (_cmd, args) => {
+      seen.push(args)
+      if (args.includes('-p')) {
+        return okResult(agyEnvelope('[{"title":"T","url":"https://t.com","snippet":"s"}]'))
+      }
+      return okResult(
+        JSON.stringify({ organic: [{ title: 'M', link: 'https://m.com', snippet: '' }] }),
+      )
+    })
+    const r = await webSearch('hello', 3, {
+      useGsk: false,
+      localCli: {
+        provider: 'antigravity',
+        settings: { localCli: { ...defaultAiLocalCliSettings(), fallback: false } },
+      },
+    })
+    expect(r.method).toBe('antigravity')
+    expect(r.results).toHaveLength(1)
+    expect(seen).toHaveLength(1)
+  })
 })
 
 describe('image generation fallback', () => {
@@ -299,7 +365,9 @@ describe('image generation fallback', () => {
       // agy side: a valid envelope but no image file anywhere
       return okResult(agyEnvelope('/nope/missing.png'))
     })
-    const r = await generateImageTool(localSettingsFile('antigravity'), { prompt: 'red apple icon' })
+    const r = await generateImageTool(localSettingsFile('antigravity'), {
+      prompt: 'red apple icon',
+    })
     expect(r.url).toMatch(/^file:/)
     expect(r.provider).toBe('mmx')
     expect(r.attempts).toHaveLength(1)
@@ -370,14 +438,16 @@ describe('analysis fallback', () => {
 })
 
 describe('speech and video', () => {
-  it('transcribes through agy, with mmx fallback on NO_AUDIO_ACCESS', async () => {
+  it('transcribes through agy, with mmx fallback on NO_SPEECH', async () => {
     const dir = ownedDir('genoffice-asr-')
     const audio = join(dir, 'a.wav')
     writeFileSync(audio, Buffer.from([0, 1, 2, 3]))
     setLocalCliRunner(async () => okResult(agyEnvelope('hello world')))
     expect(await agyTranscribe(audio, 'zh', null)).toBe('hello world')
+    setLocalCliRunner(async () => okResult(agyEnvelope('NO_AUDIO_ACCESS')))
+    await expect(agyTranscribe(audio, 'zh', null)).rejects.toThrow(/could not transcribe/)
     setLocalCliRunner(async (_cmd, args) => {
-      if (args.includes('-p')) return okResult(agyEnvelope('NO_AUDIO_ACCESS'))
+      if (args.includes('-p')) return okResult(agyEnvelope('NO_SPEECH'))
       return okResult(JSON.stringify({ text: 'fallback transcript' }))
     })
     const r = await transcribeAudioTool(localSettingsFile('antigravity'), { path: audio })
@@ -398,7 +468,9 @@ describe('speech and video', () => {
     })
     const image = await mmxGenerateImage({ prompt: 'apple', aspectRatio: '16:9' }, null)
     expect(image.mime).toBe('image/png')
-    setLocalCliRunner(async () => okResult(JSON.stringify({ segments: [{ text: 'a' }, { text: 'b' }] })))
+    setLocalCliRunner(async () =>
+      okResult(JSON.stringify({ segments: [{ text: 'a' }, { text: 'b' }] })),
+    )
     expect(await mmxTranscribe('/tmp/a.wav', 'zh', null)).toBe('ab')
   })
 
@@ -481,13 +553,19 @@ describe('agySearch denied retry', () => {
       if (calls === 1) {
         return okResult(agyEnvelope('', { denied_actions: [{ action: 'command' }] }))
       }
-      return okResult(agyEnvelope(JSON.stringify([{ title: 'T', url: 'https://t.com', snippet: 's' }])))
+      return okResult(
+        agyEnvelope(JSON.stringify([{ title: 'T', url: 'https://t.com', snippet: 's' }])),
+      )
     })
     const r = await agySearch('GenOffice', 6, null)
     expect(calls).toBe(2)
     expect(r.results).toEqual([{ title: 'T', url: 'https://t.com', snippet: 's' }])
     expect(prompts[0]).toBe(prompts[1])
-    expect(prompts[0]?.startsWith('Do not run any shell commands and do not open or resolve any URL; use only the search_web tool.')).toBe(true)
+    expect(
+      prompts[0]?.startsWith(
+        'Do not run any shell commands and do not open or resolve any URL; use only the search_web tool.',
+      ),
+    ).toBe(true)
     expect(prompts[0]).toContain('Report each URL exactly as search_web returned it.')
   })
 
@@ -495,7 +573,9 @@ describe('agySearch denied retry', () => {
     let calls = 0
     setLocalCliRunner(async () => {
       calls++
-      return okResult(agyEnvelope('', { denied_actions: [{ action: 'command', display_name: 'RunCommand' }] }))
+      return okResult(
+        agyEnvelope('', { denied_actions: [{ action: 'command', display_name: 'RunCommand' }] }),
+      )
     })
     await expect(agySearch('q', 6, null)).rejects.toThrow(/auto-denied/)
     expect(calls).toBe(2)
@@ -515,7 +595,7 @@ describe('agySearch denied retry', () => {
 describe('staging refs from the media dir', () => {
   it('strips the exact live analyze link and its leading space', () => {
     const live =
-      '[media-0.png](file:///tmp/genoffice-analyze-LWS36c/media-0.png) 展示了一个…'
+      '[media-0.png](file:///tmp/genoffice-analyze-LWS36c/media-0.png) \u5c55\u793a\u4e86\u4e00\u4e2a…'
     expect(stripAgyStagingRefs(live, [], ['/tmp/genoffice-analyze-LWS36c/media-0.png'])).toBe(
       '展示了一个…',
     )
@@ -524,8 +604,12 @@ describe('staging refs from the media dir', () => {
   })
 
   it('strips leading punctuation left at the start', () => {
-    expect(stripAgyStagingRefs('， hello', [])).toBe('hello')
-    expect(stripAgyStagingRefs('  spaced  out  ', [])).toBe('spaced out')
+    // cleanup only runs when a link was actually removed: bare text is only trimmed
+    expect(stripAgyStagingRefs('， hello', [])).toBe('， hello')
+    expect(stripAgyStagingRefs('  spaced  out  ', [])).toBe('spaced  out')
+    expect(
+      stripAgyStagingRefs('， [x](/tmp/genoffice-agy-Z/img.png)  hello', ['/tmp/genoffice-agy-Z']),
+    ).toBe('hello')
   })
 
   it('scrubs echoed staging paths from a real agyDescribe answer', async () => {
@@ -558,8 +642,7 @@ describe('staging refs from the media dir', () => {
 })
 
 describe('grounding redirect unwrapping', () => {
-  const grounding =
-    'https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQabc123'
+  const grounding = 'https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQabc123'
 
   it('recognises only the exact grounding host and path', () => {
     expect(isGroundingRedirectUrl(grounding)).toBe(true)
@@ -570,11 +653,7 @@ describe('grounding redirect unwrapping', () => {
 
   it('replaces grounding URLs with the resolved source', async () => {
     setLocalCliRunner(async () =>
-      okResult(
-        agyEnvelope(
-          JSON.stringify([{ title: 'T', url: grounding, snippet: 's' }]),
-        ),
-      ),
+      okResult(agyEnvelope(JSON.stringify([{ title: 'T', url: grounding, snippet: 's' }]))),
     )
     setAgyRedirectResolver(async (url) => {
       expect(url).toBe(grounding)
@@ -584,7 +663,7 @@ describe('grounding redirect unwrapping', () => {
     expect(r.results[0]?.url).toBe('https://source.example/article')
   })
 
-  it('keeps the original URL when resolving fails', async () => {
+  it('drops dead grounding links, or falls back to a bare-domain title', async () => {
     setLocalCliRunner(async () =>
       okResult(agyEnvelope(JSON.stringify([{ title: 'T', url: grounding, snippet: 's' }]))),
     )
@@ -592,14 +671,31 @@ describe('grounding redirect unwrapping', () => {
       throw new Error('no network')
     })
     const r = await agySearch('q', 6, null)
-    expect(r.results[0]?.url).toBe(grounding)
+    expect(r.results).toEqual([])
+  })
+
+  it('replaces a dead grounding link with the bare domain from the title', async () => {
+    setLocalCliRunner(async () =>
+      okResult(
+        agyEnvelope(JSON.stringify([{ title: 'electronjs.org', url: grounding, snippet: 's' }])),
+      ),
+    )
+    setAgyRedirectResolver(async () => null)
+    const r = await agySearch('q', 6, null)
+    expect(r.results).toEqual([
+      { title: 'electronjs.org', url: 'https://electronjs.org', snippet: 's' },
+    ])
   })
 })
 
 describe('mmx condensed errors', () => {
   it('condenses a JSON error blob without the hint paths', async () => {
     const blob = JSON.stringify({
-      error: { code: 3, message: 'No credentials found', hint: '/very/long/path/blob ' + 'x'.repeat(500) },
+      error: {
+        code: 3,
+        message: 'No credentials found',
+        hint: '/very/long/path/blob ' + 'x'.repeat(500),
+      },
     })
     setLocalCliRunner(async () => ({ stdout: blob, stderr: '', exitCode: 1, timedOut: false }))
     await expect(mmxSearch('q', 1, null)).rejects.toThrow(
@@ -643,9 +739,11 @@ describe('agy staging-ref cleanup', () => {
   })
 
   it('drops ascii empty parens left behind and collapses spaces', () => {
-    expect(stripAgyStagingRefs('a cat (file) ([x](/tmp/genoffice-agy-Z/img.png)) end', ['/tmp/genoffice-agy-Z'])).toBe(
-      'a cat (file) end',
-    )
+    expect(
+      stripAgyStagingRefs('a cat (file) ([x](/tmp/genoffice-agy-Z/img.png)) end', [
+        '/tmp/genoffice-agy-Z',
+      ]),
+    ).toBe('a cat (file) end')
   })
 
   it('leaves text without staging refs alone', () => {
@@ -675,7 +773,8 @@ describe('temp-dir cleanup', () => {
   it('leaves no helper staging dirs behind', async () => {
     const before = new Set(helperDirs())
     setLocalCliRunner(async (_cmd, args, opts) => {
-      if (args.includes('video')) return okResult(JSON.stringify({ taskId: 't-9', status: 'queued' }))
+      if (args.includes('video'))
+        return okResult(JSON.stringify({ taskId: 't-9', status: 'queued' }))
       const outIdx = args.indexOf('--out')
       if (outIdx !== -1) writeFileSync(args[outIdx + 1] as string, PNG)
       if (opts.cwd) writeFileSync(join(opts.cwd, 'gen.png'), PNG)
@@ -710,5 +809,231 @@ describe('video agy skip note', () => {
       provider: 'antigravity',
       error: 'skipped: agy has no video generation tool (localCli.agyVideo=false)',
     })
+  })
+})
+
+describe('transcribe language hint', () => {
+  it('requires Simplified Chinese for zh and passes other languages through', async () => {
+    const prompts: string[] = []
+    setLocalCliRunner(async (_cmd, args) => {
+      prompts.push(String(args[args.indexOf('-p') + 1] ?? ''))
+      return okResult(agyEnvelope('text'))
+    })
+    const dir = ownedDir('genoffice-agy-lang-')
+    const file = join(dir, 'a.wav')
+    writeFileSync(file, Buffer.from([0, 1, 2, 3]))
+    await agyTranscribe(file, 'zh', null)
+    await agyTranscribe(file, 'en', null)
+    expect(prompts[0]).toContain('NEVER translate')
+    expect(prompts[0]).toContain(
+      'If (and only if) the speech is Chinese, write it in Simplified Chinese characters',
+    )
+    expect(prompts[1]).toContain('The likely language is "en" but that is only a hint')
+  })
+})
+
+describe('leading cleanup limits', () => {
+  it('leaves lists, quotes and digits alone when no link was removed', () => {
+    expect(stripAgyStagingRefs('- item one\n- item two', [])).toBe('- item one\n- item two')
+    expect(stripAgyStagingRefs('"quoted" and 3 things', [])).toBe('"quoted" and 3 things')
+    expect(stripAgyStagingRefs('> quoted', [])).toBe('> quoted')
+  })
+})
+
+describe('missing binaries read as not found', () => {
+  it('says mmx is not found (not logged in) when the binary is missing', async () => {
+    process.env.GENOFFICE_MMX_PATH = '/nonexistent/mmx'
+    delete process.env.MINIMAX_API_KEY
+    try {
+      await mmxSearch('q', 1, null)
+      expect.unreachable()
+    } catch (err) {
+      expect((err as Error).message).toMatch(/MiniMax CLI \(mmx\) not found/)
+    }
+  })
+})
+
+describe('windows spawn', () => {
+  it('routes .cmd through cmd.exe with a verbatim-quoted line', async () => {
+    expect(windowsCommand('C:\\tools\\mmx.cmd', ['search', 'a b'])).toEqual({
+      command: process.env.ComSpec ?? 'cmd.exe',
+      // cmd /s /c strips the outer pair; caret-escaping (cross-spawn)
+      // keeps the inner metachars literal through the second cmd parse
+      argv: ['/d', '/s', '/c', '"C:\\tools\\mmx.cmd ^^^"search^^^" ^^^"a^^^ b^^^""'],
+    })
+  })
+
+  it('caret-escapes %, &, | and quotes in arguments', async () => {
+    const { argv } = windowsCommand('agy', ['x %PATH% & | "q"'])
+    const line = argv[3] as string
+    // double-escaped: every metachar arrives preceded by ^
+    expect(line).toContain('^^^%PATH^^^%')
+    expect(line).toContain('^^^&')
+    expect(line).toContain('^^^|')
+    // quotes arrive backslash-escaped, then caret-escaped
+    expect(line).toContain('\\^^^"')
+  })
+})
+
+describe('missing-binary Genspark fallback', () => {
+  function noBinaries(): void {
+    process.env.GENOFFICE_AGY_PATH = '/nonexistent/agy'
+    process.env.GENOFFICE_MMX_PATH = '/nonexistent/mmx'
+    delete process.env.MINIMAX_API_KEY
+  }
+
+  it('falls web search over to gsk when both CLIs are missing', async () => {
+    noBinaries()
+    vi.spyOn(gsk, 'hasGskAuth').mockReturnValue(true)
+    vi.spyOn(gsk, 'gskWebSearch').mockResolvedValue({
+      results: [{ title: 'G', url: 'https://g.com', snippet: 's' }],
+    })
+    const r = await webSearch('hello', 3, {
+      useGsk: false,
+      localCli: { provider: 'local-cli', settings: null },
+    })
+    expect(r.method).toBe('gsk')
+    expect(r.results).toHaveLength(1)
+    expect(r.attempts?.map((a) => a.provider)).toEqual(['antigravity', 'mmx'])
+  })
+
+  it('falls image generation over to gsk when both CLIs are missing', async () => {
+    noBinaries()
+    vi.spyOn(gsk, 'hasGskAuth').mockReturnValue(true)
+    vi.spyOn(gsk, 'gskGenerateImage').mockResolvedValue({ url: 'https://cdn/x.png', taskId: '1' })
+    const settings = localSettingsFile('antigravity')
+    const r = await generateImageTool(settings, { prompt: 'red apple' })
+    expect(r.url).toBe('https://cdn/x.png')
+    expect(r.provider).toBe(undefined)
+    expect(r.attempts?.map((a) => a.provider)).toEqual(['antigravity', 'mmx'])
+  })
+
+  it('falls media analysis over to gsk when both CLIs are missing', async () => {
+    noBinaries()
+    vi.spyOn(gsk, 'hasGskAuth').mockReturnValue(true)
+    vi.spyOn(gsk, 'gskAnalyzeMedia').mockResolvedValue('gsk says hi')
+    const r = await analyzeMediaTool(localSettingsFile('antigravity'), {
+      mediaUrls: ['data:image/png;base64,' + PNG_B64],
+      requirements: 'describe',
+    })
+    expect(r.text).toBe('gsk says hi')
+    expect(r.attempts?.map((a) => a.provider)).toEqual(['antigravity', 'mmx'])
+  })
+
+  it('does not fall web search over to gsk when a CLI binary exists', async () => {
+    // agy is missing but mmx exists: its credential failure must not read as
+    // missing binaries, so the gsk route stays off even when signed in.
+    process.env.GENOFFICE_AGY_PATH = '/nonexistent/agy'
+    process.env.GENOFFICE_MMX_PATH = dummyBin
+    delete process.env.MINIMAX_API_KEY
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+    setLocalCliRunner(async () =>
+      okResult(JSON.stringify({ error: { code: 3, message: 'No credentials found' } })),
+    )
+    vi.spyOn(gsk, 'hasGskAuth').mockReturnValue(true)
+    const gskSearch = vi
+      .spyOn(gsk, 'gskWebSearch')
+      .mockResolvedValue({ results: [{ title: 'G', url: 'https://g.com', snippet: 's' }] })
+    const r = await webSearch('hello', 3, {
+      useGsk: false,
+      localCli: { provider: 'local-cli', settings: null },
+    })
+    expect(r.method).not.toBe('gsk')
+    expect(gskSearch).not.toHaveBeenCalled()
+  })
+})
+
+describe('silent file-producing calls', () => {
+  it('treats exit 0 plus a written --out file as success without stdout JSON', async () => {
+    setLocalCliRunner(async (_cmd, args) => {
+      const out = String(args[args.indexOf('--out') + 1] ?? '')
+      writeFileSync(out, Buffer.from([1, 2, 3, 4]))
+      return { stdout: '', stderr: '', exitCode: 0, timedOut: false }
+    })
+    const out = join(ownedDir('genoffice-tts-silent-'), 'out.mp3')
+    const synth = await mmxSynthesize({ text: 'hello', out }, null)
+    expect(synth.bytes.length).toBe(4)
+    const image = await mmxGenerateImage({ prompt: 'apple' }, null)
+    expect(image.bytes.length).toBeGreaterThan(0)
+  })
+
+  it('still fails when the --out file is missing or empty', async () => {
+    setLocalCliRunner(async () => ({ stdout: '', stderr: '', exitCode: 0, timedOut: false }))
+    const out = join(ownedDir('genoffice-tts-empty-'), 'out.mp3')
+    await expect(mmxSynthesize({ text: 'hello', out }, null)).rejects.toThrow(/did not write/)
+    setLocalCliRunner(async () => okResult(JSON.stringify({ ok: true })))
+    writeFileSync(out, Buffer.from([]))
+    await expect(mmxSynthesize({ text: 'hello', out }, null)).rejects.toThrow(/empty/)
+  })
+})
+
+describe('code 6 retry', () => {
+  const flaky = JSON.stringify({ error: { code: 6, message: 'Network request failed.' } })
+
+  it('retries idempotent calls once and then succeeds', async () => {
+    let calls = 0
+    setLocalCliRunner(async () => {
+      calls++
+      if (calls === 1) return okResult(flaky)
+      return okResult(
+        JSON.stringify({ organic: [{ title: 'T', link: 'https://t.com', snippet: '' }] }),
+      )
+    })
+    const r = await mmxSearch('q', 1, null)
+    expect(calls).toBe(2)
+    expect(r.results).toHaveLength(1)
+  })
+
+  it('does not retry image generation', async () => {
+    let calls = 0
+    setLocalCliRunner(async () => {
+      calls++
+      return okResult(flaky)
+    })
+    await expect(mmxGenerateImage({ prompt: 'apple' }, null)).rejects.toThrow(/code 6/)
+    expect(calls).toBe(1)
+  })
+})
+
+describe('mmx stderr progress chatter', () => {
+  it('skips banners and spinners when building the error', async () => {
+    setLocalCliRunner(async () => ({
+      stdout: '',
+      stderr: '[Model: MiniMax-Hailuo-2.3]\nreal boom happened',
+      exitCode: 1,
+      timedOut: false,
+    }))
+    await expect(mmxSearch('q', 1, null)).rejects.toThrow(
+      'MiniMax CLI (mmx) failed: real boom happened',
+    )
+  })
+
+  it('names the exit code when nothing readable remains', async () => {
+    setLocalCliRunner(async () => ({
+      stdout: '',
+      stderr: '[Task abc]\n45%',
+      exitCode: 2,
+      timedOut: false,
+    }))
+    await expect(mmxSearch('q', 1, null)).rejects.toThrow('MiniMax CLI (mmx) exited with code 2')
+  })
+})
+
+describe('testSearchProvider settings', () => {
+  it('honours the user mmx region for the mmx Test call', async () => {
+    const seen: string[][] = []
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+    setLocalCliRunner(async (_cmd, args) => {
+      seen.push(args)
+      return okResult(
+        JSON.stringify({ organic: [{ title: 'T', link: 'https://t.com', snippet: '' }] }),
+      )
+    })
+    const r = await testSearchProvider('mmx', '', {
+      localCli: { ...defaultAiLocalCliSettings(), mmxRegion: 'global' },
+    })
+    expect(r.ok).toBe(true)
+    const regionIdx = seen[0]?.indexOf('--region') ?? -1
+    expect(seen[0]?.[regionIdx + 1]).toBe('global')
   })
 })

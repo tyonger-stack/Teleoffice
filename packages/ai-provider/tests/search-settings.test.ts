@@ -149,9 +149,9 @@ describe('local CLI search settings', () => {
         }),
       ).toBe(provider)
     }
-    expect(activeSearchProvider({ search: { ...defaultAiSearchSettings(), provider: 'genspark' } })).toBe(
-      'genspark',
-    )
+    expect(
+      activeSearchProvider({ search: { ...defaultAiSearchSettings(), provider: 'genspark' } }),
+    ).toBe('genspark')
   })
 
   it('keeps a stored local provider through resolution', () => {

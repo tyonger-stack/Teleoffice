@@ -30,14 +30,19 @@ export const searchCommand: CommandDef = {
       const r = await imageSearchTool(settings, query, max ?? 8)
       if (r.method === 'error') throw new CliError(EXIT.app, r.error ?? 'image search failed')
       return {
-        summary: r.images.length + ' images for "' + query + '" via ' + r.method,
+        summary: `${r.images.length} images for "${query}" via ${r.method}`,
         detail: { method: r.method, images: r.images },
       }
     }
-    const r = await webSearchTool(settings, query, max ?? 6, via !== undefined ? { via } : undefined)
+    const r = await webSearchTool(
+      settings,
+      query,
+      max ?? 6,
+      via !== undefined ? { via } : undefined,
+    )
     if (r.method === 'error') throw new CliError(EXIT.app, r.error ?? 'search failed')
     return {
-      summary: r.results.length + ' results for "' + query + '" via ' + r.method,
+      summary: `${r.results.length} results for "${query}" via ${r.method}`,
       detail: {
         method: r.method,
         ...(r.answer ? { answer: r.answer } : {}),
@@ -49,10 +54,13 @@ export const searchCommand: CommandDef = {
 }
 
 // --via wins over --region; auto means no override (routing decides).
-export function viaOverride(via: string | undefined, region: string | undefined): string | undefined {
+export function viaOverride(
+  via: string | undefined,
+  region: string | undefined,
+): string | undefined {
   if (via !== undefined) {
     if (!VIA_VALUES.includes(via)) {
-      throw new CliError(EXIT.usage, '--via must be one of ' + VIA_VALUES.join(', '), undefined, {
+      throw new CliError(EXIT.usage, `--via must be one of ${VIA_VALUES.join(', ')}`, undefined, {
         reason: 'invalid_argument',
       })
     }
@@ -62,7 +70,7 @@ export function viaOverride(via: string | undefined, region: string | undefined)
     if (!REGION_VALUES.includes(region)) {
       throw new CliError(
         EXIT.usage,
-        '--region must be one of ' + REGION_VALUES.join(', '),
+        `--region must be one of ${REGION_VALUES.join(', ')}`,
         undefined,
         { reason: 'invalid_argument' },
       )
@@ -72,12 +80,12 @@ export function viaOverride(via: string | undefined, region: string | undefined)
   return undefined
 }
 
-// --max clamped to 1..20; undefined when absent so each mode keeps its own default.
+/** `--max` clamped to 1..20; undefined when absent so each mode keeps its own default. */
 export function resultCount(raw: string | undefined): number | undefined {
   if (raw === undefined) return undefined
   const n = Number(raw)
   if (!Number.isFinite(n))
-    throw new CliError(EXIT.usage, '--max must be a number, got "' + raw + '"', undefined, {
+    throw new CliError(EXIT.usage, `--max must be a number, got "${raw}"`, undefined, {
       reason: 'invalid_argument',
     })
   return Math.min(20, Math.max(1, Math.floor(n)))

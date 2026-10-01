@@ -33,12 +33,10 @@ export function resolveAiLocalCliSettings(
 ): AiLocalCliSettings {
   const defaults = defaultAiLocalCliSettings()
   if (!stored || typeof stored !== 'object') return defaults
-  const str = (v: unknown, fallback: string): string =>
-    typeof v === 'string' ? v : fallback
+  const str = (v: unknown, fallback: string): string => (typeof v === 'string' ? v : fallback)
   const num = (v: unknown, fallback: number): number =>
     typeof v === 'number' && Number.isFinite(v) ? v : fallback
-  const bool = (v: unknown, fallback: boolean): boolean =>
-    typeof v === 'boolean' ? v : fallback
+  const bool = (v: unknown, fallback: boolean): boolean => (typeof v === 'boolean' ? v : fallback)
   return {
     agyPath: str(stored.agyPath, defaults.agyPath).trim(),
     mmxPath: str(stored.mmxPath, defaults.mmxPath).trim(),

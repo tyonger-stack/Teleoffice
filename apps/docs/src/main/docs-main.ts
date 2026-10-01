@@ -3957,7 +3957,7 @@ export function registerAiIpc(): void {
       return hasGskAuth() ? { ok: true } : { ok: false, error: tm('errGskNotLoggedIn') }
     }
     if (provider === 'local-cli' || provider === 'mmx' || provider === 'antigravity') {
-      return testSearchProvider(provider, '')
+      return testSearchProvider(provider, '', readAiSettingsFile(SETTINGS_PATH()))
     }
     return testSearchProvider(provider, String(apiKey ?? ''))
   })

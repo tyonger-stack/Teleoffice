@@ -91,10 +91,14 @@ async function defaultRunner(
     }
     let child: ReturnType<typeof spawn> | undefined
     try {
-      child = spawn(cmd, args, {
+      // .cmd/.bat need cmd.exe on Windows; everything else spawns directly.
+      const direct = process.platform !== 'win32' || !/\.(cmd|bat)$/i.test(cmd)
+      const launch = direct ? { command: cmd, argv: args } : windowsCommand(cmd, args)
+      child = spawn(launch.command, launch.argv, {
         cwd: opts.cwd,
         env: opts.env,
         stdio: ['ignore', 'pipe', 'pipe'],
+        ...(direct ? {} : { windowsVerbatimArguments: true }),
       })
     } catch (err) {
       resolve({
@@ -106,21 +110,24 @@ async function defaultRunner(
       return
     }
     const proc = child
-    const timer = setTimeout(() => {
-      timedOut = true
-      try {
-        proc.kill('SIGTERM')
-      } catch {
-        // already gone
-      }
-      killTimer = setTimeout(() => {
+    const timer = setTimeout(
+      () => {
+        timedOut = true
         try {
-          proc.kill('SIGKILL')
+          proc.kill('SIGTERM')
         } catch {
           // already gone
         }
-      }, SIGKILL_GRACE_MS)
-    }, Math.max(250, opts.timeoutMs))
+        killTimer = setTimeout(() => {
+          try {
+            proc.kill('SIGKILL')
+          } catch {
+            // already gone
+          }
+        }, SIGKILL_GRACE_MS)
+      },
+      Math.max(250, opts.timeoutMs),
+    )
     if (child.stdout) {
       child.stdout.on('data', (c: Buffer) => {
         stdout = appendCapped(stdout, c, MAX_OUTPUT_BYTES)
@@ -144,6 +151,36 @@ let runner: LocalCliRunner = defaultRunner
 // Override the spawn implementation (unit tests); null restores the default.
 export function setLocalCliRunner(fn: LocalCliRunner | null | undefined): void {
   runner = fn ?? defaultRunner
+}
+
+// .cmd/.bat cannot spawn without a shell (EINVAL): route them through
+// cmd.exe /d /s /c with one verbatim command line, caret-escaping per
+// cross-spawn so %, &, | and quotes in user queries are never interpreted.
+const WINDOWS_CMD_META = /([()\][%!^`"<>&|;, *?])/g
+
+function escapeWindowsCommand(cmd: string): string {
+  return cmd.replace(WINDOWS_CMD_META, '^$1')
+}
+
+function escapeWindowsArgument(arg: string, doubleEscape: boolean): string {
+  arg = arg.replace(/(?=(\\+?)?)\1"/g, '$1$1\\"')
+  arg = arg.replace(/(?=(\\+?)?)\1$/, '$1$1')
+  arg = '"' + arg + '"'
+  arg = arg.replace(WINDOWS_CMD_META, '^$1')
+  if (doubleEscape) arg = arg.replace(WINDOWS_CMD_META, '^$1')
+  return arg
+}
+
+export function windowsCommand(cmd: string, args: string[]): { command: string; argv: string[] } {
+  // Double-escape because agy/mmx/mmx-env on Windows are npm-style .cmd
+  // shims that forward %* through a second cmd parse.
+  const line = [escapeWindowsCommand(cmd), ...args.map((a) => escapeWindowsArgument(a, true))].join(
+    ' ',
+  )
+  return {
+    command: process.env.ComSpec ?? 'cmd.exe',
+    argv: ['/d', '/s', '/c', '"' + line + '"'],
+  }
 }
 
 // -- binary resolution ----------------------------------------------
@@ -329,13 +366,25 @@ export interface AgyEnvelope {
 
 const AGY_MISSING = 'Antigravity CLI (agy) not found; install it or set the agy path in Settings'
 
+// Thrown when the CLI binary itself is missing (as opposed to a runtime or
+// credential failure), so the message always says "not found". The Genspark
+// fallback is decided by localCliBinariesMissing, not by this error.
+export class LocalCliNotFoundError extends Error {
+  readonly cli: 'agy' | 'mmx'
+  constructor(cli: 'agy' | 'mmx') {
+    super(cli === 'agy' ? AGY_MISSING : MMX_MISSING_BINARY)
+    this.name = 'LocalCliNotFoundError'
+    this.cli = cli
+  }
+}
+
 async function runAgy(
   prompt: string,
   settings: LocalCliSettingsInput,
   opts: { jsonSchema?: unknown; timeoutSec?: number; keepCwd?: boolean } = {},
 ): Promise<{ envelope: AgyEnvelope; cwd: string }> {
   const agy = resolveAgyPath(settings)
-  if (!agy) throw new Error(AGY_MISSING)
+  if (!agy) throw new LocalCliNotFoundError('agy')
   const cwd = mkdtempSync(join(tmpdir(), 'genoffice-agy-'))
   try {
     const timeout = agyTimeoutMs(settings)
@@ -719,21 +768,29 @@ export function setAgyRedirectResolver(fn: AgyRedirectResolver | null | undefine
 }
 
 // Unwrap grounding redirects in parallel; only that exact https host is ever
-// fetched, and any failure keeps the original URL.
-async function resolveGroundingRedirects(
-  results: WebSearchResult[],
-): Promise<WebSearchResult[]> {
-  return Promise.all(
-    results.map(async (r) => {
+// fetched. A dead link becomes the bare-domain title or is dropped.
+async function resolveGroundingRedirects(results: WebSearchResult[]): Promise<WebSearchResult[]> {
+  // A bare-domain title (the agent usually echoes the site name there).
+  const bareDomain = (title: string): string | null => {
+    const clean = title.trim().toLowerCase()
+    return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(clean) ? clean : null
+  }
+  const settled = await Promise.all(
+    results.map(async (r): Promise<WebSearchResult | null> => {
       if (!isGroundingRedirectUrl(r.url)) return r
       try {
         const target = await redirectResolver(r.url)
-        return target ? { ...r, url: target } : r
+        if (target) return { ...r, url: target }
       } catch {
-        return r
+        // fall through to the dead-link handling below
       }
+      // Dead grounding link (404, network failure, no Location): fall back
+      // to the bare domain when the title is one, otherwise drop the result.
+      const domain = bareDomain(r.title)
+      return domain ? { title: r.title, url: 'https://' + domain, snippet: r.snippet } : null
     }),
   )
+  return settled.filter((r): r is WebSearchResult => r !== null)
 }
 
 // -- agy image generation --------------------------------------------
@@ -749,7 +806,7 @@ export async function agyGenerateImage(
   settings: LocalCliSettingsInput = undefined,
 ): Promise<{ bytes: Uint8Array; mime: string }> {
   const agy = resolveAgyPath(settings)
-  if (!agy) throw new Error(AGY_MISSING)
+  if (!agy) throw new LocalCliNotFoundError('agy')
   const cwd = mkdtempSync(join(tmpdir(), 'genoffice-agy-'))
   try {
     let prompt =
@@ -824,11 +881,7 @@ export async function agyDescribe(
     const { envelope } = await runAgy(prompt, settings)
     const text = typeof envelope.response === 'string' ? envelope.response.trim() : ''
     if (!text) throw agyEmptyError(envelope, 'analysis')
-    return stripAgyStagingRefs(
-      text,
-      [cwd, ...local.map((p) => dirname(p))],
-      local,
-    )
+    return stripAgyStagingRefs(text, [cwd, ...local.map((p) => dirname(p))], local)
   } finally {
     rmrf(cwd)
   }
@@ -869,13 +922,19 @@ export function stripAgyStagingRefs(
     if (wanted.has(clean)) return true
     return dirs.some((d) => d && (clean === d || clean.startsWith(d + '/')))
   }
-  out = out.replace(/\[([^\]]*)\]\(([^)]+)\)/g, (match, _label, target) =>
-    isStagingRef(String(target)) ? '' : match,
-  )
-  out = out.replace(/（\s*）/g, '').replace(/\(\s*\)/g, '')
-  // Removals leave doubled spaces and stray leading punctuation behind.
-  out = out.replace(/ {2,}/g, ' ')
-  out = out.replace(/^[\s,.;:!?，。；：！？、…—\-–'"")\]}>]+/, '')
+  let removedLink = false
+  out = out.replace(/\[([^\]]*)\]\(([^)]+)\)/g, (match, _label, target) => {
+    if (!isStagingRef(String(target))) return match
+    removedLink = true
+    return ''
+  })
+  // The follow-up cleanup only runs when a link was actually removed, and it
+  // never touches list markers, quotes or digits at the start of real prose.
+  if (removedLink) {
+    out = out.replace(/（\s*）/g, '').replace(/\(\s*\)/g, '')
+    out = out.replace(/ {2,}/g, ' ')
+    out = out.replace(/^[\s,.;:!?，。；：！？、…]+/, '')
+  }
   return out.trim()
 }
 
@@ -887,29 +946,30 @@ export async function agyTranscribe(
   const cwd = mkdtempSync(join(tmpdir(), 'genoffice-agy-'))
   try {
     const local = await materialiseForAgy([path], cwd)
-    void language
+    const hintLang = (language ?? eff(settings).asrLanguage ?? '').trim() || 'zh'
     const prompt =
       'Do not run any shell commands. Call view_file on ' +
       (local[0] as string) +
-      ' and transcribe the speech verbatim in its original language. Do not mention file names or paths in your answer. ' +
-      'Reply only with the transcript, or exactly NO_AUDIO_ACCESS if you cannot hear it.'
+      ' and transcribe exactly what is spoken, in the language actually spoken. NEVER translate. ' +
+      'The likely language is "' +
+      hintLang +
+      '" but that is only a hint. ' +
+      'If (and only if) the speech is Chinese, write it in Simplified Chinese characters. ' +
+      'Do not mention file names or paths in your answer. ' +
+      'If there is no intelligible speech, reply exactly NO_SPEECH.'
     const { envelope } = await runAgy(prompt, settings)
     const text = typeof envelope.response === 'string' ? envelope.response.trim() : ''
     if (!text) throw agyEmptyError(envelope, 'transcript')
-    if (text === 'NO_AUDIO_ACCESS') {
+    if (text === 'NO_SPEECH' || text === 'NO_AUDIO_ACCESS') {
       const label = agyDeniedLabel(envelope)
       throw new Error(
         'Antigravity CLI (agy) could not transcribe the audio' +
           (label
             ? ': the agent needed permission for ' + label + ' and it was auto-denied headless'
-            : ': the agent reported NO_AUDIO_ACCESS'),
+            : ': the agent reported ' + text),
       )
     }
-    return stripAgyStagingRefs(
-      text,
-      [cwd, ...local.map((p) => dirname(p))],
-      local,
-    )
+    return stripAgyStagingRefs(text, [cwd, ...local.map((p) => dirname(p))], local)
   } finally {
     rmrf(cwd)
   }
@@ -944,10 +1004,7 @@ export async function agyVideoGenerate(
 
 // -- mmx core --------------------------------------------------------
 
-const MMX_MISSING_NO_KEY =
-  'MiniMax CLI (mmx) is not logged in (MINIMAX_API_KEY is missing and no mmx credentials were found)'
-const MMX_MISSING_BINARY =
-  'MiniMax CLI (mmx) not found; install it or set the mmx path in Settings'
+const MMX_MISSING_BINARY = 'MiniMax CLI (mmx) not found; install it or set the mmx path in Settings'
 
 function mmxErrorMessage(raw: unknown): { code: unknown; message: string } {
   if (typeof raw === 'string') return { code: undefined, message: raw }
@@ -958,18 +1015,55 @@ function mmxErrorMessage(raw: unknown): { code: unknown; message: string } {
   }
 }
 
-// First non-empty line, capped: never dump a whole stderr blob or hint paths.
-function firstLine(text: string, max = 300): string {
+// One-line mmx API failure, without the hint blob. A trailing period on the
+// vendor message is stripped so the code suffix never doubles punctuation.
+function condenseMmxError(code: unknown, message: string): string {
+  const clean = message.replace(/\.\s*$/, '')
+  const head =
+    'MiniMax CLI (mmx): ' + clean + (code !== undefined ? ' (code ' + String(code) + ')' : '')
+  return code === 3 ? head + ' - mmx is not logged in and MINIMAX_API_KEY is not set' : head
+}
+
+// Carries the vendor error code alongside the condensed message so the
+// runner can retry flaky failures without re-parsing text.
+class MmxCallError extends Error {
+  readonly code: unknown
+  constructor(message: string, code: unknown) {
+    super(message)
+    this.name = 'MmxCallError'
+    this.code = code
+  }
+}
+
+function sleepMs(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// Progress banners, spinners and bare percentages are mmx chatter, not the
+// error: skip them when falling back to raw stderr lines.
+function isMmxProgressLine(clean: string): boolean {
+  if (/^\[(Model|Task|Status)[^\]]*\]/.test(clean)) return true
+  if (/[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏◐◑◒◓]/.test(clean)) return true
+  return clean.replace(/[\d\s.,:%()\-–—/\\|_·…]+/g, '') === ''
+}
+
+// First meaningful line, capped: never dump a whole stderr blob or hint paths.
+function firstMeaningfulLine(text: string, max = 300): string {
   for (const line of text.split('\n')) {
     const clean = line.replace(/\s+/g, ' ').trim()
-    if (clean) return clean.length > max ? clean.slice(0, max) + '…' : clean
+    if (!clean || isMmxProgressLine(clean)) continue
+    return clean.length > max ? clean.slice(0, max) + '…' : clean
   }
   return ''
 }
 
 // Condensed mmx failure: {error:{code,message}} becomes a one-liner without
 // the hint blob; anything else is the first stderr line, capped.
-function mmxFailureMessage(stdout: string, stderr: string): string {
+function mmxFailureMessage(
+  stdout: string,
+  stderr: string,
+  exitCode: number | null,
+): { message: string; code: unknown } {
   const payload = parseLastJsonObject(stdout) ?? parseLastJsonObject(stderr)
   const rec = (payload && typeof payload === 'object' ? payload : {}) as Record<string, unknown>
   const err = rec.error !== undefined && rec.error !== null ? rec.error : rec
@@ -979,52 +1073,92 @@ function mmxFailureMessage(stdout: string, stderr: string): string {
       : typeof rec.code !== 'undefined' || typeof rec.message !== 'undefined'
   if (hasErrorShape) {
     const { code, message } = mmxErrorMessage(err)
-    const head = 'MiniMax CLI (mmx): ' + message + (code !== undefined ? ' (code ' + String(code) + ')' : '')
-    return code === 3
-      ? head + ' - mmx is not logged in and MINIMAX_API_KEY is not set'
-      : head
+    return { message: condenseMmxError(code, message), code }
   }
-  const line = firstLine(stderr || stdout)
-  return 'MiniMax CLI (mmx) failed' + (line ? ': ' + line : '')
+  const line = firstMeaningfulLine(stderr || stdout)
+  if (line) return { message: 'MiniMax CLI (mmx) failed: ' + line, code: undefined }
+  return {
+    message: 'MiniMax CLI (mmx) exited with code ' + String(exitCode ?? 'unknown'),
+    code: undefined,
+  }
+}
+
+// A --out file written by mmx counts as success on exit 0 even with empty
+// stdout: read it (callers need the bytes anyway) and require non-empty.
+function readNonEmptyOutFile(out: string, what: string): Buffer {
+  let raw: Buffer
+  try {
+    raw = readFileSync(out)
+  } catch {
+    throw new Error('MiniMax CLI (mmx) did not write ' + what)
+  }
+  if (!raw.length) throw new Error('MiniMax CLI (mmx) wrote an empty ' + what)
+  return raw
+}
+
+// Same existence check without loading the whole file (large video downloads).
+function assertOutFileWritten(out: string, what: string): void {
+  try {
+    if (statSync(out).size > 0) return
+  } catch {
+    // fall through to the error below
+  }
+  throw new Error('MiniMax CLI (mmx) did not write ' + what)
 }
 
 async function runMmx(
   args: string[],
   settings: LocalCliSettingsInput,
-  opts: { timeoutMs?: number; quiet?: boolean } = {},
+  opts: { timeoutMs?: number; quiet?: boolean; outFile?: string; retry?: boolean } = {},
 ): Promise<{ json: unknown; stdout: string }> {
   const inv = resolveMmxInvocation(settings)
   if (!inv) {
-    throw new Error((process.env.MINIMAX_API_KEY ?? '').trim() ? MMX_MISSING_BINARY : MMX_MISSING_NO_KEY)
+    // A missing binary always reads as not found, even without a key: the
+    // login remedy only makes sense once mmx exists to log in with.
+    throw new LocalCliNotFoundError('mmx')
   }
   const full = [...inv.baseArgs, ...args]
   // --quiet must not be passed where it changes JSON output (video --download prints only the path).
   if (opts.quiet !== false && !args.includes('--download')) full.push('--quiet')
-  const r = await runner(inv.cmd, full, {
-    env: inv.env,
-    timeoutMs: opts.timeoutMs ?? 300000,
-  })
-  if (r.timedOut) throw new Error('MiniMax CLI (mmx) timed out')
-  if (r.exitCode !== 0) {
-    throw new Error(mmxFailureMessage(r.stdout, r.stderr))
+  const attempt = async (): Promise<{ json: unknown; stdout: string }> => {
+    const r = await runner(inv.cmd, full, {
+      env: inv.env,
+      timeoutMs: opts.timeoutMs ?? 300000,
+    })
+    if (r.timedOut) throw new MmxCallError('MiniMax CLI (mmx) timed out', undefined)
+    if (r.exitCode !== 0) {
+      const failure = mmxFailureMessage(r.stdout, r.stderr, r.exitCode)
+      throw new MmxCallError(failure.message, failure.code)
+    }
+    const parsed = parseLastJsonObject(r.stdout) ?? parseLooseJson(r.stdout)
+    if (parsed === undefined || parsed === null) {
+      // File-producing calls succeed with silent stdout: exit 0 plus a
+      // non-empty --out file is success, JSON is only parsed when present.
+      if (opts.outFile) {
+        assertOutFileWritten(opts.outFile, 'the output file')
+        return { json: {}, stdout: r.stdout }
+      }
+      throw new MmxCallError('MiniMax CLI (mmx) returned no JSON output', undefined)
+    }
+    const rec = (parsed && typeof parsed === 'object' ? parsed : {}) as Record<string, unknown>
+    if (rec.error !== undefined && rec.error !== null) {
+      const { code, message } = mmxErrorMessage(rec.error)
+      throw new MmxCallError(condenseMmxError(code, message), code)
+    }
+    return { json: parsed, stdout: r.stdout }
   }
-  const parsed = parseLastJsonObject(r.stdout) ?? parseLooseJson(r.stdout)
-  if (parsed === undefined || parsed === null) {
-    throw new Error('MiniMax CLI (mmx) returned no JSON output')
+  try {
+    return await attempt()
+  } catch (err) {
+    // Flaky egress (code 6) gets one retry after a beat, for idempotent
+    // calls only: image/video generation would double-spend on retry.
+    const code = err instanceof MmxCallError ? err.code : undefined
+    if (opts.retry && code === 6) {
+      await sleepMs(1500)
+      return await attempt()
+    }
+    throw err
   }
-  const rec = (parsed && typeof parsed === 'object' ? parsed : {}) as Record<string, unknown>
-  if (rec.error !== undefined && rec.error !== null) {
-    const { code, message } = mmxErrorMessage(rec.error)
-    // Same condensed shape as a non-zero exit (no hint blob, code 3 spells
-    // out the login remedy). MMX_MISSING_NO_KEY stays the no-binary/no-key
-    // resolution error above.
-    const head =
-      'MiniMax CLI (mmx): ' + message + (code !== undefined ? ' (code ' + String(code) + ')' : '')
-    throw new Error(
-      code === 3 ? head + ' - mmx is not logged in and MINIMAX_API_KEY is not set' : head,
-    )
-  }
-  return { json: parsed, stdout: r.stdout }
 }
 
 // -- mmx search ------------------------------------------------------
@@ -1035,7 +1169,9 @@ export async function mmxSearch(
   settings: LocalCliSettingsInput = undefined,
 ): Promise<{ results: WebSearchResult[]; answer?: string }> {
   const max = clampInt(maxResults, 1, 20, 6)
-  const { json } = await runMmx(['search', 'query', '--q', query, '--output', 'json'], settings)
+  const { json } = await runMmx(['search', 'query', '--q', query, '--output', 'json'], settings, {
+    retry: true,
+  })
   const rec = (json && typeof json === 'object' ? json : {}) as Record<string, unknown>
   const organic = Array.isArray(rec.organic) ? rec.organic : []
   const results: WebSearchResult[] = []
@@ -1059,6 +1195,7 @@ export async function mmxDescribe(
   const { json } = await runMmx(
     ['vision', 'describe', '--image', pathOrUrl, '--prompt', prompt, '--output', 'json'],
     settings,
+    { retry: true },
   )
   const rec = (json && typeof json === 'object' ? json : {}) as Record<string, unknown>
   const content = String(rec.content ?? '').trim()
@@ -1087,14 +1224,12 @@ export async function mmxGenerateImage(
       args.push('--aspect-ratio', input.aspectRatio)
     }
     args.push('--out', out, '--output', 'json')
-    await runMmx(args, settings, { timeoutMs: 600000 })
-    let raw: Buffer
-    try {
-      raw = readFileSync(out)
-    } catch {
-      throw new Error('MiniMax CLI (mmx) did not write the image file')
+    await runMmx(args, settings, { timeoutMs: 600000, outFile: out })
+    const raw = readNonEmptyOutFile(out, 'the image file')
+    return {
+      bytes: new Uint8Array(raw),
+      mime: mimeFromMagicBytes(new Uint8Array(raw)) ?? 'image/png',
     }
-    return { bytes: new Uint8Array(raw), mime: mimeFromMagicBytes(new Uint8Array(raw)) ?? 'image/png' }
   } finally {
     rmrf(cwd)
   }
@@ -1115,7 +1250,10 @@ export interface MmxSynthesizeInput {
 
 const HAN_RE = /\p{Script=Han}/u
 
-export function defaultMmxVoice(text: string, settings: LocalCliSettingsInput = undefined): string | null {
+export function defaultMmxVoice(
+  text: string,
+  settings: LocalCliSettingsInput = undefined,
+): string | null {
   const configured = eff(settings).ttsVoice
   if (configured) return configured
   return HAN_RE.test(text) ? 'male-qn-qingse' : null
@@ -1138,13 +1276,8 @@ export async function mmxSynthesize(
   if (input.emotion) args.push('--emotion', input.emotion)
   if (input.language) args.push('--language', input.language)
   args.push('--output', 'json')
-  await runMmx(args, settings, { timeoutMs: 600000 })
-  let raw: Buffer
-  try {
-    raw = readFileSync(input.out)
-  } catch {
-    throw new Error('MiniMax CLI (mmx) did not write the audio file')
-  }
+  await runMmx(args, settings, { timeoutMs: 600000, outFile: input.out, retry: true })
+  const raw = readNonEmptyOutFile(input.out, 'the audio file')
   return { path: input.out, bytes: new Uint8Array(raw) }
 }
 
@@ -1156,7 +1289,7 @@ export async function mmxTranscribe(
   const args = ['speech', 'transcribe', '--file', path]
   if (language) args.push('--language', language)
   args.push('--output', 'json')
-  const { json } = await runMmx(args, settings, { timeoutMs: 600000 })
+  const { json } = await runMmx(args, settings, { timeoutMs: 600000, retry: true })
   const rec = (json && typeof json === 'object' ? json : {}) as Record<string, unknown>
   if (typeof rec.text === 'string' && rec.text.trim()) return rec.text.trim()
   const segments = Array.isArray(rec.segments) ? rec.segments : []
@@ -1208,12 +1341,19 @@ export async function mmxVideoGenerate(
     args.push('--download', input.out)
   }
   args.push('--output', 'json')
-  const { json } = await runMmx(args, settings, { timeoutMs: 1800000, quiet: input.async ? true : false })
+  const { json } = await runMmx(args, settings, {
+    timeoutMs: 1800000,
+    quiet: input.async ? true : false,
+    ...(input.async || !input.out ? {} : { outFile: input.out }),
+  })
   const rec = (json && typeof json === 'object' ? json : {}) as Record<string, unknown>
   const taskId = String(rec.task_id ?? rec.taskId ?? '')
   if (!taskId && !input.async) {
     // synchronous --download run without a task id: the file itself is the result
-    if (input.out && existsSync(input.out)) return { taskId: '', path: input.out }
+    if (input.out) {
+      assertOutFileWritten(input.out, 'the video file')
+      return { taskId: '', path: input.out }
+    }
   }
   if (!taskId) throw new Error('MiniMax CLI (mmx) returned no task id')
   const out = input.out
@@ -1223,7 +1363,10 @@ export async function mmxVideoGenerate(
   if (typeof fileId === 'string' && fileId) result.fileId = fileId
   const saved = rec.saved
   if (typeof saved === 'string' && saved) result.path = saved
-  else if (out && !input.async && existsSync(out)) result.path = out
+  else if (out && !input.async) {
+    assertOutFileWritten(out, 'the video file')
+    result.path = out
+  }
   return result
 }
 
@@ -1235,7 +1378,7 @@ export async function mmxVideoTask(
   const args = ['video', 'task', 'get', '--task-id', taskId]
   if (model) args.push('--model', model)
   args.push('--output', 'json')
-  const { json } = await runMmx(args, settings, { timeoutMs: 120000 })
+  const { json } = await runMmx(args, settings, { timeoutMs: 120000, retry: true })
   return json
 }
 
@@ -1246,7 +1389,10 @@ export async function mmxVideoDownload(
 ): Promise<string> {
   await runMmx(['video', 'download', '--file-id', fileId, '--out', out], settings, {
     timeoutMs: 1800000,
+    outFile: out,
+    retry: true,
   })
+  assertOutFileWritten(out, 'the video file')
   return out
 }
 
@@ -1263,9 +1409,7 @@ export interface LocalCliStatus {
 }
 
 // Binary presence + credential existence only: no network, no spawning.
-export function localCliStatus(
-  settings: LocalCliSettingsInput = undefined,
-): LocalCliStatus {
+export function localCliStatus(settings: LocalCliSettingsInput = undefined): LocalCliStatus {
   const agyPath = resolveAgyPath(settings)
   const inv = resolveMmxInvocation(settings)
   let credentials: 'env' | 'config' | 'missing' = 'missing'
@@ -1288,6 +1432,12 @@ export function localCliStatus(
       credentials,
     },
   }
+}
+
+// True when neither local CLI binary exists on this machine: no spawn, no
+// network. Callers use it (not error shapes) to decide the Genspark fallback.
+export function localCliBinariesMissing(settings: LocalCliSettingsInput = undefined): boolean {
+  return !resolveAgyPath(settings) && !resolveMmxInvocation(settings)
 }
 
 // -- routing -----------------------------------------------------------
@@ -1342,18 +1492,15 @@ export function pickSearchProvider(
   explicit?: string,
 ): LocalSearchCli {
   const e = (explicit ?? '').trim().toLowerCase()
-  if (
-    e === 'mmx' ||
-    e === 'antigravity' ||
-    e === 'cn' ||
-    e === 'domestic' ||
-    e === 'china'
-  ) {
+  if (e === 'mmx' || e === 'cn' || e === 'domestic' || e === 'china') {
     return 'mmx'
   }
-  // NOTE: 'agy' (the Antigravity CLI binary) selects antigravity, so that
-  // search --via agy / --region intl reaches the agy backend.
-  if (e === 'agy' || e === 'intl' || e === 'foreign' || e === 'global') return 'antigravity'
+  // 'agy' is the Antigravity CLI binary and 'antigravity' its provider id:
+  // both select antigravity, so search --via agy and provider=antigravity
+  // reach the agy backend.
+  if (e === 'agy' || e === 'antigravity' || e === 'intl' || e === 'foreign' || e === 'global') {
+    return 'antigravity'
+  }
   if (routing === 'mmx') return 'mmx'
   if (routing === 'antigravity') return 'antigravity'
   return isDomesticQuery(query) ? 'mmx' : 'antigravity'

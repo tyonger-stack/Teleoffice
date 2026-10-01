@@ -15,10 +15,22 @@ export const ttsCommand: CommandDef = {
   usage:
     'tts <text> [--out <file>] [--voice <id>] [--format mp3] [--text-file <path>] [--speed <n>] [--emotion <e>] [--language <code>] [--force]',
   options: [
-    { name: 'out', value: 'file', description: 'where to save (default: speech-<time>.mp3 in cwd)' },
-    { name: 'voice', value: 'id', description: 'mmx voice id (default: Chinese voice for Han text)' },
+    {
+      name: 'out',
+      value: 'file',
+      description: 'where to save (default: speech-<time>.mp3 in cwd)',
+    },
+    {
+      name: 'voice',
+      value: 'id',
+      description: 'mmx voice id (default: Chinese voice for Han text)',
+    },
     { name: 'format', value: 'fmt', description: 'mp3 | wav | flac | pcm | opus (default mp3)' },
-    { name: 'text-file', value: 'path', description: 'read the text from a file instead of <text>' },
+    {
+      name: 'text-file',
+      value: 'path',
+      description: 'read the text from a file instead of <text>',
+    },
     { name: 'speed', value: 'n', description: 'speech speed multiplier' },
     { name: 'emotion', value: 'e', description: 'mmx emotion hint' },
     { name: 'language', value: 'code', description: 'mmx language code' },
@@ -43,9 +55,14 @@ export const ttsCommand: CommandDef = {
     if (speedRaw !== undefined) {
       speed = Number(speedRaw)
       if (!Number.isFinite(speed)) {
-        throw new CliError(EXIT.usage, '--speed must be a number, got "' + speedRaw + '"', undefined, {
-          reason: 'invalid_argument',
-        })
+        throw new CliError(
+          EXIT.usage,
+          '--speed must be a number, got "' + speedRaw + '"',
+          undefined,
+          {
+            reason: 'invalid_argument',
+          },
+        )
       }
     }
     const textFile = textFileRaw ? resolveInput(textFileRaw, ctx) : undefined
@@ -62,7 +79,9 @@ export const ttsCommand: CommandDef = {
       ...(text ? { text } : {}),
       ...(textFile ? { textFile } : {}),
       out: chosen,
-      ...(flagString(args, 'voice') !== undefined ? { voice: flagString(args, 'voice') as string } : {}),
+      ...(flagString(args, 'voice') !== undefined
+        ? { voice: flagString(args, 'voice') as string }
+        : {}),
       format,
       ...(speed !== undefined ? { speed } : {}),
       ...(flagString(args, 'emotion') !== undefined
@@ -74,8 +93,7 @@ export const ttsCommand: CommandDef = {
     })
     if (!r.path || !r.bytes) {
       throw new CliError(EXIT.app, r.error ?? 'speech synthesis failed', undefined, {
-        suggestion:
-          'check that the mmx CLI is installed and logged in, or retry once later',
+        suggestion: 'check that the mmx CLI is installed and logged in, or retry once later',
       })
     }
     writeOutput(chosen, r.bytes)
@@ -83,6 +101,19 @@ export const ttsCommand: CommandDef = {
       summary: 'saved ' + r.bytes.byteLength + ' bytes (' + format + ') to ' + chosen,
       outputPath: chosen,
       detail: { bytes: r.bytes.byteLength, format, path: r.path, provider: r.provider ?? 'mmx' },
+      // The bytes are encoded as --format regardless of the file name: say
+      // so instead of silently writing mp3 bytes into a .wav file.
+      ...(outExt && outExt !== format
+        ? {
+            warnings: [
+              {
+                code: 'format_mismatch',
+                message: '--out ends in .' + outExt + ' but --format is ' + format,
+                suggestion: 'match the --out extension to --format',
+              },
+            ],
+          }
+        : {}),
     }
   },
 }

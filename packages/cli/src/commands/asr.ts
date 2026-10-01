@@ -11,9 +11,7 @@ export const asrCommand: CommandDef = {
   summary:
     'Transcribe speech in an audio file to text (Antigravity agy first, MiniMax mmx fallback).',
   usage: 'asr <audio file> [--language <code>]',
-  options: [
-    { name: 'language', value: 'code', description: 'audio language (default zh)' },
-  ],
+  options: [{ name: 'language', value: 'code', description: 'audio language (default zh)' }],
   async run(args, ctx) {
     const ref = args.positionals[0]
     if (!ref)

@@ -237,7 +237,8 @@ describe('genoffice capabilities', () => {
     expect(r.json().detail.video_generation).toEqual({
       available: true,
       via: 'antigravity',
-      fallback: 'mmx',
+      // mmx has no binary in this test, so no fallback is named
+      fallback: null,
     })
   })
 
@@ -260,5 +261,34 @@ describe('genoffice capabilities', () => {
     expect(d.tts).toEqual({ available: false, via: null })
     expect(d.local_cli.mmx.credentials).toBe('missing')
     expect(d.local_cli.mmx.hint).toMatch(/MINIMAX_API_KEY/)
+  })
+
+  it('reports Genspark as the effective via when the local binaries are missing', async () => {
+    vi.spyOn(aiSearch, 'hasGskAuth').mockReturnValue(true)
+    const settings = settingsFile(tempDir(), {})
+    const r = await run(['capabilities', '--json'], {
+      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+    })
+    const d = r.json().detail
+    expect(d.search).toEqual({ available: true, via: 'genspark' })
+    expect(d.image_generation).toEqual({ available: true, via: 'genspark' })
+    expect(d.media_analysis).toEqual({ available: true, via: 'genspark' })
+    // tts has no Genspark equivalent: still gated on the mmx binary
+    expect(d.tts).toEqual({ available: false, via: null })
+  })
+
+  it('keeps the local via when a binary exists even while signed in to Genspark', async () => {
+    vi.spyOn(aiSearch, 'hasGskAuth').mockReturnValue(true)
+    const dir = tempDir()
+    const agy = join(dir, 'agy')
+    writeFileSync(agy, '')
+    process.env.GENOFFICE_AGY_PATH = agy
+    const settings = settingsFile(dir, {})
+    const r = await run(['capabilities', '--json'], {
+      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+    })
+    const d = r.json().detail
+    expect(d.image_generation.via).toBe('antigravity')
+    expect(d.media_analysis.via).toBe('antigravity')
   })
 })

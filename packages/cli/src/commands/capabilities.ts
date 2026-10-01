@@ -11,12 +11,14 @@ import { aiSettingsPath, prepareCloud } from '../cloud'
 import type { CommandDef } from '../registry'
 import { appLaunch } from '../resources'
 
-// What the cloud commands can do on this machine, decided from GenOffice's
-// own settings without a network call: the local agy/mmx CLIs (the default
-// search, image and media backends), a Genspark login with cloud tools on,
-// or a BYOK key. Unkeyed fallbacks in the keyed chain (free Parallel MCP,
-// DuckDuckGo) do not count as configured. Agents check this once before
-// planning work that needs photos or web facts.
+/**
+ * What the cloud commands can do on this machine, decided from GenOffice's
+ * own settings without a network call: the local agy/mmx CLIs (the default
+ * search, image and media backends), a Genspark login with cloud tools on,
+ * or a BYOK key. Unkeyed fallbacks in the keyed chain (free Parallel MCP,
+ * DuckDuckGo) do not count as configured. Agents check this once before
+ * planning work that needs photos or web facts.
+ */
 export const capabilitiesCommand: CommandDef = {
   name: 'capabilities',
   summary:
@@ -49,6 +51,19 @@ export const capabilitiesCommand: CommandDef = {
     } else {
       search = { available: true, via: searchProvider }
     }
+    // A selected local search backend with no usable binary falls back to
+    // Genspark search when signed in with cloud tools on.
+    if (
+      !search.available &&
+      gsk &&
+      !status.agy.found &&
+      !status.mmx.found &&
+      (searchProvider === 'local-cli' ||
+        searchProvider === 'mmx' ||
+        searchProvider === 'antigravity')
+    ) {
+      search = { available: true, via: 'genspark' }
+    }
     const keyedImageSearch = searchProvider === 'serper' || searchProvider === 'serply'
     const gskSearch = gsk && searchProvider === 'genspark'
     const imageSearch = gskSearch
@@ -74,18 +89,28 @@ export const capabilitiesCommand: CommandDef = {
       return {
         available,
         via: available ? primary : null,
-        fallback: available && cli.fallback ? other : null,
+        // Name the other side only when it is actually usable.
+        fallback: available && cli.fallback && cliOk(other) ? other : null,
       }
     }
+    // A selected local backend with neither binary present falls back to
+    // Genspark when signed in with cloud tools on: report genspark as the
+    // effective via. BYOK entries never get this fallback.
+    const withGskFallback = <T extends { available: boolean; via: string | null }>(
+      entry: T,
+    ): T | { available: boolean; via: string | null } =>
+      !entry.available && gsk && !status.agy.found && !status.mmx.found
+        ? { available: true, via: 'genspark' }
+        : entry
     const imageProvider = activeMediaProvider(settings, 'image')
     const imageGeneration =
       imageProvider === 'antigravity' || imageProvider === 'mmx'
-        ? localPair(imageProvider)
+        ? withGskFallback(localPair(imageProvider))
         : byokCaps(imageProvider, imageGenerationAvailable(settings, hasGskAuth()))
     const analysisProvider = activeMediaProvider(settings, 'analysis')
     const mediaAnalysis =
       analysisProvider === 'antigravity' || analysisProvider === 'mmx'
-        ? localPair(analysisProvider)
+        ? withGskFallback(localPair(analysisProvider))
         : byokCaps(analysisProvider, mediaAnalysisAvailable(settings, hasGskAuth()))
     const tts = { available: mmxOk, via: mmxOk ? 'mmx' : null }
     const asrPair = localPair('antigravity')
@@ -127,7 +152,7 @@ export const capabilitiesCommand: CommandDef = {
       .map(([k]) => k)
     return {
       summary: on.length
-        ? 'configured: ' + on.join(', ')
+        ? `configured: ${on.join(', ')}`
         : 'no cloud feature configured; the app is not installed',
       detail,
     }

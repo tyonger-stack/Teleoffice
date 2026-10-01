@@ -36,6 +36,7 @@ import {
   agyGenerateImage,
   agyTranscribe,
   agyVideoGenerate,
+  localCliBinariesMissing,
   mmxDescribe,
   mmxGenerateImage,
   mmxSynthesize,
@@ -302,7 +303,8 @@ async function localGenerateImage(
   const attempts: { provider: string; error: string }[] = []
   const fullPrompt =
     op.transparentBackground === true
-      ? prompt + ' The subject must be isolated on a clean, uniform background (transparent-background style cutout).'
+      ? prompt +
+        ' The subject must be isolated on a clean, uniform background (transparent-background style cutout).'
       : prompt
   let referenceImagePaths: string[] = []
   let refDir: string | null = null
@@ -337,7 +339,8 @@ async function localGenerateImage(
       }
     }
     return {
-      error: attempts.map((a) => a.provider + ': ' + a.error).join('; ') || 'image generation failed',
+      error:
+        attempts.map((a) => a.provider + ': ' + a.error).join('; ') || 'image generation failed',
       attempts,
     }
   } catch (err) {
@@ -383,7 +386,35 @@ export async function generateImageTool(
     }
     // Local CLI backends never reach the HTTP providers below (guarded there too).
     if (byok.provider === 'antigravity' || byok.provider === 'mmx') {
-      return localGenerateImage(settings, prompt, op)
+      const r = await localGenerateImage(settings, prompt, op)
+      if (
+        r.url ||
+        !localCliBinariesMissing(settings) ||
+        !hasGskAuth() ||
+        !cloudToolsEnabled(settings)
+      ) {
+        return r
+      }
+      // Neither CLI binary exists while Genspark is available: run the gsk
+      // route above and keep the CLI failures in attempts.
+      const gate = gskGate(settings, options.notLoggedInError ?? GSK_NOT_LOGGED_IN_ERROR)
+      if (gate) return { ...gate, attempts: [...(r.attempts ?? [])] }
+      assertMediaItemCount(op.referenceImageUrls?.length ?? 0, MEDIA_BUDGET.maxItems)
+      const gen = await gskGenerateImage({ ...op, prompt })
+      const prior = [...(r.attempts ?? [])]
+      if (!op.transparentBackground || op.model === GSK_RMBG_MODEL) {
+        return prior.length ? { url: gen.url, attempts: prior } : { url: gen.url }
+      }
+      try {
+        const cut = await gskGenerateImage({
+          prompt: 'remove the background completely, keep only the subject',
+          model: GSK_RMBG_MODEL,
+          referenceImageUrls: [gen.url],
+        })
+        return prior.length ? { url: cut.url, attempts: prior } : { url: cut.url }
+      } catch {
+        return prior.length ? { url: gen.url, attempts: prior } : { url: gen.url }
+      }
     }
     // `model` names Genspark-only special models (fal-*); BYOK uses the configured image model
     const references = await loadMediaReferences(op.referenceImageUrls ?? [])
@@ -441,7 +472,19 @@ export async function analyzeMediaTool(
     const byok = hasVideo ? videoByok : imageByok
     if (!byok) return await viaGsk()
     if (byok.provider === 'antigravity' || byok.provider === 'mmx') {
-      return localAnalyzeMedia(settings, mediaUrls, media, requirements, byok.provider)
+      const r = await localAnalyzeMedia(settings, mediaUrls, media, requirements, byok.provider)
+      if (
+        r.text ||
+        !localCliBinariesMissing(settings) ||
+        !hasGskAuth() ||
+        !cloudToolsEnabled(settings)
+      ) {
+        return r
+      }
+      // Neither CLI binary exists while Genspark is available: run the gsk
+      // route and keep the CLI failures in attempts.
+      const g = await viaGsk()
+      return { ...g, attempts: [...(r.attempts ?? [])] }
     }
     return {
       text: await analyzeMediaWithProvider(byok.provider, byok.config, { media, requirements }),
@@ -494,7 +537,10 @@ async function localAnalyzeMedia(
     const dir = mkdtempSync(join(tmpdir(), 'genoffice-analyze-'))
     staged.push(dir)
     return blobs.map((blob, i) => {
-      const target = join(dir, 'media-' + i + (LOCAL_ANALYZE_EXT[blob.mime.toLowerCase()] ?? '.bin'))
+      const target = join(
+        dir,
+        'media-' + i + (LOCAL_ANALYZE_EXT[blob.mime.toLowerCase()] ?? '.bin'),
+      )
       writeFileSync(target, blob.bytes)
       return target
     })

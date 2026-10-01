@@ -789,9 +789,8 @@ function AiMediaPane({
               search.provider === 'mmx' ||
               search.provider === 'antigravity'
                 ? ''
-                : (search.providers[
-                    search.provider as keyof AiSearchSettings['providers']
-                  ]?.apiKey ?? ''),
+                : (search.providers[search.provider as keyof AiSearchSettings['providers']]
+                    ?.apiKey ?? ''),
           }) ?? Promise.resolve(fallback),
       ],
       ['image', () => vendorCheck(media.imageProvider)],

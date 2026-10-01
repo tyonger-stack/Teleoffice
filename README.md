@@ -264,6 +264,16 @@ document in a visible editor tab while you watch.
 through the Genspark proxy (Claude, GPT and Gemini families) and the agents get
 web and image search, image generation, and image/audio/video analysis.
 
+**Local CLIs by default for search and media.** Unless another provider is
+picked under **AI Media & Search**, web search goes through two command-line
+tools on this computer: the MiniMax CLI (`mmx`) for Chinese queries and
+Chinese sites, the Antigravity CLI (`agy`) for everything else, each falling
+over to the other. Image generation, image/audio/video analysis and speech
+recognition use `agy` first and `mmx` second; text-to-speech and video use
+`mmx`. This replaces the earlier Genspark default; Genspark stays selectable,
+and when neither CLI is installed a Genspark sign-in with cloud tools on
+takes over search, image generation and media analysis automatically.
+
 **Or bring your own key.** Settings → AI lists Claude, OpenAI, Gemini,
 DeepSeek, Kimi, GLM, Qwen, Doubao, MiniMax, Grok, Mistral, OpenRouter, Requesty, Opper
 and OpenCode Zen/Go, plus a custom slot for any OpenAI-compatible endpoint (base
@@ -281,8 +291,8 @@ default; when on, the excerpts of the top 20 local hits are sent for judgment
 and nothing else leaves the machine.
 
 **Parallel** works without an account: its free Search MCP (rate-limited) is the
-default web search whenever no Genspark login or search key is configured, and
-it runs ahead of the DuckDuckGo scrape. Select Parallel under Web search and
+web search fallback whenever no Genspark login or search key is configured (after
+the local CLIs when those are selected), and it runs ahead of the DuckDuckGo scrape. Select Parallel under Web search and
 enter a [Parallel](https://platform.parallel.ai/) key to use the Search API
 instead.
 

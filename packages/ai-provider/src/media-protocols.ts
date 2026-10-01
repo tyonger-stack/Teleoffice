@@ -47,10 +47,14 @@ export interface AnalyzeMediaInput {
 export type ByokMediaProviderId = Exclude<AiMediaProviderId, 'genspark' | 'antigravity' | 'mmx'>
 
 // Local CLI media ids are served by the agy/mmx CLIs in ai-search, never here.
-export function assertHttpMediaProvider(provider: AiMediaProviderId): asserts provider is ByokMediaProviderId {
+export function assertHttpMediaProvider(
+  provider: AiMediaProviderId,
+): asserts provider is ByokMediaProviderId {
   if (provider === 'antigravity' || provider === 'mmx') {
     throw new Error(
-      'Media provider ' + provider + ' is a local CLI backend; route it through the local CLI runtime',
+      'Media provider ' +
+        provider +
+        ' is a local CLI backend; route it through the local CLI runtime',
     )
   }
 }

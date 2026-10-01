@@ -104,6 +104,23 @@ describe('genoffice tts', () => {
     expect(r.json().detail.provider).toBe('mmx')
   })
 
+  it('warns when the output extension disagrees with the format', async () => {
+    const dir = tempDir()
+    const out = join(dir, 'hello.wav')
+    vi.spyOn(aiSearch, 'synthesizeSpeechTool').mockImplementation(async (_settings, op) => ({
+      path: op.out as string,
+      bytes: new Uint8Array([1, 2, 3]),
+      provider: 'mmx',
+    }))
+    const settings = settingsFile(dir)
+    const r = await run(['tts', 'hello', '--out', out, '--format', 'mp3', '--json'], {
+      cwd: dir,
+      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+    })
+    expect(r.code).toBe(0)
+    expect(r.json().warnings?.[0]?.code).toBe('format_mismatch')
+  })
+
   it('rejects an unknown format', async () => {
     const r = await run(['tts', 'hello', '--format', 'ogg2', '--json'], {
       env: { ...process.env },
