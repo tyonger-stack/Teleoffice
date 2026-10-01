@@ -4124,6 +4124,10 @@ export function App({
             // to reproduce the exact pre-save view.
             restoredSheet.scrollToCell(restore.viewRow, restore.viewColumn)
           } else {
+            // Activate A1 so EditorBridge parks the hidden input on a real cell.
+            // scrollToCell alone leaves a spare-adopted view without a primary
+            // selection the keyboard listener can open for typing.
+            worksheet.getRange(0, 0, 1, 1).activate()
             worksheet.scrollToCell(0, 0)
           }
         } catch {
@@ -4166,11 +4170,12 @@ export function App({
   }
 
   // A workbook loaded into an already-mounted view (the prewarmed spare) can
-  // leave document focus on a node Univer no longer reads keys from; hand it
-  // back to the cell editor unless chrome (AI composer, dialogs) holds it.
+  // leave Univer without FOCUSING_SHEET / a focused unit after disposeUnit, so
+  // printable keys never open the cell editor (Enter still navigates via
+  // shortcuts). Re-focus the sheet unit, then Univer's hidden input host.
   function focusSheetGrid(): void {
     const runtime = univerRef.current
-    if (!runtime || !document.hasFocus()) return
+    if (!runtime) return
     const active = document.activeElement
     const chromeHoldsFocus =
       active !== null &&
@@ -4178,7 +4183,23 @@ export function App({
       active.isConnected &&
       !active.closest('#univer-container')
     if (chromeHoldsFocus) return
-    runtime.univer.__getInjector().get(ILayoutService).focus()
+
+    const apply = (): boolean => {
+      if (!document.hasFocus()) return false
+      const injector = runtime.univer.__getInjector()
+      const instances = injector.get(IUniverInstanceService)
+      const workbook = instances.getCurrentUnitOfType(UniverInstanceType.UNIVER_SHEET)
+      if (workbook) instances.focusUnit(workbook.getUnitId())
+      injector.get(ILayoutService).focus()
+      return true
+    }
+    if (apply()) return
+    // Spare adoption can finish the open before Electron focuses the view.
+    const onFocus = (): void => {
+      if (apply()) window.removeEventListener('focus', onFocus)
+    }
+    window.addEventListener('focus', onFocus)
+    window.setTimeout(() => window.removeEventListener('focus', onFocus), 5_000)
   }
 
   async function handleInspectWorkbook(): Promise<void> {

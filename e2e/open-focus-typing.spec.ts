@@ -270,20 +270,15 @@ test.describe('sheets spare-view focus', () => {
       // settles on A1 the poll fails and names what it settled on instead, so a
       // broken adoption cannot pass by typing into nothing.
       await expect.poll(() => activeRangeNotation(sheets), { timeout: 30_000 }).toBe('A1')
-      // Re-focus the live connected editor: spare adoption can leave a stale
-      // contenteditable as activeElement even after isConnected passes.
-      await sheets.evaluate(() => {
-        const editors = [...document.querySelectorAll('[contenteditable="true"]')].filter(
-          (el): el is HTMLElement =>
-            el instanceof HTMLElement && el.isConnected && el.offsetParent !== null,
-        )
-        const preferred =
-          editors.find((el) => /editor/i.test(el.id) || /editor/i.test(el.className)) ?? editors[0]
-        preferred?.focus()
-      })
+      // Product code must hand keyboard ownership to Univer's sheet input host
+      // (ILayoutService.focus after focusUnit). Do not steal focus onto the
+      // docs-normal contenteditable — that element accepts DOM focus without
+      // FOCUSING_SHEET, so printable keys never open the cell editor while
+      // Enter still navigates.
       const before = await domState(sheets)
       // Character key simulation can omit input events in an adopted Electron
-      // view. Prefer the text-input channel; fall back to typed keys if empty.
+      // view. Prefer the text-input channel once the sheet input host is
+      // focused; fall back to typed keys if empty.
       await sheets.keyboard.insertText('4242')
       let afterInsert = await domState(sheets)
       if (!afterInsert.editorText) {
