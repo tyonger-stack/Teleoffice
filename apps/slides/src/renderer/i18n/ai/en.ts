@@ -17,7 +17,6 @@ export const en = {
   aiQcPageSkipped: 'Page {n}: automatic layout check skipped',
   aiQcStopped: 'Layout check stopped',
   aiQcCapped: '{count} more page(s) not checked (per-run cap)',
-  aiGskLoginBtn: 'Sign in to Genspark',
   aiPanelTitle: 'Genspark',
   aiOpenAssistant: 'Open AI assistant',
   aiFactCheckBtn: 'AI Fact Check',

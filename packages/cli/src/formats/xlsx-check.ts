@@ -1,6 +1,9 @@
 import { parseRange } from '@teleoffice/xlsx-gateway/domain/cell-address'
 import { splitSheetRef } from '@teleoffice/xlsx-gateway/domain/chart-visual'
-import { parseRelationships, parseSheetElements } from '@teleoffice/xlsx-gateway/gateway/xlsx-sheets'
+import {
+  parseRelationships,
+  parseSheetElements,
+} from '@teleoffice/xlsx-gateway/gateway/xlsx-sheets'
 import {
   FORMULA_REFERENCE_PATTERN,
   qualifierMatches,

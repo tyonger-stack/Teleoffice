@@ -963,7 +963,12 @@ export function cssFontFamily(font: string, followAltName = true): string {
     'Noto Serif JP',
   ]
   const KO_SANS = ['Malgun Gothic', 'TeleOffice Sans KR', 'Apple SD Gothic Neo', 'Noto Sans KR']
-  const KO_SERIF = ['TeleOffice Batang', 'TeleOffice Serif KR', 'TeleOffice Myungjo', 'Noto Serif KR']
+  const KO_SERIF = [
+    'TeleOffice Batang',
+    'TeleOffice Serif KR',
+    'TeleOffice Myungjo',
+    'Noto Serif KR',
+  ]
   const TC_SANS = ['Microsoft JhengHei', 'PingFang TC', 'TeleOffice Heiti TC', 'Noto Sans TC']
   // 'TeleOffice Fullwidth TC' (fonts.css): fullwidth U+FF0D/FF0F/FF3C/FF3F/FF5E whose Songti TC glyphs look half-width
   // 'TeleOffice Songti TC' (fonts.css): weight-normal alias so bold synthesizes like Word's faux-bold PMingLiU

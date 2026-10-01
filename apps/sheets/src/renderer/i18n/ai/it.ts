@@ -4,7 +4,6 @@ export const it = {
   aiComposerPlaceholderBuild: 'Descrivi la tabella, i dati o il grafico da creare…',
   aiEmptyBuildTitle: "Lascia che l'IA costruisca questa cartella di lavoro",
   aiEmptyBuildBody: 'Descrivi la tabella, i dati o il grafico che ti servono: l’IA li crea subito.',
-  aiGskLoginBtn: 'Accedi a Genspark',
   aiUndelivered: 'Non inviato',
   aiRetry: 'Riprova',
   aiOpenAssistant: "Apri l'assistente IA",

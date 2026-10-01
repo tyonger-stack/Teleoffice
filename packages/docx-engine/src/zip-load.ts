@@ -1,5 +1,8 @@
 import JSZip from 'jszip'
-import { assertDeclaredSizesWithinLimits, assertZipInflatesWithinLimits } from '@teleoffice/zip-gate'
+import {
+  assertDeclaredSizesWithinLimits,
+  assertZipInflatesWithinLimits,
+} from '@teleoffice/zip-gate'
 import { needsOoxmlNormalization, normalizeOoxmlXml } from './ooxml-normalize'
 
 // Re-exported for the engine's public API (index.ts) and the CLI's pre-open

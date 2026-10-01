@@ -5,7 +5,6 @@ export const nl = {
   aiEmptyBuildTitle: 'Laat AI deze werkmap voor je opbouwen',
   aiEmptyBuildBody:
     'Beschrijf de tabel, gegevens of grafiek die je nodig hebt — AI maakt het direct.',
-  aiGskLoginBtn: 'Aanmelden bij Genspark',
   aiUndelivered: 'Niet verzonden',
   aiRetry: 'Opnieuw proberen',
   aiOpenAssistant: 'AI-assistent openen',

@@ -83,7 +83,9 @@ describe('fontAttrsFromFamilyChain', () => {
 
   it('skips internal TeleOffice aliases even at the chain head', () => {
     expect(
-      fontAttrsFromFamilyChain("'TeleOffice Songti SC','STSong','SimSun','Noto Serif CJK SC',serif"),
+      fontAttrsFromFamilyChain(
+        "'TeleOffice Songti SC','STSong','SimSun','Noto Serif CJK SC',serif",
+      ),
     ).toEqual({ font: 'STSong' })
   })
 
@@ -93,7 +95,9 @@ describe('fontAttrsFromFamilyChain', () => {
       fontAscii: 'SomeCustomFont',
     })
     expect(
-      fontAttrsFromFamilyChain("'PT Serif Custom','Noto Serif CJK GO','TeleOffice PUA Blank',serif"),
+      fontAttrsFromFamilyChain(
+        "'PT Serif Custom','Noto Serif CJK GO','TeleOffice PUA Blank',serif",
+      ),
     ).toEqual({ font: 'PT Serif Custom', fontAscii: 'PT Serif Custom' })
   })
 

@@ -69,7 +69,9 @@ export function IntegrationsPane({
   const [copied, setCopied] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
-    const s = await api()?.status()
+    const bridge = api()
+    if (!bridge || typeof bridge.status !== 'function') return
+    const s = await bridge.status()
     if (!s) return
     setStatus(s)
     onStatus?.(s)

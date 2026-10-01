@@ -81,9 +81,9 @@ function electronCompatArgs(): string[] {
 }
 
 /**
- * API key for Genspark LLM proxy / tool_cli auth; '' when not logged in.
- * Priority: GSK_API_KEY env → TeleOffice's own key (bills to us via its
- * key_name) → shared gsk CLI login (bills to the Claw bucket).
+ * API key for Genspark LLM proxy / tool_cli; '' when none is configured.
+ * Priority: GSK_API_KEY env → residual ~/.teleoffice/auth.json → shared
+ * ~/.genspark-tool-cli/config.json. TeleOffice no longer runs a login UI.
  */
 export function gskApiKey(): string {
   if (process.env.GSK_API_KEY) return process.env.GSK_API_KEY
@@ -122,7 +122,7 @@ export function watchGskApiKey(onChange: (key: string) => void, intervalMs = 200
 }
 
 /**
- * Whether gsk is usable (CLI installed and logged in / has a key). Callers use this to decide fallback.
+ * Whether gsk is usable (CLI installed and a key is available). Callers use this to decide fallback.
  * Set AI_SEARCH_DISABLE_GSK=1 to force-disable (test isolation / force Serper).
  */
 export function hasGskAuth(): boolean {

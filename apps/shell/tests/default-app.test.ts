@@ -126,7 +126,9 @@ describe('createDefaultAppService', () => {
     const run = vi.fn<RunCommand>(async (cmd, args) => {
       calls.push([cmd, ...args])
       if (args[0] === 'query')
-        return args[2].includes('spreadsheetml') ? 'wps-office-et.desktop\n' : 'teleoffice.desktop\n'
+        return args[2].includes('spreadsheetml')
+          ? 'wps-office-et.desktop\n'
+          : 'teleoffice.desktop\n'
       return ''
     })
     const svc = createDefaultAppService({

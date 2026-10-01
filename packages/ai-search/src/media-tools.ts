@@ -23,7 +23,10 @@ import {
   type MediaBlob,
 } from '@teleoffice/ai-provider'
 // deep imports: the package root re-exports Electron-bound modules, and this file also runs in the teleoffice CLI
-import { readGeneratedImage, storeGeneratedImage } from '@teleoffice/electron-utils/generated-images'
+import {
+  readGeneratedImage,
+  storeGeneratedImage,
+} from '@teleoffice/electron-utils/generated-images'
 import {
   ResponseTooLargeError,
   fetchRemoteImage,

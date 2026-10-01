@@ -5,7 +5,6 @@ export const cs = {
   aiEmptyBuildTitle: 'Nechte AI sestavit tento sešit za vás',
   aiEmptyBuildBody:
     'Popište tabulku, data nebo graf, které potřebujete — AI je vytvoří přímo na místě.',
-  aiGskLoginBtn: 'Přihlásit se ke Genspark',
   aiUndelivered: 'Neodesláno',
   aiRetry: 'Zkusit znovu',
   aiOpenAssistant: 'Otevřít asistenta AI',

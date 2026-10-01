@@ -26,7 +26,11 @@ export default defineConfig({
   main: {
     plugins: [
       externalizeDepsPlugin({
-        exclude: ['@teleoffice/docx-engine', '@teleoffice/electron-utils', '@teleoffice/font-metrics'],
+        exclude: [
+          '@teleoffice/docx-engine',
+          '@teleoffice/electron-utils',
+          '@teleoffice/font-metrics',
+        ],
       }),
     ],
     resolve: { alias: localAlias },

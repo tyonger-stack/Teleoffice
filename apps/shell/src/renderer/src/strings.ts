@@ -310,7 +310,7 @@ export const strings = {
     setAiKeyHint: '密钥仅保存在本机。',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: '留空使用官方端点。',
-    setAiGensparkHint: '使用 Genspark 账号登录，无需 API key。',
+    setAiGensparkHint: '使用环境变量 GSK_API_KEY（或其它已配置的密钥）；无需登录。',
     setAiCodexPath: 'Codex 可执行文件',
     setAiCodexPathHint: '仅自定义安装时填写；留空会自动检测。',
     setAiCodexAutoPlaceholder: '留空自动检测（推荐）',
@@ -328,7 +328,7 @@ export const strings = {
     setAiMaxTokensDesc:
       '一次回合的输出预算。推理模型会先消耗预算用于思考，预算用完时回复可能变成空白，遇到这种情况请调大此项。',
     setSecAiMedia: '生图、媒体与搜索',
-    setAiMediaGensparkHint: '生图与图片/视频解析使用 Genspark 账号登录。',
+    setAiMediaGensparkHint: '生图与图片/视频解析使用 GSK_API_KEY 或其它已配置密钥。',
     setAiMediaAgyHint:
       '生图与图片/视频/音频解析经由本机 Antigravity CLI（agy），使用你的 Google 账号，无需 API key。',
     setAiMediaMmxHint:
@@ -384,7 +384,7 @@ export const strings = {
     onbBody1: '创建文档、制作表格、生成演示、审阅 PDF。AI 深度融入每个环节。',
     onbTitle2: '这只是一个开始',
     onbBody2: 'TeleOffice 目前处于 alpha 阶段。欢迎加入 GenTeam 群聊，分享反馈，一起塑造它的未来。',
-    onbCredits: '活跃贡献者可获得 **1,000+ Genspark 积分**',
+    onbCredits: '加入社区，分享反馈。',
     onbJoinGenTeam: '加入 GenTeam',
     onbSkip: '跳过',
     onbNext: '下一步',
@@ -392,7 +392,7 @@ export const strings = {
     onbStepAria: '第 {n} 页，共 {total} 页',
     onbTitle3: '人人免费',
     onbBody3: '无授权费用，无广告，无水印。',
-    onbNote3: 'AI 功能可能消耗 Genspark 积分。',
+    onbNote3: '可选的 AI 功能需要在设置中配置你自己的 API 密钥；核心编辑完全本地。',
     onbBack: '上一步',
   },
   en: {
@@ -712,7 +712,8 @@ export const strings = {
     setAiKeyHint: 'Stored only on this device.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Leave empty for the official endpoint.',
-    setAiGensparkHint: 'Uses your Genspark sign-in; no API key needed.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Codex executable',
     setAiCodexPathHint: 'Only set this for a custom install; leave blank to auto-detect.',
     setAiCodexAutoPlaceholder: 'Auto-detect (recommended)',
@@ -730,7 +731,8 @@ export const strings = {
     setAiMaxTokensDesc:
       'Output budget for one turn. Reasoning models spend part of it thinking, so an answer can come back empty once the budget runs out; raise this value if that happens.',
     setSecAiMedia: 'AI Media & Search',
-    setAiMediaGensparkHint: 'Image generation and image/video analysis use your Genspark sign-in.',
+    setAiMediaGensparkHint:
+      'Image generation and image/video analysis use GSK_API_KEY or another configured key.',
     setAiMediaAgyHint:
       'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
     setAiMediaMmxHint:
@@ -738,7 +740,7 @@ export const strings = {
     setAiImageModel: 'Image model',
     setAiAnalysisModel: 'Analysis model',
     setAiSearchGensparkHint:
-      'Web and image search use your Genspark sign-in; signed out or with cloud tools off they fall back to free sources.',
+      'Web and image search use GSK_API_KEY when set; otherwise they fall back to free sources.',
     setAiSearchSerperHint: 'Serper serves both web and image search with your key.',
     setAiSearchSerplyHint: 'Serply serves both web and image search with your key.',
     setAiSearchTavilyHint:
@@ -790,7 +792,7 @@ export const strings = {
     onbTitle2: 'This is just the beginning',
     onbBody2:
       'TeleOffice is still in alpha. Join the group chat on GenTeam to share feedback and help shape what comes next.',
-    onbCredits: 'Active contributors get **1,000+ Genspark credits**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Join GenTeam',
     onbSkip: 'Skip',
     onbNext: 'Next',
@@ -798,7 +800,8 @@ export const strings = {
     onbStepAria: 'Page {n} of {total}',
     onbTitle3: 'Free for everyone',
     onbBody3: 'No license fees. No ads. No watermarks.',
-    onbNote3: 'AI features may consume Genspark credits.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Back',
   },
   vi: {
@@ -1119,7 +1122,8 @@ export const strings = {
     setAiKeyHint: 'Chỉ được lưu trữ trên thiết bị này.',
     setAiBaseUrl: 'URL cơ sở',
     setAiBaseUrlHint: 'Để trống để sử dụng điểm cuối chính thức.',
-    setAiGensparkHint: 'Sử dụng thông tin đăng nhập Genspark của bạn; không cần khóa API.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Tệp thực thi Codex',
     setAiCodexPathHint: 'Chỉ đặt mục này nếu cài đặt tùy chỉnh; để trống để tự động phát hiện.',
     setAiCodexAutoPlaceholder: 'Tự động phát hiện (khuyến nghị)',
@@ -1198,7 +1202,7 @@ export const strings = {
     onbTitle2: 'Đây mới chỉ là khởi đầu',
     onbBody2:
       'TeleOffice vẫn đang trong giai đoạn alpha. Hãy tham gia nhóm trò chuyện trên GenTeam để chia sẻ phản hồi và định hình những bước phát triển tiếp theo.',
-    onbCredits: 'Thành viên đóng góp tích cực nhận được **1.000+ credit Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Tham gia GenTeam',
     onbSkip: 'Bỏ qua',
     onbNext: 'Tiếp theo',
@@ -1206,7 +1210,8 @@ export const strings = {
     onbStepAria: 'Trang {n} / {total}',
     onbTitle3: 'Miễn phí cho mọi người',
     onbBody3: 'Không phí bản quyền. Không quảng cáo. Không hình mờ.',
-    onbNote3: 'Các tính năng AI có thể tiêu tốn credit Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Quay lại',
   },
   ja: {
@@ -1540,7 +1545,8 @@ export const strings = {
     setAiKeyHint: 'キーはこの端末にのみ保存されます。',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: '空欄で公式エンドポイントを使用します。',
-    setAiGensparkHint: 'Genspark アカウントでサインインするため、API キーは不要です。',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Codex 実行ファイル',
     setAiCodexPathHint: 'カスタムインストール時のみ指定します。空欄なら自動検出します。',
     setAiCodexAutoPlaceholder: '自動検出（推奨）',
@@ -1557,7 +1563,8 @@ export const strings = {
     setAiMaxTokensDesc:
       '1 ターンの出力予算です。推論モデルは思考にも消費するため、使い切ると返信が空になることがあります。その場合は値を大きくしてください。',
     setSecAiMedia: 'AI メディアと検索',
-    setAiMediaGensparkHint: '画像生成と画像/動画解析は Genspark のサインインを使用します。',
+    setAiMediaGensparkHint:
+      'Image generation and image/video analysis use GSK_API_KEY or another configured key.',
     setAiMediaAgyHint:
       'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
     setAiMediaMmxHint:
@@ -1619,7 +1626,7 @@ export const strings = {
     onbTitle2: 'これはまだ始まりにすぎません',
     onbBody2:
       'TeleOffice はまだアルファ版です。GenTeam のグループチャットに参加して、フィードバックを共有し、今後の開発を一緒に形作りましょう。',
-    onbCredits: 'アクティブな貢献者への特典 **1,000+ Genspark クレジット**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'GenTeam に参加',
     onbSkip: 'スキップ',
     onbNext: '次へ',
@@ -1627,7 +1634,8 @@ export const strings = {
     onbStepAria: '{total} ページ中 {n} ページ目',
     onbTitle3: 'すべての人に無料',
     onbBody3: 'ライセンス料なし、広告なし、透かしなし。',
-    onbNote3: 'AI 機能は Genspark クレジットを消費する場合があります。',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: '戻る',
   },
   ko: {
@@ -1951,7 +1959,8 @@ export const strings = {
     setAiKeyHint: '키는 이 기기에만 저장됩니다.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: '비워 두면 공식 엔드포인트를 사용합니다.',
-    setAiGensparkHint: 'Genspark 로그인으로 사용하며 API 키가 필요 없습니다.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Codex 실행 파일',
     setAiCodexPathHint: '사용자 지정 설치에만 입력하세요. 비워 두면 자동 감지합니다.',
     setAiCodexAutoPlaceholder: '자동 감지(권장)',
@@ -1968,7 +1977,8 @@ export const strings = {
     setAiMaxTokensDesc:
       '한 턴의 출력 예산입니다. 추론 모델은 생각하는 데 소모하므로 예산이 떨어지면 응답이 비어 올 수 있습니다. 그럴 때 값을 키우세요.',
     setSecAiMedia: 'AI 미디어 및 검색',
-    setAiMediaGensparkHint: '이미지 생성과 이미지/동영상 분석은 Genspark 로그인을 사용합니다.',
+    setAiMediaGensparkHint:
+      'Image generation and image/video analysis use GSK_API_KEY or another configured key.',
     setAiMediaAgyHint:
       'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
     setAiMediaMmxHint:
@@ -2030,7 +2040,7 @@ export const strings = {
     onbTitle2: '이제 시작일 뿐입니다',
     onbBody2:
       'TeleOffice는 아직 알파 단계입니다. GenTeam 그룹 채팅에 참여해 피드백을 공유하고 앞으로의 방향을 함께 만들어 가세요.',
-    onbCredits: '활발한 기여자를 위한 혜택 **1,000+ Genspark 크레딧**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'GenTeam 참여하기',
     onbSkip: '건너뛰기',
     onbNext: '다음',
@@ -2038,7 +2048,8 @@ export const strings = {
     onbStepAria: '총 {total}페이지 중 {n}페이지',
     onbTitle3: '모두에게 무료',
     onbBody3: '라이선스 비용 없음, 광고 없음, 워터마크 없음.',
-    onbNote3: 'AI 기능은 Genspark 크레딧을 소모할 수 있습니다.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: '이전',
   },
   fr: {
@@ -2374,7 +2385,8 @@ export const strings = {
     setAiKeyHint: 'Stockée uniquement sur cet appareil.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Laisser vide pour le point de terminaison officiel.',
-    setAiGensparkHint: 'Utilise votre connexion Genspark ; aucune clé API requise.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Exécutable Codex',
     setAiCodexPathHint:
       'À renseigner uniquement pour une installation personnalisée ; sinon, détection automatique.',
@@ -2457,7 +2469,7 @@ export const strings = {
     onbTitle2: 'Ce n’est qu’un début',
     onbBody2:
       'TeleOffice est encore en alpha. Rejoignez la discussion de groupe sur GenTeam pour partager vos retours et façonner la suite.',
-    onbCredits: 'Les contributeurs actifs reçoivent **1 000+ crédits Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Rejoindre GenTeam',
     onbSkip: 'Passer',
     onbNext: 'Suivant',
@@ -2465,7 +2477,8 @@ export const strings = {
     onbStepAria: 'Page {n} sur {total}',
     onbTitle3: 'Gratuit pour tous',
     onbBody3: 'Pas de licence. Pas de publicité. Pas de filigrane.',
-    onbNote3: 'Les fonctions IA peuvent consommer des crédits Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Retour',
   },
   de: {
@@ -2805,7 +2818,8 @@ export const strings = {
     setAiKeyHint: 'Wird nur auf diesem Gerät gespeichert.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Leer lassen für den offiziellen Endpunkt.',
-    setAiGensparkHint: 'Nutzt Ihre Genspark-Anmeldung; kein API-Schlüssel nötig.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Codex-Programmdatei',
     setAiCodexPathHint:
       'Nur bei einer benutzerdefinierten Installation angeben; leer lassen für automatische Erkennung.',
@@ -2886,7 +2900,7 @@ export const strings = {
     onbTitle2: 'Das ist erst der Anfang',
     onbBody2:
       'TeleOffice ist noch in der Alpha-Phase. Treten Sie dem Gruppenchat auf GenTeam bei, um Feedback zu teilen und die Zukunft mitzugestalten.',
-    onbCredits: 'Aktive Mitwirkende erhalten **1.000+ Genspark-Guthaben**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'GenTeam beitreten',
     onbSkip: 'Überspringen',
     onbNext: 'Weiter',
@@ -2894,7 +2908,8 @@ export const strings = {
     onbStepAria: 'Seite {n} von {total}',
     onbTitle3: 'Kostenlos für alle',
     onbBody3: 'Keine Lizenzgebühren. Keine Werbung. Keine Wasserzeichen.',
-    onbNote3: 'KI-Funktionen können Genspark-Credits verbrauchen.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Zurück',
   },
   es: {
@@ -3217,7 +3232,8 @@ export const strings = {
     intgSaveZipTitle: 'Guardar skill',
     intgSavedTo: 'Guardado en {path}',
     intgCopied: 'Copiado',
-    intgCliEphemeral: 'Arrastra primero TeleOffice a Aplicaciones y luego usa la línea de comandos.',
+    intgCliEphemeral:
+      'Arrastra primero TeleOffice a Aplicaciones y luego usa la línea de comandos.',
     intgCopyPath: 'Copiar ruta',
     intgCliNeedsUpdate:
       'Este skill necesita la línea de comandos {v} o superior; actualiza TeleOffice.',
@@ -3230,7 +3246,8 @@ export const strings = {
     setAiKeyHint: 'Se guarda solo en este dispositivo.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Deja vacío para usar el endpoint oficial.',
-    setAiGensparkHint: 'Usa tu inicio de sesión de Genspark; no se necesita clave de API.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Ejecutable de Codex',
     setAiCodexPathHint:
       'Indícalo solo para una instalación personalizada; déjalo vacío para detectarlo automáticamente.',
@@ -3311,7 +3328,7 @@ export const strings = {
     onbTitle2: 'Esto es solo el comienzo',
     onbBody2:
       'TeleOffice aún está en alfa. Únete al chat grupal en GenTeam para compartir comentarios y ayudar a dar forma a lo que viene.',
-    onbCredits: 'Los colaboradores activos reciben **1.000+ créditos de Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Unirse a GenTeam',
     onbSkip: 'Omitir',
     onbNext: 'Siguiente',
@@ -3319,7 +3336,8 @@ export const strings = {
     onbStepAria: 'Página {n} de {total}',
     onbTitle3: 'Gratis para todos',
     onbBody3: 'Sin licencias. Sin anuncios. Sin marcas de agua.',
-    onbNote3: 'Las funciones de IA pueden consumir créditos de Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Atrás',
   },
   th: {
@@ -3369,7 +3387,8 @@ export const strings = {
     templateCardSub: 'เทมเพลตบริษัท / .pptx',
     importTemplate: 'นำเข้าเทมเพลต…',
     openTemplatesFolder: 'เปิดโฟลเดอร์เทมเพลต',
-    noTemplates: 'ยังไม่มีเทมเพลต เพิ่มด้วย `teleoffice template add <ชื่อ> <ไฟล์.pptx>` หรือนำเข้า',
+    noTemplates:
+      'ยังไม่มีเทมเพลต เพิ่มด้วย `teleoffice template add <ชื่อ> <ไฟล์.pptx>` หรือนำเข้า',
     dropToOpenTitle: 'วางเพื่อเปิดไฟล์',
     greetMorning: 'สวัสดีตอนเช้า',
     greetAfternoon: 'สวัสดีตอนบ่าย',
@@ -3639,7 +3658,8 @@ export const strings = {
     setAiKeyHint: 'จัดเก็บไว้ในเครื่องนี้เท่านั้น',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'เว้นว่างเพื่อใช้ปลายทางอย่างเป็นทางการ',
-    setAiGensparkHint: 'ใช้การลงชื่อเข้าใช้ Genspark ไม่ต้องใช้คีย์ API',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'ไฟล์ปฏิบัติการ Codex',
     setAiCodexPathHint: 'กรอกเฉพาะเมื่อติดตั้งแบบกำหนดเอง เว้นว่างไว้เพื่อค้นหาอัตโนมัติ',
     setAiCodexAutoPlaceholder: 'ค้นหาอัตโนมัติ (แนะนำ)',
@@ -3718,7 +3738,7 @@ export const strings = {
     onbTitle2: 'นี่เป็นเพียงจุดเริ่มต้น',
     onbBody2:
       'TeleOffice ยังอยู่ในช่วงอัลฟ่า เข้าร่วมแชทกลุ่มบน GenTeam เพื่อแบ่งปันความคิดเห็นและร่วมกำหนดทิศทางต่อไป',
-    onbCredits: 'ผู้มีส่วนร่วมอย่างต่อเนื่องจะได้รับ **เครดิต Genspark กว่า 1,000**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'เข้าร่วม GenTeam',
     onbSkip: 'ข้าม',
     onbNext: 'ถัดไป',
@@ -3726,7 +3746,8 @@ export const strings = {
     onbStepAria: 'หน้า {n} จาก {total}',
     onbTitle3: 'ฟรีสำหรับทุกคน',
     onbBody3: 'ไม่มีค่าลิขสิทธิ์ ไม่มีโฆษณา ไม่มีลายน้ำ',
-    onbNote3: 'ฟีเจอร์ AI อาจใช้เครดิต Genspark',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'ย้อนกลับ',
   },
   id: {
@@ -4009,7 +4030,8 @@ export const strings = {
     intgMcpHttpDesc:
       'Berjalan di dalam TeleOffice; asisten terhubung lewat URL dan Anda bisa melihat dokumen dibangun langkah demi langkah di editor Word. TeleOffice harus tetap terbuka; untuk saat ini hanya dokumen Word.',
     intgMcpHttpAdvanced: 'Lanjutan: alamat lain dan log',
-    intgMcpTryNote: 'Asisten memanggil TeleOffice melalui MCP; Anda tidak pernah mengetik perintah.',
+    intgMcpTryNote:
+      'Asisten memanggil TeleOffice melalui MCP; Anda tidak pernah mengetik perintah.',
     intgMcpClaudeTitle: 'Claude Code',
     intgMcpClaudeDesc: 'Jalankan ini sekali di terminal:',
     intgMcpOtherTitle: 'Cursor, Claude Desktop, atau asisten lain yang mendukung MCP',
@@ -4057,7 +4079,8 @@ export const strings = {
     setAiKeyHint: 'Hanya disimpan di perangkat ini.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Kosongkan untuk endpoint resmi.',
-    setAiGensparkHint: 'Menggunakan login Genspark; tanpa kunci API.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Berkas eksekusi Codex',
     setAiCodexPathHint: 'Isi hanya untuk instalasi khusus; kosongkan agar terdeteksi otomatis.',
     setAiCodexAutoPlaceholder: 'Deteksi otomatis (disarankan)',
@@ -4137,7 +4160,7 @@ export const strings = {
     onbTitle2: 'Ini baru permulaan',
     onbBody2:
       'TeleOffice masih dalam tahap alpha. Gabung obrolan grup di GenTeam untuk berbagi masukan dan ikut menentukan arah ke depan.',
-    onbCredits: 'Kontributor aktif mendapat **1.000+ kredit Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Gabung GenTeam',
     onbSkip: 'Lewati',
     onbNext: 'Berikutnya',
@@ -4145,7 +4168,8 @@ export const strings = {
     onbStepAria: 'Halaman {n} dari {total}',
     onbTitle3: 'Gratis untuk semua',
     onbBody3: 'Tanpa biaya lisensi. Tanpa iklan. Tanpa watermark.',
-    onbNote3: 'Fitur AI dapat menggunakan kredit Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Kembali',
   },
   ru: {
@@ -4473,7 +4497,8 @@ export const strings = {
     setAiKeyHint: 'Хранится только на этом устройстве.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Оставьте пустым для официальной конечной точки.',
-    setAiGensparkHint: 'Использует вход в Genspark; ключ API не нужен.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Исполняемый файл Codex',
     setAiCodexPathHint:
       'Указывайте только для нестандартной установки; оставьте пустым для автоопределения.',
@@ -4554,7 +4579,7 @@ export const strings = {
     onbTitle2: 'Это только начало',
     onbBody2:
       'TeleOffice пока в альфа-версии. Присоединяйтесь к групповому чату в GenTeam, чтобы делиться отзывами и влиять на дальнейшее развитие.',
-    onbCredits: 'Активные участники получают **1000+ кредитов Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Присоединиться к GenTeam',
     onbSkip: 'Пропустить',
     onbNext: 'Далее',
@@ -4562,7 +4587,8 @@ export const strings = {
     onbStepAria: 'Страница {n} из {total}',
     onbTitle3: 'Бесплатно для всех',
     onbBody3: 'Без лицензий. Без рекламы. Без водяных знаков.',
-    onbNote3: 'Функции ИИ могут расходовать кредиты Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Назад',
   },
   ar: {
@@ -4885,7 +4911,8 @@ export const strings = {
     setAiKeyHint: 'يُحفظ على هذا الجهاز فقط.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'اتركه فارغًا لاستخدام نقطة النهاية الرسمية.',
-    setAiGensparkHint: 'يستخدم تسجيل الدخول إلى Genspark؛ لا حاجة لمفتاح API.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'ملف Codex التنفيذي',
     setAiCodexPathHint: 'حدده فقط للتثبيت المخصص؛ اتركه فارغًا للاكتشاف التلقائي.',
     setAiCodexAutoPlaceholder: 'اكتشاف تلقائي (موصى به)',
@@ -4902,7 +4929,8 @@ export const strings = {
     setAiMaxTokensDesc:
       'ميزانية الإخراج في الدورة الواحدة. نماذج الاستدلال تصرفها على التفكير، فإذا نفدت جاء الرد فارغًا؛ ارفع هذه القيمة عندئذ.',
     setSecAiMedia: 'وسائط الذكاء الاصطناعي والبحث',
-    setAiMediaGensparkHint: 'يستخدم توليد الصور وتحليل الصور/الفيديو تسجيل دخولك إلى Genspark.',
+    setAiMediaGensparkHint:
+      'Image generation and image/video analysis use GSK_API_KEY or another configured key.',
     setAiMediaAgyHint:
       'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
     setAiMediaMmxHint:
@@ -4963,7 +4991,7 @@ export const strings = {
     onbTitle2: 'هذه مجرد البداية',
     onbBody2:
       'لا يزال TeleOffice في مرحلة ألفا. انضم إلى الدردشة الجماعية على GenTeam لمشاركة ملاحظاتك والمساهمة في تشكيل المستقبل.',
-    onbCredits: 'يحصل المساهمون النشطون على **+1,000 من أرصدة Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'الانضمام إلى GenTeam',
     onbSkip: 'تخطي',
     onbNext: 'التالي',
@@ -4971,7 +4999,8 @@ export const strings = {
     onbStepAria: 'الصفحة {n} من {total}',
     onbTitle3: 'مجاني للجميع',
     onbBody3: 'بلا رسوم ترخيص، بلا إعلانات، بلا علامات مائية.',
-    onbNote3: 'قد تستهلك ميزات الذكاء الاصطناعي أرصدة Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'رجوع',
   },
   pt: {
@@ -5298,7 +5327,8 @@ export const strings = {
     setAiKeyHint: 'Armazenada apenas neste dispositivo.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Deixe vazio para o endpoint oficial.',
-    setAiGensparkHint: 'Usa seu login Genspark; nenhuma chave de API necessária.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Executável do Codex',
     setAiCodexPathHint:
       'Preencha apenas para uma instalação personalizada; deixe em branco para detectar automaticamente.',
@@ -5377,7 +5407,7 @@ export const strings = {
     onbTitle2: 'Isto é só o começo',
     onbBody2:
       'O TeleOffice ainda está em alfa. Entre no chat em grupo no GenTeam para compartilhar feedback e ajudar a moldar o que vem a seguir.',
-    onbCredits: 'Contribuidores ativos recebem **1.000+ créditos Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Entrar no GenTeam',
     onbSkip: 'Pular',
     onbNext: 'Avançar',
@@ -5385,7 +5415,8 @@ export const strings = {
     onbStepAria: 'Página {n} de {total}',
     onbTitle3: 'Gratuito para todos',
     onbBody3: "Sem licenças. Sem anúncios. Sem marcas d'água.",
-    onbNote3: 'Os recursos de IA podem consumir créditos Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Voltar',
   },
   it: {
@@ -5711,7 +5742,8 @@ export const strings = {
     setAiKeyHint: 'Salvata solo su questo dispositivo.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: "Lascia vuoto per l'endpoint ufficiale.",
-    setAiGensparkHint: 'Usa il tuo accesso Genspark; nessuna chiave API richiesta.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Eseguibile Codex',
     setAiCodexPathHint:
       'Compila solo per un’installazione personalizzata; lascia vuoto per il rilevamento automatico.',
@@ -5790,7 +5822,7 @@ export const strings = {
     onbTitle2: 'Questo è solo l’inizio',
     onbBody2:
       'TeleOffice è ancora in alpha. Unisciti alla chat di gruppo su GenTeam per condividere feedback e contribuire a plasmare il futuro.',
-    onbCredits: 'I collaboratori attivi ricevono **1.000+ crediti Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Unisciti a GenTeam',
     onbSkip: 'Salta',
     onbNext: 'Avanti',
@@ -5798,7 +5830,8 @@ export const strings = {
     onbStepAria: 'Pagina {n} di {total}',
     onbTitle3: 'Gratuito per tutti',
     onbBody3: 'Nessuna licenza. Nessuna pubblicità. Nessuna filigrana.',
-    onbNote3: 'Le funzioni IA possono consumare crediti Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Indietro',
   },
   pl: {
@@ -6058,7 +6091,8 @@ export const strings = {
     intgExample1: 'Zamień ~/Downloads/report.md na dokument Word',
     intgExample2: 'Zrób prezentację z 6 slajdów o naszych wynikach za III kwartał',
     intgExample3: 'Przekonwertuj budget.xlsx do PDF i otwórz w TeleOffice',
-    intgStep2Note: 'Asystent sam uruchamia wiersz poleceń teleoffice; nigdy nie musisz go wpisywać.',
+    intgStep2Note:
+      'Asystent sam uruchamia wiersz poleceń teleoffice; nigdy nie musisz go wpisywać.',
     intgCliPartTitle: 'CLI · wiersz poleceń + skill',
     intgCliPartDesc:
       'Dla asystentów, które potrafią uruchamiać polecenia terminala (Claude Code, Codex, Cursor i inne). Po zainstalowaniu skilla asystent sam wywołuje wiersz poleceń teleoffice, aby tworzyć, konwertować, czytać i edytować pliki; nigdy nie wpisujesz polecenia.',
@@ -6109,7 +6143,8 @@ export const strings = {
     intgCopied: 'Skopiowano',
     intgCliEphemeral: 'Najpierw przenieś TeleOffice do Aplikacji, potem użyj wiersza poleceń.',
     intgCopyPath: 'Kopiuj ścieżkę',
-    intgCliNeedsUpdate: 'Ten skill wymaga wiersza poleceń {v} lub nowszego; zaktualizuj TeleOffice.',
+    intgCliNeedsUpdate:
+      'Ten skill wymaga wiersza poleceń {v} lub nowszego; zaktualizuj TeleOffice.',
     intgLoading: 'Sprawdzanie…',
     intgUpdateDue: 'Dostępna aktualizacja skilla',
     setSecAiModel: 'Model AI',
@@ -6119,7 +6154,8 @@ export const strings = {
     setAiKeyHint: 'Przechowywany tylko na tym urządzeniu.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Pozostaw puste, aby użyć oficjalnego punktu końcowego.',
-    setAiGensparkHint: 'Korzysta z logowania Genspark; klucz API nie jest potrzebny.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Plik wykonywalny Codex',
     setAiCodexPathHint:
       'Ustaw tylko dla instalacji niestandardowej; pozostaw puste, aby wykryć automatycznie.',
@@ -6198,7 +6234,7 @@ export const strings = {
     onbTitle2: 'To dopiero początek',
     onbBody2:
       'TeleOffice jest wciąż w fazie alfa. Dołącz do czatu grupowego na GenTeam, aby dzielić się opiniami i współtworzyć jego przyszłość.',
-    onbCredits: 'Aktywni współtwórcy otrzymują **1000+ kredytów Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Dołącz do GenTeam',
     onbSkip: 'Pomiń',
     onbNext: 'Dalej',
@@ -6206,7 +6242,8 @@ export const strings = {
     onbStepAria: 'Strona {n} z {total}',
     onbTitle3: 'Za darmo dla każdego',
     onbBody3: 'Bez opłat licencyjnych. Bez reklam. Bez znaków wodnych.',
-    onbNote3: 'Funkcje AI mogą zużywać kredyty Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Wstecz',
   },
   cs: {
@@ -6497,7 +6534,8 @@ export const strings = {
     setAiKeyHint: 'Ukládá se pouze na tomto zařízení.',
     setAiBaseUrl: 'Základní URL',
     setAiBaseUrlHint: 'Pro oficiální koncový bod ponechte prázdné.',
-    setAiGensparkHint: 'Používá vaše přihlášení ke Genspark; klíč API není potřeba.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Spustitelný soubor Codex',
     setAiCodexPathHint:
       'Vyplňte jen u vlastní instalace; prázdné pole znamená automatickou detekci.',
@@ -6577,7 +6615,7 @@ export const strings = {
     onbTitle2: 'Toto je jen začátek',
     onbBody2:
       'TeleOffice je stále ve fázi alfa. Připojte se ke skupinovému chatu na GenTeam, sdílejte zpětnou vazbu a pomozte utvářet, co přijde dál.',
-    onbCredits: 'Aktivní přispěvatelé získají **1 000+ kreditů Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Připojit se ke GenTeam',
     onbSkip: 'Přeskočit',
     onbNext: 'Další',
@@ -6585,7 +6623,8 @@ export const strings = {
     onbStepAria: 'Stránka {n} z {total}',
     onbTitle3: 'Zdarma pro všechny',
     onbBody3: 'Žádné licenční poplatky. Žádné reklamy. Žádné vodoznaky.',
-    onbNote3: 'Funkce AI mohou čerpat kredity Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Zpět',
     setAutoSave: 'Automaticky ukládat všechny dokumenty',
     setAutoSaveDesc:
@@ -6938,7 +6977,8 @@ export const strings = {
     setAiKeyHint: 'Alleen op dit apparaat opgeslagen.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Leeg laten voor het officiële eindpunt.',
-    setAiGensparkHint: 'Gebruikt je Genspark-login; geen API-sleutel nodig.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Codex-uitvoerbaar bestand',
     setAiCodexPathHint:
       'Alleen invullen voor een aangepaste installatie; laat leeg voor automatische detectie.',
@@ -7017,7 +7057,7 @@ export const strings = {
     onbTitle2: 'Dit is nog maar het begin',
     onbBody2:
       'TeleOffice is nog in alfa. Doe mee aan de groepschat op GenTeam om feedback te delen en mee te bepalen wat er komt.',
-    onbCredits: 'Actieve bijdragers krijgen **1.000+ Genspark-credits**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Word lid van GenTeam',
     onbSkip: 'Overslaan',
     onbNext: 'Volgende',
@@ -7025,7 +7065,8 @@ export const strings = {
     onbStepAria: 'Pagina {n} van {total}',
     onbTitle3: 'Gratis voor iedereen',
     onbBody3: 'Geen licentiekosten. Geen advertenties. Geen watermerken.',
-    onbNote3: 'AI-functies kunnen Genspark-credits verbruiken.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Terug',
   },
   ms: {
@@ -7351,7 +7392,8 @@ export const strings = {
     setAiKeyHint: 'Disimpan pada peranti ini sahaja.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'Biarkan kosong untuk endpoint rasmi.',
-    setAiGensparkHint: 'Menggunakan log masuk Genspark; tiada kunci API diperlukan.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Fail boleh laku Codex',
     setAiCodexPathHint:
       'Isi hanya untuk pemasangan tersuai; biarkan kosong untuk pengesanan automatik.',
@@ -7431,7 +7473,7 @@ export const strings = {
     onbTitle2: 'Ini baru permulaan',
     onbBody2:
       'TeleOffice masih dalam peringkat alfa. Sertai sembang kumpulan di GenTeam untuk berkongsi maklum balas dan membentuk masa depannya.',
-    onbCredits: 'Penyumbang aktif menerima **1,000+ kredit Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'Sertai GenTeam',
     onbSkip: 'Langkau',
     onbNext: 'Seterusnya',
@@ -7439,7 +7481,8 @@ export const strings = {
     onbStepAria: 'Halaman {n} daripada {total}',
     onbTitle3: 'Percuma untuk semua',
     onbBody3: 'Tiada yuran lesen. Tiada iklan. Tiada tera air.',
-    onbNote3: 'Ciri AI mungkin menggunakan kredit Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Kembali',
   },
   he: {
@@ -7751,7 +7794,8 @@ export const strings = {
     setAiKeyHint: 'נשמר רק במכשיר זה.',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'השאר ריק לנקודת הקצה הרשמית.',
-    setAiGensparkHint: 'משתמש בכניסת Genspark שלך; אין צורך במפתח API.',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'קובץ ההפעלה של Codex',
     setAiCodexPathHint: 'יש למלא רק בהתקנה מותאמת; השאר ריק לזיהוי אוטומטי.',
     setAiCodexAutoPlaceholder: 'זיהוי אוטומטי (מומלץ)',
@@ -7768,7 +7812,8 @@ export const strings = {
     setAiMaxTokensDesc:
       'תקציב פלט לסיבוב אחד. מודלי היסק מנצלים חלק ממנו לחשיבה, ואם הוא נגמר התשובה עלולה לחזור ריקה — במקרה כזה העלו את הערך.',
     setSecAiMedia: 'מדיה וחיפוש AI',
-    setAiMediaGensparkHint: 'יצירת תמונות וניתוח תמונות/וידאו משתמשים בהתחברות Genspark שלך.',
+    setAiMediaGensparkHint:
+      'Image generation and image/video analysis use GSK_API_KEY or another configured key.',
     setAiMediaAgyHint:
       'Image generation and image/video/audio analysis run through the local Antigravity CLI (agy) with your Google account; no API key needed.',
     setAiMediaMmxHint:
@@ -7826,7 +7871,7 @@ export const strings = {
     onbTitle2: 'זו רק ההתחלה',
     onbBody2:
       'TeleOffice עדיין בגרסת אלפא. הצטרפו לצ׳אט הקבוצתי ב-GenTeam כדי לשתף משוב ולעזור לעצב את ההמשך.',
-    onbCredits: 'תורמים פעילים מקבלים **1,000+ נקודות Genspark**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'הצטרפו ל-GenTeam',
     onbSkip: 'דילוג',
     onbNext: 'הבא',
@@ -7834,7 +7879,8 @@ export const strings = {
     onbStepAria: 'עמוד {n} מתוך {total}',
     onbTitle3: 'חינם לכולם',
     onbBody3: 'ללא דמי רישיון, ללא פרסומות, ללא סימני מים.',
-    onbNote3: 'תכונות AI עשויות לצרוך קרדיטים של Genspark.',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'חזרה',
   },
   hi: {
@@ -8155,7 +8201,8 @@ export const strings = {
     setAiKeyHint: 'केवल इसी डिवाइस पर संग्रहीत।',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: 'आधिकारिक एंडपॉइंट के लिए खाली छोड़ें।',
-    setAiGensparkHint: 'आपके Genspark साइन-इन का उपयोग करता है; API कुंजी की आवश्यकता नहीं।',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Codex निष्पादन फ़ाइल',
     setAiCodexPathHint: 'केवल कस्टम इंस्टॉलेशन के लिए भरें; स्वतः पहचान के लिए खाली छोड़ें।',
     setAiCodexAutoPlaceholder: 'स्वतः पहचान (अनुशंसित)',
@@ -8234,7 +8281,7 @@ export const strings = {
     onbTitle2: 'यह तो बस शुरुआत है',
     onbBody2:
       'TeleOffice अभी अल्फ़ा में है। GenTeam पर ग्रुप चैट से जुड़ें, फ़ीडबैक साझा करें और आगे की दिशा तय करने में मदद करें।',
-    onbCredits: 'सक्रिय योगदानकर्ताओं के लिए **1,000+ Genspark क्रेडिट**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: 'GenTeam से जुड़ें',
     onbSkip: 'छोड़ें',
     onbNext: 'आगे',
@@ -8242,7 +8289,8 @@ export const strings = {
     onbStepAria: 'कुल {total} में से पृष्ठ {n}',
     onbTitle3: 'सभी के लिए मुफ़्त',
     onbBody3: 'कोई लाइसेंस शुल्क नहीं। कोई विज्ञापन नहीं। कोई वॉटरमार्क नहीं।',
-    onbNote3: 'AI सुविधाएँ Genspark क्रेडिट खर्च कर सकती हैं।',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'वापस',
   },
   'zh-TW': {
@@ -8549,7 +8597,8 @@ export const strings = {
     setAiKeyHint: '金鑰僅儲存在本機。',
     setAiBaseUrl: 'Base URL',
     setAiBaseUrlHint: '留空使用官方端點。',
-    setAiGensparkHint: '使用 Genspark 帳號登入，無需 API key。',
+    setAiGensparkHint:
+      'Uses the GSK_API_KEY environment variable (or another configured key); no sign-in.',
     setAiCodexPath: 'Codex 可執行檔',
     setAiCodexPathHint: '僅自訂安裝時填寫；留空會自動偵測。',
     setAiCodexAutoPlaceholder: '留空自動偵測（建議）',
@@ -8622,7 +8671,7 @@ export const strings = {
     onbBody1: '建立文件、製作試算表、產生簡報、審閱 PDF。AI 深度融入每個環節。',
     onbTitle2: '這只是一個開始',
     onbBody2: 'TeleOffice 目前仍在 alpha 階段。歡迎加入 GenTeam 群聊，分享回饋，一起打造它的未來。',
-    onbCredits: '活躍貢獻者可獲得 **1,000+ Genspark 點數**',
+    onbCredits: 'Join the community and share feedback.',
     onbJoinGenTeam: '加入 GenTeam',
     onbSkip: '略過',
     onbNext: '下一步',
@@ -8630,7 +8679,8 @@ export const strings = {
     onbStepAria: '第 {n} 頁，共 {total} 頁',
     onbTitle3: '人人免費',
     onbBody3: '無授權費用，無廣告，無浮水印。',
-    onbNote3: 'AI 功能可能消耗 Genspark 點數。',
+    onbNote3:
+      'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: '上一步',
   },
 } as const

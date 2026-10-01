@@ -618,7 +618,9 @@ describe('staging refs from the media dir', () => {
     expect(stripAgyStagingRefs('， hello', [])).toBe('， hello')
     expect(stripAgyStagingRefs('  spaced  out  ', [])).toBe('spaced  out')
     expect(
-      stripAgyStagingRefs('， [x](/tmp/teleoffice-agy-Z/img.png)  hello', ['/tmp/teleoffice-agy-Z']),
+      stripAgyStagingRefs('， [x](/tmp/teleoffice-agy-Z/img.png)  hello', [
+        '/tmp/teleoffice-agy-Z',
+      ]),
     ).toBe('hello')
   })
 

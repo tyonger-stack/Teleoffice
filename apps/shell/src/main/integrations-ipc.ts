@@ -47,7 +47,10 @@ export function registerIntegrationsIpc(deps: IntegrationsDeps): void {
   ipcMain.handle(INTEGRATIONS_CHANNELS.status, (): IntegrationsStatus => {
     const skill = bundled()
     const l = ledger()
-    const launcher = join(deps.cliDir, process.platform === 'win32' ? 'teleoffice.cmd' : 'teleoffice')
+    const launcher = join(
+      deps.cliDir,
+      process.platform === 'win32' ? 'teleoffice.cmd' : 'teleoffice',
+    )
     return {
       cli: {
         ...inspectCliLink({ launcher }),

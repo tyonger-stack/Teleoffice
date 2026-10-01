@@ -4,7 +4,6 @@ export const id = {
   aiComposerPlaceholderBuild: 'Jelaskan tabel, data, atau bagan yang akan dibuat…',
   aiEmptyBuildTitle: 'Biarkan AI membangun buku kerja ini untuk Anda',
   aiEmptyBuildBody: 'Jelaskan tabel, data, atau bagan yang Anda perlukan — AI langsung membuatnya.',
-  aiGskLoginBtn: 'Masuk ke Genspark',
   aiUndelivered: 'Tidak terkirim',
   aiRetry: 'Coba lagi',
   aiOpenAssistant: 'Buka asisten AI',

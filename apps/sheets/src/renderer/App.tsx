@@ -1408,7 +1408,6 @@ export function App({
                 const next = [...previous]
                 const last = next.at(-1)
                 if (last?.role === 'assistant' && last.isError) {
-                  next[next.length - 1] = { ...last, loginRequired: true }
                 }
                 return next
               })

@@ -4,7 +4,6 @@ export const vi = {
   aiComposerPlaceholderBuild: 'Mô tả bảng, dữ liệu hoặc biểu đồ cần tạo…',
   aiEmptyBuildTitle: 'Để AI xây dựng sổ làm việc này cho bạn',
   aiEmptyBuildBody: 'Mô tả bảng, dữ liệu hoặc biểu đồ bạn cần — AI sẽ tạo trực tiếp tại chỗ.',
-  aiGskLoginBtn: 'Đăng nhập vào Genspark',
   aiUndelivered: 'Chưa gửi',
   aiRetry: 'Thử lại',
   aiOpenAssistant: 'Mở trợ lý AI',

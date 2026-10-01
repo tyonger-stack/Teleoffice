@@ -43,7 +43,6 @@ import {
 import {
   webSearchTool,
   imageSearchTool,
-  ensureTeleofficeLogin,
   gskApiKey,
   generateImageTool,
   analyzeMediaTool,
@@ -124,10 +123,6 @@ export function registerAiIpc(): void {
       return info?.email ? { loggedIn: true, email: info.email } : { loggedIn: true }
     },
   )
-
-  ipcMain.handle('ai:gsk-login', () => {
-    ensureTeleofficeLogin((url) => void shell.openExternal(url))
-  })
 
   ipcMain.handle('ai:set-settings', (_event, settings: AiSettings) => {
     writeJsonAtomic(AI_SETTINGS_PATH(), settings)

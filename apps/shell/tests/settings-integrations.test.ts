@@ -114,23 +114,15 @@ async function openIntegrations(
         LocaleProvider,
         { initial: 'en' },
         createElement(SettingsModal, {
-          status: null,
-          loggingOut: false,
-          loginWaiting: false,
-          loginUrl: null,
-          urlCopied: false,
-          onOpenLoginUrl: vi.fn(),
-          onCopyLoginUrl: vi.fn(),
           onClose: vi.fn(),
-          onLogin: vi.fn(),
-          onLogout: vi.fn(),
+          target: { section: 'integrations' },
           ...extra,
         }),
       ),
     )
     await Promise.resolve()
   })
-  await click(buttonWithText('Integrations'))
+  await flush()
 }
 
 describe('Settings → Integrations', () => {

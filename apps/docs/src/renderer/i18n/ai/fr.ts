@@ -8,7 +8,6 @@ export const fr = {
   aiStarterPolishAll: 'Peaufiner tout le document pour un ton plus professionnel',
   aiStarterContinue: 'Continuer la rédaction là où le document s’arrête',
   aiStarterFillTemplate: 'Trouver et remplir les espaces réservés du document',
-  aiGskLoginBtn: 'Se connecter à Genspark',
   aiPanelTitle: 'Genspark',
   aiOpenAssistant: "Ouvrir l'assistant IA",
   aiSummarizeBtn: 'Résumé IA',

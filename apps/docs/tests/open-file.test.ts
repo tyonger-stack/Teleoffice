@@ -13,7 +13,9 @@ describe('findDocxPath', () => {
   })
 
   it('ignores Electron switches and unrelated files', () => {
-    expect(findDocxPath(['TeleOffice Docs', '--inspect=document.docx', '/tmp/notes.txt'])).toBeNull()
+    expect(
+      findDocxPath(['TeleOffice Docs', '--inspect=document.docx', '/tmp/notes.txt']),
+    ).toBeNull()
   })
 })
 

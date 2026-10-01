@@ -14,7 +14,9 @@ describe('byte handoff', () => {
 
   it('ignores lazy-media and foreign URLs', () => {
     handOffBytes(Buffer.from('x'))
-    expect(takeHandoff(`teleoffice-docx-media://${'a'.repeat(64)}/word/media/image1.png`)).toBeNull()
+    expect(
+      takeHandoff(`teleoffice-docx-media://${'a'.repeat(64)}/word/media/image1.png`),
+    ).toBeNull()
     expect(takeHandoff('teleoffice-docx-media://handoff/not-a-token')).toBeNull()
     expect(takeHandoff('https://example.com/handoff/x')).toBeNull()
     expect(pendingHandoffCount()).toBe(1)

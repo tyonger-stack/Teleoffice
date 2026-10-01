@@ -17,8 +17,12 @@ describe('teleoffice launcher file', () => {
   it('writes one line, creates the directory, and only rewrites on change', () => {
     const dir = mkdtempSync(join(tmpdir(), 'teleoffice-launcher-'))
     const file = join(dir, 'nested', 'launcher')
-    expect(writeLauncherFile(file, '/Applications/TeleOffice.app/Contents/Resources/cli')).toBe(true)
-    expect(readFileSync(file, 'utf-8')).toBe('/Applications/TeleOffice.app/Contents/Resources/cli\n')
+    expect(writeLauncherFile(file, '/Applications/TeleOffice.app/Contents/Resources/cli')).toBe(
+      true,
+    )
+    expect(readFileSync(file, 'utf-8')).toBe(
+      '/Applications/TeleOffice.app/Contents/Resources/cli\n',
+    )
     const before = statSync(file).mtimeMs
     expect(writeLauncherFile(file, '/Applications/TeleOffice.app/Contents/Resources/cli')).toBe(
       false,
@@ -29,11 +33,13 @@ describe('teleoffice launcher file', () => {
   })
 
   it('treats dmg and AppImage mounts as temporary', () => {
-    expect(isEphemeralInstall('/Volumes/TeleOffice/TeleOffice.app/Contents/Resources', {})).toBe(true)
-    expect(isEphemeralInstall('/tmp/.mount_GenOfxyz/resources', {})).toBe(true)
-    expect(isEphemeralInstall('/opt/TeleOffice/resources', { APPIMAGE: '/home/u/G.AppImage' })).toBe(
+    expect(isEphemeralInstall('/Volumes/TeleOffice/TeleOffice.app/Contents/Resources', {})).toBe(
       true,
     )
+    expect(isEphemeralInstall('/tmp/.mount_GenOfxyz/resources', {})).toBe(true)
+    expect(
+      isEphemeralInstall('/opt/TeleOffice/resources', { APPIMAGE: '/home/u/G.AppImage' }),
+    ).toBe(true)
     expect(isEphemeralInstall('/Applications/TeleOffice.app/Contents/Resources', {})).toBe(false)
   })
 })

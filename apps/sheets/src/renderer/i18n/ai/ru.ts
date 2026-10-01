@@ -4,7 +4,6 @@ export const ru = {
   aiComposerPlaceholderBuild: 'Опишите таблицу, данные или диаграмму для создания…',
   aiEmptyBuildTitle: 'Пусть ИИ построит эту книгу за вас',
   aiEmptyBuildBody: 'Опишите нужную таблицу, данные или диаграмму — ИИ создаст их на месте.',
-  aiGskLoginBtn: 'Войти в Genspark',
   aiUndelivered: 'Не отправлено',
   aiRetry: 'Повторить',
   aiOpenAssistant: 'Открыть ИИ-помощника',

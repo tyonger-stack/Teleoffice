@@ -4,10 +4,14 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 export default defineConfig({
   // @teleoffice/i18n and @teleoffice/electron-utils ship as TS source — must be bundled
   main: {
-    plugins: [externalizeDepsPlugin({ exclude: ['@teleoffice/i18n', '@teleoffice/electron-utils'] })],
+    plugins: [
+      externalizeDepsPlugin({ exclude: ['@teleoffice/i18n', '@teleoffice/electron-utils'] }),
+    ],
   },
   preload: {
-    plugins: [externalizeDepsPlugin({ exclude: ['@teleoffice/i18n', '@teleoffice/electron-utils'] })],
+    plugins: [
+      externalizeDepsPlugin({ exclude: ['@teleoffice/i18n', '@teleoffice/electron-utils'] }),
+    ],
   },
   renderer: {
     plugins: [react()],

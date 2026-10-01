@@ -32,7 +32,8 @@ function waitForDocFonts(timeoutMs = 4000): Promise<void> {
   return new Promise((resolve) => {
     const started = Date.now()
     const tick = () => {
-      if (window.__teleofficeDocFontsSynced !== false || Date.now() - started >= timeoutMs) resolve()
+      if (window.__teleofficeDocFontsSynced !== false || Date.now() - started >= timeoutMs)
+        resolve()
       else setTimeout(tick, 50)
     }
     setTimeout(tick, 50)

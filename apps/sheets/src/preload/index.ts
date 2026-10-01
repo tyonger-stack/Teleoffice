@@ -468,9 +468,6 @@ const desktopApi: DesktopApi = {
     }
     return result as unknown as GenSparkAccountStatus
   },
-  async aiGskLogin() {
-    await ipcRenderer.invoke(IPC_CHANNELS.aiGskLogin)
-  },
   async webSearch(query, maxResults) {
     if (typeof query !== 'string' || !query.trim() || query.length > 512) {
       throw new Error('Invalid search query.')

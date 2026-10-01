@@ -16,7 +16,6 @@ export const zh = {
   aiQcPageSkipped: '第 {n} 页:已跳过自动版式检查',
   aiQcStopped: '版式检查已停止',
   aiQcCapped: '其余 {count} 页未检查(单次上限)',
-  aiGskLoginBtn: '登录 Genspark',
   aiPanelTitle: 'Genspark',
   aiOpenAssistant: '打开 AI 助手',
   aiFactCheckBtn: 'AI 事实核查',

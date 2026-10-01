@@ -1,24 +1,22 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+/**
+ * Residual auth.json reader — login/logout flows were removed (local-first).
+ */
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
+  loadTeleofficeAuth,
+  reloadTeleofficeAuth,
+  resetTeleofficeAuthCache,
   teleofficeApiKey,
   teleofficeAuthPath,
-  teleofficeLoginInFlight,
-  teleofficeLogout,
-  teleofficeProxyFallbackPreferred,
-  loadTeleofficeAuth,
-  resetTeleofficeAuthCache,
-  startTeleofficeLogin,
-  type GskLoginProgress,
 } from '../src/teleoffice-auth'
-import { gskApiKey, setGskProxyUrl, watchGskApiKey } from '../src/gsk'
-
-const CODE = 'a'.repeat(64)
-const AUTH_URL = `https://www.genspark.ai/api/office_addin_auth/verify?code=${CODE}`
+import { gskApiKey } from '../src/gsk'
 
 let dir: string
+const prevAuthDir = process.env.TELEOFFICE_AUTH_DIR
+const prevGskKey = process.env.GSK_API_KEY
 
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'teleoffice-auth-'))
@@ -28,291 +26,42 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  vi.unstubAllGlobals()
-  rmSync(dir, { recursive: true, force: true })
-  delete process.env.TELEOFFICE_AUTH_DIR
-  delete process.env.GSK_API_KEY
-  setGskProxyUrl('')
   resetTeleofficeAuthCache()
+  if (prevAuthDir === undefined) delete process.env.TELEOFFICE_AUTH_DIR
+  else process.env.TELEOFFICE_AUTH_DIR = prevAuthDir
+  if (prevGskKey === undefined) delete process.env.GSK_API_KEY
+  else process.env.GSK_API_KEY = prevGskKey
+  rmSync(dir, { recursive: true, force: true })
 })
 
-function jsonResponse(json: unknown, opts: { status?: number; setCookie?: string } = {}): Response {
-  const headers = new Headers()
-  if (opts.setCookie) headers.append('set-cookie', opts.setCookie)
-  return {
-    ok: (opts.status ?? 200) < 400,
-    status: opts.status ?? 200,
-    json: async () => json,
-    headers,
-  } as unknown as Response
-}
-
-/** fetch stub for the full flow; token polls: pending × (pendingPolls) then approved */
-function stubFlow(opts: { pendingPolls?: number; createResponse?: unknown } = {}) {
-  let tokenPolls = 0
-  const fetchMock = vi.fn(async (input: string | URL, _init?: RequestInit) => {
-    const url = String(input)
-    if (url.includes('/office_addin_auth/device_code')) {
-      return jsonResponse({
-        device_code: CODE,
-        auth_url: AUTH_URL,
-        expires_in: 600,
-        poll_interval: 0.001,
-      })
-    }
-    if (url.includes('/office_addin_auth/token')) {
-      tokenPolls++
-      if (tokenPolls <= (opts.pendingPolls ?? 1)) return jsonResponse({ status: 'pending' })
-      return jsonResponse({ status: 'approved', access_token: 'bearer-token' })
-    }
-    if (url.includes('/office_addin_auth/session')) {
-      return jsonResponse(
-        { status: 'ok', cogen_id: 'user-1' },
-        { setCookie: 'session_id=sess-abc; Path=/; HttpOnly' },
-      )
-    }
-    if (url.includes('/api_tokens/create')) {
-      return jsonResponse(
-        opts.createResponse ?? {
-          status: 0,
-          data: { key_id: 'kid-1', key_name: 'genoffice', token: 'gsk-teleoffice-key' },
-        },
-      )
-    }
-    if (url.includes('/api_tokens/revoke')) return jsonResponse({ status: 0 })
-    throw new Error(`unexpected fetch: ${url}`)
-  })
-  vi.stubGlobal('fetch', fetchMock)
-  return fetchMock
-}
-
-async function loginAndCollect(): Promise<GskLoginProgress[]> {
-  const events: GskLoginProgress[] = []
-  startTeleofficeLogin((progress) => events.push(progress))
-  await vi.waitFor(() => {
-    expect(['success', 'error']).toContain(events.at(-1)?.phase)
-  })
-  return events
-}
-
-describe('startTeleofficeLogin', () => {
-  it('runs device_code → poll → session → key create and stores the key', async () => {
-    const fetchMock = stubFlow({ pendingPolls: 2 })
-    const events = await loginAndCollect()
-
-    expect(events[0]).toEqual({ phase: 'url', url: AUTH_URL, expiresInSec: 600 })
-    expect(events.at(-1)).toEqual({ phase: 'success' })
-
-    const saved = JSON.parse(readFileSync(teleofficeAuthPath(), 'utf-8'))
-    expect(saved).toEqual({
-      api_key: 'gsk-teleoffice-key',
-      key_id: 'kid-1',
-      access_token: 'bearer-token',
-    })
-    expect(statSync(teleofficeAuthPath()).mode & 0o777).toBe(0o600)
-    expect(teleofficeApiKey()).toBe('gsk-teleoffice-key')
-    expect(teleofficeLoginInFlight()).toBe(false)
-
-    // the key create call must ride on the session cookie
-    const createCall = fetchMock.mock.calls.find(([u]) => String(u).includes('/api_tokens/create'))!
-    const init = createCall[1]!
-    expect((init.headers as Record<string, string>).Cookie).toBe('session_id=sess-abc')
-    expect(JSON.parse(String(init.body))).toEqual({ key_name: 'genoffice' })
-  })
-
-  it('feeds gskApiKey(), losing only to an explicit GSK_API_KEY env override', async () => {
-    stubFlow()
-    await loginAndCollect()
-    expect(gskApiKey()).toBe('gsk-teleoffice-key')
-    process.env.GSK_API_KEY = 'gsk-env-override'
-    expect(gskApiKey()).toBe('gsk-env-override')
-  })
-
-  it('reports a network failure at device_code as error "network"', async () => {
-    const fetchMock = vi.fn().mockRejectedValue(new Error('ECONNREFUSED'))
-    vi.stubGlobal('fetch', fetchMock)
-    const events = await loginAndCollect()
-    expect(events).toEqual([{ phase: 'error', error: 'network' }])
+describe('teleoffice auth.json reader', () => {
+  it('returns null when no auth file exists', () => {
     expect(loadTeleofficeAuth()).toBeNull()
-    // no proxy registered → nothing better to retry through
-    expect(fetchMock).toHaveBeenCalledTimes(1)
-  })
-
-  it('retries through the registered proxy channel when the direct fetch cannot connect', async () => {
-    setGskProxyUrl('http://127.0.0.1:7890')
-    const flow = stubFlow()
-    let deviceCodeCalls = 0
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (input: string | URL, init?: RequestInit) => {
-        if (String(input).includes('/device_code') && ++deviceCodeCalls === 1) {
-          throw new Error('ECONNRESET')
-        }
-        return flow(input, init)
-      }),
-    )
-    const events = await loginAndCollect()
-    expect(deviceCodeCalls).toBe(2)
-    expect(events.at(-1)).toEqual({ phase: 'success' })
-    expect(teleofficeApiKey()).toBe('gsk-teleoffice-key')
-    expect(teleofficeProxyFallbackPreferred()).toBe(true)
-  })
-
-  it('treats a gateway status (502) as channel failure: fails over without adopting the channel', async () => {
-    setGskProxyUrl('http://127.0.0.1:7890')
-    const fetchMock = vi.fn(async () => jsonResponse({}, { status: 502 }))
-    vi.stubGlobal('fetch', fetchMock)
-    const events = await loginAndCollect()
-    expect(events).toEqual([{ phase: 'error', error: 'network' }])
-    // both channels tried, neither adopted
-    expect(fetchMock).toHaveBeenCalledTimes(2)
-    expect(teleofficeProxyFallbackPreferred()).toBe(false)
-  })
-
-  it('counts an endpoint 4xx (authorization_pending) as channel success', async () => {
-    setGskProxyUrl('http://127.0.0.1:7890')
-    const flow = stubFlow({ pendingPolls: 0 })
-    let deviceCodeCalls = 0
-    let tokenCalls = 0
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (input: string | URL, init?: RequestInit) => {
-        const url = String(input)
-        if (url.includes('/device_code') && ++deviceCodeCalls === 1) {
-          throw new Error('ECONNRESET')
-        }
-        if (url.includes('/office_addin_auth/token') && ++tokenCalls === 1) {
-          return jsonResponse({ status: 'pending' }, { status: 400 })
-        }
-        return flow(input, init)
-      }),
-    )
-    const events = await loginAndCollect()
-    expect(events.at(-1)).toEqual({ phase: 'success' })
-    // the 400 poll neither failed over to a second attempt nor dropped the preference
-    expect(tokenCalls).toBe(2)
-    expect(teleofficeProxyFallbackPreferred()).toBe(true)
-  })
-
-  it('reports an expired device code as error "expired"', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (input: string | URL) => {
-        const url = String(input)
-        if (url.includes('/device_code')) {
-          return jsonResponse({
-            device_code: CODE,
-            auth_url: AUTH_URL,
-            expires_in: 600,
-            poll_interval: 0.001,
-          })
-        }
-        return jsonResponse({ status: 'expired' })
-      }),
-    )
-    const events = await loginAndCollect()
-    expect(events.at(-1)).toEqual({ phase: 'error', error: 'expired' })
-  })
-
-  it('surfaces the server message when key creation fails', async () => {
-    stubFlow({ createResponse: { status: -1, message: 'Invalid API key name.' } })
-    const events = await loginAndCollect()
-    expect(events.at(-1)).toEqual({ phase: 'error', error: 'Invalid API key name.' })
-    expect(loadTeleofficeAuth()).toBeNull()
-  })
-
-  it('re-login revokes the superseded key (best-effort)', async () => {
-    stubFlow()
-    await loginAndCollect()
-
-    const fetchMock = stubFlow({
-      createResponse: { status: 0, data: { key_id: 'kid-2', token: 'gsk-teleoffice-key-2' } },
-    })
-    await loginAndCollect()
-    expect(loadTeleofficeAuth()).toMatchObject({ apiKey: 'gsk-teleoffice-key-2', keyId: 'kid-2' })
-    await vi.waitFor(() => {
-      const revoke = fetchMock.mock.calls.find(([u]) => String(u).includes('/api_tokens/revoke'))
-      expect(revoke).toBeDefined()
-      expect(JSON.parse(String(revoke![1]!.body))).toEqual({ key_id: 'kid-1' })
-    })
-  })
-
-  it('a new login cancels the in-flight one without emitting on it', async () => {
-    // first flow polls pending forever
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (input: string | URL) => {
-        const url = String(input)
-        if (url.includes('/device_code')) {
-          return jsonResponse({
-            device_code: CODE,
-            auth_url: AUTH_URL,
-            expires_in: 600,
-            poll_interval: 0.001,
-          })
-        }
-        return jsonResponse({ status: 'pending' })
-      }),
-    )
-    const first: GskLoginProgress[] = []
-    startTeleofficeLogin((progress) => first.push(progress))
-    await vi.waitFor(() => expect(first.length).toBeGreaterThan(0))
-    expect(teleofficeLoginInFlight()).toBe(true)
-
-    stubFlow()
-    const second = await loginAndCollect()
-    expect(second.at(-1)).toEqual({ phase: 'success' })
-    expect(first.every((e) => e.phase === 'url')).toBe(true)
-  })
-})
-
-describe('teleofficeLogout', () => {
-  it('revokes the key server-side and removes the local file', async () => {
-    const fetchMock = stubFlow()
-    await loginAndCollect()
-
-    await teleofficeLogout()
-    expect(existsSync(teleofficeAuthPath())).toBe(false)
     expect(teleofficeApiKey()).toBe('')
-    const revokeCall = fetchMock.mock.calls.find(([u]) => String(u).includes('/api_tokens/revoke'))!
-    const init = revokeCall[1]!
-    expect((init.headers as Record<string, string>).Cookie).toBe('session_id=sess-abc')
-    expect(JSON.parse(String(init.body))).toEqual({ key_id: 'kid-1' })
   })
 
-  it('still clears locally when the server revoke fails', async () => {
-    stubFlow()
-    await loginAndCollect()
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
-    await teleofficeLogout()
-    expect(existsSync(teleofficeAuthPath())).toBe(false)
-    expect(loadTeleofficeAuth()).toBeNull()
+  it('reads api_key from auth.json', () => {
+    writeFileSync(
+      teleofficeAuthPath(),
+      JSON.stringify({ api_key: 'gsk-residual', key_id: 'kid-1' }),
+    )
+    expect(loadTeleofficeAuth()).toEqual({ apiKey: 'gsk-residual', keyId: 'kid-1' })
+    expect(teleofficeApiKey()).toBe('gsk-residual')
   })
 
-  it('is a no-op network-wise when not signed in', async () => {
-    const fetchMock = vi.fn()
-    vi.stubGlobal('fetch', fetchMock)
-    await teleofficeLogout()
-    expect(fetchMock).not.toHaveBeenCalled()
+  it('feeds gskApiKey behind GSK_API_KEY env', () => {
+    writeFileSync(teleofficeAuthPath(), JSON.stringify({ api_key: 'gsk-residual' }))
+    reloadTeleofficeAuth()
+    expect(gskApiKey()).toBe('gsk-residual')
+    process.env.GSK_API_KEY = 'gsk-env'
+    expect(gskApiKey()).toBe('gsk-env')
   })
-})
 
-describe('watchGskApiKey', () => {
-  it('drops the cached key and reports the new one when another process rewrites auth.json', async () => {
-    const write = (key: string) =>
-      writeFileSync(join(dir, 'auth.json'), JSON.stringify({ api_key: key, key_id: key }))
-    write('gsk-old')
-    expect(gskApiKey()).toBe('gsk-old')
-    const seen: string[] = []
-    const stop = watchGskApiKey((key) => seen.push(key), 20)
-    try {
-      // the first stat runs off-thread; a write that lands before it becomes the baseline
-      await new Promise((r) => setTimeout(r, 100))
-      write('gsk-new')
-      await vi.waitFor(() => expect(seen).toEqual(['gsk-new']), { timeout: 3000 })
-      expect(teleofficeApiKey()).toBe('gsk-new')
-    } finally {
-      stop()
-    }
+  it('reloadTeleofficeAuth picks up a rewritten file', () => {
+    writeFileSync(teleofficeAuthPath(), JSON.stringify({ api_key: 'gsk-old' }))
+    expect(teleofficeApiKey()).toBe('gsk-old')
+    writeFileSync(teleofficeAuthPath(), JSON.stringify({ api_key: 'gsk-new' }))
+    reloadTeleofficeAuth()
+    expect(teleofficeApiKey()).toBe('gsk-new')
   })
 })

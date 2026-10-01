@@ -47,7 +47,10 @@ async function fakeShell(
     join(dir, 'control.json'),
     JSON.stringify({ protocol: 1, pid: process.pid, endpoint, token: 'secret' }),
   )
-  return { env: { ...process.env, TELEOFFICE_AUDIT_LOG: 'off', TELEOFFICE_USER_DATA: dir }, requests }
+  return {
+    env: { ...process.env, TELEOFFICE_AUDIT_LOG: 'off', TELEOFFICE_USER_DATA: dir },
+    requests,
+  }
 }
 
 describe('open targets', () => {
