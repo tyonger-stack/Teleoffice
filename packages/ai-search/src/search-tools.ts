@@ -26,6 +26,8 @@ export function searchOptionsFromSettings(settings: AiSettings): SearchOptions {
   const key = settings.search!.providers?.[provider]?.apiKey?.trim() ?? ''
   if (provider === 'parallel') return { useGsk: false, parallelKey: key, prefer: 'parallel' }
   if (provider === 'serply') return { useGsk: false, serplyKey: key, prefer: 'serply' }
+  if (provider === 'exa') return { useGsk: false, exaKey: key, prefer: 'exa' }
+  if (provider === 'firecrawl') return { useGsk: false, firecrawlKey: key, prefer: 'firecrawl' }
   return provider === 'tavily'
     ? { useGsk: false, tavilyKey: key, prefer: 'tavily' }
     : { useGsk: false, serperKey: key }
@@ -101,6 +103,8 @@ export async function testSearchProvider(
     serplyKey: provider === 'serply' ? apiKey : '',
     tavilyKey: provider === 'tavily' ? apiKey : '',
     parallelKey: provider === 'parallel' ? apiKey : '',
+    exaKey: provider === 'exa' ? apiKey : '',
+    firecrawlKey: provider === 'firecrawl' ? apiKey : '',
     prefer: provider,
   }
   const r = await webSearch('TeleOffice', 1, options)
