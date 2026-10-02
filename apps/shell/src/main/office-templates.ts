@@ -2,7 +2,15 @@
 // Slide decks stay in the pptx registry (slide-templates.ts). These files live
 // in a per-kind subdirectory so they never show up as slide templates.
 // Pure Node (no electron imports) so the logic stays unit-testable.
-import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, unlinkSync } from 'node:fs'
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  renameSync,
+  statSync,
+  unlinkSync,
+} from 'node:fs'
 import { randomBytes } from 'node:crypto'
 import { basename, extname, join, resolve, sep } from 'node:path'
 import { templatesDir } from '@genoffice/pipelines/slides/templates'
@@ -77,6 +85,17 @@ function acceptedExt(kind: OfficeTemplateKind, path: string): boolean {
   return ACCEPTED_EXT[kind].includes(extname(path).toLowerCase())
 }
 
+// Lower rank wins the plain slug. Index 0 is the canonical extension.
+function extRank(kind: OfficeTemplateKind, file: string): number {
+  const idx = ACCEPTED_EXT[kind].indexOf(extname(file).toLowerCase())
+  return idx === -1 ? ACCEPTED_EXT[kind].length : idx
+}
+
+function stemIsLower(file: string): boolean {
+  const stem = basename(file, extname(file))
+  return stem === stem.toLowerCase()
+}
+
 export function listOfficeTemplates(
   kind: OfficeTemplateKind,
   env: NodeJS.ProcessEnv = process.env,
@@ -89,14 +108,40 @@ export function listOfficeTemplates(
   } catch {
     return []
   }
-  const out: OfficeTemplateItem[] = []
+  // Canonical extension, then an already-lowercase stem, then filename order.
+  // That way page.html keeps the name "page" and page.htm becomes "page-2"
+  // instead of both listing as "page" (the click would always open the first).
+  const candidates: Array<{ file: string; stem: string; rank: number; path: string }> = []
   for (const file of files) {
     if (file.startsWith('.')) continue
     const path = join(dir, file)
     if (!acceptedExt(kind, file)) continue
-    const name = basename(file, extname(file)).toLowerCase()
-    if (!NAME_RE.test(name)) continue
-    out.push({ name, path, exists: existsSync(path) })
+    let fileStat: ReturnType<typeof statSync>
+    try {
+      fileStat = statSync(path)
+    } catch {
+      continue
+    }
+    if (!fileStat.isFile()) continue
+    const stem = basename(file, extname(file)).toLowerCase()
+    if (!NAME_RE.test(stem)) continue
+    candidates.push({ file, stem, rank: extRank(kind, file), path })
+  }
+  candidates.sort((a, b) => {
+    if (a.rank !== b.rank) return a.rank - b.rank
+    const aLower = stemIsLower(a.file) ? 0 : 1
+    const bLower = stemIsLower(b.file) ? 0 : 1
+    if (aLower !== bLower) return aLower - bLower
+    if (a.file < b.file) return -1
+    if (a.file > b.file) return 1
+    return 0
+  })
+  const taken = new Set<string>()
+  const out: OfficeTemplateItem[] = []
+  for (const item of candidates) {
+    const name = freeName(item.stem, taken)
+    taken.add(name)
+    out.push({ name, path: item.path, exists: true })
   }
   out.sort((a, b) => a.name.localeCompare(b.name))
   return out
