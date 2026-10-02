@@ -34,7 +34,7 @@ TeleOffice 是免费、开源的 Microsoft Office 替代品，支持 macOS、Win
 - **AI 的修改可以审阅。** 改动以修订痕迹和差异出现，可以整轮回滚。表格里写入的是会重新计算的公式，不是贴进去的数字。幻灯片和网页生成到画布上之后，仍然可以继续改。
 - **文件留在本机。** 打开、编辑、保存和转换都在你的电脑上完成。PDF → Word / Excel / PowerPoint、Markdown → Word、HTML → Word 都在本地运行。只有 AI 调用会发到你选择的服务商。
 - **按内容找文件。** 首页会搜索文件名、文件夹和正文。`.docx`、`.xlsx`、`.pptx`、PDF、Markdown 和 HTML 都进入本机 SQLite 全文索引，中文也可以检索。需要时，前若干条结果还可以交给 **[TypeSafe Jev](https://typesafe.ai/)** 按相关性重排。
-- **用自己的密钥，或者先不配密钥。** 登录 Genspark 即可直接使用；也可以自带 Claude、OpenAI、Gemini、DeepSeek、Kimi、GLM、Qwen、Doubao、MiniMax、Grok、Mistral、OpenRouter、Requesty、Opper 的密钥，或任何 OpenAI 兼容端点，包括本机模型服务。
+- **用自己的密钥。** 在设置里填写 Claude、OpenAI、Gemini、DeepSeek、Kimi、GLM、Qwen、Doubao、MiniMax、Grok、Mistral、OpenRouter、Requesty、Opper 的密钥，或任何 OpenAI 兼容端点，包括本机模型服务。搜索和生图也可以走本机命令行。
 - **可以脚本化，也可以交给编程助手。** 应用自带 `teleoffice` 命令行，以及一份给 Claude Code、Codex、Cursor、Gemini CLI、GitHub Copilot、OpenCode 和 Windsurf 用的 skill。编程助手不必打开窗口，就能在这台电脑上创建、转换、读取和编辑真正的 Office 文件。
 
 **获取：** [macOS](https://github.com/tyonger-stack/Teleoffice/releases/latest)（Apple Silicon 和 Intel）·
@@ -205,7 +205,7 @@ TeleOffice 带有 `teleoffice` 命令行和一份 agent skill。装上 skill 之
 - **在你的电脑上运行。** macOS、Windows 和 Linux 都有原生应用。文件在本地磁盘上，编辑、保存和转换都在本机。
 - **真正的 Office 文件。** 原生 `.docx`、`.xlsx` 和 `.pptx`。没改过的部分按原样复制。
 - **AI 改的是文档本身。** Docs 里是修订，Sheets 里是公式和图表，Slides 里是画布上的对象。每一轮都可以回滚。
-- **模型和密钥由你决定。** 登录 Genspark，或使用 Claude、OpenAI、Gemini、DeepSeek 等的密钥，也包括本机服务和任何 OpenAI 兼容端点。
+- **模型和密钥由你决定。** 使用 Claude、OpenAI、Gemini、DeepSeek 等的密钥，也包括本机服务和任何 OpenAI 兼容端点。
 - **PDF 按页面处理。** 可以在页内改文字，也可以在本机把 PDF 转成 Word、Excel 或 PowerPoint。扫描件可以使用系统 OCR。
 - **Markdown 和 HTML 用同一个 AI 面板**，并可以在本机导出为 Word。
 - **搜索找的是内容，不只是文件名。** 文件夹里的文档在本机建全文索引。需要时用 TypeSafe Jev 重排。
@@ -214,15 +214,13 @@ TeleOffice 带有 `teleoffice` 命令行和一份 agent skill。装上 skill 之
 
 ## AI 后端
 
-**登录 Genspark** 就不需要再填配置。模型调用走 Genspark 代理（Claude、GPT 和 Gemini 系列）。助手还可以使用网页搜索、图片搜索、图片生成，以及图片、音频和视频解析。
+**搜索和媒体默认走本机命令行。** 在「生图、媒体与搜索」里没有另选服务商时，网页搜索使用这台电脑上的两个命令行：中文查询和中文站点走 MiniMax CLI（`mmx`），其余走 Antigravity CLI（`agy`），一方失败就换另一方。图片生成、图片/音频/视频解析和语音识别先试 `agy`，再试 `mmx`；语音合成和视频使用 `mmx`。两个命令行都没有时，网页搜索改用 Parallel 的免费 Search MCP，然后再用 DuckDuckGo。生图和媒体解析可以在同一页改用其他服务商。
 
-**搜索和媒体默认走本机命令行。** 在「生图、媒体与搜索」里没有另选服务商时，网页搜索使用这台电脑上的两个命令行：中文查询和中文站点走 MiniMax CLI（`mmx`），其余走 Antigravity CLI（`agy`），一方失败就换另一方。图片生成、图片/音频/视频解析和语音识别先试 `agy`，再试 `mmx`；语音合成和视频使用 `mmx`。Genspark 仍然可以选。两个命令行都没安装时，已登录且打开了云工具的 Genspark 会自动接管搜索、生图和媒体解析。
-
-**也可以自带密钥。** 「设置 → AI 模型」列出 Claude、OpenAI、Gemini、DeepSeek、Kimi、GLM、Qwen、Doubao、MiniMax、Grok、Mistral、OpenRouter、Requesty、Opper 和 OpenCode Zen/Go，另有一个自定义槽位，可填任何 OpenAI 兼容端点（Base URL 和密钥），包括本机模型服务。搜索和媒体在「生图、媒体与搜索」里按能力分开配置：网页搜索可选 Serper、Serply、Tavily 或 Parallel；生图和图片/视频解析可选 OpenAI、Gemini、Doubao/Seedream、GLM、Grok、Qwen、MiniMax，或任何 OpenAI 兼容的图片端点。图片解析还可以用 DeepSeek V4.1 Flash。
+**自带密钥。** 「设置 → AI 模型」列出 Claude、OpenAI、Gemini、DeepSeek、Kimi、GLM、Qwen、Doubao、MiniMax、Grok、Mistral、OpenRouter、Requesty、Opper 和 OpenCode Zen/Go，另有一个自定义槽位，可填任何 OpenAI 兼容端点（Base URL 和密钥），包括本机模型服务。搜索和媒体在「生图、媒体与搜索」里按能力分开配置：网页搜索可选 Serper、Serply、Tavily 或 Parallel；生图和图片/视频解析可选 OpenAI、Gemini、Doubao/Seedream、GLM、Grok、Qwen、MiniMax，或任何 OpenAI 兼容的图片端点。图片解析还可以用 DeepSeek V4.1 Flash。
 
 **TypeSafe Jev** 用来重排首页的文件搜索。在「生图、媒体与搜索 → 本机文件搜索」打开 Jev 搜索重排，并选择端点：[OpenRouter](https://openrouter.ai/typesafe)（模型 `typesafe/jev-1.13`）或 TypeSafe 自己的 API。密钥只保存在本机。默认关闭。打开之后，离开本机的只有前 20 条命中的片段。
 
-**Parallel** 可以不登录使用。没有 Genspark 登录、也没有搜索密钥时，在本机 CLI 之后，免费的 Search MCP（有速率限制）会作为网页搜索的后备，并排在 DuckDuckGo 抓取之前。在网页搜索里选中 Parallel 并填写 [Parallel](https://platform.parallel.ai/) 密钥后，则改走 Search API。
+**Parallel** 的免费 Search MCP 不需要账号，有速率限制。本机命令行没有给出结果时，它排在 DuckDuckGo 抓取之前。在网页搜索里选中 Parallel 并填写 [Parallel](https://platform.parallel.ai/) 密钥后，则改走 Search API。
 
 整套应用有浅色、深色和跟随系统三种主题。主题只改变屏幕。导出、打印和保存的文件始终使用文档自己的颜色。
 
@@ -264,7 +262,7 @@ teleoffice open sales.xlsx                          # 把结果交给编辑器
 做一份演示文稿时，助手按 skill 的分阶段流程推进。CLI 在进入下一步之前检查这一阶段：
 
 ```bash
-teleoffice capabilities --json                        # 这台 TeleOffice 配了哪些云工具
+teleoffice capabilities --json                        # 这台 TeleOffice 配了哪些外部能力
 teleoffice guide slides design                        # 文稿流程和版式
 teleoffice image "…" --aspect 16:9 --out deck/assets/cover.jpg
 teleoffice slides check deck/outline.json --json      # 先检查大纲
@@ -411,7 +409,7 @@ Sheets 的 xlsx sidecar 还需要 Rust 工具链（`cargo` 在 PATH 里）。`np
 TeleOffice 还在积极开发，反馈会改变它。
 
 - **报告缺陷或提出功能**，请到 [GitHub Issues](https://github.com/tyonger-stack/Teleoffice/issues)。
-- **加入 TeleOffice 群聊**，在 [GenTeam](https://teleoffice.ai/join) 和团队以及其他使用者交流。
+- **加入 TeleOffice 群聊**，在 [社区](https://teleoffice.ai/join) 和团队以及其他使用者交流。
 - **给仓库加星。** 如果 TeleOffice 对你有用，这是支持这个项目最直接的方式。
 
 ## 常见问题
@@ -433,7 +431,7 @@ TeleOffice 还在积极开发，反馈会改变它。
 <details>
 <summary><b>可以离线使用吗？</b></summary>
 
-编辑完全在本地。打开、编辑、保存和转换都不会把文件发出去。AI 功能（助手、搜索、图片工具）需要网络，并需要登录 Genspark 或提供你自己的模型 API 密钥。
+编辑完全在本地。打开、编辑、保存和转换都不会把文件发出去。AI 功能（助手、搜索、图片工具）需要网络，并需要可用的本机命令行，或你自己的模型 API 密钥。
 
 </details>
 
@@ -454,7 +452,7 @@ TeleOffice 还在积极开发，反馈会改变它。
 <details>
 <summary><b>能用自己的模型或 API 密钥吗？</b></summary>
 
-可以。除了免密钥的 Genspark 登录，还可以自带 Claude、OpenAI、Gemini、DeepSeek、Kimi、GLM、Qwen、Doubao、MiniMax、Grok、Mistral、OpenRouter、Requesty、Opper 和 OpenCode Zen/Go 的密钥，以及任何 OpenAI 兼容端点，包括本机模型服务。搜索、生图和图片/视频解析在「设置 → 生图、媒体与搜索」里使用各自的密钥。
+可以。TeleOffice 支持自带 Claude、OpenAI、Gemini、DeepSeek、Kimi、GLM、Qwen、Doubao、MiniMax、Grok、Mistral、OpenRouter、Requesty、Opper 和 OpenCode Zen/Go 的密钥，以及任何 OpenAI 兼容端点，包括本机模型服务。搜索、生图和图片/视频解析在「设置 → 生图、媒体与搜索」里使用各自的密钥，也可以走本机命令行。
 
 </details>
 
@@ -511,4 +509,4 @@ TeleOffice 用到这些开源项目：
 
 TeleOffice 使用 [Apache License 2.0](LICENSE)。例外是 `ee/` 目录，留给以后的企业模块，受 [TeleOffice 企业许可证](ee/LICENSE) 约束。
 
-TeleOffice 和 Genspark 的名称与标识是 Mainfunc, Inc. 的商标。Apache-2.0 并不授予使用它们的权利（见第 6 节）。分叉请使用自己的品牌。
+TeleOffice 的名称与标识是 Mainfunc, Inc. 的商标。Apache-2.0 并不授予使用它们的权利（见第 6 节）。分叉请使用自己的品牌。
