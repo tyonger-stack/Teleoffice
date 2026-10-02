@@ -51,8 +51,6 @@ describe('Settings AI panel preferences', () => {
     window.aiOffice = {
       getTheme: async () => 'system',
       getDefaultSaveDir: async () => '',
-      getAnalyticsEnabled: async () => true,
-      setAnalyticsEnabled: async () => true,
       getAiPanelPrefs: async () => saved,
       setAiPanelPrefs,
       getUpdateChannel: async () => 'stable',
@@ -104,8 +102,6 @@ describe('Settings AI panel preferences', () => {
     window.aiOffice = {
       getTheme: async () => 'system',
       getDefaultSaveDir: async () => '',
-      getAnalyticsEnabled: async () => true,
-      setAnalyticsEnabled: async () => true,
       getAiPanelPrefs: async () => saved,
       setAiPanelPrefs,
       getUpdateChannel: async () => 'stable',
@@ -160,8 +156,6 @@ describe('Settings AI panel preferences', () => {
     window.aiOffice = {
       getTheme: async () => 'system',
       getDefaultSaveDir: async () => '',
-      getAnalyticsEnabled: async () => true,
-      setAnalyticsEnabled: async () => true,
       getAiPanelPrefs: async () => saved,
       setAiPanelPrefs,
       getUpdateChannel: async () => 'stable',

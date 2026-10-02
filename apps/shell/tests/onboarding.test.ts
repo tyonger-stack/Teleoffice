@@ -64,15 +64,15 @@ describe('first-run welcome copy', () => {
   })
 })
 
-describe('analytics consent in onboarding', () => {
-  it('shows the welcome slide without an analytics control or skip', () => {
+describe('first-run welcome dialog', () => {
+  it('shows the welcome slide without a skip control', () => {
     renderOnboarding(vi.fn(async () => true))
     expect(host.querySelector('[role="switch"]')).toBeNull()
     expect(host.querySelector('.onb-skip')).toBeNull()
     expect(host.textContent).not.toContain('Enabled by default')
   })
 
-  it('lets Escape finish without changing analytics', async () => {
+  it('lets Escape finish the welcome', async () => {
     const onDone = vi.fn(async () => true)
     renderOnboarding(onDone)
 
@@ -83,7 +83,7 @@ describe('analytics consent in onboarding', () => {
     expect(onDone).toHaveBeenCalledOnce()
   })
 
-  it('finishes the final slide without an analytics choice', async () => {
+  it('finishes from the start button', async () => {
     const onDone = vi.fn(async () => true)
     renderOnboarding(onDone)
 
