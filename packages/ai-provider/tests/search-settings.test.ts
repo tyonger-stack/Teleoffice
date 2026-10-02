@@ -183,7 +183,7 @@ describe('exa and firecrawl providers', () => {
     expect(s.providers.firecrawl.apiKey).toBe('')
   })
 
-  it('activate with a key and fall back to genspark without one', () => {
+  it('activate with a key and fall back to the local CLI without one', () => {
     const mk = (id: 'exa' | 'firecrawl', apiKey: string) => ({
       search: {
         provider: id,
