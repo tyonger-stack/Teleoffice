@@ -17,7 +17,6 @@ export const pt = {
   aiQcPageSkipped: 'Página {n}: verificação automática de layout ignorada',
   aiQcStopped: 'Verificação de layout interrompida',
   aiQcCapped: 'Mais {count} página(s) não verificada(s) (limite por execução)',
-  aiGskLoginBtn: 'Entrar no Genspark',
   aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: 'Abrir assistente de IA',
   aiFactCheckBtn: 'Checagem IA',

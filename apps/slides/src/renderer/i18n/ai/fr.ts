@@ -17,7 +17,6 @@ export const fr = {
   aiQcPageSkipped: 'Page {n} : vérification automatique de la mise en page ignorée',
   aiQcStopped: 'Vérification de la mise en page arrêtée',
   aiQcCapped: '{count} page(s) restante(s) non vérifiée(s) (limite par exécution)',
-  aiGskLoginBtn: 'Se connecter à Genspark',
   aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: "Ouvrir l'assistant IA",
   aiFactCheckBtn: 'Vérification IA',

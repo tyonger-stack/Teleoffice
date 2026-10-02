@@ -5,7 +5,6 @@ export const fr = {
   aiEmptyBuildTitle: "Laissez l'IA construire ce classeur pour vous",
   aiEmptyBuildBody:
     "Décrivez le tableau, les données ou le graphique voulu — l'IA les crée directement.",
-  aiGskLoginBtn: 'Se connecter à Genspark',
   aiUndelivered: 'Non envoyé',
   aiRetry: 'Réessayer',
   aiOpenAssistant: "Ouvrir l'assistant IA",

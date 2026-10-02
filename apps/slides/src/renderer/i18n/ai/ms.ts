@@ -17,7 +17,6 @@ export const ms = {
   aiQcPageSkipped: 'Halaman {n}: semakan susun atur automatik dilangkau',
   aiQcStopped: 'Semakan susun atur dihentikan',
   aiQcCapped: '{count} halaman lagi tidak disemak (had setiap larian)',
-  aiGskLoginBtn: 'Log masuk ke Genspark',
   aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: 'Buka pembantu AI',
   aiFactCheckBtn: 'Semak Fakta AI',
