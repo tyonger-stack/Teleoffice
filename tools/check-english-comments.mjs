@@ -5,8 +5,7 @@
 //
 // Functional CJK string literals are fine (i18n resources, test fixture
 // text, zh-UI matchers), as are the AI prompt guides (runtime resources that
-// legitimately show CJK examples), translated READMEs under an i18n directory,
-// and the language-switcher line that names those translations.
+// legitimately show CJK examples). The repository README is Simplified Chinese.
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -25,7 +24,10 @@ for (const file of git.stdout.trim().split('\n')) {
   const isCode = /\.(ts|tsx|mjs|cjs|js|rs)$/.test(file)
   const isHashCode = /\.(py|sh)$/.test(file)
   const isDoc =
-    /\.(md|html?)$/.test(file) && !file.includes('/ai/prompts/') && !file.includes('/i18n/')
+    /\.(md|html?)$/.test(file) &&
+    !file.includes('/ai/prompts/') &&
+    !file.includes('/i18n/') &&
+    file !== 'README.md'
   if (!isCode && !isHashCode && !isDoc) continue
   const lines = readFileSync(join(root, file), 'utf8').split('\n')
   lines.forEach((line, index) => {
