@@ -394,6 +394,22 @@ body.vib .home {
   gap: 10px;
 }
 
+.default-templates {
+  margin-top: 16px;
+}
+
+.default-templates-heading {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.default-templates .quick-cards {
+  flex-wrap: wrap;
+}
+
 .quick-card {
   position: relative;
   flex: 1;

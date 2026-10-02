@@ -32,6 +32,14 @@ import {
   importSlideTemplate as importSlideTemplateFile,
   listSlideTemplates,
 } from './slide-templates'
+import {
+  createFileFromTemplate,
+  ensureOfficeTemplatesDir,
+  importOfficeTemplate as importOfficeTemplateFile,
+  isOfficeTemplateKind,
+  listOfficeTemplates,
+  type OfficeTemplateKind,
+} from './office-templates'
 import { tabStripOverlay } from './title-bar-overlay'
 import menuDocxIcon1x from './assets/menu-docx.png?asset'
 import menuDocxIcon2x from './assets/menu-docx@2x.png?asset'
@@ -3791,6 +3799,68 @@ function statEntries(paths: string[]): RecentEntry[] {
 
 const LOCAL_ACCOUNT_EMAIL_KEY = 'localAccountEmail'
 
+function officeTemplatePendingKind(kind: OfficeTemplateKind): string {
+  switch (kind) {
+    case 'docx':
+      return 'doc'
+    case 'xlsx':
+      return 'sheet'
+    case 'md':
+      return 'markdown'
+    case 'html':
+      return 'html'
+    case 'pdf':
+      return 'pdf'
+    default: {
+      const unreachable: never = kind
+      return unreachable
+    }
+  }
+}
+
+function officeTemplateUntitledKey(
+  kind: OfficeTemplateKind,
+): 'untitledDoc' | 'untitledSheet' | 'untitledMarkdown' | 'untitledHtml' | 'untitledPdf' {
+  switch (kind) {
+    case 'docx':
+      return 'untitledDoc'
+    case 'xlsx':
+      return 'untitledSheet'
+    case 'md':
+      return 'untitledMarkdown'
+    case 'html':
+      return 'untitledHtml'
+    case 'pdf':
+      return 'untitledPdf'
+    default: {
+      const unreachable: never = kind
+      return unreachable
+    }
+  }
+}
+
+function officeTemplateDialogFilter(kind: OfficeTemplateKind): {
+  name: 'filterWord' | 'filterExcel' | 'filterMarkdown' | 'filterHtml' | 'filterPdf'
+  extensions: readonly string[]
+} {
+  switch (kind) {
+    case 'docx':
+      return { name: 'filterWord', extensions: ['docx'] }
+    case 'xlsx':
+      return { name: 'filterExcel', extensions: ['xlsx'] }
+    case 'md':
+      return { name: 'filterMarkdown', extensions: ['md', 'markdown'] }
+    case 'html':
+      return { name: 'filterHtml', extensions: ['html', 'htm'] }
+    case 'pdf':
+      return { name: 'filterPdf', extensions: ['pdf'] }
+    default: {
+      const unreachable: never = kind
+      return unreachable
+    }
+  }
+}
+
 function registerHomeIpc(): void {
   ipcMain.handle(HOME_CHANNELS.localAccountEmail, (): string => {
     const value = readAppSettings(APP_SETTINGS_PATH())[LOCAL_ACCOUNT_EMAIL_KEY]
@@ -4016,6 +4086,55 @@ function registerHomeIpc(): void {
 
   ipcMain.handle(HOME_CHANNELS.openTemplatesFolder, async () => {
     await shell.openPath(ensureTemplatesDir())
+  })
+
+  ipcMain.handle(HOME_CHANNELS.listOfficeTemplates, (_event, kind: unknown) => {
+    if (!isOfficeTemplateKind(kind)) throw new Error(tm('errBadArgs'))
+    return listOfficeTemplates(kind)
+  })
+
+  ipcMain.handle(
+    HOME_CHANNELS.newOfficeFromTemplate,
+    (_event, kind: unknown, name: unknown, opts?: NewFileOpts) => {
+      if (!isOfficeTemplateKind(kind)) throw new Error(tm('errBadArgs'))
+      if (typeof name !== 'string' || !name || name.length > 128) throw new Error(tm('errBadArgs'))
+      const pending = officeTemplatePendingKind(kind)
+      rememberPendingDir(pending, opts)
+      try {
+        const path = createFileFromTemplate(
+          kind,
+          name,
+          newFileDir(pending),
+          tm(officeTemplateUntitledKey(kind)),
+        )
+        if (routeDocumentPath(path)) recordStarPromptDocOpen()
+        analytics.track('file_new', { kind })
+      } catch (err) {
+        surfaceNewTabError(err)
+      }
+    },
+  )
+
+  ipcMain.handle(HOME_CHANNELS.importOfficeTemplate, async (event, kind: unknown) => {
+    if (!isOfficeTemplateKind(kind)) throw new Error(tm('errBadArgs'))
+    const win = BrowserWindow.fromWebContents(event.sender) ?? shellWindow
+    if (!win) return null
+    const filter = officeTemplateDialogFilter(kind)
+    const result = await showOpenDialogWithMemory(dialog, win, {
+      title: tm('dlgImportTemplate'),
+      filters: [{ name: tm(filter.name), extensions: [...filter.extensions] }],
+      properties: ['openFile'],
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    const source = result.filePaths[0]
+    if (!source) return null
+    const imported = importOfficeTemplateFile(kind, source)
+    return { name: imported.name }
+  })
+
+  ipcMain.handle(HOME_CHANNELS.openOfficeTemplatesFolder, async (_event, kind: unknown) => {
+    if (!isOfficeTemplateKind(kind)) throw new Error(tm('errBadArgs'))
+    await shell.openPath(ensureOfficeTemplatesDir(kind))
   })
 
   ipcMain.handle(HOME_CHANNELS.newMarkdown, (_event, opts?: NewFileOpts) => {

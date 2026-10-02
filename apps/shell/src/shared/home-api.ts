@@ -192,8 +192,16 @@ export interface HomeApi {
   newSlideFromTemplate(name: string, opts?: NewFileOpts): Promise<void>
   /** import a .pptx file into the template registry; null when cancelled */
   importSlideTemplate(): Promise<{ name: string } | null>
-  /** reveal the templates folder in the file manager */
+  /** reveal the slide templates folder in the file manager */
   openTemplatesFolder(): Promise<void>
+  /** imported templates for one non-slide Office kind */
+  listOfficeTemplates(kind: OfficeTemplateKind): Promise<OfficeTemplateItem[]>
+  /** copy a registered template to a new file and open it */
+  newOfficeFromTemplate(kind: OfficeTemplateKind, name: string, opts?: NewFileOpts): Promise<void>
+  /** import a file of this kind into its template folder; null when cancelled */
+  importOfficeTemplate(kind: OfficeTemplateKind): Promise<{ name: string } | null>
+  /** reveal that kind's template folder in the file manager */
+  openOfficeTemplatesFolder(kind: OfficeTemplateKind): Promise<void>
   /** open a blank markdown editor tab */
   newMarkdown(opts?: NewFileOpts): Promise<void>
   /** open a blank html editor tab */
@@ -428,6 +436,15 @@ export interface SlideTemplateItem {
   source: 'registry' | 'file'
 }
 
+/** non-slide Office kinds that share the home template row */
+export type OfficeTemplateKind = 'docx' | 'xlsx' | 'md' | 'html' | 'pdf'
+
+export interface OfficeTemplateItem {
+  name: string
+  path: string
+  exists: boolean
+}
+
 // ── Folder tree (home "Folders" panel: the default save folder plus any folder the user added) ──
 
 export interface FolderRoot {
@@ -503,6 +520,10 @@ export const HOME_CHANNELS = {
   newSlideFromTemplate: 'home:new-slide-from-template',
   importSlideTemplate: 'home:import-slide-template',
   openTemplatesFolder: 'home:open-templates-folder',
+  listOfficeTemplates: 'home:list-office-templates',
+  newOfficeFromTemplate: 'home:new-office-from-template',
+  importOfficeTemplate: 'home:import-office-template',
+  openOfficeTemplatesFolder: 'home:open-office-templates-folder',
   newMarkdown: 'home:new-markdown',
   newHtml: 'home:new-html',
   newPdf: 'home:new-pdf',

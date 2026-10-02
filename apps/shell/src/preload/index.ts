@@ -177,6 +177,29 @@ const homeApi: HomeApi = {
   async openTemplatesFolder() {
     await ipcRenderer.invoke(HOME_CHANNELS.openTemplatesFolder)
   },
+  async listOfficeTemplates(kind) {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.listOfficeTemplates, kind)
+    return Array.isArray(result) ? result : []
+  },
+  async newOfficeFromTemplate(kind, name, opts) {
+    if (typeof name !== 'string' || !name) throw new Error('Invalid template name.')
+    await ipcRenderer.invoke(HOME_CHANNELS.newOfficeFromTemplate, kind, name, opts)
+  },
+  async importOfficeTemplate(kind) {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.importOfficeTemplate, kind)
+    if (result === null) return null
+    if (
+      result &&
+      typeof result === 'object' &&
+      typeof (result as { name?: unknown }).name === 'string'
+    ) {
+      return result as { name: string }
+    }
+    return null
+  },
+  async openOfficeTemplatesFolder(kind) {
+    await ipcRenderer.invoke(HOME_CHANNELS.openOfficeTemplatesFolder, kind)
+  },
   async newMarkdown(opts) {
     await ipcRenderer.invoke(HOME_CHANNELS.newMarkdown, opts)
   },
