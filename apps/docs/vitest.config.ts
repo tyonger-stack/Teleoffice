@@ -19,6 +19,9 @@ export default defineConfig({
       '@teleoffice/electron-utils/atomic-write': local(
         '../../packages/electron-utils/src/atomic-write.ts',
       ),
+      '@teleoffice/electron-utils/safe-external-url': local(
+        '../../packages/electron-utils/src/safe-external-url.ts',
+      ),
       '@teleoffice/electron-utils': local('../../packages/electron-utils/src/index.ts'),
       '@teleoffice/ai-provider/browser': local('../../packages/ai-provider/src/browser.ts'),
       '@teleoffice/ai-provider': local('../../packages/ai-provider/src/index.ts'),

@@ -11,6 +11,8 @@ export type AiProviderId =
   | 'glm'
   | 'qwen'
   | 'doubao'
+  | 'mimo'
+  | 'hunyuan'
   | 'minimax'
   | 'xai'
   | 'mistral'
@@ -138,7 +140,16 @@ export interface AiMediaSettings {
 
 /** web/image search backends; Parallel supports both a user key and free keyless search */
 export type AiSearchProviderId =
-  'genspark' | 'local-cli' | 'mmx' | 'antigravity' | 'serper' | 'serply' | 'tavily' | 'parallel'
+  | 'genspark'
+  | 'local-cli'
+  | 'mmx'
+  | 'antigravity'
+  | 'serper'
+  | 'serply'
+  | 'tavily'
+  | 'parallel'
+  | 'exa'
+  | 'firecrawl'
 
 export interface AiSearchProviderMeta {
   id: AiSearchProviderId
