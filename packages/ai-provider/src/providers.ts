@@ -395,7 +395,7 @@ export function defaultAiSettings(
     }
   }
   return {
-    provider: 'genspark',
+    provider: 'codex',
     providers,
     gskToolsEnabled: true,
     localCli: defaultAiLocalCliSettings(),
@@ -414,26 +414,24 @@ export function cloudToolsEnabled(settings: Pick<AiSettings, 'gskToolsEnabled'>)
  * (api-key providers need a key and a model id; custom also needs a base URL).
  * Codex can auto-discover its executable. Anything else — including unknown
  * ids from a hand-edited
- * settings file — falls back to genspark, so a half-filled setup degrades
- * to the signed-in default instead of silently disabling AI.
+ * settings file — falls back to Codex, which needs no API key.
  */
 export function activeProvider(settings: AiSettings): AiProviderId {
-  const provider = settings.provider
-  if (provider === 'genspark') return 'genspark'
+  const provider = settings.provider === 'genspark' ? 'codex' : settings.provider
   const meta = AI_PROVIDERS.find((m) => m.id === provider)
   const config = settings.providers?.[provider]
-  if (!meta || !config) return 'genspark'
+  if (!meta || !config) return 'codex'
   if (meta.needsCliPath) return provider
   // Trim-aware: in-memory settings bypass the trimConfigs applied to
   // persisted files, and a whitespace-only key/URL/model is a 401, not a config.
-  if (!config.model?.trim()) return 'genspark'
+  if (!config.model?.trim()) return 'codex'
   if (meta.needsBaseUrl) {
     // Custom OpenAI-compatible endpoints (Ollama, LM Studio, vLLM) accept
     // anonymous requests: base URL + model suffice, the key stays optional.
-    if (!config.baseUrl?.trim()) return 'genspark'
+    if (!config.baseUrl?.trim()) return 'codex'
     return provider
   }
-  if (!config.apiKey?.trim()) return 'genspark'
+  if (!config.apiKey?.trim()) return 'codex'
   return provider
 }
 
@@ -556,7 +554,7 @@ export function resolveAiSettings(stored: unknown, defaults: AiSettings): AiSett
     return defaults
   }
   return {
-    provider: settings.provider ?? defaults.provider,
+    provider: !settings.provider || settings.provider === 'genspark' ? 'codex' : settings.provider,
     // Trim before migrating: a pasted " deepseek-reasoner " must still hit
     // the retired-id remap instead of being sent to the API verbatim.
     providers: migrateRetiredModels(

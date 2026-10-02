@@ -36,7 +36,7 @@ describe('search settings', () => {
   })
 
   it('activates a BYOK search provider only with a key', () => {
-    expect(activeSearchProvider({ search: undefined })).toBe('genspark')
+    expect(activeSearchProvider({ search: undefined })).toBe('local-cli')
     expect(
       activeSearchProvider({
         search: {
@@ -49,7 +49,7 @@ describe('search settings', () => {
           },
         },
       }),
-    ).toBe('genspark')
+    ).toBe('local-cli')
     expect(
       activeSearchProvider({
         search: {
@@ -75,9 +75,9 @@ describe('search settings', () => {
           },
         },
       }),
-    ).toBe('genspark')
+    ).toBe('local-cli')
     expect(activeSearchProvider({ search: { provider: 'bing', providers: {} } as never })).toBe(
-      'genspark',
+      'local-cli',
     )
   })
 })
@@ -95,7 +95,7 @@ describe('Serply search settings', () => {
       activeSearchProvider({
         search: { ...settings, providers: { ...settings.providers, serply: { apiKey: '  ' } } },
       }),
-    ).toBe('genspark')
+    ).toBe('local-cli')
   })
 })
 
@@ -151,7 +151,7 @@ describe('local CLI search settings', () => {
     }
     expect(
       activeSearchProvider({ search: { ...defaultAiSearchSettings(), provider: 'genspark' } }),
-    ).toBe('genspark')
+    ).toBe('local-cli')
   })
 
   it('keeps a stored local provider through resolution', () => {

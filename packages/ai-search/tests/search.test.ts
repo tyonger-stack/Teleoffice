@@ -323,9 +323,13 @@ describe('search-tools', () => {
       ...base,
       search: { ...base.search!, provider: 'genspark' as const },
     }
-    expect(searchOptionsFromSettings(genspark)).toEqual({ useGsk: true })
+    expect(searchOptionsFromSettings(genspark)).toEqual({
+      useGsk: false,
+      localCli: { provider: 'local-cli', settings: genspark },
+    })
     expect(searchOptionsFromSettings({ ...genspark, gskToolsEnabled: false })).toEqual({
       useGsk: false,
+      localCli: { provider: 'local-cli', settings: { ...genspark, gskToolsEnabled: false } },
     })
     const serper = {
       ...base,
@@ -357,7 +361,7 @@ describe('search-tools', () => {
       tavilyKey: 't',
       prefer: 'tavily',
     })
-    // no key → genspark chain
+    // no key → local CLI chain, not Genspark
     const empty = {
       ...base,
       search: {
@@ -370,7 +374,10 @@ describe('search-tools', () => {
         },
       },
     }
-    expect(searchOptionsFromSettings(empty)).toEqual({ useGsk: true })
+    expect(searchOptionsFromSettings(empty)).toEqual({
+      useGsk: false,
+      localCli: { provider: 'local-cli', settings: empty },
+    })
   })
 
   it('reports a rejected key as a failure instead of the silent free fallback', async () => {

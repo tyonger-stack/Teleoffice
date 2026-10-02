@@ -270,6 +270,14 @@ const homeApi: HomeApi = {
     if (channel !== 'stable' && channel !== 'beta') throw new Error('Invalid update channel.')
     await ipcRenderer.invoke(HOME_CHANNELS.setUpdateChannel, channel)
   },
+  async localAccountEmail() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.localAccountEmail)
+    return typeof result === 'string' ? result : ''
+  },
+  async setLocalAccountEmail(email) {
+    const value = typeof email === 'string' ? email.trim() : ''
+    await ipcRenderer.invoke(HOME_CHANNELS.setLocalAccountEmail, value)
+  },
   async accountStatus() {
     const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.accountStatus)
     return (result ?? { loggedIn: false }) as AccountStatus
@@ -474,7 +482,7 @@ const homeApi: HomeApi = {
     await ipcRenderer.invoke('ai:set-settings', settings)
   },
   getAiProviders() {
-    return AI_PROVIDERS.map((meta) => {
+    return AI_PROVIDERS.filter((meta) => meta.id !== 'genspark').map((meta) => {
       let defaultBaseUrl = ''
       // genspark routes by model and custom has no default — both stay ''
       if (meta.id !== 'genspark' && !meta.needsBaseUrl && !meta.needsCliPath) {
@@ -504,10 +512,10 @@ const homeApi: HomeApi = {
       : { ok: false, error: typeof raw.error === 'string' ? raw.error : 'Connection failed' }
   },
   getAiMediaProviders() {
-    return AI_MEDIA_PROVIDERS
+    return AI_MEDIA_PROVIDERS.filter((meta) => meta.id !== 'genspark')
   },
   getAiSearchProviders() {
-    return AI_SEARCH_PROVIDERS
+    return AI_SEARCH_PROVIDERS.filter((meta) => meta.id !== 'genspark')
   },
   async testAiSearchSettings(input) {
     const raw = ((await ipcRenderer.invoke('ai:search-test', input)) ?? {}) as {

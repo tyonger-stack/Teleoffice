@@ -3789,7 +3789,17 @@ function statEntries(paths: string[]): RecentEntry[] {
   return statPathEntries(paths, new Set(readStarredFiles()))
 }
 
+const LOCAL_ACCOUNT_EMAIL_KEY = 'localAccountEmail'
+
 function registerHomeIpc(): void {
+  ipcMain.handle(HOME_CHANNELS.localAccountEmail, (): string => {
+    const value = readAppSettings(APP_SETTINGS_PATH())[LOCAL_ACCOUNT_EMAIL_KEY]
+    return typeof value === 'string' ? value : ''
+  })
+  ipcMain.handle(HOME_CHANNELS.setLocalAccountEmail, (_event, email: unknown) => {
+    const value = typeof email === 'string' ? email.trim() : ''
+    writeAppSetting(APP_SETTINGS_PATH(), LOCAL_ACCOUNT_EMAIL_KEY, value)
+  })
   // signed-in means GenOffice's own device-code login; the shared gsk CLI key
   // is only a silent fallback, deliberately not shown here to nudge users onto our key
   ipcMain.handle(HOME_CHANNELS.accountStatus, async () => {

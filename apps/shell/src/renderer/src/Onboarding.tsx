@@ -28,16 +28,6 @@ interface Slide {
 
 const SLIDES: readonly Slide[] = [
   { titleKey: 'onbTitle1', subtitleKey: 'onbSubtitle1', bodyKey: 'onbBody1', art: 'logo' },
-  { titleKey: 'onbTitle2', subtitleKey: 'onbBody2', showOffer: true, art: 'gift' },
-  {
-    titleKey: 'onbTitle3',
-    subtitleKey: 'onbBody3',
-    bodyKey: 'onbNote3',
-    bodyDim: true,
-    showStar: true,
-    showAnalyticsNotice: true,
-    art: 'check',
-  },
 ]
 
 /** render `**emphasized**` segments of a localized string as <strong> */
@@ -242,21 +232,25 @@ export function Onboarding({ onDone }: OnboardingProps) {
         </div>
 
         <div className="onb-footer">
-          <div className="onb-dots">
-            {SLIDES.map((s, i) => (
-              <button
-                key={s.titleKey}
-                className={`onb-dot${i === index ? ' active' : ''}`}
-                aria-label={t('onbStepAria', { n: i + 1, total: SLIDES.length })}
-                aria-current={i === index}
-                onClick={() => setIndex(i)}
-              />
-            ))}
-          </div>
+          {SLIDES.length > 1 && (
+            <div className="onb-dots">
+              {SLIDES.map((s, i) => (
+                <button
+                  key={s.titleKey}
+                  className={`onb-dot${i === index ? ' active' : ''}`}
+                  aria-label={t('onbStepAria', { n: i + 1, total: SLIDES.length })}
+                  aria-current={i === index}
+                  onClick={() => setIndex(i)}
+                />
+              ))}
+            </div>
+          )}
           <div className="onb-nav">
-            <button className="onb-skip" disabled={submitting} onClick={finish}>
-              {t('onbSkip')}
-            </button>
+            {SLIDES.length > 1 && (
+              <button className="onb-skip" disabled={submitting} onClick={finish}>
+                {t('onbSkip')}
+              </button>
+            )}
             {index > 0 && (
               <button
                 className="onb-back"
