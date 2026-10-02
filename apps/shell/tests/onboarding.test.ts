@@ -44,27 +44,43 @@ async function click(selector: string): Promise<void> {
   })
 }
 
+describe('first-run welcome copy', () => {
+  it('shows the TeleOffice welcome lines and keeps the original body style', () => {
+    act(() => {
+      root.render(
+        createElement(
+          LocaleProvider,
+          { initial: 'zh' },
+          createElement(Onboarding, { onDone: vi.fn(async () => true) }),
+        ),
+      )
+    })
+
+    expect(host.querySelector('.onb-title')?.textContent).toBe('欢迎使用TeleOffice')
+    expect(host.querySelector('.onb-subtitle')?.textContent).toBe('TeleOffice是AI原生Office套件')
+    const body = host.querySelector('.onb-body')
+    expect(body?.textContent).toBe('创建文档、制作表格、生成演示、审阅 PDF。AI 深度融入每个环节。')
+    expect(body?.className).toBe('onb-body')
+  })
+})
+
 describe('analytics consent in onboarding', () => {
-  it('explains default-on analytics without an onboarding control', () => {
+  it('shows the welcome slide without an analytics control or skip', () => {
     renderOnboarding(vi.fn(async () => true))
     expect(host.querySelector('[role="switch"]')).toBeNull()
-    expect(host.textContent).toContain('Enabled by default')
-    expect(host.textContent).toContain('Settings → General')
+    expect(host.querySelector('.onb-skip')).toBeNull()
+    expect(host.textContent).not.toContain('Enabled by default')
   })
 
-  it('lets Skip and Escape finish without changing analytics', async () => {
+  it('lets Escape finish without changing analytics', async () => {
     const onDone = vi.fn(async () => true)
     renderOnboarding(onDone)
 
-    await click('.onb-skip')
-    expect(onDone).toHaveBeenLastCalledWith()
-
-    onDone.mockClear()
     await act(async () => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
       await Promise.resolve()
     })
-    expect(onDone).toHaveBeenLastCalledWith()
+    expect(onDone).toHaveBeenCalledOnce()
   })
 
   it('finishes the final slide without an analytics choice', async () => {

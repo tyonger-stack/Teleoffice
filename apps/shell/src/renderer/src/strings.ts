@@ -378,8 +378,8 @@ export const strings = {
     appMenu: '菜单',
     newTab: '新建标签页',
     // First-run onboarding
-    onbTitle1: '欢迎使用 GenOffice',
-    onbSubtitle1: '第一个开源的 AI 原生 Office 套件',
+    onbTitle1: '欢迎使用TeleOffice',
+    onbSubtitle1: 'TeleOffice是AI原生Office套件',
     onbBody1: '创建文档、制作表格、生成演示、审阅 PDF。AI 深度融入每个环节。',
     onbTitle2: '这只是一个开始',
     onbBody2: 'GenOffice 目前处于 alpha 阶段。欢迎加入 GenTeam 群聊，分享反馈，一起塑造它的未来。',
@@ -782,8 +782,8 @@ export const strings = {
     appMenu: 'Menu',
     newTab: 'New tab',
     // First-run onboarding
-    onbTitle1: 'Welcome to GenOffice',
-    onbSubtitle1: 'The first open-source, AI-native office suite',
+    onbTitle1: 'Welcome to TeleOffice',
+    onbSubtitle1: 'TeleOffice is an AI-native office suite',
     onbBody1:
       'Create docs, build sheets, make slides, and review PDFs. AI is built into every step.',
     onbTitle2: 'This is just the beginning',
@@ -1190,8 +1190,8 @@ export const strings = {
     appMenu: 'Menu',
     newTab: 'Tab mới',
     // First-run onboarding
-    onbTitle1: 'Chào mừng đến với GenOffice',
-    onbSubtitle1: 'Bộ ứng dụng văn phòng AI nguồn mở đầu tiên',
+    onbTitle1: 'Chào mừng đến với TeleOffice',
+    onbSubtitle1: 'TeleOffice là bộ ứng dụng văn phòng AI gốc',
     onbBody1:
       'Tạo tài liệu, xây dựng bảng tính, tạo bản trình bày và xem lại PDF. AI được tích hợp trong từng bước.',
     onbTitle2: 'Đây mới chỉ là khởi đầu',
@@ -1611,8 +1611,8 @@ export const strings = {
     appMenu: 'メニュー',
     newTab: '新しいタブ',
     // First-run onboarding
-    onbTitle1: 'GenOffice へようこそ',
-    onbSubtitle1: '初のオープンソース AI ネイティブ Office スイート',
+    onbTitle1: 'TeleOffice へようこそ',
+    onbSubtitle1: 'TeleOffice は AI ネイティブな Office スイートです',
     onbBody1:
       '文書の作成、表計算、プレゼン作成、PDF のレビュー。あらゆるステップに AI が組み込まれています。',
     onbTitle2: 'これはまだ始まりにすぎません',
@@ -2022,8 +2022,8 @@ export const strings = {
     appMenu: '메뉴',
     newTab: '새 탭',
     // First-run onboarding
-    onbTitle1: 'GenOffice에 오신 것을 환영합니다',
-    onbSubtitle1: '최초의 오픈소스 AI 네이티브 오피스 제품군',
+    onbTitle1: 'TeleOffice에 오신 것을 환영합니다',
+    onbSubtitle1: 'TeleOffice는 AI 네이티브 오피스 제품군입니다',
     onbBody1:
       '문서 작성, 스프레드시트 제작, 프레젠테이션 생성, PDF 검토. 모든 단계에 AI가 녹아 있습니다.',
     onbTitle2: '이제 시작일 뿐입니다',
@@ -2449,8 +2449,8 @@ export const strings = {
     appMenu: 'Menu',
     newTab: 'Nouvel onglet',
     // First-run onboarding
-    onbTitle1: 'Bienvenue dans GenOffice',
-    onbSubtitle1: 'La première suite bureautique open source et native IA',
+    onbTitle1: 'Bienvenue dans TeleOffice',
+    onbSubtitle1: 'TeleOffice est une suite bureautique native IA',
     onbBody1:
       'Créez des documents, des feuilles de calcul et des présentations, et relisez des PDF. L’IA est intégrée à chaque étape.',
     onbTitle2: 'Ce n’est qu’un début',
@@ -2878,8 +2878,8 @@ export const strings = {
     appMenu: 'Menü',
     newTab: 'Neuer Tab',
     // First-run onboarding
-    onbTitle1: 'Willkommen bei GenOffice',
-    onbSubtitle1: 'Die erste quelloffene, KI-native Office-Suite',
+    onbTitle1: 'Willkommen bei TeleOffice',
+    onbSubtitle1: 'TeleOffice ist eine KI-native Office-Suite',
     onbBody1:
       'Dokumente erstellen, Tabellen bauen, Präsentationen gestalten und PDFs prüfen. KI ist in jedem Schritt integriert.',
     onbTitle2: 'Das ist erst der Anfang',
@@ -3303,8 +3303,8 @@ export const strings = {
     appMenu: 'Menú',
     newTab: 'Nueva pestaña',
     // First-run onboarding
-    onbTitle1: 'Bienvenido a GenOffice',
-    onbSubtitle1: 'La primera suite ofimática de código abierto y nativa de IA',
+    onbTitle1: 'Bienvenido a TeleOffice',
+    onbSubtitle1: 'TeleOffice es una suite ofimática nativa de IA',
     onbBody1:
       'Crea documentos, hojas de cálculo y presentaciones, y revisa PDF. La IA está integrada en cada paso.',
     onbTitle2: 'Esto es solo el comienzo',
@@ -3711,8 +3711,8 @@ export const strings = {
     appMenu: 'เมนู',
     newTab: 'แท็บใหม่',
     // First-run onboarding
-    onbTitle1: 'ยินดีต้อนรับสู่ GenOffice',
-    onbSubtitle1: 'ชุดโปรแกรมออฟฟิศ AI-native โอเพนซอร์สตัวแรก',
+    onbTitle1: 'ยินดีต้อนรับสู่ TeleOffice',
+    onbSubtitle1: 'TeleOffice คือชุดโปรแกรมออฟฟิศ AI-native',
     onbBody1: 'สร้างเอกสาร ทำสเปรดชีต สร้างงานนำเสนอ และตรวจทาน PDF ทุกขั้นตอนมี AI ในตัว',
     onbTitle2: 'นี่เป็นเพียงจุดเริ่มต้น',
     onbBody2:
@@ -4129,8 +4129,8 @@ export const strings = {
     appMenu: 'Menu',
     newTab: 'Tab baru',
     // First-run onboarding
-    onbTitle1: 'Selamat datang di GenOffice',
-    onbSubtitle1: 'Suite office open source AI-native pertama',
+    onbTitle1: 'Selamat datang di TeleOffice',
+    onbSubtitle1: 'TeleOffice adalah suite office AI-native',
     onbBody1:
       'Buat dokumen, susun spreadsheet, rancang presentasi, dan tinjau PDF. AI hadir di setiap langkah.',
     onbTitle2: 'Ini baru permulaan',
@@ -4546,8 +4546,8 @@ export const strings = {
     appMenu: 'Меню',
     newTab: 'Новая вкладка',
     // First-run onboarding
-    onbTitle1: 'Добро пожаловать в GenOffice',
-    onbSubtitle1: 'Первый открытый AI-нативный офисный пакет',
+    onbTitle1: 'Добро пожаловать в TeleOffice',
+    onbSubtitle1: 'TeleOffice — AI-нативный офисный пакет',
     onbBody1:
       'Создавайте документы, таблицы и презентации, работайте с PDF. ИИ встроен в каждый шаг.',
     onbTitle2: 'Это только начало',
@@ -4955,8 +4955,8 @@ export const strings = {
     appMenu: 'القائمة',
     newTab: 'علامة تبويب جديدة',
     // First-run onboarding
-    onbTitle1: 'مرحبًا بك في GenOffice',
-    onbSubtitle1: 'أول حزمة مكتبية مفتوحة المصدر وأصيلة في الذكاء الاصطناعي',
+    onbTitle1: 'مرحبًا بك في TeleOffice',
+    onbSubtitle1: 'TeleOffice حزمة مكتبية أصيلة في الذكاء الاصطناعي',
     onbBody1:
       'أنشئ المستندات وجداول البيانات والعروض التقديمية وراجع ملفات PDF. الذكاء الاصطناعي مدمج في كل خطوة.',
     onbTitle2: 'هذه مجرد البداية',
@@ -5369,8 +5369,8 @@ export const strings = {
     appMenu: 'Menu',
     newTab: 'Nova guia',
     // First-run onboarding
-    onbTitle1: 'Bem-vindo ao GenOffice',
-    onbSubtitle1: 'A primeira suíte de escritório open source e nativa de IA',
+    onbTitle1: 'Bem-vindo ao TeleOffice',
+    onbSubtitle1: 'O TeleOffice é uma suíte de escritório nativa de IA',
     onbBody1:
       'Crie documentos, planilhas e apresentações e revise PDFs. A IA está integrada em cada etapa.',
     onbTitle2: 'Isto é só o começo',
@@ -5782,8 +5782,8 @@ export const strings = {
     appMenu: 'Menu',
     newTab: 'Nuova scheda',
     // First-run onboarding
-    onbTitle1: 'Benvenuto in GenOffice',
-    onbSubtitle1: 'La prima suite per ufficio open source e nativa per l’IA',
+    onbTitle1: 'Benvenuto in TeleOffice',
+    onbSubtitle1: 'TeleOffice è una suite per ufficio nativa per l’IA',
     onbBody1:
       'Crea documenti, fogli di calcolo e presentazioni e rivedi i PDF. L’IA è integrata in ogni passaggio.',
     onbTitle2: 'Questo è solo l’inizio',
@@ -6191,8 +6191,8 @@ export const strings = {
     appMenu: 'Menu',
     newTab: 'Nowa karta',
     // First-run onboarding
-    onbTitle1: 'Witamy w GenOffice',
-    onbSubtitle1: 'Pierwszy otwartoźródłowy, natywnie oparty na AI pakiet biurowy',
+    onbTitle1: 'Witamy w TeleOffice',
+    onbSubtitle1: 'TeleOffice to natywnie oparty na AI pakiet biurowy',
     onbBody1:
       'Twórz dokumenty, arkusze i prezentacje oraz przeglądaj pliki PDF. AI jest wbudowana w każdy etap.',
     onbTitle2: 'To dopiero początek',
@@ -6570,8 +6570,8 @@ export const strings = {
     appMenu: 'Nabídka',
     newTab: 'Nová karta',
     // First-run onboarding
-    onbTitle1: 'Vítejte v GenOffice',
-    onbSubtitle1: 'První open-source kancelářský balík s nativní AI',
+    onbTitle1: 'Vítejte v TeleOffice',
+    onbSubtitle1: 'TeleOffice je kancelářský balík s nativní AI',
     onbBody1:
       'Vytvářejte dokumenty, tabulky a prezentace a kontrolujte PDF. AI je součástí každého kroku.',
     onbTitle2: 'Toto je jen začátek',
@@ -7010,8 +7010,8 @@ export const strings = {
     appMenu: 'Menu',
     newTab: 'Nieuw tabblad',
     // First-run onboarding
-    onbTitle1: 'Welkom bij GenOffice',
-    onbSubtitle1: 'De eerste open source, AI-native officesuite',
+    onbTitle1: 'Welkom bij TeleOffice',
+    onbSubtitle1: 'TeleOffice is een AI-native officesuite',
     onbBody1:
       'Maak documenten, bouw spreadsheets, maak presentaties en beoordeel PDF-bestanden. AI zit in elke stap ingebouwd.',
     onbTitle2: 'Dit is nog maar het begin',
@@ -7424,8 +7424,8 @@ export const strings = {
     appMenu: 'Menu',
     newTab: 'Tab baharu',
     // First-run onboarding
-    onbTitle1: 'Selamat datang ke GenOffice',
-    onbSubtitle1: 'Suite pejabat sumber terbuka natif AI yang pertama',
+    onbTitle1: 'Selamat datang ke TeleOffice',
+    onbSubtitle1: 'TeleOffice ialah suite pejabat natif AI',
     onbBody1:
       'Cipta dokumen, bina hamparan, hasilkan persembahan dan semak PDF. AI tersedia pada setiap langkah.',
     onbTitle2: 'Ini baru permulaan',
@@ -7819,8 +7819,8 @@ export const strings = {
     appMenu: 'תפריט',
     newTab: 'כרטיסייה חדשה',
     // First-run onboarding
-    onbTitle1: 'ברוכים הבאים ל-GenOffice',
-    onbSubtitle1: 'חבילת המשרד הראשונה בקוד פתוח שהיא AI-נייטיב',
+    onbTitle1: 'ברוכים הבאים ל-TeleOffice',
+    onbSubtitle1: 'TeleOffice היא חבילת משרד AI-נייטיב',
     onbBody1: 'צרו מסמכים, בנו גיליונות, הכינו מצגות ובדקו קובצי PDF. ה-AI מובנה בכל שלב.',
     onbTitle2: 'זו רק ההתחלה',
     onbBody2:
@@ -8226,8 +8226,8 @@ export const strings = {
     appMenu: 'मेनू',
     newTab: 'नया टैब',
     // First-run onboarding
-    onbTitle1: 'GenOffice में आपका स्वागत है',
-    onbSubtitle1: 'पहला ओपन-सोर्स, AI-नेटिव ऑफ़िस सुइट',
+    onbTitle1: 'TeleOffice में आपका स्वागत है',
+    onbSubtitle1: 'TeleOffice एक AI-नेटिव ऑफ़िस सुइट है',
     onbBody1:
       'दस्तावेज़ बनाएँ, स्प्रेडशीट तैयार करें, प्रस्तुतियाँ बनाएँ और PDF की समीक्षा करें। AI हर चरण में शामिल है।',
     onbTitle2: 'यह तो बस शुरुआत है',
@@ -8615,8 +8615,8 @@ export const strings = {
     appMenu: '選單',
     newTab: '新分頁',
     // First-run onboarding
-    onbTitle1: '歡迎使用 GenOffice',
-    onbSubtitle1: '第一個開源的 AI 原生 Office 套件',
+    onbTitle1: '歡迎使用TeleOffice',
+    onbSubtitle1: 'TeleOffice是AI原生Office套件',
     onbBody1: '建立文件、製作試算表、產生簡報、審閱 PDF。AI 深度融入每個環節。',
     onbTitle2: '這只是一個開始',
     onbBody2: 'GenOffice 目前仍在 alpha 階段。歡迎加入 GenTeam 群聊，分享回饋，一起打造它的未來。',
