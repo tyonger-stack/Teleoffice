@@ -37,7 +37,7 @@ export function createContext(base: {
 }): McpContext {
   const scratchDir =
     base.scratchDir ??
-    join(tmpdir(), `genoffice-mcp-${process.pid}-${randomBytes(4).toString('hex')}`)
+    join(tmpdir(), `teleoffice-mcp-${process.pid}-${randomBytes(4).toString('hex')}`)
   mkdirSync(scratchDir, { recursive: true })
   return {
     ...base,
@@ -51,11 +51,11 @@ export function disposeContext(ctx: McpContext): void {
   rmSync(ctx.scratchDir, { recursive: true, force: true })
 }
 
-/** GENOFFICE_ALLOWED_ROOTS stays in force for the caller's paths; the server's own scratch dir is added so inline ops can be read. */
+/** TELEOFFICE_ALLOWED_ROOTS stays in force for the caller's paths; the server's own scratch dir is added so inline ops can be read. */
 function allowScratch(env: NodeJS.ProcessEnv, scratchDir: string): NodeJS.ProcessEnv {
-  const roots = env.GENOFFICE_ALLOWED_ROOTS
+  const roots = env.TELEOFFICE_ALLOWED_ROOTS
   if (roots === undefined || roots.trim() === '') return env
-  return { ...env, GENOFFICE_ALLOWED_ROOTS: `${roots}${delimiter}${scratchDir}` }
+  return { ...env, TELEOFFICE_ALLOWED_ROOTS: `${roots}${delimiter}${scratchDir}` }
 }
 
 /** One command, as `teleoffice <argv> --json` would run it, with the JSON envelope parsed back. */

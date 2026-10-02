@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import { extname } from 'node:path'
-import { synthesizeSpeechTool } from '@genoffice/ai-search'
+import { synthesizeSpeechTool } from '@teleoffice/ai-search'
 import { flagBool, flagString } from '../args'
 import { aiSettingsPath, prepareCloud } from '../cloud'
 import { resolveInput, resolveOutput, writeOutput } from '../fs'

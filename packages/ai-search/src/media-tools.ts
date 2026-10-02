@@ -21,15 +21,18 @@ import {
   type AiSettings,
   type LegacyAiSettings,
   type MediaBlob,
-} from '@genoffice/ai-provider'
+} from '@teleoffice/ai-provider'
 // deep imports: the package root re-exports Electron-bound modules, and this file also runs in the teleoffice CLI
-import { readGeneratedImage, storeGeneratedImage } from '@genoffice/electron-utils/generated-images'
+import {
+  readGeneratedImage,
+  storeGeneratedImage,
+} from '@teleoffice/electron-utils/generated-images'
 import {
   ResponseTooLargeError,
   fetchRemoteImage,
   readBodyCapped,
-} from '@genoffice/electron-utils/remote-image'
-import { fetchWithSsrfGuard } from '@genoffice/electron-utils/safe-remote-url'
+} from '@teleoffice/electron-utils/remote-image'
+import { fetchWithSsrfGuard } from '@teleoffice/electron-utils/safe-remote-url'
 import { gskAnalyzeMedia, gskGenerateImage, hasGskAuth, type GskGenerateImageOptions } from './gsk'
 import {
   agyDescribe,
@@ -47,7 +50,7 @@ import {
 } from './local-cli'
 
 export const GSK_NOT_LOGGED_IN_ERROR =
-  'Genspark account is not logged in on this machine; ask the user to log in first'
+  'No Genspark API key configured; set GSK_API_KEY or choose another provider in Settings'
 export const GSK_TOOLS_OFF_ERROR =
   'Genspark cloud tools are turned off in Settings (AI Model); enable them or configure an image provider under Settings (AI Media) to use this tool'
 
@@ -311,7 +314,7 @@ async function localGenerateImage(
   try {
     const references = await loadMediaReferences(op.referenceImageUrls ?? [])
     if (references.length) {
-      refDir = mkdtempSync(join(tmpdir(), 'genoffice-imgref-'))
+      refDir = mkdtempSync(join(tmpdir(), 'teleoffice-imgref-'))
       referenceImagePaths = references.map((blob, i) => {
         const target = join(
           refDir as string,
@@ -323,16 +326,15 @@ async function localGenerateImage(
     }
     for (const id of order) {
       try {
+        const imageInput = {
+          prompt: fullPrompt,
+          referenceImagePaths,
+          ...(op.aspectRatio !== undefined ? { aspectRatio: op.aspectRatio } : {}),
+        }
         const image =
           id === 'mmx'
-            ? await mmxGenerateImage(
-                { prompt: fullPrompt, aspectRatio: op.aspectRatio, referenceImagePaths },
-                settings,
-              )
-            : await agyGenerateImage(
-                { prompt: fullPrompt, aspectRatio: op.aspectRatio, referenceImagePaths },
-                settings,
-              )
+            ? await mmxGenerateImage(imageInput, settings)
+            : await agyGenerateImage(imageInput, settings)
         return { url: storeGeneratedImage(image.bytes, image.mime), provider: id, attempts }
       } catch (err) {
         attempts.push({ provider: id, error: errorText(err) })
@@ -534,7 +536,7 @@ async function localAnalyzeMedia(
   const attempts: { provider: string; error: string }[] = []
   const staged: string[] = []
   const stageBlobs = (blobs: MediaBlob[]): string[] => {
-    const dir = mkdtempSync(join(tmpdir(), 'genoffice-analyze-'))
+    const dir = mkdtempSync(join(tmpdir(), 'teleoffice-analyze-'))
     staged.push(dir)
     return blobs.map((blob, i) => {
       const target = join(
@@ -553,7 +555,7 @@ async function localAnalyzeMedia(
             throw new Error('MiniMax CLI (mmx) vision reads images only, not audio/video')
           }
           // https URLs go straight to mmx; everything else is already-loaded bytes.
-          const dir = mkdtempSync(join(tmpdir(), 'genoffice-analyze-'))
+          const dir = mkdtempSync(join(tmpdir(), 'teleoffice-analyze-'))
           staged.push(dir)
           const inputs = media.map((blob, i) => {
             const ref = mediaUrls[i] as string
@@ -677,7 +679,7 @@ export async function transcribeAudioTool(
   if (!cli.fallback) {
     return { error: attempts.map((a) => a.provider + ': ' + a.error).join('; '), attempts }
   }
-  const staging = mkdtempSync(join(tmpdir(), 'genoffice-asr-'))
+  const staging = mkdtempSync(join(tmpdir(), 'teleoffice-asr-'))
   try {
     const local = await ensureLocalAudioFile(ref, staging)
     return { text: await mmxTranscribe(local, language, settings), provider: 'mmx', attempts }

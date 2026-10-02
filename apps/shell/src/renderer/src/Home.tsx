@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { DragEvent as ReactDragEvent, ReactElement } from 'react'
-import logoLockup from './assets/genoffice-logo.svg'
+import logoLockup from './assets/teleoffice-logo.svg'
 import iconDocx from './assets/file-docx.svg'
 import iconXlsx from './assets/file-xlsx.svg'
 import iconPptx from './assets/file-pptx.svg'
@@ -8,7 +8,6 @@ import iconPdf from './assets/file-pdf.svg'
 import iconMd from './assets/file-md.svg'
 import iconHtml from './assets/file-html.svg'
 import type {
-  AccountStatus,
   FolderEntry,
   FolderListing,
   FolderRoot,
@@ -21,7 +20,7 @@ import type {
 } from '../../shared/home-api'
 import type { IntegrationsApi } from '../../shared/integrations-api'
 import { markText } from '../../shared/text-marks'
-import { useDismissablePopover } from '@genoffice/ui'
+import { useDismissablePopover } from '@teleoffice/ui'
 import { fileCountLabel, visiblePageCount } from './counts'
 import { useI18n } from './locale'
 import type { I18n, StringKey } from './locale'
@@ -92,7 +91,7 @@ const TEMPLATE_CARDS: readonly {
 ]
 
 /** drag payload of home file/folder rows (JSON array of absolute paths) */
-const DRAG_PATHS_MIME = 'application/x-genoffice-paths'
+const DRAG_PATHS_MIME = 'application/x-teleoffice-paths'
 /** hovering a collapsed folder this long while dragging expands it */
 const DRAG_EXPAND_DELAY_MS = 600
 /** expanded folders survive a home reload; the selection is per session */
@@ -703,54 +702,22 @@ function ConflictPrompt({ names, onChoose }: ConflictPromptProps) {
   )
 }
 
-// ── Account entry (bottom-left) ──────────────────────────
-// Signed out, this is a Settings button — the corner does not show a guest
-// login prompt. Signed in, it shows the account. Either way it opens the
-// settings modal (SettingsModal.tsx): login/logout plus preferences.
+// ── Settings entry (bottom-left) ─────────────────────────
+// Opens preferences (language, theme, save location, AI keys, integrations).
+// No account / Genspark sign-in — TeleOffice is local-first.
 
-function SettingsGlyph() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <circle cx="8" cy="8" r="2.15" stroke="currentColor" strokeWidth="1.3" />
-      <path
-        d="M8 1.7v1.55M8 12.75v1.55M1.7 8h1.55M12.75 8h1.55M3.55 3.55l1.1 1.1M11.35 11.35l1.1 1.1M12.45 3.55l-1.1 1.1M4.65 11.35l-1.1 1.1"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function AccountEntry({
-  onStatusChange,
+function SettingsEntry({
   onFileSearchSettingsChange,
   openRequest,
 }: {
-  onStatusChange?: (status: AccountStatus | null) => void
   onFileSearchSettingsChange?: () => void
   /** a fresh object per request: the home list asks to open the modal on a given block */
   openRequest?: SettingsTarget | null
 }) {
   const { t } = useI18n()
-  const [status, setStatus] = useState<AccountStatus | null>(null)
-
-  useEffect(() => {
-    onStatusChange?.(status)
-  }, [status, onStatusChange])
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [skillUpdate, setSkillUpdate] = useState(false)
-
-  // the address is stored on this machine; nothing is checked against a server
-  useEffect(() => {
-    let alive = true
-    void window.aiOffice.localAccountEmail?.().then((value) => {
-      if (alive) setStatus({ loggedIn: value.trim().length > 0, email: value.trim() })
-    })
-    return () => {
-      alive = false
-    }
-  }, [])
+  const [target, setTarget] = useState<SettingsTarget | null>(null)
 
   // the skill state is a few file reads; re-probe after the modal closes so an
   // update done inside it clears the dot
@@ -764,18 +731,6 @@ function AccountEntry({
       alive = false
     }
   }, [settingsOpen])
-
-  const loggedIn = status?.loggedIn ?? false
-  const email = status?.email ?? ''
-  const initial = email ? email[0].toUpperCase() : 'G'
-
-  const applyEmail = (value: string) => {
-    const next = value.trim()
-    setStatus({ loggedIn: next.length > 0, email: next })
-    void window.aiOffice.setLocalAccountEmail?.(next)
-  }
-
-  const [target, setTarget] = useState<SettingsTarget | null>(null)
   const openSettings = useCallback((to: SettingsTarget | null) => {
     setTarget(to)
     setSettingsOpen(true)
@@ -789,11 +744,8 @@ function AccountEntry({
     <div className="account-entry">
       {settingsOpen && (
         <SettingsModal
-          email={email}
           onClose={() => setSettingsOpen(false)}
           onFileSearchChange={onFileSearchSettingsChange}
-          onSaveEmail={applyEmail}
-          onLogout={() => applyEmail('')}
           skillUpdateDue={skillUpdate}
           onSkillUpdateDue={setSkillUpdate}
           target={target}
@@ -804,19 +756,25 @@ function AccountEntry({
         onClick={handleClick}
         aria-haspopup="dialog"
         aria-expanded={settingsOpen}
-        data-tip={loggedIn ? t('loggedIn') : t('settings')}
+        data-tip={t('settings')}
         aria-label={t('settings')}
       >
-        <span className={`account-avatar${loggedIn ? ' logged-in' : ''}`}>
-          {loggedIn ? initial : <SettingsGlyph />}
+        <span className="account-avatar">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="2.2" stroke="currentColor" strokeWidth="1.3" />
+            <path
+              d="M8 1.6v1.4M8 13v1.4M1.6 8h1.4M13 8h1.4M3.3 3.3l1 1M11.7 11.7l1 1M3.3 12.7l1-1M11.7 4.3l1-1"
+              stroke="currentColor"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+            />
+          </svg>
           {skillUpdate && (
             <span className="account-badge" role="img" aria-label={t('intgUpdateDue')} />
           )}
         </span>
         <span className="account-text">
-          <span className="account-name">
-            {loggedIn ? email.split('@')[0] || t('loggedIn') : t('settings')}
-          </span>
+          <span className="account-name">{t('settings')}</span>
         </span>
         <svg
           className="account-chevron"
@@ -839,6 +797,17 @@ function AccountEntry({
   )
 }
 
+// ── Drop-to-open overlay ────────────────────────────────
+
+/**
+ * Full-window affordance while OS files hover over Home. Purely visual — the
+ * actual open is owned by the preload drop bridge (installDropOpenBridge), so
+ * this overlay stays pointer-events:none and never handles events itself.
+ * Visibility tracks a dragenter/dragleave depth counter: `dragover` stops
+ * being delivered while the cursor is stationary (macOS), so a debounce would
+ * hide the overlay mid-drag. Enter fires before the matching leave when
+ * moving between elements, so the depth never dips to zero inside the window.
+ */
 function DropToOpenOverlay(): ReactElement | null {
   const [visible, setVisible] = useState(false)
   useEffect(() => {
@@ -945,13 +914,6 @@ export function Home() {
   const [confirmDelete, setConfirmDelete] = useState<string[] | null>(null)
   // unavailable recent entry (missing flag) the user clicked — offer list removal
   const [confirmMissing, setConfirmMissing] = useState<RecentEntry | null>(null)
-  // name in the greeting; omitted when logged out
-  const [accountName, setAccountName] = useState('')
-  // AccountEntry reports every local-email change so the greeting stays in sync
-  const handleAccountStatus = useCallback((s: AccountStatus | null) => {
-    const name = s?.loggedIn ? (s.email ?? '').split('@')[0] : ''
-    setAccountName(name ? name[0].toUpperCase() + name.slice(1) : '')
-  }, [])
   const [greetAskKey] = useState(
     () => GREET_ASK_KEYS[Math.floor(Math.random() * GREET_ASK_KEYS.length)]!,
   )
@@ -2722,7 +2684,7 @@ export function Home() {
             ? 'greetAfternoon'
             : 'greetEvening'
     const cjk = lang === 'zh' || lang === 'zh-TW' || lang === 'ja'
-    const greeting = `${t(greetKey)}${accountName ? (cjk ? '，' : ', ') + accountName : ''}${cjk ? '。' : '. '}`
+    const greeting = `${t(greetKey)}${cjk ? '。' : '. '}`
     return (
       <main className="content">
         <section className="quick-start" aria-label={t('secQuickStart')}>
@@ -2886,8 +2848,7 @@ export function Home() {
         </nav>
         <div className="sidebar-divider" />
         {renderFolderPanel()}
-        <AccountEntry
-          onStatusChange={handleAccountStatus}
+        <SettingsEntry
           onFileSearchSettingsChange={() => setRerankSettingsTick((n) => n + 1)}
           openRequest={settingsRequest}
         />

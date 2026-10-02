@@ -59,7 +59,6 @@ export function installCliLink(opts: InstallOptions): InstallOutcome {
   if (platform === 'win32') return installWindowsPath(opts)
   if (platform !== 'darwin' && platform !== 'linux') return { status: 'unsupported' }
   const dirs = opts.candidateDirs ?? defaultCandidateDirs(platform)
-  removeLegacyCliLinks(dirs)
   const manual = manualCommand(opts.launcher)
   let occupied: string | undefined
   for (const dir of dirs) {
@@ -110,52 +109,6 @@ export function inspectCliLink(opts: InstallOptions): InstallOutcome {
   }
   if (occupied) return { status: 'occupied', location: occupied, manual }
   return { status: 'unwritable', location: join(dirs[0] ?? '/usr/local/bin', 'teleoffice'), manual }
-}
-
-/** the command name before the rename to teleoffice */
-export const LEGACY_CLI_NAME = 'genoffice'
-
-/**
- * Drop `genoffice` links an earlier app version put into the PATH
- * directories: a symlink whose target is an app launcher named `genoffice`
- * (with genoffice.cjs or genoffice.cmd beside it), or a dead link into an
- * app's `Resources/cli` / `resources/cli` folder. Plain files and links to
- * anything else belong to someone else and stay. Returns the removed paths.
- */
-export function removeLegacyCliLinks(dirs: string[]): string[] {
-  const removed: string[] = []
-  for (const dir of dirs) {
-    const link = join(dir, LEGACY_CLI_NAME)
-    try {
-      if (!lstatSync(link).isSymbolicLink()) continue
-      const target = readlinkSync(link)
-      const resolved = isAbsolute(target) ? target : resolve(dirname(link), target)
-      if (!isLegacyLauncherTarget(resolved)) continue
-      if (!writable(dir)) continue
-      unlinkSync(link)
-      removed.push(link)
-    } catch {
-      // missing, unreadable or not removable: leave it
-    }
-  }
-  return removed
-}
-
-function isLegacyLauncherTarget(resolved: string): boolean {
-  if (basename(resolved) !== LEGACY_CLI_NAME) return false
-  if (!existsSync(resolved)) return /[\\/][Rr]esources[\\/]cli[\\/]genoffice$/.test(resolved)
-  let real: string
-  try {
-    real = realpathSync(resolved)
-  } catch {
-    return false
-  }
-  const dir = dirname(real)
-  return (
-    basename(real) === LEGACY_CLI_NAME &&
-    (existsSync(join(dir, `${LEGACY_CLI_NAME}.cjs`)) ||
-      existsSync(join(dir, `${LEGACY_CLI_NAME}.cmd`)))
-  )
 }
 
 function manualCommand(launcher: string): string {
@@ -224,9 +177,9 @@ const WIN_PATH_READ =
 // best effort: a locked-down PowerShell may refuse Add-Type, the PATH edit still stands
 const WIN_BROADCAST =
   'try { ' +
-  'Add-Type -Namespace GenOfficePath -Name Native -MemberDefinition \'[DllImport("user32.dll", SetLastError=true, CharSet=CharSet.Auto)] public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);\'; ' +
+  'Add-Type -Namespace TeleOfficePath -Name Native -MemberDefinition \'[DllImport("user32.dll", SetLastError=true, CharSet=CharSet.Auto)] public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);\'; ' +
   '$r = [UIntPtr]::Zero; ' +
-  "[void][GenOfficePath.Native]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'Environment', 2, 5000, [ref]$r) " +
+  "[void][TeleOfficePath.Native]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'Environment', 2, 5000, [ref]$r) " +
   '} catch {}; '
 
 function psQuote(text: string): string {

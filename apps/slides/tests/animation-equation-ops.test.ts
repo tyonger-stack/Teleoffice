@@ -7,8 +7,8 @@ import {
   savePptx,
   type OpenedPptx,
   type TextElement,
-} from '@genoffice/pptx-engine'
-import { listSlideAnimations, runTxn } from '@genoffice/pptx-ops'
+} from '@teleoffice/pptx-engine'
+import { listSlideAnimations, runTxn } from '@teleoffice/pptx-ops'
 
 let opened: OpenedPptx
 let titleId: string

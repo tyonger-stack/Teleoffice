@@ -397,7 +397,7 @@ describe('teleoffice merge', () => {
     const out = join(dir, 'deck.pptx')
     const r = await run(['merge', template, '--data', dataFile(dir, DATA), '--out', out, '--json'])
     expect(r.code).toBe(0)
-    // the deck engine fills a placeholder split over runs (genoffice#1052); only the
+    // the deck engine fills a placeholder split over runs (teleoffice#1052); only the
     // nested-group and missing-key cases stay unresolved
     expect(r.json().summary).toBe('6 placeholders filled, 2 unresolved')
     expect(r.json().detail.used_keys).toEqual(['name', 'amount', 'item'])

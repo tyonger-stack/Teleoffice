@@ -47,13 +47,7 @@ export const ja = {
   aiFileTooltip:
     'SHA-256 {sha}\n保存時は編集されたエントリのみを書き換え、その他はそのまま保持します。',
   aiFileMeta: 'シート {sheets} 件 · エントリ {entries} 件',
-  aiGensparkAccount: 'Genspark アカウント',
-  aiAccountChecking: '確認中…',
-  aiLoggedIn: 'サインイン済み',
-  aiLoggedInAs: 'サインイン済み: {email}',
-  aiNotLoggedIn: '未サインイン（AI 機能には Genspark アカウントへのサインインが必要です）',
-  aiWaitingBrowserLogin: 'ブラウザーでのサインインを待機中…',
-  aiLoginGenspark: 'Genspark にサインイン',
+  aiResizePanel: 'Resize AI panel',
   aiModel: 'モデル',
   aiCancel: 'キャンセル',
   aiSave: '保存',
@@ -64,7 +58,7 @@ export const ja = {
   aiNetworkError:
     'ネットワークに問題があり、AI サービスに接続できません。接続を確認して再試行してください',
   aiCreditsExhausted:
-    'Gensparkクレジットを使い切りました。genspark.ai/pricing でチャージしてから再試行してください',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiToolWorkbookContext: 'ブック情報を読み取り',
   aiToolReadRange: '範囲を読み取り',
   aiToolReadRangeOf: '範囲 {range} を読み取り',

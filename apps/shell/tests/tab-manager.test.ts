@@ -218,7 +218,7 @@ describe('opening tabs', () => {
     expect(tabs[1]).toMatchObject({
       id,
       kind: 'docs',
-      title: 'GenOffice Docs',
+      title: 'TeleOffice Docs',
       closable: true,
       active: true,
     })
@@ -369,8 +369,8 @@ describe('spare sheets view', () => {
     }
   })
 
-  it('stays off under GENOFFICE_NO_SPARE_VIEW', () => {
-    vi.stubEnv('GENOFFICE_NO_SPARE_VIEW', '1')
+  it('stays off under TELEOFFICE_NO_SPARE_VIEW', () => {
+    vi.stubEnv('TELEOFFICE_NO_SPARE_VIEW', '1')
     vi.useFakeTimers()
     try {
       manager.openSheetsTab()

@@ -10,7 +10,7 @@ import {
   type ControlEnvelope,
   type ControlReply,
   type ControlRequest,
-} from '@genoffice/cli/control-protocol'
+} from '@teleoffice/cli/control-protocol'
 
 /**
  * Local request/reply channel for the teleoffice CLI (`open --slide`,
@@ -30,7 +30,7 @@ export interface ControlServer {
 export function controlEndpointPath(userData: string): string {
   if (process.platform === 'win32') {
     const hash = createHash('sha1').update(userData).digest('hex').slice(0, 16)
-    return `\\\\.\\pipe\\genoffice-control-${hash}`
+    return `\\\\.\\pipe\\teleoffice-control-${hash}`
   }
   return join(userData, 'control.sock')
 }

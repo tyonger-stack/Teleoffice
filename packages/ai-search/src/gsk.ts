@@ -25,10 +25,10 @@ import {
   type ImageSearchResult,
   type WebSearchResult,
 } from './shared'
-import { genofficeApiKey, genofficeAuthPath, reloadGenofficeAuth } from './genoffice-auth'
+import { teleofficeApiKey, teleofficeAuthPath, reloadTeleofficeAuth } from './teleoffice-auth'
 // deep import: the package root re-exports Electron-bound modules, and this file also runs in the teleoffice CLI
-import { readBodyCapped } from '@genoffice/electron-utils/remote-image'
-import { teleofficeHomeDir } from '@genoffice/electron-utils/teleoffice-home'
+import { readBodyCapped } from '@teleoffice/electron-utils/remote-image'
+import { teleofficeHomeDir } from '@teleoffice/electron-utils/teleoffice-home'
 
 const SEARCH_TIMEOUT_MS = 60_000
 const GENERATE_TIMEOUT_MS = 600_000
@@ -82,13 +82,13 @@ function electronCompatArgs(): string[] {
 }
 
 /**
- * API key for Genspark LLM proxy / tool_cli auth; '' when not logged in.
- * Priority: GSK_API_KEY env → GenOffice's own key (bills to us via its
- * key_name) → shared gsk CLI login (bills to the Claw bucket).
+ * API key for Genspark LLM proxy / tool_cli; '' when none is configured.
+ * Priority: GSK_API_KEY env → residual ~/.teleoffice/auth.json → shared
+ * ~/.genspark-tool-cli/config.json. TeleOffice no longer runs a login UI.
  */
 export function gskApiKey(): string {
   if (process.env.GSK_API_KEY) return process.env.GSK_API_KEY
-  const own = genofficeApiKey()
+  const own = teleofficeApiKey()
   if (own) return own
   try {
     const configPath = join(homedir(), '.genspark-tool-cli', 'config.json')
@@ -101,7 +101,7 @@ export function gskApiKey(): string {
 }
 
 /**
- * Fires when the effective gsk key changes on disk — another GenOffice-family
+ * Fires when the effective gsk key changes on disk — another TeleOffice-family
  * app re-logging in mints a new key and revokes the one this process holds.
  * Polls by path (watchFile): auth.json is replaced whole, and fs.watch misses
  * events for a moment after it is armed.
@@ -109,13 +109,13 @@ export function gskApiKey(): string {
 export function watchGskApiKey(onChange: (key: string) => void, intervalMs = 2000): () => void {
   let last = gskApiKey()
   const check = (): void => {
-    reloadGenofficeAuth()
+    reloadTeleofficeAuth()
     const key = gskApiKey()
     if (key === last) return
     last = key
     onChange(key)
   }
-  const files = [genofficeAuthPath(), join(homedir(), '.genspark-tool-cli', 'config.json')]
+  const files = [teleofficeAuthPath(), join(homedir(), '.genspark-tool-cli', 'config.json')]
   for (const f of files) watchFile(f, { persistent: false, interval: intervalMs }, check)
   return () => {
     for (const f of files) unwatchFile(f, check)
@@ -123,7 +123,7 @@ export function watchGskApiKey(onChange: (key: string) => void, intervalMs = 200
 }
 
 /**
- * Whether gsk is usable (CLI installed and logged in / has a key). Callers use this to decide fallback.
+ * Whether gsk is usable (CLI installed and a key is available). Callers use this to decide fallback.
  * Set AI_SEARCH_DISABLE_GSK=1 to force-disable (test isolation / force Serper).
  */
 export function hasGskAuth(): boolean {
@@ -524,7 +524,7 @@ async function toolCliPost(
   signal?: AbortSignal,
 ): Promise<unknown> {
   const key = gskApiKey()
-  if (!key) throw new Error('Not logged in to Genspark (gsk login)')
+  if (!key) throw new Error('No Genspark API key (set GSK_API_KEY or configure a key in Settings)')
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   const onAbort = () => controller.abort()
@@ -532,11 +532,11 @@ async function toolCliPost(
   try {
     const resp = await fetch(`${GSK_TOOL_CLI_BASE}${path}`, {
       method: 'POST',
-      // X-Agent-Type splits GenOffice usage out of the proxy's "Claw" billing bucket
+      // X-Agent-Type splits TeleOffice usage out of the proxy's "Claw" billing bucket
       headers: {
         'X-Api-Key': key,
         'Content-Type': 'application/json',
-        'X-Agent-Type': 'genoffice',
+        'X-Agent-Type': 'teleoffice',
       },
       body: JSON.stringify(body),
       signal: controller.signal,

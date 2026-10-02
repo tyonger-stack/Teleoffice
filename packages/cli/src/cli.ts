@@ -38,13 +38,13 @@ import {
   type Warning,
 } from './result'
 import { didYouMean } from './suggest'
-import { migrateLegacyHome } from '@genoffice/electron-utils/teleoffice-home'
+import { migrateLegacyHome } from '@teleoffice/electron-utils/teleoffice-home'
 
-declare const __GENOFFICE_VERSION__: string | undefined
+declare const __TELEOFFICE_VERSION__: string | undefined
 
-/** The @genoffice/cli package version: inlined by build.mjs, read from disk when running from source. */
+/** The @teleoffice/cli package version: inlined by build.mjs, read from disk when running from source. */
 export const VERSION: string =
-  typeof __GENOFFICE_VERSION__ === 'string' ? __GENOFFICE_VERSION__ : devVersion()
+  typeof __TELEOFFICE_VERSION__ === 'string' ? __TELEOFFICE_VERSION__ : devVersion()
 
 function devVersion(): string {
   try {
@@ -238,7 +238,7 @@ function globalHelp(registry: CommandRegistry): string {
   const defs = registry.list()
   const width = Math.max(...defs.map((d) => d.name.length))
   return [
-    `teleoffice ${VERSION} — GenOffice command line`,
+    `teleoffice ${VERSION} — TeleOffice command line`,
     '',
     'Usage: teleoffice <command> [options]',
     '',

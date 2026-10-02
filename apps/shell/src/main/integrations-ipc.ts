@@ -13,8 +13,8 @@ import {
   uninstallSkill,
   type BundledSkill,
   type SkillLedger,
-} from '@genoffice/cli/agent-skills'
-import { inspectCliLink } from '@genoffice/cli/install'
+} from '@teleoffice/cli/agent-skills'
+import { inspectCliLink } from '@teleoffice/cli/install'
 import { readAppSettings, writeAppSetting } from './app-settings'
 import { isEphemeralInstall } from './cli-link'
 import {
@@ -107,7 +107,7 @@ export function registerIntegrationsIpc(deps: IntegrationsDeps): void {
       const skill = bundled()
       const opts: Electron.SaveDialogOptions = {
         title: String(title ?? ''),
-        defaultPath: join(app.getPath('downloads'), `genoffice-skill-${skill.version}.zip`),
+        defaultPath: join(app.getPath('downloads'), `teleoffice-skill-${skill.version}.zip`),
         filters: [{ name: 'ZIP', extensions: ['zip'] }],
       }
       const win = deps.window()

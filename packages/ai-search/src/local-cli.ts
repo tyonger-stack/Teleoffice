@@ -1,5 +1,5 @@
 // Local CLI runtime: the Antigravity CLI (agy) and the MiniMax CLI (mmx) as
-// GenOffice search / image / media backends.
+// TeleOffice search / image / media backends.
 //
 // Node-only: child_process.spawn with an args array (never a shell string),
 // no Electron imports - this file runs inside the teleoffice CLI bundle AND
@@ -21,7 +21,7 @@ import {
   defaultAiLocalCliSettings,
   type AiLocalCliSettings,
   type AiSettings,
-} from '@genoffice/ai-provider'
+} from '@teleoffice/ai-provider'
 import type { WebSearchResult } from './shared'
 
 export type LocalCliSettingsInput = Pick<AiSettings, 'localCli'> | null | undefined
@@ -205,7 +205,7 @@ function findOnPath(name: string): string | null {
 
 // agy binary path (env override, then settings, then ~/.local/bin, then PATH).
 export function resolveAgyPath(settings: LocalCliSettingsInput = undefined): string | null {
-  const override = (process.env.GENOFFICE_AGY_PATH ?? '').trim() || eff(settings).agyPath
+  const override = (process.env.TELEOFFICE_AGY_PATH ?? '').trim() || eff(settings).agyPath
   if (override) return existsSync(override) ? override : null
   const homeBin = join(homedir(), '.local', 'bin', 'agy')
   if (existsSync(homeBin)) return homeBin
@@ -253,7 +253,7 @@ export function resolveMmxInvocation(
 ): MmxInvocation | null {
   const s = eff(settings)
   const region = effectiveMmxRegion(settings)
-  const override = (process.env.GENOFFICE_MMX_PATH ?? '').trim() || s.mmxPath
+  const override = (process.env.TELEOFFICE_MMX_PATH ?? '').trim() || s.mmxPath
   if (override) {
     if (!existsSync(override)) return null
     if (basename(override) === 'mmx-env') {
@@ -412,7 +412,7 @@ async function runAgy(
 ): Promise<{ envelope: AgyEnvelope; cwd: string }> {
   const agy = resolveAgyPath(settings)
   if (!agy) throw new LocalCliNotFoundError('agy')
-  const cwd = mkdtempSync(join(tmpdir(), 'genoffice-agy-'))
+  const cwd = mkdtempSync(join(tmpdir(), 'teleoffice-agy-'))
   try {
     const timeout = agyTimeoutMs(settings)
     const timeoutMs =
@@ -834,7 +834,7 @@ export async function agyGenerateImage(
 ): Promise<{ bytes: Uint8Array; mime: string }> {
   const agy = resolveAgyPath(settings)
   if (!agy) throw new LocalCliNotFoundError('agy')
-  const cwd = mkdtempSync(join(tmpdir(), 'genoffice-agy-'))
+  const cwd = mkdtempSync(join(tmpdir(), 'teleoffice-agy-'))
   try {
     let prompt =
       'Do not run any shell commands, do not copy/move/convert files; call generate_image exactly once to create: ' +
@@ -897,7 +897,7 @@ export async function agyDescribe(
   settings: LocalCliSettingsInput = undefined,
 ): Promise<string> {
   if (!paths.length) throw new Error('agyDescribe needs at least one media file')
-  const cwd = mkdtempSync(join(tmpdir(), 'genoffice-agy-'))
+  const cwd = mkdtempSync(join(tmpdir(), 'teleoffice-agy-'))
   try {
     const local = await materialiseForAgy(paths, cwd)
     const prompt =
@@ -970,7 +970,7 @@ export async function agyTranscribe(
   language: string | undefined,
   settings: LocalCliSettingsInput = undefined,
 ): Promise<string> {
-  const cwd = mkdtempSync(join(tmpdir(), 'genoffice-agy-'))
+  const cwd = mkdtempSync(join(tmpdir(), 'teleoffice-agy-'))
   try {
     const local = await materialiseForAgy([path], cwd)
     const hintLang = (language ?? eff(settings).asrLanguage ?? '').trim() || 'zh'
@@ -1243,7 +1243,7 @@ export async function mmxGenerateImage(
   settings: LocalCliSettingsInput = undefined,
 ): Promise<{ bytes: Uint8Array; mime: string }> {
   void input.referenceImagePaths
-  const cwd = mkdtempSync(join(tmpdir(), 'genoffice-mmx-'))
+  const cwd = mkdtempSync(join(tmpdir(), 'teleoffice-mmx-'))
   try {
     const out = join(cwd, 'image.png')
     const args = ['image', 'generate', '--prompt', input.prompt]

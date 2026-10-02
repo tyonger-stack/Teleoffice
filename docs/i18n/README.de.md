@@ -1,22 +1,22 @@
 <p align="center">
-  <a href="https://genoffice.ai/">
+  <a href="https://teleoffice.ai/">
     <picture>
       <source srcset="../assets/readme/hero-dark.webp" media="(prefers-color-scheme: dark)">
-      <img src="../assets/readme/hero.webp" alt="GenOffice – die Open-Source-KI-Office-Suite: Docs, Sheets, Slides, PDF, Markdown und HTML mit integriertem KI-Panel" width="100%">
+      <img src="../assets/readme/hero.webp" alt="TeleOffice – die Open-Source-KI-Office-Suite: Docs, Sheets, Slides, PDF, Markdown und HTML mit integriertem KI-Panel" width="100%">
     </picture>
   </a>
 </p>
 
-<h1 align="center">GenOffice</h1>
+<h1 align="center">TeleOffice</h1>
 
 <p align="center"><b>Die weltweit erste vollwertige Open-Source-KI-Office-Suite.</b><br>
 Word-, Excel-, PowerPoint- und PDF-Dateien, bearbeitet von dir und deiner KI, gespeichert in den echten Formaten.</p>
 
 <p align="center">
-  <a href="../../LICENSE"><img src="https://img.shields.io/github/license/genspark-ai/genoffice" alt="Lizenz: Apache-2.0"></a>
-  <a href="https://github.com/genspark-ai/genoffice/releases/latest"><img src="https://img.shields.io/github/v/release/genspark-ai/genoffice" alt="Neueste Version"></a>
-  <a href="https://github.com/genspark-ai/genoffice/releases"><img src="https://img.shields.io/github/downloads/genspark-ai/genoffice/total" alt="Downloads"></a>
-  <a href="https://github.com/genspark-ai/genoffice/stargazers"><img src="https://img.shields.io/github/stars/genspark-ai/genoffice?style=flat" alt="GitHub-Sterne"></a>
+  <a href="../../LICENSE"><img src="https://img.shields.io/github/license/tyonger-stack/Teleoffice" alt="Lizenz: Apache-2.0"></a>
+  <a href="https://github.com/tyonger-stack/Teleoffice/releases/latest"><img src="https://img.shields.io/github/v/release/tyonger-stack/Teleoffice" alt="Neueste Version"></a>
+  <a href="https://github.com/tyonger-stack/Teleoffice/releases"><img src="https://img.shields.io/github/downloads/tyonger-stack/Teleoffice/total" alt="Downloads"></a>
+  <a href="https://github.com/tyonger-stack/Teleoffice/stargazers"><img src="https://img.shields.io/github/stars/tyonger-stack/Teleoffice?style=flat" alt="GitHub-Sterne"></a>
 </p>
 
 <p align="center"><a href="../../README.md">English</a> · <a href="README.es.md">Español</a> · <a href="README.pt-BR.md">Português (Brasil)</a> · <b>Deutsch</b> · <a href="README.fr.md">Français</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.ko.md">한국어</a> · <a href="README.ja.md">日本語</a> · <a href="README.ar.md">العربية</a> · <a href="README.ru.md">Русский</a> · <a href="README.it.md">Italiano</a> · <a href="README.nl.md">Nederlands</a> · <a href="README.pl.md">Polski</a> · <a href="README.cs.md">Čeština</a> · <a href="README.id.md">Bahasa Indonesia</a> · <a href="README.ms.md">Bahasa Melayu</a> · <a href="README.th.md">ไทย</a> · <a href="README.hi.md">हिन्दी</a> · <a href="README.he.md">עברית</a></p>
@@ -25,12 +25,12 @@ Word-, Excel-, PowerPoint- und PDF-Dateien, bearbeitet von dir und deiner KI, ge
   <a href="#download"><b>Download</b></a> ·
   <a href="#command-line-and-agent-skill"><b>CLI</b></a> ·
   <a href="#mcp-server"><b>MCP</b></a> ·
-  <a href="https://genoffice.ai/"><b>Website</b></a> ·
-  <a href="https://genoffice.ai/join"><b>Community</b></a> ·
+  <a href="https://teleoffice.ai/"><b>Website</b></a> ·
+  <a href="https://teleoffice.ai/join"><b>Community</b></a> ·
   <a href="../../PRIVACY.md"><b>Datenschutz</b></a>
 </p>
 
-GenOffice ist eine kostenlose Open-Source-Alternative zu Microsoft Office für
+TeleOffice ist eine kostenlose Open-Source-Alternative zu Microsoft Office für
 macOS, Windows und Linux. Es öffnet und speichert native `.docx`-, `.xlsx`-
 und `.pptx`-Dateien, bearbeitet PDF, Markdown und HTML und stellt jedem
 Dokument einen KI-Agenten zur Seite – keine angeflanschte Chat-Box, sondern
@@ -60,9 +60,9 @@ er verändert hat.
   Coding-Agent echte Office-Dateien auf deinem Rechner erstellen,
   konvertieren, lesen und bearbeiten kann, ohne ein Fenster zu öffnen.
 
-**Los geht's:** [macOS](https://github.com/genspark-ai/genoffice/releases/latest) (Apple Silicon und Intel) ·
-[Windows](https://github.com/genspark-ai/genoffice/releases/latest) (x64 und Arm) ·
-[Linux](https://github.com/genspark-ai/genoffice/releases/latest) (deb, rpm, AppImage) —
+**Los geht's:** [macOS](https://github.com/tyonger-stack/Teleoffice/releases/latest) (Apple Silicon und Intel) ·
+[Windows](https://github.com/tyonger-stack/Teleoffice/releases/latest) (x64 und Arm) ·
+[Linux](https://github.com/tyonger-stack/Teleoffice/releases/latest) (deb, rpm, AppImage) —
 Details und Voraussetzungen unter [Download](#download).
 
 ## Demo
@@ -75,8 +75,8 @@ Prompt gesteuert wird, den du im Panel nachlesen kannst.
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/docs-report.webp" alt="GenOffice Docs stellt eine zweispaltige Geschäftsberichtsseite mit vollbreitem Titelbild, schattierter KPI-Tabelle, Kopf- und Fußzeile bei 80 % Zoom mit eingeklapptem KI-Panel dar"></td>
-<td width="50%"><img src="../assets/readme/docs-ai.webp" alt="GenOffice Docs: eine Unternehmensübersicht mit einem Banner-Bild; die KI hat die Übersicht gestrafft und einen neuen Abschnitt mit Aufzählungspunkten eingefügt, und das Panel bietet ein Rückgängig per Klick"></td>
+<td width="50%"><img src="../assets/readme/docs-report.webp" alt="TeleOffice Docs stellt eine zweispaltige Geschäftsberichtsseite mit vollbreitem Titelbild, schattierter KPI-Tabelle, Kopf- und Fußzeile bei 80 % Zoom mit eingeklapptem KI-Panel dar"></td>
+<td width="50%"><img src="../assets/readme/docs-ai.webp" alt="TeleOffice Docs: eine Unternehmensübersicht mit einem Banner-Bild; die KI hat die Übersicht gestrafft und einen neuen Abschnitt mit Aufzählungspunkten eingefügt, und das Panel bietet ein Rückgängig per Klick"></td>
 </tr>
 <tr>
 <td><b>Öffnet die Datei genau so, wie Word sie layoutet</b> — zweispaltige Abschnitte, randlose Bilder, schattierte Tabellen, Kopf- und Fußzeilen, Seitenumbruch nach Words Zeilenmetrik. Formatvorlagen, Kommentare, nachverfolgte Änderungen, Formeln und Tinteneingaben bleiben beim Roundtrip unverändert.</td>
@@ -88,8 +88,8 @@ Prompt gesteuert wird, den du im Panel nachlesen kannst.
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/sheets-ai.webp" alt="GenOffice Sheets: die KI hat ein Summary-Tabellenblatt mit Umsatz nach Region und Kategorie über SUMIF-Formeln sowie ein Säulendiagramm hinzugefügt und meldet 43 angewendete Änderungen mit einer Rückgängig-Schaltfläche"></td>
-<td width="50%"><img src="../assets/readme/sheets-qa.webp" alt="GenOffice Sheets: auf die Frage, welche Region den Q2-Umsatz anführte, antwortet die KI mit Europa samt Aufschlüsselung nach Kategorie und verlinkt die verwendeten Zellen als Belege, neben dem Orders-Tabellenblatt"></td>
+<td width="50%"><img src="../assets/readme/sheets-ai.webp" alt="TeleOffice Sheets: die KI hat ein Summary-Tabellenblatt mit Umsatz nach Region und Kategorie über SUMIF-Formeln sowie ein Säulendiagramm hinzugefügt und meldet 43 angewendete Änderungen mit einer Rückgängig-Schaltfläche"></td>
+<td width="50%"><img src="../assets/readme/sheets-qa.webp" alt="TeleOffice Sheets: auf die Frage, welche Region den Q2-Umsatz anführte, antwortet die KI mit Europa samt Aufschlüsselung nach Kategorie und verlinkt die verwendeten Zellen als Belege, neben dem Orders-Tabellenblatt"></td>
 </tr>
 <tr>
 <td><b>Bau es</b> — aus einem einzigen Satz fügt der Agent ein Summary-Tabellenblatt mit echten <code>SUMIF</code>s nach Region und Kategorie hinzu, fügt ein Säulendiagramm ein und wendet die 43 Änderungen als einen einzigen, rückgängig machbaren Vorgang an.</td>
@@ -99,15 +99,15 @@ Prompt gesteuert wird, den du im Panel nachlesen kannst.
 
 ### 3 · Slides – vom Prompt zur `.pptx`-Präsentation
 
-<img src="../assets/readme/slides-generate.webp" alt="Zeitraffer von GenOffice Slides bei der Erstellung des Investoren-Decks für Aurora Home: Die KI plant die Storyline im Panel, die Folien erscheinen nacheinander auf der Leinwand, und das fertige Deck endet mit dem abschließenden Ask" width="100%">
+<img src="../assets/readme/slides-generate.webp" alt="Zeitraffer von TeleOffice Slides bei der Erstellung des Investoren-Decks für Aurora Home: Die KI plant die Storyline im Panel, die Folien erscheinen nacheinander auf der Leinwand, und das fertige Deck endet mit dem abschließenden Ask" width="100%">
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/slides-cover.webp" alt="GenOffice Slides: die Titelfolie einer von der KI erstellten Investoren-Präsentation für Aurora Home auf der Arbeitsfläche, mit dem ursprünglichen Ein-Zeilen-Prompt und der Zusammenfassung der KI im Panel, was sie erstellt hat"></td>
-<td width="50%"><img src="../assets/readme/slides-ai.webp" alt="GenOffice Slides: die gestaltete Abschlussfolie derselben 11-Folien-Präsentation, mit der Miniaturansicht-Leiste links und dem KI-Panel, das den Handlungsbogen zusammenfasst"></td>
+<td width="50%"><img src="../assets/readme/slides-cover.webp" alt="TeleOffice Slides: die Titelfolie einer von der KI erstellten Investoren-Präsentation für Aurora Home auf der Arbeitsfläche, mit dem ursprünglichen Ein-Zeilen-Prompt und der Zusammenfassung der KI im Panel, was sie erstellt hat"></td>
+<td width="50%"><img src="../assets/readme/slides-ai.webp" alt="TeleOffice Slides: die gestaltete Abschlussfolie derselben 11-Folien-Präsentation, mit der Miniaturansicht-Leiste links und dem KI-Panel, das den Handlungsbogen zusammenfasst"></td>
 </tr>
 <tr>
-<td><b>Eine Zeile rein</b> — „Erstelle eine 10-Folien-Investoren-Präsentation für Aurora Home…“. GenOffice plant den Handlungsbogen, recherchiert die Zahlen und entwirft jede Folie direkt auf der Arbeitsfläche als echte <code>.pptx</code>.</td>
+<td><b>Eine Zeile rein</b> — „Erstelle eine 10-Folien-Investoren-Präsentation für Aurora Home…“. TeleOffice plant den Handlungsbogen, recherchiert die Zahlen und entwirft jede Folie direkt auf der Arbeitsfläche als echte <code>.pptx</code>.</td>
 <td><b>Eine fertige Präsentation raus</b> — elf gestaltete Folien mit einheitlicher Typografie, Bildsprache und einem abschließenden Call-to-Action; weiter bearbeiten mit Master-Folien, Layouts, intelligenten Hilfslinien und zerstörungsfreiem Zuschneiden, oder das Panel bitten, neu zu stylen, umzuschreiben und neu zu ordnen.</td>
 </tr>
 </table>
@@ -116,8 +116,8 @@ Prompt gesteuert wird, den du im Panel nachlesen kannst.
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/pdf-edit.webp" alt="GenOffice PDF: Der Textbearbeitungsmodus umrahmt jeden Textblock auf der Seite zur direkten Bearbeitung, während das KI-Panel eine Frage zum Bericht mit Seitenangaben beantwortet"></td>
-<td width="50%"><img src="../assets/readme/pdf-convert.webp" alt="GenOffice Docs zeigt ein Word-Dokument, das lokal aus dem PDF des Helios-Quartalsberichts konvertiert wurde, geöffnet in einem zweiten Tab neben dem Original-PDF"></td>
+<td width="50%"><img src="../assets/readme/pdf-edit.webp" alt="TeleOffice PDF: Der Textbearbeitungsmodus umrahmt jeden Textblock auf der Seite zur direkten Bearbeitung, während das KI-Panel eine Frage zum Bericht mit Seitenangaben beantwortet"></td>
+<td width="50%"><img src="../assets/readme/pdf-convert.webp" alt="TeleOffice Docs zeigt ein Word-Dokument, das lokal aus dem PDF des Helios-Quartalsberichts konvertiert wurde, geöffnet in einem zweiten Tab neben dem Original-PDF"></td>
 </tr>
 <tr>
 <td><b>Direkt auf der Seite bearbeiten</b> — der Textbearbeitungsmodus umrahmt jeden Textblock zum direkten Neutippen; der Inhaltsstream wird über PDFium mit den Originalschriften neu geschrieben, nicht mit einer überdeckenden Anmerkung. Frag die KI zu einem langen Bericht und erhalte Antworten mit Seitenangaben.</td>
@@ -132,11 +132,11 @@ Sag, wofür die Seite gedacht ist und für wen. Die KI schlägt zunächst ein
 Stilrichtungen – und baut dann eine einzige, in sich geschlossene `.html`-Datei
 nach diesen Vorgaben.
 
-<img src="../assets/readme/html-restyle-motion.webp" alt="Zeitraffer von GenOffice HTML beim Neugestalten der Lumen-Landingpage: Eine einzige Restyle-Anfrage im Panel verwandelt die dunkle Midnight Studio-Seite in die warme Solar Daybreak-Version, während jeder Abschnitt und der gesamte Text unverändert bleiben" width="100%">
+<img src="../assets/readme/html-restyle-motion.webp" alt="Zeitraffer von TeleOffice HTML beim Neugestalten der Lumen-Landingpage: Eine einzige Restyle-Anfrage im Panel verwandelt die dunkle Midnight Studio-Seite in die warme Solar Daybreak-Version, während jeder Abschnitt und der gesamte Text unverändert bleiben" width="100%">
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/html-ai.webp" alt="GenOffice HTML: eine generierte Landingpage für eine Solar-Schreibtischlampe in der dunklen Stilrichtung „Midnight Studio“, gezeigt in der Live-Vorschau mit dem KI-Panel, das die gerade erstellte Seite zusammenfasst"></td>
+<td width="50%"><img src="../assets/readme/html-ai.webp" alt="TeleOffice HTML: eine generierte Landingpage für eine Solar-Schreibtischlampe in der dunklen Stilrichtung „Midnight Studio“, gezeigt in der Live-Vorschau mit dem KI-Panel, das die gerade erstellte Seite zusammenfasst"></td>
 <td width="50%"><img src="../assets/readme/html-restyle.webp" alt="Dieselbe Lumen-Landingpage, von der KI in die warme Stilrichtung „Solar Daybreak“ umgestylt: Papierhintergrund, Serifen-Überschriften und ein Orange-Akzent, wobei jeder Abschnitt und der gesamte Text erhalten bleiben"></td>
 </tr>
 <tr>
@@ -146,8 +146,8 @@ nach diesen Vorgaben.
 </table>
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/html-dashboard.webp" alt="GenOffice HTML: ein generiertes persönliches Dashboard-UI für eine freiberufliche Designerin im warmen Leinen-Stil, mit einer linken Leiste, einer Begrüßung in Serifenschrift und vier Kennzahlen-Karten"></td>
-<td width="50%"><img src="../assets/readme/html-report.webp" alt="GenOffice HTML: ein generierter Datenreport zum E-Auto-Markt im Broadsheet-Stil, mit einem Serifen-Kopf, einer Schlagzeile von 17,3 Millionen und einer Kennzahlenzeile"></td>
+<td width="50%"><img src="../assets/readme/html-dashboard.webp" alt="TeleOffice HTML: ein generiertes persönliches Dashboard-UI für eine freiberufliche Designerin im warmen Leinen-Stil, mit einer linken Leiste, einer Begrüßung in Serifenschrift und vier Kennzahlen-Karten"></td>
+<td width="50%"><img src="../assets/readme/html-report.webp" alt="TeleOffice HTML: ein generierter Datenreport zum E-Auto-Markt im Broadsheet-Stil, mit einem Serifen-Kopf, einer Schlagzeile von 17,3 Millionen und einer Kennzahlenzeile"></td>
 </tr>
 <tr>
 <td><b>UI-Mockups</b> — die Vorlage „Personal Dashboard“ macht aus einer Persona ein funktionierendes Layout: linke Leiste, Begrüßung, Sparkline für abrechenbare Stunden, Rechnungs- und Auslastungskarten – alles echtes HTML, das du direkt an eine Entwicklerin oder einen Entwickler weitergeben kannst.</td>
@@ -159,8 +159,8 @@ nach diesen Vorgaben.
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/markdown-ai.webp" alt="GenOffice Markdown: In einem ausgewählten Absatz erscheint ein Ask-AI-Popover mit einer eingegebenen Anweisung und Vorschlags-Chips wie „Polish“, „Make more concise“, „Expand“ und „Fix grammar“, außerdem den Schaltflächen „Send now“ und „Add to queue“"></td>
-<td width="50%"><img src="../assets/readme/markdown-render.webp" alt="GenOffice Markdown stellt ein Launch-Notes-Dokument mit einer Tabelle, einem Mermaid-Flussdiagramm und einer Aufgabenliste dar, mit den Start-Prompts des KI-Panels links"></td>
+<td width="50%"><img src="../assets/readme/markdown-ai.webp" alt="TeleOffice Markdown: In einem ausgewählten Absatz erscheint ein Ask-AI-Popover mit einer eingegebenen Anweisung und Vorschlags-Chips wie „Polish“, „Make more concise“, „Expand“ und „Fix grammar“, außerdem den Schaltflächen „Send now“ und „Add to queue“"></td>
+<td width="50%"><img src="../assets/readme/markdown-render.webp" alt="TeleOffice Markdown stellt ein Launch-Notes-Dokument mit einer Tabelle, einem Mermaid-Flussdiagramm und einer Aufgabenliste dar, mit den Start-Prompts des KI-Panels links"></td>
 </tr>
 <tr>
 <td><b>Ask AI zu einer Auswahl</b> — markiere eine beliebige Textstelle, und ein <b>Ask AI</b>-Chip erscheint: eine Anweisung eingeben oder einen Vorschlag auswählen, sofort senden, oder mehrere verankerte Änderungen in eine Warteschlange legen und in einem Durchgang ausführen. Denselben Einstiegspunkt gibt es in jeder App.</td>
@@ -168,24 +168,24 @@ nach diesen Vorgaben.
 </tr>
 </table>
 
-### 7 · CLI – dein Coding-Agent steuert GenOffice, auf deinem Rechner
+### 7 · CLI – dein Coding-Agent steuert TeleOffice, auf deinem Rechner
 
-GenOffice bringt eine `teleoffice`-Befehlszeile und einen Agent-Skill mit.
+TeleOffice bringt eine `teleoffice`-Befehlszeile und einen Agent-Skill mit.
 Installiere den Skill, und Claude Code, Codex, Cursor, Gemini CLI, GitHub
 Copilot, OpenCode oder Windsurf können echte Office-Dateien über dieselben
 Engines wie die Apps erstellen, konvertieren, lesen und bearbeiten, ohne ein
 Fenster zu öffnen.
 
-<img src="../assets/readme/cli-deck-in-app.webp" alt="GenOffice Slides zeigt eine Sonnensystem-Präsentation mit acht Folien, die ein Coding-Agent über die genoffice-Befehlszeile erstellt hat: die Titelfolie auf der Arbeitsfläche, acht Miniaturansichten links und das geöffnete KI-Panel" width="100%">
+<img src="../assets/readme/cli-deck-in-app.webp" alt="TeleOffice Slides zeigt eine Sonnensystem-Präsentation mit acht Folien, die ein Coding-Agent über die teleoffice-Befehlszeile erstellt hat: die Titelfolie auf der Arbeitsfläche, acht Miniaturansichten links und das geöffnete KI-Panel" width="100%">
 
 <table>
 <tr>
 <td width="50%"><img src="../assets/readme/cli-slides-grid.webp" alt="Die acht gerenderten Folien der Sonnensystem-Präsentation nebeneinander: Titel, Zeitleiste der Erforschung, vier Kennzahlen, Balkendiagramm der Planetendurchmesser, Gesteinsplaneten gegen Riesen, die 99,8 % der Sonne als Hero-Zahl, das Raster der vier Riesen und die Kernaussagen"></td>
-<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="GenOffice-Einstellungen, Seite Integrationen: der genoffice-Skill ist in Claude Code installiert, mit Installieren-Schaltflächen neben Codex und Cursor"></td>
+<td width="50%"><img src="../assets/readme/cli-integrations.webp" alt="TeleOffice-Einstellungen, Seite Integrationen: der teleoffice-Skill ist in Claude Code installiert, mit Installieren-Schaltflächen neben Codex und Cursor"></td>
 </tr>
 <tr>
 <td><b>Ein Prompt an deinen Agenten</b> — „Erstelle eine Präsentation mit acht Folien über das Sonnensystem.“ Der Agent liest den Skill, schreibt ein Stylesheet, eine Gliederung und eine Seitenspezifikation pro Folie, generiert die beiden Fotos mit <code>teleoffice image</code> und lässt <code>teleoffice slides check</code> alles zurückweisen, was überläuft oder sich überlappt, bevor <code>teleoffice create</code> die <code>.pptx</code> zusammensetzt und <code>slides render</code> pro Folie ein PNG zum Anschauen zurückgibt.</td>
-<td><b>Einmal installieren, unter Einstellungen → Integrationen</b> — GenOffice listet die Coding-Agenten auf, die es auf diesem Rechner findet, und schreibt den Skill in jeden, den du auswählst. Oder lade den Skill als Zip herunter oder führe <code>npx skills add genspark-ai/genoffice</code> aus. Befehle und der vollständige Workflow stehen unter <a href="#command-line-and-agent-skill">Befehlszeile und Agent-Skill</a>.</td>
+<td><b>Einmal installieren, unter Einstellungen → Integrationen</b> — TeleOffice listet die Coding-Agenten auf, die es auf diesem Rechner findet, und schreibt den Skill in jeden, den du auswählst. Oder lade den Skill als Zip herunter oder führe <code>npx skills add tyonger-stack/Teleoffice</code> aus. Befehle und der vollständige Workflow stehen unter <a href="#command-line-and-agent-skill">Befehlszeile und Agent-Skill</a>.</td>
 </tr>
 </table>
 
@@ -198,12 +198,12 @@ Tools plus die Op-Referenzen als Ressourcen. Ein zweiter HTTP-Server in der
 App lässt einen Agenten ein Word-Dokument in einem sichtbaren Editor-Tab
 aufbauen, während du zusiehst.
 
-<img src="../assets/readme/mcp-deck-motion.webp" alt="Zeitraffer von Claude Code beim Bau einer achtseitigen Investoren-Präsentation über erneuerbare Energien über den genoffice-MCP-Server: sucht nach Abbildungen und Fotos, prüft jedes Kandidatenbild mit media, deck_start schreibt das Stylesheet und die Gliederung, deck_page fügt Seite für Seite eine geprüfte Seite hinzu, deck_build stellt die .pptx zusammen und slides_render liefert ein Bild jeder Folie zurück; die fertige Präsentation öffnet sich danach in GenOffice Slides" width="100%">
+<img src="../assets/readme/mcp-deck-motion.webp" alt="Zeitraffer von Claude Code beim Bau einer achtseitigen Investoren-Präsentation über erneuerbare Energien über den teleoffice-MCP-Server: sucht nach Abbildungen und Fotos, prüft jedes Kandidatenbild mit media, deck_start schreibt das Stylesheet und die Gliederung, deck_page fügt Seite für Seite eine geprüfte Seite hinzu, deck_build stellt die .pptx zusammen und slides_render liefert ein Bild jeder Folie zurück; die fertige Präsentation öffnet sich danach in TeleOffice Slides" width="100%">
 
 <table>
 <tr>
-<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="GenOffice Slides zeigt die achtseitige Präsentation Renewable Energy 2026, die Claude Code über den genoffice-MCP-Server erstellt hat: die Titelfolie mit einem Foto eines Windparks auf der Arbeitsfläche und acht Miniaturansichten links"></td>
-<td width="50%"><img src="../assets/readme/mcp-integrations.webp" alt="GenOffice-Einstellungen, Seite Integrationen, MCP-Teil: der einzeilige claude mcp add-Befehl für Claude Code, der JSON-Block für Cursor, Claude Desktop und andere MCP-Clients, und die Option für den lokalen HTTP-Server darunter"></td>
+<td width="50%"><img src="../assets/readme/mcp-deck-in-app.webp" alt="TeleOffice Slides zeigt die achtseitige Präsentation Renewable Energy 2026, die Claude Code über den teleoffice-MCP-Server erstellt hat: die Titelfolie mit einem Foto eines Windparks auf der Arbeitsfläche und acht Miniaturansichten links"></td>
+<td width="50%"><img src="../assets/readme/mcp-integrations.webp" alt="TeleOffice-Einstellungen, Seite Integrationen, MCP-Teil: der einzeilige claude mcp add-Befehl für Claude Code, der JSON-Block für Cursor, Claude Desktop und andere MCP-Clients, und die Option für den lokalen HTTP-Server darunter"></td>
 </tr>
 <tr>
 <td><b>Ein Prompt, 38 Tool-Aufrufe, kein Terminal</b> — „Erstelle eine achtseitige Investoren-Präsentation über erneuerbare Energien im Jahr 2026, mit einem echten Foto auf dem Titelblatt und überall sonst, wo ein Foto hilft.“ Der Agent holt die Abbildungen und die Fotos mit <code>search</code>, fragt <code>media</code>, ob jedes Kandidatenbild eine echte Fotografie ist, ruft <code>deck_start</code> mit einem Stylesheet und einer Gliederung auf, dann <code>deck_page</code> einmal pro Folie; jede Seite wird gegen die Gliederung und die Palette geprüft, bevor sie behalten wird, <code>deck_build</code> stellt die <code>.pptx</code> zusammen, <code>slides_audit</code> sucht nach Überlauf, <code>slides_render</code> liefert pro Folie ein PNG als Bildinhalt zurück, den das Modell ansehen kann, und <code>deck_replace</code> überarbeitet die drei Seiten, die ihm nicht gefallen haben.</td>
@@ -211,7 +211,7 @@ aufbauen, während du zusiehst.
 </tr>
 </table>
 
-## Warum GenOffice
+## Warum TeleOffice
 
 - **Open Source**, Apache-2.0, offen entwickelt auf GitHub.
 - **Läuft auf deinem Rechner.** Native Apps für macOS, Windows und Linux;
@@ -263,7 +263,7 @@ Farben des Dokuments.
 Alles, was die Apps mit einer Datei tun können, kann die
 `teleoffice`-Befehlszeile aus einem Terminal heraus: Word, Excel, PowerPoint,
 PDF, Markdown und HTML inspizieren, konvertieren, erstellen, lesen und
-bearbeiten – auf denselben Engines, ohne Fenster. Sie wird mit GenOffice
+bearbeiten – auf denselben Engines, ohne Fenster. Sie wird mit TeleOffice
 installiert, braucht keine eigene Laufzeitumgebung und schickt nie ein
 Dokument irgendwohin. Zusammen mit dem mitgelieferten **Agent-Skill** macht
 sie aus einem Coding-Agenten einen Dokumentenarbeiter, der echte
@@ -276,11 +276,11 @@ MCP-Client.
 
 ### Skill installieren
 
-| Wie                                           | Was passiert                                                                                                                                                                                                             |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Einstellungen → Integrationen** in der App  | Listet die auf diesem Rechner gefundenen Agenten auf; ein Klick schreibt den Skill in jeden, den du auswählst. Eine **Aktualisieren**-Schaltfläche erscheint, wenn eine GenOffice-Version einen neueren Skill mitbringt. |
-| **Als Zip herunterladen** auf derselben Seite | Das Layout, das claude.ai, die Claude-Desktop-Apps und andere Assistenten als hochgeladenen Skill akzeptieren.                                                                                                           |
-| `npx skills add genspark-ai/genoffice`        | Installiert aus diesem Repository in jeden Skills-kompatiblen Agenten.                                                                                                                                                   |
+| Wie                                           | Was passiert                                                                                                                                                                                                              |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Einstellungen → Integrationen** in der App  | Listet die auf diesem Rechner gefundenen Agenten auf; ein Klick schreibt den Skill in jeden, den du auswählst. Eine **Aktualisieren**-Schaltfläche erscheint, wenn eine TeleOffice-Version einen neueren Skill mitbringt. |
+| **Als Zip herunterladen** auf derselben Seite | Das Layout, das claude.ai, die Claude-Desktop-Apps und andere Assistenten als hochgeladenen Skill akzeptieren.                                                                                                            |
+| `npx skills add tyonger-stack/Teleoffice`     | Installiert aus diesem Repository in jeden Skills-kompatiblen Agenten.                                                                                                                                                    |
 
 Starte dann einen neuen Chat und bitte um ein Dokument. Der Skill bringt dem
 Agenten bei, wann er zu `teleoffice` greifen soll, wie er eine Datei vor dem
@@ -313,7 +313,7 @@ in Claude Code. Dahinter folgte der Agent dem gestuften Workflow des Skills,
 und die CLI prüfte jede Stufe, bevor die nächste begann:
 
 ```bash
-teleoffice capabilities --json                        # which cloud tools GenOffice has configured
+teleoffice capabilities --json                        # which cloud tools TeleOffice has configured
 teleoffice guide slides design                        # the deck workflow and layout library
 teleoffice image "the eight planets in a row …" --aspect 16:9 --out deck/assets/cover.jpg
 teleoffice slides check deck/outline.json --json      # 8 pages, no findings
@@ -327,7 +327,7 @@ teleoffice open deck/solar-system.pptx
 ```
 
 Innerhalb von `teleoffice` findet kein Modellaufruf statt: Der Agent denkt,
-die CLI baut und prüft, und das Ergebnis öffnet sich in GenOffice oder
+die CLI baut und prüft, und das Ergebnis öffnet sich in TeleOffice oder
 PowerPoint als gewöhnliche `.pptx`.
 
 <a id="mcp-server"></a>
@@ -340,10 +340,10 @@ Verfügung, für Assistenten, die kein Terminal ausführen können oder denen du
 lieber keins gibst. Es gibt zwei Wege hinein, beide mit kopierfertigen
 Snippets unter **Einstellungen → Integrationen → MCP**:
 
-| Weg                                  | Was es ist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A · `teleoffice mcp`** (empfohlen) | Ein Stdio-Server, den der Assistent selbst startet; GenOffice muss dafür nicht geöffnet sein. Ein Tool pro Befehl (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus der gestufte Deck-Ablauf `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Ops, Specs und Markdown werden inline übergeben, sodass auch ein Client ohne Dateisystem funktioniert. |
-| **B · Lokaler HTTP-Server**          | Läuft innerhalb der GenOffice-App unter `http://127.0.0.1:3093/mcp` (Streamable HTTP, mit Legacy-SSE). Seine Tools steuern einen sichtbaren Word-Editor-Tab: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, und du siehst zu, wie das Dokument entsteht. Standardmäßig aus; im selben Einstellungsbereich einschalten.                                                                                                                                                |
+| Weg                                  | Was es ist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A · `teleoffice mcp`** (empfohlen) | Ein Stdio-Server, den der Assistent selbst startet; TeleOffice muss dafür nicht geöffnet sein. Ein Tool pro Befehl (`info`, `convert`, `create_docx`, `create_xlsx`, `create_pptx`, `create_pdf`, `docs_read` / `docs_apply` / `docs_check`, `sheet_*`, `slides_*`, `render`, `guide`, `search`, `image`, `media`, `open`) plus der gestufte Deck-Ablauf `deck_start` → `deck_page` → `deck_build` → `deck_replace`. Ops, Specs und Markdown werden inline übergeben, sodass auch ein Client ohne Dateisystem funktioniert. |
+| **B · Lokaler HTTP-Server**          | Läuft innerhalb der TeleOffice-App unter `http://127.0.0.1:3093/mcp` (Streamable HTTP, mit Legacy-SSE). Seine Tools steuern einen sichtbaren Word-Editor-Tab: `create_session`, `insert_content`, `replace_blocks`, `apply_ops`, `read_document`, `save_session`, und du siehst zu, wie das Dokument entsteht. Standardmäßig aus; im selben Einstellungsbereich einschalten.                                                                                                                                                |
 
 ```bash
 # Claude Code
@@ -356,14 +356,14 @@ claude mcp add --transport stdio teleoffice -- teleoffice mcp
 ```
 
 `teleoffice` ist hier die CLI, die in der App enthalten ist (unter macOS
-`/Applications/GenOffice.app/Contents/Resources/cli/teleoffice`; der
+`/Applications/TeleOffice.app/Contents/Resources/cli/teleoffice`; der
 Einstellungsbereich zeigt den genauen Pfad für deine Installation an). Der
 Server bringt seine eigenen Workflow-Anweisungen mit und stellt die
 Op-Referenzen als `teleoffice://guide/*`-Ressourcen bereit, sodass kein
 Skill nötig ist; der Skill und der MCP-Server können nebeneinander
 bestehen, und der Assistent wählt einen davon. Cloud-Funktionen (`search`,
-`image`, `media`) laufen weiterhin über den in GenOffice konfigurierten
-Anbieter; alles andere läuft lokal, und `GENOFFICE_ALLOWED_ROOTS`
+`image`, `media`) laufen weiterhin über den in TeleOffice konfigurierten
+Anbieter; alles andere läuft lokal, und `TELEOFFICE_ALLOWED_ROOTS`
 beschränkt jedes Tool auf die Ordner, die du angibst.
 
 Die Präsentation über erneuerbare Energien aus der Demo oben zeigt, wie ein
@@ -388,42 +388,42 @@ deck_replace(dir, n, page) ×3 · slides_render(file, out)
 Achtunddreißig Aufrufe, etwa dreizehn Minuten, und der Assistent hat nie
 ein Terminal angefasst: Die Abbildungen, die Fotos, die Guides, die
 Prüfungen und die Renderings liefen alle als MCP-Tool-Ergebnisse. Nur
-`search` und `media` haben die Maschine verlassen, zum in GenOffice
+`search` und `media` haben die Maschine verlassen, zum in TeleOffice
 konfigurierten Provider.
 
 <a id="download"></a>
 
 ## Download
 
-| Plattform                            | Voraussetzungen                                       | Download                                                                                    |
-| ------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| **macOS** – Apple Silicon (arm64)    | macOS 11+                                             | [Neueste `.dmg` (arm64)](https://github.com/genspark-ai/genoffice/releases/latest)          |
-| **macOS** – Intel (x64)              | macOS 11+                                             | [Neueste `.dmg` (x64)](https://github.com/genspark-ai/genoffice/releases/latest)            |
-| **Windows** (x64, die meisten PCs)   | Windows 10+, Intel/AMD                                | [Neuester `-x64.exe`-Installer](https://github.com/genspark-ai/genoffice/releases/latest)   |
-| **Windows** auf Arm (ARM64)          | Windows 11 auf Arm (Snapdragon X und Ähnliche)        | [Neuester `-arm64.exe`-Installer](https://github.com/genspark-ai/genoffice/releases/latest) |
-| **Linux** – Debian / Ubuntu          | x86_64, glibc 2.34+ (Ubuntu 22.04 oder neuer)         | [Neueste `.deb`](https://github.com/genspark-ai/genoffice/releases/latest)                  |
-| **Linux** – Fedora / RHEL / openSUSE | x86_64, glibc 2.34+ (Fedora 35+, RHEL 9+, Leap 15.6+) | [Neueste `.rpm`](https://github.com/genspark-ai/genoffice/releases/latest)                  |
-| **Linux** – andere Distributionen    | x86_64, glibc 2.34+, FUSE 2                           | [Neueste `.AppImage`](https://github.com/genspark-ai/genoffice/releases/latest)             |
+| Plattform                            | Voraussetzungen                                       | Download                                                                                       |
+| ------------------------------------ | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **macOS** – Apple Silicon (arm64)    | macOS 11+                                             | [Neueste `.dmg` (arm64)](https://github.com/tyonger-stack/Teleoffice/releases/latest)          |
+| **macOS** – Intel (x64)              | macOS 11+                                             | [Neueste `.dmg` (x64)](https://github.com/tyonger-stack/Teleoffice/releases/latest)            |
+| **Windows** (x64, die meisten PCs)   | Windows 10+, Intel/AMD                                | [Neuester `-x64.exe`-Installer](https://github.com/tyonger-stack/Teleoffice/releases/latest)   |
+| **Windows** auf Arm (ARM64)          | Windows 11 auf Arm (Snapdragon X und Ähnliche)        | [Neuester `-arm64.exe`-Installer](https://github.com/tyonger-stack/Teleoffice/releases/latest) |
+| **Linux** – Debian / Ubuntu          | x86_64, glibc 2.34+ (Ubuntu 22.04 oder neuer)         | [Neueste `.deb`](https://github.com/tyonger-stack/Teleoffice/releases/latest)                  |
+| **Linux** – Fedora / RHEL / openSUSE | x86_64, glibc 2.34+ (Fedora 35+, RHEL 9+, Leap 15.6+) | [Neueste `.rpm`](https://github.com/tyonger-stack/Teleoffice/releases/latest)                  |
+| **Linux** – andere Distributionen    | x86_64, glibc 2.34+, FUSE 2                           | [Neueste `.AppImage`](https://github.com/tyonger-stack/Teleoffice/releases/latest)             |
 
 Alle Builds stammen aus `main`; die macOS- und Windows-Installer sind
 signiert. Ältere Versionen findest du auf der Seite
-[Releases](https://github.com/genspark-ai/genoffice/releases).
+[Releases](https://github.com/tyonger-stack/Teleoffice/releases).
 
 <details>
 <summary><b>Installation unter Linux</b></summary>
 
 Das deb-Paket wird mit apt installiert – es zieht die Abhängigkeiten nach
-und fügt GenOffice dem Anwendungsmenü hinzu:
+und fügt TeleOffice dem Anwendungsmenü hinzu:
 
 ```bash
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 Installiere auf Fedora / RHEL-Familie / openSUSE stattdessen das rpm-Paket:
 
 ```bash
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 Das AppImage läuft direkt: installiere die FUSE-2-Laufzeit
@@ -431,8 +431,8 @@ Das AppImage läuft direkt: installiere die FUSE-2-Laufzeit
 `libfuse2t64`), mache die Datei ausführbar und starte sie dann:
 
 ```bash
-chmod +x GenOffice-<version>.AppImage
-./GenOffice-<version>.AppImage
+chmod +x TeleOffice-<version>.AppImage
+./TeleOffice-<version>.AppImage
 ```
 
 </details>
@@ -473,37 +473,37 @@ npm run dist:linux   # package Linux AppImage + deb + rpm
 ```
 
 Die Sheets-App benötigt zusätzlich eine Rust-Toolchain für ihren
-xlsx-Sidecar (`cargo` im PATH); `npm run build -w @genoffice/sheets`
+xlsx-Sidecar (`cargo` im PATH); `npm run build -w @teleoffice/sheets`
 kompiliert ihn automatisch. Die Prüfungen, die jede Änderung bestehen muss,
 und wie Pull Requests landen, stehen in
 [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ## Community
 
-GenOffice wird aktiv weiterentwickelt, und dein Feedback prägt es mit.
+TeleOffice wird aktiv weiterentwickelt, und dein Feedback prägt es mit.
 
 - **Melde einen Bug oder wünsche dir ein Feature** in
-  [GitHub Issues](https://github.com/genspark-ai/genoffice/issues).
-- **Tritt dem GenOffice-Gruppenchat** auf
-  [GenTeam](https://genoffice.ai/join) bei, um mit dem Team und anderen
+  [GitHub Issues](https://github.com/tyonger-stack/Teleoffice/issues).
+- **Tritt dem TeleOffice-Gruppenchat** auf
+  [GenTeam](https://teleoffice.ai/join) bei, um mit dem Team und anderen
   Nutzern zu sprechen.
-- **Gib dem Repo einen Stern**, wenn dir GenOffice nützlich ist – das ist
+- **Gib dem Repo einen Stern**, wenn dir TeleOffice nützlich ist – das ist
   die beste Art, das Projekt zu unterstützen.
 
 ## FAQ
 
 <details>
-<summary><b>Ist GenOffice kostenlos?</b></summary>
+<summary><b>Ist TeleOffice kostenlos?</b></summary>
 
-Ja. GenOffice ist kostenlos und Open Source unter der Apache-2.0-Lizenz –
+Ja. TeleOffice ist kostenlos und Open Source unter der Apache-2.0-Lizenz –
 keine Testversion, keine kostenpflichtige Stufe für die Apps selbst.
 
 </details>
 
 <details>
-<summary><b>Kann GenOffice Microsoft Word-, Excel- und PowerPoint-Dateien öffnen?</b></summary>
+<summary><b>Kann TeleOffice Microsoft Word-, Excel- und PowerPoint-Dateien öffnen?</b></summary>
 
-Ja. GenOffice öffnet und speichert native `.docx`-, `.xlsx`- und
+Ja. TeleOffice öffnet und speichert native `.docx`-, `.xlsx`- und
 `.pptx`-Dateien. Das Speichern ist byteerhaltend: Teile der Datei, die du
 nicht angefasst hast, werden Byte für Byte zurückgeschrieben, sodass
 Dokumente in Microsoft Office weiter funktionieren.
@@ -511,7 +511,7 @@ Dokumente in Microsoft Office weiter funktionieren.
 </details>
 
 <details>
-<summary><b>Funktioniert GenOffice offline?</b></summary>
+<summary><b>Funktioniert TeleOffice offline?</b></summary>
 
 Die Dokumentbearbeitung ist vollständig lokal – Dateien verlassen deinen
 Rechner nie, um geöffnet, bearbeitet, gespeichert oder konvertiert zu
@@ -522,7 +522,7 @@ eigenen Modell-API-Schlüssel.
 </details>
 
 <details>
-<summary><b>Kann GenOffice PDF-Dateien bearbeiten?</b></summary>
+<summary><b>Kann TeleOffice PDF-Dateien bearbeiten?</b></summary>
 
 Ja – echte PDF-Text- und Bildbearbeitung, die den Seiteninhalts-Stream unter
 Erhalt der Originalschriften neu schreibt, statt überdeckender Anmerkungen.
@@ -530,7 +530,7 @@ Erhalt der Originalschriften neu schreibt, statt überdeckender Anmerkungen.
 </details>
 
 <details>
-<summary><b>Kann GenOffice PDF in Word, Excel oder PowerPoint konvertieren?</b></summary>
+<summary><b>Kann TeleOffice PDF in Word, Excel oder PowerPoint konvertieren?</b></summary>
 
 Ja – vollständig lokal: zeichenweise Extraktion über PDFium plus
 geometriebasierte Layoutanalyse, kein Cloud-Dienst, kein Upload. Auch
@@ -543,7 +543,7 @@ Seitenbild konvertiert werden.
 <details>
 <summary><b>Kann ich mein eigenes KI-Modell oder meinen eigenen API-Schlüssel verwenden?</b></summary>
 
-Ja. Neben der schlüssellosen Genspark-Anmeldung unterstützt GenOffice das
+Ja. Neben der schlüssellosen Genspark-Anmeldung unterstützt TeleOffice das
 Mitbringen eigener Schlüssel für Claude, OpenAI, Gemini, DeepSeek, Kimi,
 GLM, Qwen, Doubao, MiniMax, Grok, Mistral, OpenRouter, Requesty und OpenCode Zen/Go,
 plus jeden OpenAI-kompatiblen Endpunkt – einschließlich lokaler
@@ -553,7 +553,7 @@ eigene Schlüssel unter Einstellungen → KI-Medien & Suche.
 </details>
 
 <details>
-<summary><b>Kann GenOffice HTML in Word konvertieren?</b></summary>
+<summary><b>Kann TeleOffice HTML in Word konvertieren?</b></summary>
 
 Ja – **Als Word exportieren** in der HTML-App erzeugt vollständig lokal
 eine native, bearbeitbare `.docx`. Die Seite wird im eingebauten Chromium
@@ -565,9 +565,9 @@ Boxen) werden als Bilder eingebettet.
 </details>
 
 <details>
-<summary><b>Kann ich GenOffice aus Claude Code, Codex, Cursor oder einem Skript steuern?</b></summary>
+<summary><b>Kann ich TeleOffice aus Claude Code, Codex, Cursor oder einem Skript steuern?</b></summary>
 
-Ja. GenOffice installiert eine `teleoffice`-Befehlszeile, die dieselben
+Ja. TeleOffice installiert eine `teleoffice`-Befehlszeile, die dieselben
 Engines ohne Fenster ausführt: Dokumente aus einem Terminal oder einem Skript
 inspizieren, konvertieren, erstellen, lesen und bearbeiten, mit
 `--json`-Ausgabe für Programme. Der mitgelieferte Agent-Skill bringt Claude
@@ -578,14 +578,14 @@ sie zu nutzen; installiere ihn unter **Einstellungen → Integrationen**. Siehe
 </details>
 
 <details>
-<summary><b>Erfasst GenOffice irgendwelche Daten?</b></summary>
+<summary><b>Erfasst TeleOffice irgendwelche Daten?</b></summary>
 
 Offizielle gepackte Builds senden standardmäßig begrenzte Nutzungsanalysen,
 und du kannst die Übermittlung jederzeit unter Einstellungen → Allgemein
 deaktivieren. Die Analysen senden niemals Dokumentinhalte, Dateinamen,
 Dateipfade, Kontoidentität oder E-Mail-Adressen. Die vollständigen Angaben
 zu Ereignissen und Daten stehen in
-[GenOffice-Datenschutz](../../PRIVACY.md).
+[TeleOffice-Datenschutz](../../PRIVACY.md).
 
 </details>
 
@@ -597,7 +597,7 @@ KI-generierte Inhalte stehen in [SECURITY.md](../../SECURITY.md).
 
 ## Danksagungen
 
-GenOffice wäre ohne diese Open-Source-Projekte nicht möglich:
+TeleOffice wäre ohne diese Open-Source-Projekte nicht möglich:
 
 - [Electron](https://www.electronjs.org/) – die Desktop-Laufzeitumgebung für jede App.
 - [Univer](https://github.com/dream-num/univer) (Apache-2.0) – der
@@ -642,11 +642,11 @@ Laufzeitabhängigkeiten stehen unter MIT/Apache-2.0/BSD-3-Clause/OFL.
 
 ## Lizenz
 
-GenOffice steht unter der [Apache License 2.0](../../LICENSE), mit einer
+TeleOffice steht unter der [Apache License 2.0](../../LICENSE), mit einer
 Ausnahme: Das Verzeichnis `ee/` ist für zukünftige Enterprise-Module
 reserviert und unterliegt der
-[GenOffice Enterprise License](../../ee/LICENSE).
+[TeleOffice Enterprise License](../../ee/LICENSE).
 
-Die Namen und Logos GenOffice und Genspark sind Marken von Mainfunc, Inc.
+Die Namen und Logos TeleOffice und Genspark sind Marken von Mainfunc, Inc.
 Die Apache-2.0-Lizenz gewährt keine Berechtigung zu ihrer Nutzung (siehe
 Abschnitt 6); Forks sollten ihr eigenes Branding verwenden.

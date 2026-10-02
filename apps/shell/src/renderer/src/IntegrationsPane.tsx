@@ -1,4 +1,4 @@
-import { mcpLaunch, type McpLaunch } from '@genoffice/cli/mcp-launch'
+import { mcpLaunch, type McpLaunch } from '@teleoffice/cli/mcp-launch'
 import { useCallback, useEffect, useState } from 'react'
 import type { TFunc } from './locale'
 import { McpServerSection } from './McpServerSection'
@@ -28,7 +28,7 @@ interface Pending {
   agentId?: AgentId
 }
 
-export const NPX_INSTALL_COMMAND = 'npx skills add genspark-ai/genoffice'
+export const NPX_INSTALL_COMMAND = 'npx skills add tyonger-stack/Teleoffice'
 
 /** some detected assistant holds an older copy of the skill than the bundled one */
 export const skillUpdateDue = (s: IntegrationsStatus): boolean =>
@@ -69,7 +69,9 @@ export function IntegrationsPane({
   const [copied, setCopied] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
-    const s = await api()?.status()
+    const bridge = api()
+    if (!bridge || typeof bridge.status !== 'function') return
+    const s = await bridge.status()
     if (!s) return
     setStatus(s)
     onStatus?.(s)

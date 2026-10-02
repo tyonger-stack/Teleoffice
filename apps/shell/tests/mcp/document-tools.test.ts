@@ -42,7 +42,7 @@ async function freePort(): Promise<number> {
 }
 
 beforeEach(async () => {
-  dir = await mkdtemp(join(tmpdir(), 'genoffice-mcp-'))
+  dir = await mkdtemp(join(tmpdir(), 'teleoffice-mcp-'))
   opened = []
   cli = fakeCli()
   const port = await freePort()
@@ -281,7 +281,7 @@ describe('M6 visible-editing tools (docs control wired)', () => {
   let fake: ReturnType<typeof fakeDocsControl>
 
   beforeEach(async () => {
-    dir2 = await mkdtemp(join(tmpdir(), 'genoffice-mcp-visible-'))
+    dir2 = await mkdtemp(join(tmpdir(), 'teleoffice-mcp-visible-'))
     fake = fakeDocsControl()
     const port = await (async () => {
       const { createServer } = await import('node:http')

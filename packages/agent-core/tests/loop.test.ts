@@ -966,7 +966,7 @@ describe('AgentLoop', () => {
   })
 
   it('after tools mutate, an empty final model turn still stores non-empty history for follow-ups', async () => {
-    // Regression for genoffice#12 / #22: first AI prompt mutates via tools with no
+    // Regression for teleoffice#12 / #22: first AI prompt mutates via tools with no
     // prose, second prompt must not inherit an empty assistant content block.
     const transport = scriptedTransport([
       (cb) => {

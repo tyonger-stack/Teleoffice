@@ -19,7 +19,7 @@ import {
   writeSync,
 } from 'node:fs'
 import { basename, extname, isAbsolute, join, relative, resolve } from 'node:path'
-import { envValue, teleofficeHomeDir } from '@genoffice/electron-utils/teleoffice-home'
+import { envValue, teleofficeHomeDir } from '@teleoffice/electron-utils/teleoffice-home'
 
 export interface TemplateRegistryEntry {
   path: string
@@ -57,7 +57,7 @@ function validName(name: string): boolean {
 
 export function templatesDir(env: NodeJS.ProcessEnv = process.env): string {
   const dir = envValue(env, 'TELEOFFICE_TEMPLATES_DIR', 'GENOFFICE_TEMPLATES_DIR')
-  if (dir) return resolve(dir)
+  if (dir && dir.trim()) return resolve(dir.trim())
   return join(teleofficeHomeDir(env), 'templates')
 }
 

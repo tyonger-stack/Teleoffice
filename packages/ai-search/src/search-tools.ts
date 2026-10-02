@@ -13,7 +13,7 @@ import {
   defaultAiLocalCliSettings,
   type AiSearchProviderId,
   type AiSettings,
-} from '@genoffice/ai-provider'
+} from '@teleoffice/ai-provider'
 import { imageSearch, webSearch, type SearchOptions } from './index'
 import { readAiSettingsFile } from './media-tools'
 
@@ -59,7 +59,7 @@ export async function testSearchProvider(
 ): Promise<{ ok: boolean; error?: string }> {
   if (provider === 'genspark') return { ok: true }
   if (provider === 'local-cli' || provider === 'mmx' || provider === 'antigravity') {
-    const query = provider === 'mmx' ? '深圳天气' : 'GenOffice'
+    const query = provider === 'mmx' ? '深圳天气' : 'TeleOffice'
     // mmx/antigravity must answer by themselves: no fallback, and the method
     // has to match, so a dead mmx cannot pass on agy's back. local-cli keeps
     // the auto routing with fallback.
@@ -103,7 +103,7 @@ export async function testSearchProvider(
     parallelKey: provider === 'parallel' ? apiKey : '',
     prefer: provider,
   }
-  const r = await webSearch('GenOffice', 1, options)
+  const r = await webSearch('TeleOffice', 1, options)
   if (r.method === provider) return { ok: true }
   return {
     ok: false,

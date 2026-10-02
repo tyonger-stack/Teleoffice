@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { buildTemplateDeck, inspectTemplate, parseTemplateDeckSpec } from '../src/slides/template'
 import { toEngineParagraphs } from '../src/slides/page-spec'
 import { parseOutline } from '../src/slides/outline'
-import { PackageArchive, getSlideNotes, openPptx } from '@genoffice/pptx-engine'
+import { PackageArchive, getSlideNotes, openPptx } from '@teleoffice/pptx-engine'
 import { makeTwoMasterTemplate } from './template-fixture'
 
 const PNG_1PX = Uint8Array.from(
@@ -445,7 +445,7 @@ describe('empty template deck', () => {
       'ppt/presentation.xml',
       Buffer.from(pres.replace(/<p:sldIdLst>[\s\S]*?<\/p:sldIdLst>/, ''), 'utf8'),
     )
-    const engine = await import('@genoffice/pptx-engine')
+    const engine = await import('@teleoffice/pptx-engine')
     const empty = await engine.savePptx(opened)
     const info = await inspectTemplate(empty)
     expect(info.slides).toEqual([])

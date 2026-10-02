@@ -5,8 +5,8 @@ import { act, createElement } from 'react'
 import { createRoot } from 'react-dom/client'
 import type { Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { defaultAiSettings } from '@genoffice/ai-provider'
-import type { AiSettings, CodexModelCatalog } from '@genoffice/ai-provider'
+import { defaultAiSettings } from '@teleoffice/ai-provider'
+import type { AiSettings, CodexModelCatalog } from '@teleoffice/ai-provider'
 import type { HomeApi } from '../src/shared/home-api'
 import { LocaleProvider } from '../src/renderer/src/locale'
 import { SettingsModal } from '../src/renderer/src/SettingsModal'
@@ -116,16 +116,7 @@ async function openAiPane(): Promise<void> {
         LocaleProvider,
         { initial: 'en' },
         createElement(SettingsModal, {
-          status: null,
-          loggingOut: false,
-          loginWaiting: false,
-          loginUrl: null,
-          urlCopied: false,
-          onOpenLoginUrl: vi.fn(),
-          onCopyLoginUrl: vi.fn(),
           onClose: vi.fn(),
-          onLogin: vi.fn(),
-          onLogout: vi.fn(),
         }),
       ),
     )

@@ -1,4 +1,4 @@
-import { TeleOfficeMark } from '@genoffice/ui'
+import { TeleOfficeMark } from '@teleoffice/ui'
 /** Small monochrome SVG icons approximating Word's ribbon glyphs. */
 
 import type { ReactNode } from 'react'

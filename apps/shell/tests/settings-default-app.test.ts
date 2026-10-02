@@ -55,16 +55,7 @@ async function openGeneral(api: Partial<HomeApi>): Promise<void> {
         LocaleProvider,
         { initial: 'en' },
         createElement(SettingsModal, {
-          status: null,
-          loggingOut: false,
-          loginWaiting: false,
-          loginUrl: null,
-          urlCopied: false,
-          onOpenLoginUrl: vi.fn(),
-          onCopyLoginUrl: vi.fn(),
           onClose: vi.fn(),
-          onLogin: vi.fn(),
-          onLogout: vi.fn(),
         }),
       ),
     )
@@ -106,7 +97,7 @@ describe('Settings default-app row', () => {
 
     await click(button)
     expect(set).toHaveBeenCalledTimes(1)
-    expect(row()?.textContent).toContain('GenOffice is already the default.')
+    expect(row()?.textContent).toContain('TeleOffice is already the default.')
     expect(row()!.querySelector<HTMLButtonElement>('button')!.disabled).toBe(true)
   })
 
@@ -115,7 +106,7 @@ describe('Settings default-app row', () => {
       getDefaultAppStatus: async () => ({ state: 'other', others: [], manualOnly: false }),
     })
     const field = row()!
-    expect(field.textContent).toContain('Open .docx, .xlsx and .pptx files in GenOffice')
+    expect(field.textContent).toContain('Open .docx, .xlsx and .pptx files in TeleOffice')
     expect(field.querySelector<HTMLButtonElement>('button')!.disabled).toBe(false)
   })
 

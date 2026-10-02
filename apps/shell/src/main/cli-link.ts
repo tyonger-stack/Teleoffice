@@ -1,8 +1,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { app } from 'electron'
-import { installCliLink } from '@genoffice/cli/install'
-import { teleofficeHomeDir } from '@genoffice/electron-utils/teleoffice-home'
+import { installCliLink } from '@teleoffice/cli/install'
+import { teleofficeHomeDir } from '@teleoffice/electron-utils/teleoffice-home'
 import { readAppSettings, writeAppSetting } from './app-settings'
 
 const SETTING_KEY = 'cliLink'
@@ -20,6 +20,9 @@ interface CliLinkRecord {
  * macOS retries on each start until a writable directory turns up; Windows
  * gets its PATH entry from the installer and only re-checks once per version
  * (the check spawns PowerShell). Silent and best effort.
+ *
+ * `~/.genoffice` → `~/.teleoffice` migration runs earlier in main via
+ * `migrateLegacyHome()` so this path always targets the live home dir.
  */
 export function installCliLinkBestEffort(settingsPath: string): void {
   if (!app.isPackaged) return

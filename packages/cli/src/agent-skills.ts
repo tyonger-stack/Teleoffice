@@ -24,10 +24,7 @@ import JSZip from 'jszip'
 
 export const SKILL_NAME = 'teleoffice'
 
-/** the skill's folder name before the command was renamed; our own unmodified copies are removed */
-export const LEGACY_SKILL_NAME = 'genoffice'
-
-/** app-settings.json key under which every install this machine's GenOffice wrote is remembered */
+/** app-settings.json key under which every install this machine's TeleOffice wrote is remembered */
 export const LEDGER_KEY = 'agentSkillInstalls'
 
 export type AgentId =
@@ -273,41 +270,13 @@ export function installSkill(
     at: new Date().toISOString(),
     channel,
   }
-  removeLegacySkill(skillsDir, ledger)
   return path
-}
-
-/**
- * Remove `<skillsDir>/genoffice/SKILL.md` left by an earlier version, but only
- * when the ledger says this app wrote it and its bytes are unchanged; a
- * folder that still holds other files keeps them. True when it was removed.
- */
-export function removeLegacySkill(skillsDir: string, ledger: SkillLedger): boolean {
-  const dir = join(skillsDir, LEGACY_SKILL_NAME)
-  const path = join(dir, 'SKILL.md')
-  const ours = ledger[path]
-  if (!ours) return false
-  try {
-    if (lstatSync(path).isSymbolicLink()) return false
-    if (sha256(readFileSync(path)) !== ours.sha256) return false
-  } catch {
-    // already gone: just forget it
-    delete ledger[path]
-    return false
-  }
-  rmSync(path, { force: true })
-  try {
-    if (readdirSync(dir).length === 0) rmSync(dir, { recursive: true })
-  } catch {}
-  delete ledger[path]
-  return true
 }
 
 /** Remove only what this app wrote; a folder holding other files keeps them. */
 export function uninstallSkill(skillsDir: string, ledger: SkillLedger): boolean {
   const path = skillFilePath(skillsDir)
-  const legacyRemoved = removeLegacySkill(skillsDir, ledger)
-  if (!ledger[path]) return legacyRemoved
+  if (!ledger[path]) return false
   rmSync(path, { force: true })
   const dir = join(skillsDir, SKILL_NAME)
   try {

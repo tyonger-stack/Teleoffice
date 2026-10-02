@@ -4,33 +4,33 @@ import {
   parseRange,
   rangeAddresses,
   type RangeBounds,
-} from '@genoffice/xlsx-gateway/domain/cell-address'
-import { InMemoryWorkbookAdapter } from '@genoffice/xlsx-gateway/domain/in-memory-workbook'
-import type { ChangePlan, WorkbookSnapshot } from '@genoffice/xlsx-gateway/domain/workbook.types'
+} from '@teleoffice/xlsx-gateway/domain/cell-address'
+import { InMemoryWorkbookAdapter } from '@teleoffice/xlsx-gateway/domain/in-memory-workbook'
+import type { ChangePlan, WorkbookSnapshot } from '@teleoffice/xlsx-gateway/domain/workbook.types'
 import type {
   CellFormatPatch,
   FillPatch,
   StyleColorInput,
-} from '@genoffice/xlsx-gateway/domain/workbook-dsl'
+} from '@teleoffice/xlsx-gateway/domain/workbook-dsl'
 import {
   normalizeStyleColor,
   type FillSpec,
   type StyleColor,
-} from '@genoffice/xlsx-gateway/domain/style-color'
+} from '@teleoffice/xlsx-gateway/domain/style-color'
 import {
   readBasicWorkbook,
   type CellEdit,
   type SheetStructuralOps,
-} from '@genoffice/xlsx-gateway/gateway/xlsx-gateway'
+} from '@teleoffice/xlsx-gateway/gateway/xlsx-gateway'
 import {
   parseRelationships,
   parseSheetElements,
   type SheetEditPlan,
-} from '@genoffice/xlsx-gateway/gateway/xlsx-sheets'
-import type { StructuralOp } from '@genoffice/xlsx-gateway/gateway/xlsx-structure'
-import type { DefinedNameEntry } from '@genoffice/xlsx-gateway/gateway/xlsx-defined-names'
-import type { SheetNote } from '@genoffice/xlsx-gateway/gateway/xlsx-notes'
-import type { WorkbookStyleEdit } from '@genoffice/xlsx-gateway/shared/edit-schemas'
+} from '@teleoffice/xlsx-gateway/gateway/xlsx-sheets'
+import type { StructuralOp } from '@teleoffice/xlsx-gateway/gateway/xlsx-structure'
+import type { DefinedNameEntry } from '@teleoffice/xlsx-gateway/gateway/xlsx-defined-names'
+import type { SheetNote } from '@teleoffice/xlsx-gateway/gateway/xlsx-notes'
+import type { WorkbookStyleEdit } from '@teleoffice/xlsx-gateway/shared/edit-schemas'
 import {
   expandToPrimitiveOps,
   isLayoutOp,
@@ -38,7 +38,7 @@ import {
   structuralOpLabel,
   workbookOperationSchema,
   type WorkbookOperation,
-} from '@genoffice/xlsx-gateway/domain/workbook-dsl'
+} from '@teleoffice/xlsx-gateway/domain/workbook-dsl'
 import JSZip from 'jszip'
 import type { PathContext } from '../fs'
 import { classifyOpError } from '../op-errors'
@@ -277,7 +277,7 @@ export async function runWorkbookDsl(
       try {
         plan = adapter.plan({
           dslVersion: 1,
-          transactionId: `genoffice-${Date.now()}-${position}`,
+          transactionId: `teleoffice-${Date.now()}-${position}`,
           baseRevision: adapter.getSnapshot().revision,
           summary: 'teleoffice sheet apply',
           operations: [op],
@@ -704,7 +704,7 @@ function normalizeOp(
   if (!(SUPPORTED_DSL_OPS as readonly string[]).includes(op.op)) {
     const reason = Object.hasOwn(REFUSED_DSL_OPS, op.op) ? REFUSED_DSL_OPS[op.op] : undefined
     const message = reason
-      ? `"${op.op}" is not available headless (${reason}); use the GenOffice app`
+      ? `"${op.op}" is not available headless (${reason}); use the TeleOffice app`
       : `unknown op "${op.op}"`
     throw new CliError(
       EXIT.usage,
@@ -716,7 +716,7 @@ function normalizeOp(
       {
         reason: reason ? 'unsupported' : 'unknown_op',
         suggestion: reason
-          ? 'open the workbook in GenOffice for this edit'
+          ? 'open the workbook in TeleOffice for this edit'
           : unknownOpSuggestion(op.op),
       },
     )

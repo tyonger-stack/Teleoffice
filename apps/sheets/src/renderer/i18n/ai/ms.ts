@@ -48,13 +48,7 @@ export const ms = {
   aiFileTooltip:
     'SHA-256 {sha}\nPenyimpanan hanya menulis semula entri yang diedit; yang lain dikekalkan seperti sedia ada.',
   aiFileMeta: '{sheets} helaian · {entries} entri',
-  aiGensparkAccount: 'Akaun Genspark',
-  aiAccountChecking: 'Sedang menyemak…',
-  aiLoggedIn: 'Sudah log masuk',
-  aiLoggedInAs: 'Sudah log masuk: {email}',
-  aiNotLoggedIn: 'Belum log masuk (ciri AI memerlukan akaun Genspark)',
-  aiWaitingBrowserLogin: 'Menunggu log masuk dalam pelayar…',
-  aiLoginGenspark: 'Log masuk ke Genspark',
+  aiResizePanel: 'Resize AI panel',
   aiModel: 'Model',
   aiCancel: 'Batal',
   aiSave: 'Simpan',
@@ -65,7 +59,7 @@ export const ms = {
   aiNetworkError:
     'Masalah rangkaian: tidak dapat menghubungi perkhidmatan AI. Semak sambungan anda dan cuba lagi',
   aiCreditsExhausted:
-    'Kredit Genspark anda telah habis. Tambah nilai di genspark.ai/pricing dan cuba lagi',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiToolWorkbookContext: 'Baca maklumat buku kerja',
   aiToolReadRange: 'Baca julat',
   aiToolReadRangeOf: 'Baca julat {range}',

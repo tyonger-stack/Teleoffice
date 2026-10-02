@@ -5,8 +5,8 @@
  * linearized text as its display text, so older readers and our renderer see
  * the fallback while PowerPoint shows the typeset formula.
  */
-import { latexToOmml } from '@genoffice/docx-engine/math'
-import { addElement, type Paragraph, type TextElement, type TextRun } from '@genoffice/pptx-engine'
+import { latexToOmml } from '@teleoffice/docx-engine/math'
+import { addElement, type Paragraph, type TextElement, type TextRun } from '@teleoffice/pptx-engine'
 import { ommlToText } from './omml-linear'
 import {
   GuidedError,

@@ -13,7 +13,7 @@ import {
 } from 'node:fs'
 import { randomBytes } from 'node:crypto'
 import { basename, extname, join, resolve, sep } from 'node:path'
-import { templatesDir } from '@genoffice/pipelines/slides/templates'
+import { templatesDir } from '@teleoffice/pipelines/slides/templates'
 
 export const OFFICE_TEMPLATE_KINDS = ['docx', 'xlsx', 'md', 'html', 'pdf'] as const
 export type OfficeTemplateKind = (typeof OFFICE_TEMPLATE_KINDS)[number]

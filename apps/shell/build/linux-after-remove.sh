@@ -12,7 +12,7 @@ esac
 for link in /usr/bin/teleoffice /usr/bin/genoffice; do
   if [ -L "$link" ]; then
     case "$(readlink "$link")" in
-      /opt/GenOffice/*) rm -f "$link" ;;
+      /opt/TeleOffice/*) rm -f "$link" ;;
     esac
   fi
 done

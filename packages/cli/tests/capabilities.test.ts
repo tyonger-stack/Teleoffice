@@ -1,7 +1,7 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import * as aiSearch from '@genoffice/ai-search'
+import * as aiSearch from '@teleoffice/ai-search'
 import { run, tempDir as makeTempDir } from './helpers'
 
 // Every temp dir a test makes is removed in afterEach (no /tmp leaks).
@@ -16,19 +16,19 @@ function tempDir(): string {
 const saved: Record<string, string | undefined> = {}
 beforeEach(() => {
   for (const k of [
-    'GENOFFICE_AUTH_DIR',
+    'TELEOFFICE_AUTH_DIR',
     'AI_SEARCH_DISABLE_GSK',
-    'GENOFFICE_AGY_PATH',
-    'GENOFFICE_MMX_PATH',
+    'TELEOFFICE_AGY_PATH',
+    'TELEOFFICE_MMX_PATH',
     'MINIMAX_API_KEY',
     'MMX_CONFIG_DIR',
   ])
     saved[k] = process.env[k]
-  process.env.GENOFFICE_AUTH_DIR = join(tempDir(), 'no-auth')
+  process.env.TELEOFFICE_AUTH_DIR = join(tempDir(), 'no-auth')
   process.env.AI_SEARCH_DISABLE_GSK = '1'
   // the local CLI defaults would otherwise pick up real binaries on this machine
-  process.env.GENOFFICE_AGY_PATH = join(tempDir(), 'no-agy')
-  process.env.GENOFFICE_MMX_PATH = join(tempDir(), 'no-mmx')
+  process.env.TELEOFFICE_AGY_PATH = join(tempDir(), 'no-agy')
+  process.env.TELEOFFICE_MMX_PATH = join(tempDir(), 'no-mmx')
   delete process.env.MINIMAX_API_KEY
   process.env.MMX_CONFIG_DIR = join(tempDir(), 'no-mmx-config')
 })
@@ -60,8 +60,8 @@ describe('teleoffice capabilities', () => {
     const r = await run(['capabilities', '--json'], {
       env: {
         ...process.env,
-        GENOFFICE_AI_SETTINGS: join(dir, 'missing.json'),
-        GENOFFICE_APP_BIN: '',
+        TELEOFFICE_AI_SETTINGS: join(dir, 'missing.json'),
+        TELEOFFICE_APP_BIN: '',
       },
     })
     expect(r.code).toBe(0)
@@ -88,8 +88,8 @@ describe('teleoffice capabilities', () => {
     const r = await run(['capabilities', '--json'], {
       env: {
         ...process.env,
-        GENOFFICE_AI_SETTINGS: settings,
-        GENOFFICE_APP_BIN: join(dir, 'bin', 'app'),
+        TELEOFFICE_AI_SETTINGS: settings,
+        TELEOFFICE_APP_BIN: join(dir, 'bin', 'app'),
       },
     })
     expect(r.code).toBe(0)
@@ -107,7 +107,7 @@ describe('teleoffice capabilities', () => {
       search: { provider: 'serply', providers: { serply: { apiKey: 'k' } } },
     })
     const r = await run(['capabilities', '--json'], {
-      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+      env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
     })
     const d = r.json().detail
     expect(d.search).toEqual({ available: true, via: 'serply' })
@@ -123,7 +123,7 @@ describe('teleoffice capabilities', () => {
       },
     })
     const r = await run(['capabilities', '--json'], {
-      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+      env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
     })
     const d = r.json().detail
     expect(d.search).toEqual({ available: true, via: provider })
@@ -144,7 +144,7 @@ describe('teleoffice capabilities', () => {
         },
       })
       const r = await run(['capabilities', '--json'], {
-        env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+        env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
       })
       const d = r.json().detail
       expect(d.search).toEqual({ available: true, via: provider })
@@ -159,7 +159,7 @@ describe('teleoffice capabilities', () => {
       search: { provider: 'parallel', providers: { parallel: { apiKey: '' } } },
     })
     const r = await run(['capabilities', '--json'], {
-      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+      env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
     })
     expect(r.json().detail.search).toEqual({ available: true, via: 'parallel' })
     expect(r.json().detail.image_search).toEqual({ available: false, via: null })
@@ -173,13 +173,13 @@ describe('teleoffice capabilities', () => {
     writeFileSync(mmx, '')
     const settings = settingsFile(dir, {})
     // local CLI resolution reads process.env (like the gsk login state)
-    process.env.GENOFFICE_AGY_PATH = agy
-    process.env.GENOFFICE_MMX_PATH = mmx
+    process.env.TELEOFFICE_AGY_PATH = agy
+    process.env.TELEOFFICE_MMX_PATH = mmx
     process.env.MINIMAX_API_KEY = 'test-key'
     const r = await run(['capabilities', '--json'], {
       env: {
         ...process.env,
-        GENOFFICE_AI_SETTINGS: settings,
+        TELEOFFICE_AI_SETTINGS: settings,
       },
     })
     expect(r.code).toBe(0)
@@ -230,9 +230,9 @@ describe('teleoffice capabilities', () => {
         asrLanguage: 'zh',
       },
     })
-    process.env.GENOFFICE_AGY_PATH = agy
+    process.env.TELEOFFICE_AGY_PATH = agy
     const r = await run(['capabilities', '--json'], {
-      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+      env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
     })
     expect(r.json().detail.video_generation).toEqual({
       available: true,
@@ -249,11 +249,11 @@ describe('teleoffice capabilities', () => {
     const settings = settingsFile(dir, {
       search: { provider: 'mmx' },
     })
-    process.env.GENOFFICE_AGY_PATH = agy
+    process.env.TELEOFFICE_AGY_PATH = agy
     const r = await run(['capabilities', '--json'], {
       env: {
         ...process.env,
-        GENOFFICE_AI_SETTINGS: settings,
+        TELEOFFICE_AI_SETTINGS: settings,
       },
     })
     const d = r.json().detail
@@ -267,7 +267,7 @@ describe('teleoffice capabilities', () => {
     vi.spyOn(aiSearch, 'hasGskAuth').mockReturnValue(true)
     const settings = settingsFile(tempDir(), {})
     const r = await run(['capabilities', '--json'], {
-      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+      env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
     })
     const d = r.json().detail
     expect(d.search).toEqual({ available: true, via: 'genspark' })
@@ -282,10 +282,10 @@ describe('teleoffice capabilities', () => {
     const dir = tempDir()
     const agy = join(dir, 'agy')
     writeFileSync(agy, '')
-    process.env.GENOFFICE_AGY_PATH = agy
+    process.env.TELEOFFICE_AGY_PATH = agy
     const settings = settingsFile(dir, {})
     const r = await run(['capabilities', '--json'], {
-      env: { ...process.env, GENOFFICE_AI_SETTINGS: settings },
+      env: { ...process.env, TELEOFFICE_AI_SETTINGS: settings },
     })
     const d = r.json().detail
     expect(d.image_generation.via).toBe('antigravity')

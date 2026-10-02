@@ -1,4 +1,4 @@
-import { aiPanelWidthAtPointer, AiPanelSideButton } from '@genoffice/ui'
+import { aiPanelWidthAtPointer, AiPanelSideButton } from '@teleoffice/ui'
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import {
   AgentLoop,
@@ -6,13 +6,13 @@ import {
   IPC_STREAM_SILENCE_TIMEOUT_MS,
   type AgentImage,
   type ToolDisplay,
-} from '@genoffice/agent-core'
-import type { RenderSlide } from '@genoffice/pptx-render'
+} from '@teleoffice/agent-core'
+import type { RenderSlide } from '@teleoffice/pptx-render'
 import {
   cloudToolsEnabled,
   imageGenerationAvailable,
   mediaAnalysisAvailable,
-} from '@genoffice/ai-provider/browser'
+} from '@teleoffice/ai-provider/browser'
 import type { AiSettings, AttachmentAddResult, AttachmentMeta } from '../../shared/ipc'
 import { ATTACHMENT_IMAGE_EXTS } from '../../shared/ipc'
 import {
@@ -43,7 +43,7 @@ import {
   settingsSupportVision,
 } from './slide-qc'
 import { useI18n, t as tGlobal, aiLangDirective, type TFunc } from '../i18n/locale'
-import { AiScopeQuote, Markdown, useAiPanelPrefs, type AiScopeQuoteData } from '@genoffice/ui'
+import { AiScopeQuote, Markdown, useAiPanelPrefs, type AiScopeQuoteData } from '@teleoffice/ui'
 import { GensparkMark } from '../components/icons'
 import sendEnterOn from '../assets/send-enter-on.png'
 import sendEnterOff from '../assets/send-enter-off.png'
@@ -222,6 +222,7 @@ interface ChatEntry {
   text: string
   error?: string
   streaming?: boolean
+  /** tool executions performed during this assistant turn */
   tools?: ToolActivity[]
   /** Generation progress card (only one per turn, replaced in real time) */
   deckProgress?: DeckProgressSnapshot
@@ -500,7 +501,7 @@ export function AiPanel({
   const settingsRef = useRef(settings)
   settingsRef.current = settings
 
-  /** gsk login state for the cloud-tools gate (refreshed on mount and window focus) */
+  /** gsk key availability for the cloud-tools gate (refreshed on mount and window focus) */
   const gskLoggedInRef = useRef(false)
   useEffect(() => {
     let alive = true

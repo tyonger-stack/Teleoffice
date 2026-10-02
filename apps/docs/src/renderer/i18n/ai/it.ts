@@ -118,7 +118,7 @@ export const it = {
   aiNetworkError:
     'Problema di rete: impossibile raggiungere il servizio IA. Controlla la connessione e riprova',
   aiCreditsExhausted:
-    'I tuoi crediti Genspark sono esauriti. Ricarica su genspark.ai/pricing e riprova',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiSumReadAttachment: 'Lettura allegato',
   aiSumImageAttachment: 'Immagine allegata {name}',
   aiSumRead: 'Lettura di {name}',

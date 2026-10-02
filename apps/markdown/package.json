@@ -1,6 +1,6 @@
 {
-  "name": "@genoffice/markdown",
-  "productName": "GenOffice Markdown",
+  "name": "@teleoffice/markdown",
+  "productName": "TeleOffice Markdown",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
@@ -14,14 +14,14 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@genoffice/agent-core": "*",
-    "@genoffice/ai-provider": "*",
-    "@genoffice/ai-search": "*",
-    "@genoffice/docx-engine": "*",
-    "@genoffice/electron-utils": "*",
-    "@genoffice/i18n": "*",
-    "@genoffice/project-store": "*",
-    "@genoffice/ui": "*",
+    "@teleoffice/agent-core": "*",
+    "@teleoffice/ai-provider": "*",
+    "@teleoffice/ai-search": "*",
+    "@teleoffice/docx-engine": "*",
+    "@teleoffice/electron-utils": "*",
+    "@teleoffice/i18n": "*",
+    "@teleoffice/project-store": "*",
+    "@teleoffice/ui": "*",
     "@tiptap/core": "3.31.0",
     "@tiptap/extension-bold": "3.31.0",
     "@tiptap/extension-code-block": "3.31.0",
@@ -52,7 +52,7 @@
     "vite": "^7.3.1",
     "vitest": "^4.1.11"
   },
-  "author": "GenOffice",
+  "author": "TeleOffice",
   "dependencies": {
     "@tiptap/extension-mathematics": "3.31.0",
     "katex": "^0.16.47",

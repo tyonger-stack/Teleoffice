@@ -48,13 +48,7 @@ export const pt = {
   aiFileTooltip:
     'SHA-256 {sha}\nAo salvar, apenas as entradas editadas são reescritas; todo o resto é preservado.',
   aiFileMeta: '{sheets} planilhas · {entries} entradas',
-  aiGensparkAccount: 'Conta Genspark',
-  aiAccountChecking: 'Verificando…',
-  aiLoggedIn: 'Conectado',
-  aiLoggedInAs: 'Conectado: {email}',
-  aiNotLoggedIn: 'Não conectado (os recursos de IA exigem uma conta Genspark)',
-  aiWaitingBrowserLogin: 'Aguardando login no navegador…',
-  aiLoginGenspark: 'Entrar no Genspark',
+  aiResizePanel: 'Resize AI panel',
   aiModel: 'Modelo',
   aiCancel: 'Cancelar',
   aiSave: 'Salvar',
@@ -66,7 +60,7 @@ export const pt = {
   aiNetworkError:
     'Problema de rede: não foi possível conectar ao serviço de IA. Verifique sua conexão e tente novamente',
   aiCreditsExhausted:
-    'Seus créditos Genspark acabaram. Recarregue em genspark.ai/pricing e tente novamente',
+    'Genspark quota exhausted. Set GSK_API_KEY or choose another AI provider in Settings, then try again.',
   aiToolWorkbookContext: 'Ler informações da pasta de trabalho',
   aiToolReadRange: 'Ler intervalo',
   aiToolReadRangeOf: 'Ler intervalo {range}',

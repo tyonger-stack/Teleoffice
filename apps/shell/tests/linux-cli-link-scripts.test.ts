@@ -19,8 +19,8 @@ const BUILD = join(__dirname, '..', 'build')
 
 /** The scripts hardcode the package paths; a copy with the two roots swapped runs against a temp tree. */
 function makeRoot() {
-  const root = mkdtempSync(join(tmpdir(), 'genoffice-postinst-'))
-  const opt = join(root, 'opt', 'GenOffice')
+  const root = mkdtempSync(join(tmpdir(), 'teleoffice-postinst-'))
+  const opt = join(root, 'opt', 'TeleOffice')
   const bin = join(root, 'usr', 'bin')
   mkdirSync(join(opt, 'resources', 'cli'), { recursive: true })
   mkdirSync(bin, { recursive: true })
@@ -30,7 +30,7 @@ function makeRoot() {
   const script = (name: string) => {
     const file = join(root, name)
     const body = readFileSync(join(BUILD, name), 'utf-8')
-      .replaceAll('/opt/GenOffice', opt)
+      .replaceAll('/opt/TeleOffice', opt)
       .replaceAll('/usr/bin/', `${bin}/`)
     writeFileSync(file, body)
     return (arg = '') => {
@@ -46,7 +46,7 @@ function makeRoot() {
   }
 }
 
-describe.skipIf(process.platform === 'win32')('linux cli link scripts (genoffice#893)', () => {
+describe.skipIf(process.platform === 'win32')('linux cli link scripts (teleoffice#893)', () => {
   it('links a free name, a dead link and a link into the old install', () => {
     const t = makeRoot()
     expect(t.install()).toEqual({ code: 0, stderr: '' })

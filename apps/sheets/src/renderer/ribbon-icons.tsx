@@ -1,4 +1,4 @@
-import { TeleOfficeMark } from '@genoffice/ui'
+import { TeleOfficeMark } from '@teleoffice/ui'
 import type { ReactElement, ReactNode } from 'react'
 
 /// Ribbon icon set drawn to the shared icon standard: 24×24 canvas with

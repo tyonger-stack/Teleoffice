@@ -1,4 +1,4 @@
-import type { SectionSettings } from '@genoffice/docx-engine'
+import type { SectionSettings } from '@teleoffice/docx-engine'
 
 export type SideMargins = Pick<SectionSettings, 'marginLeft' | 'marginRight'>
 

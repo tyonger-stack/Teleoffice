@@ -27,11 +27,11 @@ import { exportViaApp } from '../formats/app-export'
 import { blankDocument, closeDocument, fillFromHtml, saveDocument } from '../formats/docx'
 import { markdownToDocx } from '../formats/markdown'
 import { runWorkbookDsl } from '../formats/xlsx-dsl'
-import { columnLabel } from '@genoffice/xlsx-gateway/domain/cell-address'
+import { columnLabel } from '@teleoffice/xlsx-gateway/domain/cell-address'
 import { sheetNameFromStem } from '../formats/csv'
 import { readOpsInput } from '../ops-input'
 import type { CommandContext, CommandDef } from '../registry'
-import type { TxnResult } from '@genoffice/pptx-ops'
+import type { TxnResult } from '@teleoffice/pptx-ops'
 import { CliError, EXIT, type CommandResult } from '../result'
 import { txnFailure, txnDetail } from './txn'
 
@@ -84,7 +84,7 @@ export const createCommand: CommandDef = {
       name: 'from',
       value: 'file',
       description:
-        'xlsx: a .csv, or a .json holding a 2-D array of cell values or { "sheets": [{ "name", "rows" }] }; strings starting with "=" are formulas. docx: a .md file, or a .html file holding a restricted-HTML fragment (see `teleoffice guide docs`). pdf: any .md/.html/.docx/.xlsx/.pptx file, printed by the GenOffice renderer',
+        'xlsx: a .csv, or a .json holding a 2-D array of cell values or { "sheets": [{ "name", "rows" }] }; strings starting with "=" are formulas. docx: a .md file, or a .html file holding a restricted-HTML fragment (see `teleoffice guide docs`). pdf: any .md/.html/.docx/.xlsx/.pptx file, printed by the TeleOffice renderer',
     },
     {
       name: 'header',
@@ -103,7 +103,7 @@ export const createCommand: CommandDef = {
       name: 'render',
       value: 'dir',
       description:
-        'pptx: after writing, render one PNG per slide into <dir> (default: <output name>-previews beside the file) and list them in detail.previews; starts a hidden GenOffice process for a few seconds',
+        'pptx: after writing, render one PNG per slide into <dir> (default: <output name>-previews beside the file) and list them in detail.previews; starts a hidden TeleOffice process for a few seconds',
     },
     {
       name: 'audit',
@@ -165,7 +165,7 @@ export const createCommand: CommandDef = {
       return {
         summary: `created ${basename(output)}`,
         outputPath: output,
-        detail: { via: 'genoffice --headless-export', summary: r.summary },
+        detail: { via: 'teleoffice --headless-export', summary: r.summary },
       }
     }
     if (type === 'docx') {

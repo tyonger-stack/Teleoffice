@@ -48,8 +48,8 @@ async function makeTemplate(dir: string): Promise<string> {
 }
 
 function templateEnv(dir: string): { cwd: string; env: NodeJS.ProcessEnv } {
-  const templates = track(mkdtempSync(join(tmpdir(), 'genoffice-templates-')))
-  return { cwd: dir, env: { ...process.env, GENOFFICE_TEMPLATES_DIR: templates } }
+  const templates = track(mkdtempSync(join(tmpdir(), 'teleoffice-templates-')))
+  return { cwd: dir, env: { ...process.env, TELEOFFICE_TEMPLATES_DIR: templates } }
 }
 
 describe('teleoffice template', () => {
@@ -79,7 +79,7 @@ describe('teleoffice template', () => {
     expect((await run(['template', 'remove', 'base', '--json'], ctx)).code).toBe(0)
     expect((await run(['template', 'list', '--json'], ctx)).json().detail.templates).toEqual([])
     expect((await run(['template', 'path', '--json'], ctx)).json().detail.path).toBe(
-      ctx.env.GENOFFICE_TEMPLATES_DIR,
+      ctx.env.TELEOFFICE_TEMPLATES_DIR,
     )
   })
 
@@ -229,7 +229,7 @@ describe('teleoffice template', () => {
     const dir = ownedTempDir()
     const ctx = templateEnv(dir)
     const template = await makeTemplate(dir)
-    const templatesDir = ctx.env.GENOFFICE_TEMPLATES_DIR as string
+    const templatesDir = ctx.env.TELEOFFICE_TEMPLATES_DIR as string
     await run(['template', 'add', 'guarded', template, '--copy', '--json'], ctx)
     const dest = join(templatesDir, 'guarded.pptx')
     expect(existsSync(dest)).toBe(true)
