@@ -297,13 +297,15 @@ export function resolveAiMediaSettings(
           : {}),
     }
   }
-  const legacy = stored.provider
-  const analysisProvider = stored.analysisProvider ?? legacy ?? defaults.analysisProvider
+  const legacy = stored.provider === 'genspark' ? undefined : stored.provider
+  const pick = (value: AiMediaProviderId | undefined): AiMediaProviderId =>
+    !value || value === 'genspark' ? 'antigravity' : value
+  const analysisProvider = pick(stored.analysisProvider ?? legacy ?? defaults.analysisProvider)
   return {
-    imageProvider: stored.imageProvider ?? legacy ?? defaults.imageProvider,
+    imageProvider: pick(stored.imageProvider ?? legacy ?? defaults.imageProvider),
     analysisProvider,
     // a pre-split file used one vendor for all media analysis
-    videoAnalysisProvider: stored.videoAnalysisProvider ?? analysisProvider,
+    videoAnalysisProvider: pick(stored.videoAnalysisProvider ?? analysisProvider),
     providers,
   }
 }
@@ -324,25 +326,26 @@ export function mediaConfigUsable(
 
 /**
  * The stored provider for one capability, honored only when it exists, has
- * that capability and is usable; anything else falls back to genspark so a
- * half-filled setup degrades to the signed-in default.
+ * that capability and is usable; anything else falls back to the local
+ * Antigravity CLI.
  */
 export function activeMediaProvider(
   settings: Pick<AiSettings, 'media'>,
   capability: MediaCapability,
 ): AiMediaProviderId {
   const media = settings.media
-  if (!media) return 'genspark'
+  if (!media) return 'antigravity'
   const id =
     capability === 'image'
       ? media.imageProvider
       : capability === 'video'
         ? media.videoAnalysisProvider
         : media.analysisProvider
-  if (!id || id === 'genspark') return 'genspark'
+  if (!id) return 'antigravity'
+  if (id === 'genspark') return 'genspark'
   const meta = getMediaProviderMeta(id)
-  if (!meta || !providerHasCapability(meta, capability)) return 'genspark'
-  if (!mediaConfigUsable(meta, media.providers?.[id])) return 'genspark'
+  if (!meta || !providerHasCapability(meta, capability)) return 'antigravity'
+  if (!mediaConfigUsable(meta, media.providers?.[id])) return 'antigravity'
   return id
 }
 

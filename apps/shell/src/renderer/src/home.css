@@ -172,9 +172,9 @@ body.vib .home {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- bottom-left account entry (today = Genspark login, later = signup/account system) ---- */
-/* clicking it opens the settings modal (settings.css) directly, which hosts
-   login/logout plus preferences (language / theme / save location / update channel) */
+/* ---- bottom-left account entry ---- */
+/* signed out this is Settings (no guest-login prompt); signed in it shows the
+   account. Clicking opens the settings modal (settings.css). */
 
 .account-entry {
   position: relative;
@@ -329,16 +329,29 @@ body.vib .home {
 }
 
 .quick-cards {
-  display: flex;
+  display: grid;
+  /* seven tracks: six Office apps plus Open local. The template row uses the
+     same tracks and only fills the first six, so those cards match the apps. */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   align-items: stretch;
   gap: 10px;
 }
 
+.default-templates {
+  margin-top: 16px;
+}
+
+.default-templates-heading {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
 .quick-card {
   position: relative;
-  flex: 1;
   min-width: 0;
-  max-width: 280px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -425,14 +438,11 @@ body.vib .home {
   letter-spacing: 0.03em;
 }
 
-/* The wrap is the flex item for the template card. Plain cards are
-   content-box (flex basis 0 + 36px padding + 2px border), so the wrap starts
-   from that same 38px and caps at 280px + 38px: all cards share one width. */
+/* The wrap is the grid item for a template card; the button fills that cell
+   so the card is the same width as the Office card in the column above. */
 .quick-card-wrap {
   position: relative;
-  flex: 1 1 38px;
-  min-width: 38px;
-  max-width: calc(280px + 38px);
+  min-width: 0;
   display: flex;
 }
 
@@ -490,19 +500,7 @@ body.vib .home {
 
 @media (max-width: 1100px) {
   .quick-cards {
-    flex-wrap: wrap;
-  }
-
-  /* border-box here so a card's basis is its whole width: two cards per row */
-  .quick-card {
-    box-sizing: border-box;
-    flex: 1 1 calc(50% - 5px);
-    max-width: none;
-  }
-
-  .quick-card-wrap {
-    flex: 1 1 calc(50% - 5px);
-    max-width: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

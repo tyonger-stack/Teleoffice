@@ -17,7 +17,7 @@ export const vi = {
   aiQcPageSkipped: 'Trang {n}: đã bỏ qua kiểm tra bố cục tự động',
   aiQcStopped: 'Đã dừng kiểm tra bố cục',
   aiQcCapped: 'Còn {count} trang chưa được kiểm tra (đạt giới hạn mỗi lần chạy)',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: 'Mở trợ lý AI',
   aiFactCheckBtn: 'Kiểm chứng thông tin AI',
   aiFactCheckPrompt:

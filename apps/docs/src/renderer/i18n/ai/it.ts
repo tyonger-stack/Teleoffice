@@ -9,7 +9,7 @@ export const it = {
   aiStarterPolishAll: "Rifinisci l'intero documento con un tono più professionale",
   aiStarterContinue: 'Continua a scrivere da dove il documento si interrompe',
   aiStarterFillTemplate: 'Trova e compila i segnaposto nel documento',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: "Apri l'assistente IA",
   aiSummarizeBtn: 'Riassunto IA',
   aiSummarizePrompt: 'Riassumi il contenuto principale e i punti chiave di questo documento',

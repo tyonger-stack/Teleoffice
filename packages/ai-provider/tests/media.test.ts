@@ -110,11 +110,11 @@ describe('media settings', () => {
   it('activates a BYOK media provider per capability, only when usable and capable', () => {
     expect(activeMediaProvider(openaiSettings(), 'image')).toBe('openai')
     expect(activeMediaProvider(openaiSettings(), 'analysis')).toBe('openai')
-    expect(activeMediaProvider(openaiSettings(''), 'image')).toBe('genspark')
-    expect(activeMediaProvider(openaiSettings('   '), 'image')).toBe('genspark')
+    expect(activeMediaProvider(openaiSettings(''), 'image')).toBe('antigravity')
+    expect(activeMediaProvider(openaiSettings('   '), 'image')).toBe('antigravity')
     const custom = defaultAiMediaSettings()
     custom.imageProvider = 'custom'
-    expect(activeMediaProvider(withMedia(custom), 'image')).toBe('genspark')
+    expect(activeMediaProvider(withMedia(custom), 'image')).toBe('antigravity')
     custom.providers.custom.baseUrl = 'http://localhost:1234/v1'
     expect(activeMediaProvider(withMedia(custom), 'image')).toBe('custom')
     expect(activeMediaProvider(withMedia(custom), 'analysis')).toBe('antigravity')
@@ -123,25 +123,25 @@ describe('media settings', () => {
     const mm = defaultAiMediaSettings()
     mm.analysisProvider = 'minimax'
     mm.providers.minimax.apiKey = 'k'
-    expect(activeMediaProvider(withMedia(mm), 'analysis')).toBe('genspark')
+    expect(activeMediaProvider(withMedia(mm), 'analysis')).toBe('antigravity')
     // DeepSeek reads images (V4.1 Flash vision) but takes no video
     const ds = defaultAiMediaSettings()
     ds.analysisProvider = 'deepseek'
     ds.providers.deepseek.apiKey = 'sk-ds'
     expect(activeMediaProvider(withMedia(ds), 'analysis')).toBe('deepseek')
     ds.videoAnalysisProvider = 'deepseek'
-    expect(activeMediaProvider(withMedia(ds), 'video')).toBe('genspark')
+    expect(activeMediaProvider(withMedia(ds), 'video')).toBe('antigravity')
     // OpenAI reads images but not video: as the video provider it falls back
     const oa = openaiSettings()
     oa.media!.videoAnalysisProvider = 'openai'
-    expect(activeMediaProvider(oa, 'video')).toBe('genspark')
+    expect(activeMediaProvider(oa, 'video')).toBe('antigravity')
     oa.media!.videoAnalysisProvider = 'gemini'
     oa.media!.providers.gemini.apiKey = 'AIza'
     expect(activeMediaProvider(oa, 'video')).toBe('gemini')
-    expect(activeMediaProvider({ media: undefined }, 'image')).toBe('genspark')
+    expect(activeMediaProvider({ media: undefined }, 'image')).toBe('antigravity')
     expect(
       activeMediaProvider({ media: { imageProvider: 'nope', providers: {} } as never }, 'image'),
-    ).toBe('genspark')
+    ).toBe('antigravity')
   })
 
   it('gates the tools on gsk login + toggle without BYOK, and on the BYOK model with it', () => {
@@ -182,7 +182,8 @@ describe('media settings', () => {
       imageModel: 'flux',
       analysisModel: '',
     }
-    expect(mediaAnalysisAvailable(withMedia(custom), false)).toBe(false)
+    // image analysis has no model, but video analysis falls back to the local CLI
+    expect(mediaAnalysisAvailable(withMedia(custom), false)).toBe(true)
     expect(imageGenerationAvailable(withMedia(custom), false)).toBe(true)
     expect(imageGenerationAvailable(null, true)).toBe(true)
   })

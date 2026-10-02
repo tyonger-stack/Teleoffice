@@ -8,7 +8,7 @@ export const de = {
   aiStarterPolishAll: 'Das ganze Dokument für einen professionelleren Ton überarbeiten',
   aiStarterContinue: 'Dort weiterschreiben, wo das Dokument aufhört',
   aiStarterFillTemplate: 'Platzhalter im Dokument finden und ausfüllen',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: 'KI-Assistenten öffnen',
   aiSummarizeBtn: 'KI-Zusammenfassung',
   aiSummarizePrompt: 'Fasse den Hauptinhalt und die Kernpunkte dieses Dokuments zusammen',

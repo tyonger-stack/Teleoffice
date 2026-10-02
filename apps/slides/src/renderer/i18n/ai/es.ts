@@ -17,7 +17,7 @@ export const es = {
   aiQcPageSkipped: 'Página {n}: comprobación automática de diseño omitida',
   aiQcStopped: 'Comprobación de diseño detenida',
   aiQcCapped: '{count} página(s) más sin comprobar (límite por ejecución)',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: 'Abrir el asistente de IA',
   aiFactCheckBtn: 'Verificación IA',
   aiFactCheckPrompt:

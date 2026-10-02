@@ -8,7 +8,7 @@ export const vi = {
   aiStarterPolishAll: 'Trau chuốt toàn bộ tài liệu để có giọng văn chuyên nghiệp hơn',
   aiStarterContinue: 'Viết tiếp từ nội dung hiện tại của tài liệu',
   aiStarterFillTemplate: 'Tìm và điền vào các vị trí giữ chỗ trong tài liệu này',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: 'Mở trợ lý AI',
   aiSummarizeBtn: 'AI Tóm tắt',
   aiSummarizePrompt: 'Tóm tắt nội dung chính và các ý quan trọng của tài liệu này',

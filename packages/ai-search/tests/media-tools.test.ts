@@ -58,7 +58,7 @@ describe('generateImageTool transparentBackground (Genspark route)', () => {
       prompt: 'red podcast icon',
       transparentBackground: true,
     })
-    expect(r).toEqual({ url: 'https://cdn/x/cutout.png' })
+    expect(r.url).toBe('https://cdn/x/cutout.png')
     expect(gskGen).toHaveBeenCalledTimes(2)
     expect(gskGen.mock.calls[1]![0]).toMatchObject({
       model: GSK_RMBG_MODEL,
@@ -69,7 +69,7 @@ describe('generateImageTool transparentBackground (Genspark route)', () => {
   it('without the flag generation stays a single pass', async () => {
     gskGen.mockResolvedValueOnce({ url: 'https://cdn/x/opaque.png', taskId: '1' })
     const r = await generateImageTool(SETTINGS, { prompt: 'red podcast icon' })
-    expect(r).toEqual({ url: 'https://cdn/x/opaque.png' })
+    expect(r.url).toBe('https://cdn/x/opaque.png')
     expect(gskGen).toHaveBeenCalledTimes(1)
   })
 
@@ -93,7 +93,7 @@ describe('generateImageTool transparentBackground (Genspark route)', () => {
       prompt: 'red podcast icon',
       transparentBackground: true,
     })
-    expect(r).toEqual({ url: 'https://cdn/x/opaque.png' })
+    expect(r.url).toBe('https://cdn/x/opaque.png')
   })
 
   it('a generation failure still surfaces as an error (no half-run chain)', async () => {

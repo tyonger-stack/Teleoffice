@@ -8,7 +8,7 @@ export const en = {
   aiStarterPolishAll: 'Polish the whole document for a more professional tone',
   aiStarterContinue: 'Continue writing from where the document leaves off',
   aiStarterFillTemplate: 'Find and fill in the placeholders in this document',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: 'Open AI assistant',
   aiSummarizeBtn: 'AI Summarize',
   aiSummarizePrompt: 'Summarize the main content and key points of this document',

@@ -17,7 +17,7 @@ export const zhTW = {
   aiQcPageSkipped: '第 {n} 頁:已略過自動版式檢查',
   aiQcStopped: '版式檢查已停止',
   aiQcCapped: '其餘 {count} 頁未檢查(單次上限)',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: '開啟 AI 助手',
   aiFactCheckBtn: 'AI 事實核查',
   aiFactCheckPrompt: '核查這份簡報的內容:檢查數據、日期、名稱和論斷是否屬實,指出並糾正錯誤',

@@ -5432,10 +5432,6 @@ textarea:focus {
   background: var(--sheets-ai-error-bg);
 }
 
-.ai-login-btn:hover {
-  opacity: 0.88;
-}
-
 /* ================= transient toast (save feedback) ================= */
 
 .app-toast {

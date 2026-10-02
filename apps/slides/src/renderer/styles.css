@@ -9043,10 +9043,6 @@ body.show-curtain::after {
   }
 }
 
-.ai-login-btn:hover {
-  opacity: 0.88;
-}
-
 /* ================= transient toast (save feedback) ================= */
 
 .app-toast {

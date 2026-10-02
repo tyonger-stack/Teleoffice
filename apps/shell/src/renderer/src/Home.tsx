@@ -14,7 +14,6 @@ import type {
   HomeApi,
   MoveConflictPolicy,
   RecentEntry,
-  SlideTemplateItem,
   FileSearchHit,
   FileSearchPage,
   FileSearchRerank,
@@ -67,6 +66,29 @@ const FILE_ICONS: Record<string, string> = {
    sync with the main-process open-dialog filter (OPEN_DIALOG_EXTENSIONS). */
 const OPEN_LOCAL_EXTENSIONS =
   '.docx / .xlsx / .xlsm / .xls / .csv / .tsv / .pptx / .pdf / .md / .html'
+
+type HomeTemplateKind = 'docx' | 'xlsx' | 'pptx' | 'md' | 'html' | 'pdf'
+
+interface TemplateMenuEntry {
+  name: string
+  path: string
+  exists: boolean
+  description?: string
+}
+
+const TEMPLATE_CARDS: readonly {
+  kind: HomeTemplateKind
+  titleKey: StringKey
+  subKey: StringKey
+  ext: string
+}[] = [
+  { kind: 'docx', titleKey: 'templateDoc', subKey: 'templateDocSub', ext: 'docx' },
+  { kind: 'xlsx', titleKey: 'templateSheet', subKey: 'templateSheetSub', ext: 'xlsx' },
+  { kind: 'pptx', titleKey: 'newSlideFromTemplate', subKey: 'templateCardSub', ext: 'pptx' },
+  { kind: 'md', titleKey: 'templateMarkdown', subKey: 'templateMarkdownSub', ext: 'md' },
+  { kind: 'html', titleKey: 'templateHtml', subKey: 'templateHtmlSub', ext: 'html' },
+  { kind: 'pdf', titleKey: 'templatePdf', subKey: 'templatePdfSub', ext: 'pdf' },
+]
 
 /** drag payload of home file/folder rows (JSON array of absolute paths) */
 const DRAG_PATHS_MIME = 'application/x-teleoffice-paths'
@@ -709,7 +731,6 @@ function SettingsEntry({
       alive = false
     }
   }, [settingsOpen])
-
   const openSettings = useCallback((to: SettingsTarget | null) => {
     setTarget(to)
     setSettingsOpen(true)
@@ -862,7 +883,6 @@ export function Home() {
   const [navCounts, setNavCounts] = useState({ recent: 0, starred: 0 })
   const [loadingMore, setLoadingMore] = useState(false)
   const [view, setView] = useState<'recent' | 'starred'>('recent')
-  // Genspark web projects take over the content area (like a selected folder)
   const [filter, setFilter] = useState('all')
   // ── File search (names + indexed content); active while the box has text ──
   const [searchQuery, setSearchQuery] = useState('')
@@ -883,10 +903,12 @@ export function Home() {
   const [rowMenu, setRowMenu] = useState<string | null>(null)
   // actions cell (… button + menu) of the row whose menu is open — the dismissal guard root
   const rowMenuWrapRef = useRef<HTMLSpanElement>(null)
-  // template picker anchored to the quick card (loads listSlideTemplates on open)
-  const [templateMenuOpen, setTemplateMenuOpen] = useState(false)
+  // which default-template card's menu is open (loads that kind's list on open)
+  const [templateMenuKind, setTemplateMenuKind] = useState<HomeTemplateKind | null>(null)
   const templateMenuWrapRef = useRef<HTMLDivElement>(null)
-  const [slideTemplates, setSlideTemplates] = useState<SlideTemplateItem[] | null>(null)
+  const [templateLists, setTemplateLists] = useState<
+    Partial<Record<HomeTemplateKind, TemplateMenuEntry[] | null>>
+  >({})
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set())
   const [renaming, setRenaming] = useState<{ path: string; value: string } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string[] | null>(null)
@@ -1173,7 +1195,7 @@ export function Home() {
   useDismissablePopover(folderMenu !== null, () => setFolderMenu(null), {
     inside: () => [folderMenuWrapRef.current],
   })
-  useDismissablePopover(templateMenuOpen, () => setTemplateMenuOpen(false), {
+  useDismissablePopover(templateMenuKind !== null, () => setTemplateMenuKind(null), {
     inside: () => [templateMenuWrapRef.current],
   })
   // the fixed-position folder menu would detach from its row while the tree scrolls
@@ -1189,7 +1211,7 @@ export function Home() {
     if (
       rowMenu === null &&
       folderMenu === null &&
-      !templateMenuOpen &&
+      templateMenuKind === null &&
       confirmDelete === null &&
       confirmMissing === null &&
       confirmDeleteFolder === null
@@ -1199,7 +1221,7 @@ export function Home() {
       if (event.key === 'Escape') {
         setRowMenu(null)
         setFolderMenu(null)
-        setTemplateMenuOpen(false)
+        setTemplateMenuKind(null)
         setConfirmDelete(null)
         setConfirmMissing(null)
         setConfirmDeleteFolder(null)
@@ -1207,7 +1229,7 @@ export function Home() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [rowMenu, folderMenu, templateMenuOpen, confirmDelete, confirmMissing, confirmDeleteFolder])
+  }, [rowMenu, folderMenu, templateMenuKind, confirmDelete, confirmMissing, confirmDeleteFolder])
 
   // WPS-style sortable "modified" column header, shared by both file tables
   const renderModifiedHeader = () => (
@@ -1569,133 +1591,151 @@ export function Home() {
     },
   ]
 
+  const loadTemplateList = (kind: HomeTemplateKind) => {
+    setTemplateLists((prev) => ({ ...prev, [kind]: null }))
+    const pending =
+      kind === 'pptx'
+        ? window.aiOffice.listSlideTemplates()
+        : window.aiOffice.listOfficeTemplates(kind)
+    void pending.then(
+      (list) => setTemplateLists((prev) => ({ ...prev, [kind]: list })),
+      () => setTemplateLists((prev) => ({ ...prev, [kind]: [] })),
+    )
+  }
+
   function renderQuickCards() {
-    const templateCard = (
-      <div className="quick-card-wrap" ref={templateMenuWrapRef}>
-        <button
-          className="quick-card template-card"
-          title={`${t('newSlideFromTemplate')} · ${t('templateCardSub')}`}
-          aria-haspopup="menu"
-          aria-expanded={templateMenuOpen}
-          onClick={() => {
-            if (templateMenuOpen) {
-              setTemplateMenuOpen(false)
-              return
-            }
-            setTemplateMenuOpen(true)
-            setSlideTemplates(null)
-            void window.aiOffice.listSlideTemplates().then(
-              (list) => setSlideTemplates(list),
-              () => setSlideTemplates([]),
-            )
-          }}
-        >
-          <FileBadge ext="pptx" size={30} />
-          <span className="quick-text">
-            <span className="quick-title-row">
-              <span className="quick-title">{t('newSlideFromTemplate')}</span>
+    return (
+      <>
+        <div className="quick-cards">
+          {NEW_ITEMS.map((item) => (
+            <button key={item.ext} className="quick-card" onClick={() => void item.action()}>
+              <FileBadge ext={item.ext} size={30} />
+              <span className="quick-text">
+                <span className="quick-title-row">
+                  <span className="quick-title">{item.title}</span>
+                  <span className="ai-chip">AI</span>
+                </span>
+                <span className="quick-sub">{item.sub}</span>
+              </span>
+            </button>
+          ))}
+          <button
+            className="quick-card"
+            onClick={() => void window.aiOffice.browse()}
+            data-tip={OPEN_LOCAL_EXTENSIONS}
+          >
+            <span className="quick-folder">
+              <FolderIcon size={18} />
             </span>
-            <span className="quick-sub">{t('templateCardSub')}</span>
-          </span>
-        </button>
-        {templateMenuOpen && (
-          <div className="cloud-sort-menu template-menu" role="menu">
-            {slideTemplates !== null && slideTemplates.length > 0
-              ? slideTemplates.map((tpl) => (
+            <span className="quick-text">
+              <span className="quick-title-row">
+                <span className="quick-title">{t('openLocal')}</span>
+              </span>
+              <span className="quick-sub">{OPEN_LOCAL_EXTENSIONS}</span>
+            </span>
+          </button>
+        </div>
+        <div className="default-templates">
+          <p className="default-templates-heading">{t('defaultTemplatesHeading')}</p>
+          <div className="quick-cards">
+            {TEMPLATE_CARDS.map((card) => {
+              const open = templateMenuKind === card.kind
+              const listed = templateLists[card.kind]
+              return (
+                <div
+                  key={card.kind}
+                  className="quick-card-wrap"
+                  ref={open ? templateMenuWrapRef : undefined}
+                >
                   <button
-                    key={tpl.name}
-                    role="menuitem"
-                    disabled={!tpl.exists}
-                    title={tpl.path}
+                    className="quick-card template-card"
+                    title={`${t(card.titleKey)} · ${t(card.subKey)}`}
+                    aria-haspopup="menu"
+                    aria-expanded={open}
                     onClick={() => {
-                      setTemplateMenuOpen(false)
-                      void window.aiOffice.newSlideFromTemplate(tpl.name, newFileOpts)
+                      if (open) {
+                        setTemplateMenuKind(null)
+                        return
+                      }
+                      setTemplateMenuKind(card.kind)
+                      loadTemplateList(card.kind)
                     }}
                   >
-                    <span className="template-name">{tpl.name}</span>
-                    {tpl.description ? (
-                      <span className="template-desc">{tpl.description}</span>
-                    ) : null}
+                    <FileBadge ext={card.ext} size={30} />
+                    <span className="quick-text">
+                      <span className="quick-title-row">
+                        <span className="quick-title">{t(card.titleKey)}</span>
+                      </span>
+                      <span className="quick-sub">{t(card.subKey)}</span>
+                    </span>
                   </button>
-                ))
-              : null}
-            {slideTemplates !== null && slideTemplates.length === 0 ? (
-              <div className="template-empty">{t('noTemplates')}</div>
-            ) : null}
-            <div className="row-menu-divider" />
-            <button
-              role="menuitem"
-              onClick={() => {
-                void window.aiOffice.importSlideTemplate().then(
-                  (imported) => {
-                    if (imported) {
-                      void window.aiOffice.listSlideTemplates().then(
-                        (list) => setSlideTemplates(list),
-                        () => setSlideTemplates([]),
-                      )
-                    }
-                  },
-                  (err: unknown) => console.warn('template import failed', err),
-                )
-              }}
-            >
-              {t('importTemplate')}
-            </button>
-            <button
-              role="menuitem"
-              onClick={() => {
-                void window.aiOffice.openTemplatesFolder()
-              }}
-            >
-              {t('openTemplatesFolder')}
-            </button>
+                  {open && (
+                    <div className="cloud-sort-menu template-menu" role="menu">
+                      {listed && listed.length > 0
+                        ? listed.map((tpl) => (
+                            <button
+                              key={tpl.name}
+                              role="menuitem"
+                              disabled={!tpl.exists}
+                              title={tpl.path}
+                              onClick={() => {
+                                setTemplateMenuKind(null)
+                                if (card.kind === 'pptx') {
+                                  void window.aiOffice.newSlideFromTemplate(tpl.name, newFileOpts)
+                                } else {
+                                  void window.aiOffice.newOfficeFromTemplate(
+                                    card.kind,
+                                    tpl.name,
+                                    newFileOpts,
+                                  )
+                                }
+                              }}
+                            >
+                              <span className="template-name">{tpl.name}</span>
+                              {tpl.description ? (
+                                <span className="template-desc">{tpl.description}</span>
+                              ) : null}
+                            </button>
+                          ))
+                        : null}
+                      {listed && listed.length === 0 ? (
+                        <div className="template-empty">{t('noTemplatesYet')}</div>
+                      ) : null}
+                      <div className="row-menu-divider" />
+                      <button
+                        role="menuitem"
+                        onClick={() => {
+                          const pending =
+                            card.kind === 'pptx'
+                              ? window.aiOffice.importSlideTemplate()
+                              : window.aiOffice.importOfficeTemplate(card.kind)
+                          void pending.then(
+                            (imported) => {
+                              if (imported) loadTemplateList(card.kind)
+                            },
+                            (err: unknown) => console.warn('template import failed', err),
+                          )
+                        }}
+                      >
+                        {t('importTemplate')}
+                      </button>
+                      <button
+                        role="menuitem"
+                        onClick={() => {
+                          if (card.kind === 'pptx') void window.aiOffice.openTemplatesFolder()
+                          else void window.aiOffice.openOfficeTemplatesFolder(card.kind)
+                        }}
+                      >
+                        {t('openTemplatesFolder')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
-        )}
-      </div>
-    )
-    return (
-      <div className="quick-cards">
-        {NEW_ITEMS.slice(0, 3).map((item) => (
-          <button key={item.ext} className="quick-card" onClick={() => void item.action()}>
-            <FileBadge ext={item.ext} size={30} />
-            <span className="quick-text">
-              <span className="quick-title-row">
-                <span className="quick-title">{item.title}</span>
-                <span className="ai-chip">AI</span>
-              </span>
-              <span className="quick-sub">{item.sub}</span>
-            </span>
-          </button>
-        ))}
-        {templateCard}
-        {NEW_ITEMS.slice(3).map((item) => (
-          <button key={item.ext} className="quick-card" onClick={() => void item.action()}>
-            <FileBadge ext={item.ext} size={30} />
-            <span className="quick-text">
-              <span className="quick-title-row">
-                <span className="quick-title">{item.title}</span>
-                <span className="ai-chip">AI</span>
-              </span>
-              <span className="quick-sub">{item.sub}</span>
-            </span>
-          </button>
-        ))}
-        <button
-          className="quick-card"
-          onClick={() => void window.aiOffice.browse()}
-          data-tip={OPEN_LOCAL_EXTENSIONS}
-        >
-          <span className="quick-folder">
-            <FolderIcon size={18} />
-          </span>
-          <span className="quick-text">
-            <span className="quick-title-row">
-              <span className="quick-title">{t('openLocal')}</span>
-            </span>
-            <span className="quick-sub">{OPEN_LOCAL_EXTENSIONS}</span>
-          </span>
-        </button>
-      </div>
+        </div>
+      </>
     )
   }
 

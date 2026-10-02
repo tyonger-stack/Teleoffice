@@ -9,6 +9,7 @@ const agentHarness = vi.hoisted(() => ({
       execution: { summary: string; output?: string; isError?: boolean; mutated?: boolean }
     }) => void
     onDone?: (result: { text: string; cancelled: boolean; turnLimit: boolean }) => void
+    onError?: (error: string) => void
   },
   run: vi.fn(),
   cancel: vi.fn(),
@@ -229,5 +230,40 @@ describe('AiPanel agent run lifecycle (slides)', () => {
     expect(agentHarness.run).toHaveBeenCalledWith('Polish this slide', [
       { base64: 'AAAA', mime: 'image/png' },
     ])
+  })
+
+  it('shows the model error without a Genspark sign-in button when gsk is signed out', async () => {
+    const aiGskStatus = vi.fn(async () => ({ loggedIn: false }))
+    Object.defineProperty(window, 'slidesApi', {
+      configurable: true,
+      value: {
+        aiGskStatus,
+        beginHistoryBatch: vi.fn(async () => false),
+        endHistoryBatch: vi.fn(async () => null),
+        aiLogRunFailure: vi.fn(async () => undefined),
+      },
+    })
+
+    const { container } = mount(
+      createElement(
+        AiPanel,
+        panelProps({
+          preset: { text: 'hi', nonce: 1, autoRun: true },
+        }),
+      ),
+    )
+    await flushEffects()
+
+    const error =
+      'Codex CLI was not found automatically. Install or open the Codex app, or set a custom codex executable path.'
+    act(() => {
+      agentHarness.events?.onError?.(error)
+    })
+    await flushEffects()
+
+    expect(container.textContent).toContain(error)
+    expect(container.querySelector('.ai-login-btn')).toBeNull()
+    expect(container.textContent).not.toContain('登录 Genspark')
+    expect(container.textContent).not.toContain('Genspark')
   })
 })

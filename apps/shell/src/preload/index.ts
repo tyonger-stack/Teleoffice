@@ -174,6 +174,29 @@ const homeApi: HomeApi = {
   async openTemplatesFolder() {
     await ipcRenderer.invoke(HOME_CHANNELS.openTemplatesFolder)
   },
+  async listOfficeTemplates(kind) {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.listOfficeTemplates, kind)
+    return Array.isArray(result) ? result : []
+  },
+  async newOfficeFromTemplate(kind, name, opts) {
+    if (typeof name !== 'string' || !name) throw new Error('Invalid template name.')
+    await ipcRenderer.invoke(HOME_CHANNELS.newOfficeFromTemplate, kind, name, opts)
+  },
+  async importOfficeTemplate(kind) {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.importOfficeTemplate, kind)
+    if (result === null) return null
+    if (
+      result &&
+      typeof result === 'object' &&
+      typeof (result as { name?: unknown }).name === 'string'
+    ) {
+      return result as { name: string }
+    }
+    return null
+  },
+  async openOfficeTemplatesFolder(kind) {
+    await ipcRenderer.invoke(HOME_CHANNELS.openOfficeTemplatesFolder, kind)
+  },
   async newMarkdown(opts) {
     await ipcRenderer.invoke(HOME_CHANNELS.newMarkdown, opts)
   },
@@ -432,7 +455,7 @@ const homeApi: HomeApi = {
     await ipcRenderer.invoke('ai:set-settings', settings)
   },
   getAiProviders() {
-    return AI_PROVIDERS.map((meta) => {
+    return AI_PROVIDERS.filter((meta) => meta.id !== 'genspark').map((meta) => {
       let defaultBaseUrl = ''
       // genspark routes by model and custom has no default — both stay ''
       if (meta.id !== 'genspark' && !meta.needsBaseUrl && !meta.needsCliPath) {
@@ -462,10 +485,10 @@ const homeApi: HomeApi = {
       : { ok: false, error: typeof raw.error === 'string' ? raw.error : 'Connection failed' }
   },
   getAiMediaProviders() {
-    return AI_MEDIA_PROVIDERS
+    return AI_MEDIA_PROVIDERS.filter((meta) => meta.id !== 'genspark')
   },
   getAiSearchProviders() {
-    return AI_SEARCH_PROVIDERS
+    return AI_SEARCH_PROVIDERS.filter((meta) => meta.id !== 'genspark')
   },
   async testAiSearchSettings(input) {
     const raw = ((await ipcRenderer.invoke('ai:search-test', input)) ?? {}) as {

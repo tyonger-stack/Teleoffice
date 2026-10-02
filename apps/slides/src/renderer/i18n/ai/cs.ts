@@ -18,7 +18,7 @@ export const cs = {
   aiQcPageSkipped: 'Stránka {n}: automatická kontrola rozložení přeskočena',
   aiQcStopped: 'Kontrola rozložení zastavena',
   aiQcCapped: 'Dalších {count} stránek nebylo zkontrolováno (limit na jedno spuštění)',
-  aiPanelTitle: 'Genspark',
+  aiPanelTitle: 'TeleOffice AI',
   aiOpenAssistant: 'Otevřít asistenta AI',
   aiFactCheckBtn: 'Ověření faktů AI',
   aiFactCheckPrompt:
