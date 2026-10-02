@@ -13,13 +13,6 @@
 Word、Excel、PowerPoint 和 PDF 文件，由你和 AI 一起编辑，并以原来的格式保存。</p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/tyonger-stack/Teleoffice" alt="许可证：Apache-2.0"></a>
-  <a href="https://github.com/tyonger-stack/Teleoffice/releases/latest"><img src="https://img.shields.io/github/v/release/tyonger-stack/Teleoffice" alt="最新版本"></a>
-  <a href="https://github.com/tyonger-stack/Teleoffice/releases"><img src="https://img.shields.io/github/downloads/tyonger-stack/Teleoffice/total" alt="下载量"></a>
-  <a href="https://github.com/tyonger-stack/Teleoffice/stargazers"><img src="https://img.shields.io/github/stars/tyonger-stack/Teleoffice?style=flat" alt="GitHub Star 数"></a>
-</p>
-
-<p align="center">
   <a href="#download"><b>下载</b></a> ·
   <a href="#command-line-and-agent-skill"><b>命令行</b></a> ·
   <a href="#mcp-server"><b>MCP</b></a> ·
