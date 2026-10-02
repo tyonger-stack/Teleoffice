@@ -236,11 +236,11 @@ TeleOffice 带有 `teleoffice` 命令行和一份 agent skill。装上 skill 之
 
 ### 安装 skill
 
-| 方式 | 效果 |
-| --- | --- |
-| 应用里的 **设置 → 集成** | 列出这台电脑上找到的助手。点一次，就把 skill 写进选中的那些。TeleOffice 更新带了新 skill 时，旁边会出现**更新**。 |
-| 同一页的 **下载 skill（zip）** | claude.ai、Claude 桌面应用和其他助手可以上传的目录结构。 |
-| `npx skills add tyonger-stack/Teleoffice` | 从本仓库安装到兼容 skills 的助手。 |
+| 方式                                      | 效果                                                                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| 应用里的 **设置 → 集成**                  | 列出这台电脑上找到的助手。点一次，就把 skill 写进选中的那些。TeleOffice 更新带了新 skill 时，旁边会出现**更新**。 |
+| 同一页的 **下载 skill（zip）**            | claude.ai、Claude 桌面应用和其他助手可以上传的目录结构。                                                          |
+| `npx skills add tyonger-stack/Teleoffice` | 从本仓库安装到兼容 skills 的助手。                                                                                |
 
 然后新开一个对话，让它做一份文档。skill 会告诉助手何时该用 `teleoffice`、改之前要先读文件，以及怎样检查结果。
 
@@ -285,11 +285,11 @@ teleoffice open deck/deck.pptx
 
 这些命令也是 [Model Context Protocol](https://modelcontextprotocol.io) 工具，给不能开终端、或者你不想给终端的助手用。**设置 → 集成 → MCP** 里有可以复制的片段。接入方式有三种：
 
-| 方式 | 内容 |
-| --- | --- |
+| 方式                             | 内容                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **A · `teleoffice mcp`**（推荐） | 助手自己启动的 stdio 服务。TeleOffice 不必开着。每条命令一个工具：`info`、`convert`、`create_docx`、`create_xlsx`、`create_pptx`、`create_pdf`、`docs_read` / `docs_apply` / `docs_check`、`sheet_*`、`slides_*`、`render`、`guide`、`search`、`image`、`media`、`open`，以及 `pdf_read`、`merge`、`template_list`、`template_inspect`、`capabilities`、`selection`。分阶段做演示文稿用 `deck_start` → `deck_page` → `deck_build` → `deck_replace`。操作、规格和 Markdown 以内联方式传入，没有文件系统的客户端也能用。 |
-| **B · 本地 HTTP 服务** | 跑在 TeleOffice 里面，地址是 `http://127.0.0.1:3093/mcp`（Streamable HTTP，兼容旧的 SSE）。工具驱动一个看得见的 Word 标签：`create_session`、`insert_content`、`replace_blocks`、`apply_ops`、`read_document`、`save_session`。默认关闭，在同一页设置里打开。 |
-| **C · `teleoffice mcp --http`** | 把同一套 stdio 工具做成 Streamable HTTP，给另一台机器上的客户端用，例如容器、沙箱或局域网里的机器。文件随调用走：`PUT /files/<name>` 上传并返回 URL，工具的 `file` 参数接受 http(s) URL。写出文件的工具返回下载 URL；文件不大时，还会把字节放进 MCP 资源。`--host 0.0.0.0` 对网络开放，`--token` 用来保护。 |
+| **B · 本地 HTTP 服务**           | 跑在 TeleOffice 里面，地址是 `http://127.0.0.1:3093/mcp`（Streamable HTTP，兼容旧的 SSE）。工具驱动一个看得见的 Word 标签：`create_session`、`insert_content`、`replace_blocks`、`apply_ops`、`read_document`、`save_session`。默认关闭，在同一页设置里打开。                                                                                                                                                                                                                                                          |
+| **C · `teleoffice mcp --http`**  | 把同一套 stdio 工具做成 Streamable HTTP，给另一台机器上的客户端用，例如容器、沙箱或局域网里的机器。文件随调用走：`PUT /files/<name>` 上传并返回 URL，工具的 `file` 参数接受 http(s) URL。写出文件的工具返回下载 URL；文件不大时，还会把字节放进 MCP 资源。`--host 0.0.0.0` 对网络开放，`--token` 用来保护。                                                                                                                                                                                                            |
 
 ```bash
 # Claude Code
@@ -338,15 +338,15 @@ deck_replace(dir, n, page) · slides_render(file, out)
 
 ## 下载
 
-| 平台 | 系统要求 | 下载 |
-| --- | --- | --- |
-| **macOS** —— Apple Silicon (arm64) | macOS 11+ | [最新 `.dmg`（arm64）](https://github.com/tyonger-stack/Teleoffice/releases/latest) |
-| **macOS** —— Intel (x64) | macOS 11+ | [最新 `.dmg`（x64）](https://github.com/tyonger-stack/Teleoffice/releases/latest) |
-| **Windows**（x64，大多数 PC） | Windows 10+，Intel/AMD | [最新 `-x64.exe` 安装程序](https://github.com/tyonger-stack/Teleoffice/releases/latest) |
-| **Windows** on Arm（ARM64） | Windows 11 on Arm（Snapdragon X 及同类芯片） | [最新 `-arm64.exe` 安装程序](https://github.com/tyonger-stack/Teleoffice/releases/latest) |
-| **Linux** —— Debian / Ubuntu | x86_64，glibc 2.34+（Ubuntu 22.04 或更新） | [最新 `.deb`](https://github.com/tyonger-stack/Teleoffice/releases/latest) |
-| **Linux** —— Fedora / RHEL / openSUSE | x86_64，glibc 2.34+（Fedora 35+、RHEL 9+、Leap 15.6+） | [最新 `.rpm`](https://github.com/tyonger-stack/Teleoffice/releases/latest) |
-| **Linux** —— 其他发行版 | x86_64，glibc 2.34+，FUSE 2 | [最新 `.AppImage`](https://github.com/tyonger-stack/Teleoffice/releases/latest) |
+| 平台                                  | 系统要求                                               | 下载                                                                                      |
+| ------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| **macOS** —— Apple Silicon (arm64)    | macOS 11+                                              | [最新 `.dmg`（arm64）](https://github.com/tyonger-stack/Teleoffice/releases/latest)       |
+| **macOS** —— Intel (x64)              | macOS 11+                                              | [最新 `.dmg`（x64）](https://github.com/tyonger-stack/Teleoffice/releases/latest)         |
+| **Windows**（x64，大多数 PC）         | Windows 10+，Intel/AMD                                 | [最新 `-x64.exe` 安装程序](https://github.com/tyonger-stack/Teleoffice/releases/latest)   |
+| **Windows** on Arm（ARM64）           | Windows 11 on Arm（Snapdragon X 及同类芯片）           | [最新 `-arm64.exe` 安装程序](https://github.com/tyonger-stack/Teleoffice/releases/latest) |
+| **Linux** —— Debian / Ubuntu          | x86_64，glibc 2.34+（Ubuntu 22.04 或更新）             | [最新 `.deb`](https://github.com/tyonger-stack/Teleoffice/releases/latest)                |
+| **Linux** —— Fedora / RHEL / openSUSE | x86_64，glibc 2.34+（Fedora 35+、RHEL 9+、Leap 15.6+） | [最新 `.rpm`](https://github.com/tyonger-stack/Teleoffice/releases/latest)                |
+| **Linux** —— 其他发行版               | x86_64，glibc 2.34+，FUSE 2                            | [最新 `.AppImage`](https://github.com/tyonger-stack/Teleoffice/releases/latest)           |
 
 构建来自 `main`。macOS 和 Windows 安装包已签名。旧版本在 [Releases](https://github.com/tyonger-stack/Teleoffice/releases)。
 
