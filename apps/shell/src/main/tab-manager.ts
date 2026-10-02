@@ -70,6 +70,9 @@ interface TabRecord {
 
 const HOME_ID = 'home'
 
+/** Home tab label and the shell window title. */
+export const SHELL_TITLE = 'TeleOffice'
+
 /**
  * Owns every open tab (Home + docs + sheets) inside the shell's single
  * BrowserWindow. Docs/sheets tabs are WebContentsView children of that
@@ -78,7 +81,7 @@ const HOME_ID = 'home'
  */
 export class TabManager {
   private readonly tabs: TabRecord[] = [
-    { id: HOME_ID, kind: 'home', view: null, title: 'GenOffice' },
+    { id: HOME_ID, kind: 'home', view: null, title: SHELL_TITLE },
   ]
   private activeId: string = HOME_ID
   private nextId = 1

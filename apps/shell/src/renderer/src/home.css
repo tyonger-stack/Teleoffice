@@ -173,9 +173,9 @@ body.vib .home {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- bottom-left account entry (today = Genspark login, later = signup/account system) ---- */
-/* clicking it opens the settings modal (settings.css) directly, which hosts
-   login/logout plus preferences (language / theme / save location / update channel) */
+/* ---- bottom-left account entry ---- */
+/* signed out this is Settings (no guest-login prompt); signed in it shows the
+   account. Clicking opens the settings modal (settings.css). */
 
 .account-entry {
   position: relative;

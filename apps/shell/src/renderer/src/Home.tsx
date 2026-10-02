@@ -684,9 +684,23 @@ function ConflictPrompt({ names, onChoose }: ConflictPromptProps) {
 }
 
 // ── Account entry (bottom-left) ──────────────────────────
-// Currently the Genspark (gsk) login entry; to be upgraded to a signup/account system later.
-// Clicking it opens the settings modal directly (SettingsModal.tsx), which hosts
-// login/logout plus preferences (language, theme, save location, update channel).
+// Signed out, this is a Settings button — the corner does not show a guest
+// login prompt. Signed in, it shows the account. Either way it opens the
+// settings modal (SettingsModal.tsx): login/logout plus preferences.
+
+function SettingsGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="2.15" stroke="currentColor" strokeWidth="1.3" />
+      <path
+        d="M8 1.7v1.55M8 12.75v1.55M1.7 8h1.55M12.75 8h1.55M3.55 3.55l1.1 1.1M11.35 11.35l1.1 1.1M12.45 3.55l-1.1 1.1M4.65 11.35l-1.1 1.1"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
 
 const LOGIN_POLL_MS = 2500
 /** fallback deadline when the CLI does not report expires_in (device codes live ~300s) */
@@ -795,7 +809,7 @@ function AccountEntry({
 
   const loggedIn = status?.loggedIn ?? false
   const email = status?.email ?? ''
-  const initial = email ? email[0].toUpperCase() : loggedIn ? 'G' : '?'
+  const initial = email ? email[0].toUpperCase() : 'G'
   const errorText = loginError
     ? {
         timeout: t('loginTimeout'),
@@ -936,7 +950,7 @@ function AccountEntry({
             ? email || t('loggedInGenspark')
             : waiting
               ? t('waitingLogin')
-              : (errorText ?? t('loginGenspark'))
+              : (errorText ?? t('settings'))
         }
         aria-label={t('settings')}
       >
@@ -963,8 +977,10 @@ function AccountEntry({
                 strokeLinecap="round"
               />
             </svg>
-          ) : (
+          ) : loggedIn ? (
             initial
+          ) : (
+            <SettingsGlyph />
           )}
           {skillUpdate && (
             <span className="account-badge" role="img" aria-label={t('intgUpdateDue')} />
@@ -978,7 +994,7 @@ function AccountEntry({
                 : t('loggedIn')
               : waiting
                 ? t('waitingShort')
-                : t('login')}
+                : t('settings')}
           </span>
           {!loggedIn && !waiting && errorText && (
             <span className="account-sub error">{errorText}</span>
@@ -3330,7 +3346,7 @@ export function Home() {
     <div className="home">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img className="logo-lockup" src={logoLockup} alt="GenOffice" />
+          <img className="logo-lockup" src={logoLockup} alt="TeleOffice" />
         </div>
         <nav className="sidebar-nav">
           <button

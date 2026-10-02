@@ -331,7 +331,7 @@ import {
   SearchReranker,
 } from './file-index/rerank'
 import { runHeadlessExport, type HeadlessExporters } from './headless-export'
-import { TabManager } from './tab-manager'
+import { SHELL_TITLE, TabManager } from './tab-manager'
 import {
   activateDetached,
   closeDetachedWithoutPrompt,
@@ -3075,7 +3075,7 @@ function createShellWindow(): void {
     height: 900,
     minWidth: 720,
     minHeight: 550,
-    title: 'GenOffice',
+    title: SHELL_TITLE,
     // vibrancy: editor modules punch translucent regions (e.g. the slides
     // thumbnail pane) through to the desktop
     ...(process.platform === 'darwin'
