@@ -621,11 +621,10 @@ to use it; install it from **Settings → Integrations**. See
 <details>
 <summary><b>Does TeleOffice collect any data?</b></summary>
 
-Official packaged builds send limited usage analytics by default, and you can
-disable reporting at any time under Settings → General. Analytics never sends
-document content, file names, file paths, account identity or email
-addresses. See [TeleOffice Privacy](PRIVACY.md) for the complete event and
-data disclosures.
+TeleOffice does not send anonymous usage statistics. Document content stays on
+this computer unless you use an AI feature, which sends the prompt and the
+document context needed to answer to the provider you configured. See
+[TeleOffice Privacy](PRIVACY.md).
 
 </details>
 

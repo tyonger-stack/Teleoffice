@@ -254,7 +254,7 @@ export interface HomeApi {
   getAppVersion(): Promise<string>
   /** whether the first-run onboarding has been completed or skipped (persisted in userData/app-settings.json) */
   onboardingSeen(): Promise<boolean>
-  /** mark onboarding done; analytics remains enabled unless separately opted out */
+  /** mark onboarding done */
   setOnboardingSeen(): Promise<boolean>
   /** current UI theme preference (persisted in userData/app-settings.json) */
   getTheme(): Promise<UiTheme>
@@ -279,10 +279,6 @@ export interface HomeApi {
   clearMcpLogs(): Promise<void>
   /** reveal the MCP log file in the file manager (created empty when missing) */
   openMcpLogFile(): Promise<void>
-  /** whether anonymous usage statistics are enabled (default true in official builds) */
-  getAnalyticsEnabled(): Promise<boolean>
-  /** persist an explicit analytics opt-in or opt-out */
-  setAnalyticsEnabled(enabled: boolean): Promise<boolean>
   /** AI panel text size + chat-input spellcheck (persisted in userData/app-settings.json) */
   getAiPanelPrefs(): Promise<AiPanelPrefs>
   /** merge + persist; broadcasts 'app:ai-panel-prefs-changed' to all web contents */
@@ -502,8 +498,6 @@ export const HOME_CHANNELS = {
   getMcpLogs: 'home:get-mcp-logs',
   clearMcpLogs: 'home:clear-mcp-logs',
   openMcpLogFile: 'home:open-mcp-log-file',
-  getAnalyticsEnabled: 'home:get-analytics-enabled',
-  setAnalyticsEnabled: 'home:set-analytics-enabled',
   getAiPanelPrefs: 'home:get-ai-panel-prefs',
   setAiPanelPrefs: 'home:set-ai-panel-prefs',
   getDefaultSaveDir: 'home:get-default-save-dir',

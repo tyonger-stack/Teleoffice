@@ -5,7 +5,7 @@ import type { StringKey } from './locale'
 import './onboarding.css'
 
 interface OnboardingProps {
-  /** persists completion; analytics remains enabled unless opted out in Settings */
+  /** persists completion of the first-run welcome */
   onDone: () => Promise<boolean>
 }
 
@@ -21,8 +21,6 @@ interface Slide {
   showCommunity?: boolean
   /** closing slide shows the "star us on GitHub" hint */
   showStar?: boolean
-  /** closing slide explains default-on analytics and how to disable it */
-  showAnalyticsNotice?: boolean
   art: 'logo' | 'gift' | 'check'
 }
 
@@ -193,14 +191,6 @@ export function Onboarding({ onDone }: OnboardingProps) {
                     </svg>
                     {t('starOnGitHub')}
                   </button>
-                </div>
-              )}
-              {s.showAnalyticsNotice && (
-                <div className="onb-consent">
-                  <span className="onb-consent-copy">
-                    <span className="onb-consent-title">{t('setAnalytics')}</span>
-                    <span className="onb-consent-desc">{t('setAnalyticsDesc')}</span>
-                  </span>
                 </div>
               )}
               {s.showCommunity && (

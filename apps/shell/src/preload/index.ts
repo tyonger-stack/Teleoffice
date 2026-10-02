@@ -388,15 +388,6 @@ const homeApi: HomeApi = {
   async openMcpLogFile() {
     await ipcRenderer.invoke(HOME_CHANNELS.openMcpLogFile)
   },
-  async getAnalyticsEnabled() {
-    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getAnalyticsEnabled)
-    return result !== false
-  },
-  async setAnalyticsEnabled(enabled) {
-    if (typeof enabled !== 'boolean') throw new Error('Invalid analytics consent.')
-    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.setAnalyticsEnabled, enabled)
-    return result === true
-  },
   async getAiPanelPrefs() {
     return normalizeAiPanelPrefs(await ipcRenderer.invoke(HOME_CHANNELS.getAiPanelPrefs))
   },
