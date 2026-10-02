@@ -1,4 +1,5 @@
 export { AiPanelSideButton } from './AiPanelSideButton'
+export { TeleOfficeMark } from './TeleOfficeMark'
 export { AiComposer } from './AiComposer'
 export { AiScopeQuote, type AiScopeQuoteData } from './AiScopeQuote'
 export {

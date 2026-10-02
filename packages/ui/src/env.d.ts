@@ -1,4 +1,9 @@
 /** bidi-js has no types (pptx-render sources are compiled into this project via the workspace source export; its bundled d.ts does not come along) */
+declare module '*.svg' {
+  const url: string
+  export default url
+}
+
 declare module 'bidi-js' {
   interface BidiApi {
     getEmbeddingLevels(
