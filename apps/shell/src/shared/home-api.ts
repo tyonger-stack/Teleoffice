@@ -188,6 +188,8 @@ export interface HomeApi {
   newSlide(opts?: NewFileOpts): Promise<void>
   /** templates registered for starter decks */
   listSlideTemplates(): Promise<SlideTemplateItem[]>
+  /** set a registered .pptx template as default, or clear it with null */
+  setDefaultSlideTemplate(name: string | null): Promise<string | null>
   /** build a one-slide starter deck from a template and open it */
   newSlideFromTemplate(name: string, opts?: NewFileOpts): Promise<void>
   /** import a .pptx file into the template registry; null when cancelled */
@@ -372,6 +374,7 @@ export interface SlideTemplateItem {
   path: string
   exists: boolean
   description?: string
+  isDefault: boolean
   source: 'registry' | 'file'
 }
 
@@ -456,6 +459,7 @@ export const HOME_CHANNELS = {
   newSheet: 'home:new-sheet',
   newSlide: 'home:new-slide',
   listSlideTemplates: 'home:list-slide-templates',
+  setDefaultSlideTemplate: 'home:set-default-slide-template',
   newSlideFromTemplate: 'home:new-slide-from-template',
   importSlideTemplate: 'home:import-slide-template',
   openTemplatesFolder: 'home:open-templates-folder',

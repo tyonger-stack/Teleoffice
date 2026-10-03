@@ -41,7 +41,7 @@ TeleOffice 是免费、开源的 Microsoft Office 替代品，支持 macOS、Win
 
 <img src="docs/assets/readme/hero-dark.webp" alt="TeleOffice 首页，深色主题：左侧是最近、收藏和文件夹，中间是六种新建入口、默认模板和最近使用的文件" width="100%">
 
-首页可以新建 Docs、Sheets、Slides、Markdown、HTML 和 PDF，也可以从默认模板开始，或打开本地文件。最近使用的文件按修改时间列出。搜索框同时查文件名和正文。
+首页可以新建 Docs、Sheets、Slides、Markdown、HTML 和 PDF，也可以从默认模板开始，或打开本地文件。最近使用的文件按修改时间列出。搜索框同时查文件名和正文。在“设置Office的默认模板”里点“PPT模版”，可在菜单中设置或取消默认 PPT 模板。
 
 ### 1 · Docs —— 打开并编辑 `.docx`
 
@@ -267,6 +267,8 @@ teleoffice slides audit deck/deck.pptx --json
 teleoffice slides replace deck/deck.pptx --slide 4 --spec deck/pages/05.json --json
 teleoffice open deck/deck.pptx
 ```
+
+CLI 也可用 `teleoffice template default <名称>` 设置已登记的 PPT 模板，或用 `teleoffice template add <名称> <文件.pptx> --default` 登记并设为默认；`teleoffice template default --clear` 可清除。创建 deck spec 时，在页面版式名称与默认模板兼容时会自动套用；未写版式的页面优先使用样例中出现过、内容占位符较少的标题版式，其次选装饰较丰富的简洁标题版式。`--no-template` 可关闭自动套用。
 
 `teleoffice` 内部不调用模型。思考是助手的事，构建和检查是 CLI 的事。结果是一份普通的 `.pptx`，可以用 TeleOffice 或 PowerPoint 打开。
 

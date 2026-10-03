@@ -7,10 +7,13 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { createBlankPptx } from '@teleoffice/pptx-engine'
 import {
   addTemplate,
+  clearDefaultTemplate,
+  getDefaultTemplate,
   listTemplates,
   removeTemplate,
   resolveRegisteredTemplate,
   resolveTemplate,
+  setDefaultTemplate,
   templatesDir,
 } from '../src/slides/template-registry'
 import { inspectTemplate } from '../src/slides/template'
@@ -104,6 +107,61 @@ describe('template registry', () => {
     const removed = removeTemplate('ext', env)
     expect(removed.deletedFile).toBeUndefined()
     expect(removed.keptFile).toBeUndefined()
+  })
+
+  it('sets, reads, preserves, clears and removes the configured default', async () => {
+    const { env, dir } = freshEnv()
+    const src = join(srcDir(), 'src.pptx')
+    await writeDeck(src)
+    addTemplate('first', src, { copy: true }, env)
+    expect(setDefaultTemplate('FIRST', env)).toBe('first')
+    expect(getDefaultTemplate(env)).toBe('first')
+    expect(JSON.parse(readFileSync(join(dir, 'templates.json'), 'utf-8'))).toMatchObject({
+      default: 'first',
+      templates: { first: { path: 'first.pptx' } },
+    })
+    expect(listTemplates(env)).toMatchObject([{ name: 'first', isDefault: true }])
+
+    addTemplate('second', src, {}, env)
+    expect(getDefaultTemplate(env)).toBe('first')
+    expect(listTemplates(env)).toMatchObject([
+      { name: 'first', isDefault: true },
+      { name: 'second', isDefault: false },
+    ])
+    removeTemplate('second', env)
+    expect(getDefaultTemplate(env)).toBe('first')
+    removeTemplate('first', env)
+    expect(getDefaultTemplate(env)).toBeUndefined()
+
+    addTemplate('again', src, {}, env)
+    setDefaultTemplate('again', env)
+    expect(clearDefaultTemplate(env)).toBe('again')
+    expect(clearDefaultTemplate(env)).toBeUndefined()
+    expect(JSON.parse(readFileSync(join(dir, 'templates.json'), 'utf-8'))).not.toHaveProperty(
+      'default',
+    )
+  })
+
+  it('accepts a bare PPTX file, rejects unknown or path names, and exposes stale defaults', async () => {
+    const { env, dir } = freshEnv()
+    await writeDeck(join(dir, 'bare.pptx'))
+    expect(setDefaultTemplate('bare', env)).toBe('bare')
+    expect(listTemplates(env)).toMatchObject([{ name: 'bare', isDefault: true, source: 'file' }])
+    expect(() => setDefaultTemplate('barr', env)).toThrow('did you mean "bare"?')
+    expect(() => setDefaultTemplate('../bare.pptx', env)).toThrow('invalid template name')
+
+    const src = join(srcDir(), 'removed.pptx')
+    await writeDeck(src)
+    addTemplate('gone', src, {}, env)
+    setDefaultTemplate('gone', env)
+    const reg = JSON.parse(readFileSync(join(dir, 'templates.json'), 'utf-8'))
+    rmSync(src)
+    writeFileSync(join(dir, 'templates.json'), JSON.stringify(reg))
+    expect(getDefaultTemplate(env)).toBe('gone')
+    expect(listTemplates(env).find((template) => template.name === 'gone')).toMatchObject({
+      exists: false,
+      isDefault: true,
+    })
   })
 
   it('lists bare files by stem and suggests near names', async () => {

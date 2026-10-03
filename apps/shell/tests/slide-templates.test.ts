@@ -11,6 +11,7 @@ import {
   importSlideTemplate,
   listSlideTemplates,
   pickStartLayout,
+  setDefaultSlideTemplate,
 } from '../src/main/slide-templates'
 
 const tempDirs: string[] = []
@@ -59,9 +60,28 @@ describe('slide-templates', () => {
     expect(existsSync(imported.path)).toBe(true)
     const listed = listSlideTemplates(env)
     expect(listed).toHaveLength(1)
-    expect(listed[0]).toMatchObject({ name: 'quarterly-review', source: 'registry', exists: true })
+    expect(listed[0]).toMatchObject({
+      name: 'quarterly-review',
+      source: 'registry',
+      exists: true,
+      isDefault: false,
+    })
     // The registry copy is independent of the source file.
     expect(listed[0]!.path).not.toBe(src)
+  })
+
+  it('sets and clears the default using a registered name only', async () => {
+    const { env } = freshEnv()
+    const srcDir = mkdtempSync(join(tmpdir(), 'shell-tmpl-src-'))
+    trackTemp(srcDir)
+    const src = await writeTemplateFile(srcDir, 'Quarterly Review.pptx')
+    const imported = importSlideTemplate(src, env)
+    expect(setDefaultSlideTemplate(imported.name, env)).toBe('quarterly-review')
+    expect(listSlideTemplates(env)).toMatchObject([{ name: 'quarterly-review', isDefault: true }])
+    expect(() => setDefaultSlideTemplate(imported.path, env)).toThrow('got a path')
+    expect(() => setDefaultSlideTemplate('missing', env)).toThrow('unknown template')
+    expect(setDefaultSlideTemplate(null, env)).toBeNull()
+    expect(listSlideTemplates(env)).toMatchObject([{ name: 'quarterly-review', isDefault: false }])
   })
 
   it('picks a free name for duplicates and falls back for non-ASCII stems', async () => {

@@ -31,6 +31,7 @@ import {
   ensureTemplatesDir,
   importSlideTemplate as importSlideTemplateFile,
   listSlideTemplates,
+  setDefaultSlideTemplate,
 } from './slide-templates'
 import {
   createFileFromTemplate,
@@ -3897,6 +3898,12 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.listSlideTemplates, () => listSlideTemplates())
+  ipcMain.handle(HOME_CHANNELS.setDefaultSlideTemplate, (_event, name: unknown) => {
+    if (name !== null && (typeof name !== 'string' || !name || name.length > 128)) {
+      throw new Error(tm('errBadArgs'))
+    }
+    return setDefaultSlideTemplate(name)
+  })
 
   ipcMain.handle(
     HOME_CHANNELS.newSlideFromTemplate,

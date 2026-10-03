@@ -1,6 +1,6 @@
-import { chmodSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve, sep } from 'node:path'
 import { runCli, type RunOptions } from '../src/cli'
 
 export interface CapturedRun {
@@ -13,10 +13,25 @@ export interface CapturedRun {
 export async function run(argv: string[], opts: Omit<RunOptions, 'io'> = {}): Promise<CapturedRun> {
   const out: string[] = []
   const err: string[] = []
-  const code = await runCli(argv, {
-    ...opts,
-    io: { stdout: (t) => out.push(t), stderr: (t) => err.push(t) },
-  })
+  const configuredTemplates =
+    opts.env?.TELEOFFICE_TEMPLATES_DIR ?? opts.env?.GENOFFICE_TEMPLATES_DIR
+  const tempRoot = resolve(tmpdir()) + sep
+  const templates =
+    configuredTemplates && resolve(configuredTemplates).startsWith(tempRoot)
+      ? undefined
+      : mkdtempSync(join(tmpdir(), 'teleoffice-test-templates-'))
+  let code: number
+  try {
+    code = await runCli(argv, {
+      ...opts,
+      env: templates
+        ? { ...process.env, ...opts.env, TELEOFFICE_TEMPLATES_DIR: templates }
+        : opts.env,
+      io: { stdout: (t) => out.push(t), stderr: (t) => err.push(t) },
+    })
+  } finally {
+    if (templates) rmSync(templates, { recursive: true, force: true })
+  }
   return {
     code,
     stdout: out.join('\n'),

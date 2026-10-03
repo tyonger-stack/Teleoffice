@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { DragEvent as ReactDragEvent, ReactElement } from 'react'
+import type { CSSProperties, DragEvent as ReactDragEvent, ReactElement } from 'react'
 import logoLockup from './assets/teleoffice-logo.svg'
 import iconDocx from './assets/file-docx.svg'
 import iconXlsx from './assets/file-xlsx.svg'
@@ -74,6 +74,7 @@ interface TemplateMenuEntry {
   path: string
   exists: boolean
   description?: string
+  isDefault?: boolean
 }
 
 const TEMPLATE_CARDS: readonly {
@@ -905,6 +906,8 @@ export function Home() {
   const rowMenuWrapRef = useRef<HTMLSpanElement>(null)
   // which default-template card's menu is open (loads that kind's list on open)
   const [templateMenuKind, setTemplateMenuKind] = useState<HomeTemplateKind | null>(null)
+  const [templateMenuPlacement, setTemplateMenuPlacement] = useState<'above' | 'below'>('below')
+  const [templateListMaxHeight, setTemplateListMaxHeight] = useState(320)
   const templateMenuWrapRef = useRef<HTMLDivElement>(null)
   const [templateLists, setTemplateLists] = useState<
     Partial<Record<HomeTemplateKind, TemplateMenuEntry[] | null>>
@@ -1603,6 +1606,11 @@ export function Home() {
     )
   }
 
+  useEffect(() => {
+    loadTemplateList('pptx')
+    // Load once so the card subtitle reflects the current default before the menu opens.
+  }, [])
+
   function renderQuickCards() {
     return (
       <>
@@ -1641,6 +1649,14 @@ export function Home() {
             {TEMPLATE_CARDS.map((card) => {
               const open = templateMenuKind === card.kind
               const listed = templateLists[card.kind]
+              const defaultTemplate =
+                card.kind === 'pptx' ? listed?.find((template) => template.isDefault) : undefined
+              const cardSub =
+                card.kind === 'pptx' && templateLists.pptx !== undefined
+                  ? defaultTemplate
+                    ? t('templateDefaultNamed', { name: defaultTemplate.name })
+                    : t(card.subKey)
+                  : t(card.subKey)
               return (
                 <div
                   key={card.kind}
@@ -1649,14 +1665,21 @@ export function Home() {
                 >
                   <button
                     className="quick-card template-card"
-                    title={`${t(card.titleKey)} · ${t(card.subKey)}`}
+                    title={`${t(card.titleKey)} · ${cardSub}`}
                     aria-haspopup="menu"
                     aria-expanded={open}
-                    onClick={() => {
+                    onClick={(event) => {
                       if (open) {
                         setTemplateMenuKind(null)
                         return
                       }
+                      const rect = event.currentTarget.getBoundingClientRect()
+                      const below = window.innerHeight - rect.bottom - 12
+                      const above = rect.top - 12
+                      const placement = below < 300 && above > below ? 'above' : 'below'
+                      const available = placement === 'above' ? above : below
+                      setTemplateMenuPlacement(placement)
+                      setTemplateListMaxHeight(Math.max(60, available - 124))
                       setTemplateMenuKind(card.kind)
                       loadTemplateList(card.kind)
                     }}
@@ -1666,38 +1689,83 @@ export function Home() {
                       <span className="quick-title-row">
                         <span className="quick-title">{t(card.titleKey)}</span>
                       </span>
-                      <span className="quick-sub">{t(card.subKey)}</span>
+                      <span className="quick-sub">{cardSub}</span>
                     </span>
                   </button>
                   {open && (
-                    <div className="cloud-sort-menu template-menu" role="menu">
-                      {listed && listed.length > 0
-                        ? listed.map((tpl) => (
-                            <button
-                              key={tpl.name}
-                              role="menuitem"
-                              disabled={!tpl.exists}
-                              title={tpl.path}
-                              onClick={() => {
-                                setTemplateMenuKind(null)
-                                if (card.kind === 'pptx') {
-                                  void window.aiOffice.newSlideFromTemplate(tpl.name, newFileOpts)
-                                } else {
-                                  void window.aiOffice.newOfficeFromTemplate(
-                                    card.kind,
-                                    tpl.name,
-                                    newFileOpts,
-                                  )
-                                }
-                              }}
-                            >
-                              <span className="template-name">{tpl.name}</span>
-                              {tpl.description ? (
-                                <span className="template-desc">{tpl.description}</span>
-                              ) : null}
-                            </button>
-                          ))
-                        : null}
+                    <div
+                      className={`cloud-sort-menu template-menu template-menu-${templateMenuPlacement}`}
+                      role="menu"
+                      style={
+                        {
+                          '--template-list-max-height': `${templateListMaxHeight}px`,
+                        } as CSSProperties
+                      }
+                    >
+                      {listed && listed.length > 0 ? (
+                        <div className="template-list">
+                          {[...listed]
+                            .sort(
+                              (a, b) => Number(Boolean(b.isDefault)) - Number(Boolean(a.isDefault)),
+                            )
+                            .map((tpl) => (
+                              <div className="template-menu-entry" key={tpl.name}>
+                                <button
+                                  className="template-use-button"
+                                  role="menuitem"
+                                  disabled={!tpl.exists}
+                                  title={`${tpl.path}${tpl.description ? `\n${tpl.description}` : ''}`}
+                                  onClick={() => {
+                                    setTemplateMenuKind(null)
+                                    if (card.kind === 'pptx') {
+                                      void window.aiOffice.newSlideFromTemplate(
+                                        tpl.name,
+                                        newFileOpts,
+                                      )
+                                    } else {
+                                      void window.aiOffice.newOfficeFromTemplate(
+                                        card.kind,
+                                        tpl.name,
+                                        newFileOpts,
+                                      )
+                                    }
+                                  }}
+                                >
+                                  <span className="template-name-row">
+                                    <span className="template-name">{tpl.name}</span>
+                                    {card.kind === 'pptx' && tpl.isDefault ? (
+                                      <span className="template-default-badge">
+                                        {t('defaultBadge')}
+                                      </span>
+                                    ) : null}
+                                  </span>
+                                  {tpl.description ? (
+                                    <span className="template-desc">{tpl.description}</span>
+                                  ) : null}
+                                </button>
+                                {card.kind === 'pptx' ? (
+                                  <button
+                                    className="template-default-action"
+                                    role="menuitem"
+                                    disabled={!tpl.exists}
+                                    onClick={() => {
+                                      void window.aiOffice
+                                        .setDefaultSlideTemplate(tpl.isDefault ? null : tpl.name)
+                                        .then(() => loadTemplateList('pptx'))
+                                        .catch((err: unknown) =>
+                                          console.warn('setting default template failed', err),
+                                        )
+                                    }}
+                                  >
+                                    {tpl.isDefault
+                                      ? t('clearTemplateDefault')
+                                      : t('setTemplateDefault')}
+                                  </button>
+                                ) : null}
+                              </div>
+                            ))}
+                        </div>
+                      ) : null}
                       {listed && listed.length === 0 ? (
                         <div className="template-empty">{t('noTemplatesYet')}</div>
                       ) : null}

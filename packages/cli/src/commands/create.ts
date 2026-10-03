@@ -9,8 +9,11 @@ import {
   buildDeckFromSpec,
   buildDeckFromTemplateDir,
   buildDeckFromTemplateText,
+  configuredDefaultTemplate,
+  defaultTemplateForLayouts,
   deckAuditDetail,
   deckSpecNamesTemplate,
+  listPageFiles,
   stageContext,
 } from '../formats/slide-spec'
 import { outputDirectory, renderToPngs } from '../formats/render'
@@ -67,7 +70,12 @@ export const createCommand: CommandDef = {
       name: 'template',
       value: 'file|name',
       description:
-        'pptx --spec: build on a corporate template (a .pptx path or a registered name) so slides use its masters, layouts and theme; the spec may also name "template" itself and the outline may carry it (the flag wins). See template inspect.',
+        'pptx --spec: build on a corporate template; when omitted, the configured default is used if page layout names fit it. Pages without a layout prefer a sample-used title layout with fewer content placeholders, then a decorated simple title layout. Explicit --template, spec and outline template fields take precedence.',
+    },
+    {
+      name: 'no-template',
+      description:
+        'pptx --spec: do not apply the configured default template; explicit --template or spec/outline template fields still apply',
     },
     {
       name: 'font',
@@ -219,11 +227,25 @@ export const createCommand: CommandDef = {
         })
       }
     }
+    const templateDetail =
+      result.detail?.template && typeof result.detail.template === 'object'
+        ? (result.detail.template as Record<string, unknown>)
+        : undefined
+    const skippedDefault =
+      result.detail?.defaultTemplateSkipped &&
+      typeof result.detail.defaultTemplateSkipped === 'object'
+        ? (result.detail.defaultTemplateSkipped as Record<string, unknown>)
+        : undefined
     return {
       summary:
-        result.keptSlides !== undefined && result.keptSlides > 0
+        (templateDetail?.source === 'default'
+          ? `using default template ${String(templateDetail.name ?? '')}; `
+          : skippedDefault
+            ? `skipped default template ${String(skippedDefault.name ?? '')} because page layout names do not match; `
+            : '') +
+        (result.keptSlides !== undefined && result.keptSlides > 0
           ? `created ${basename(output)} (${result.slides} slides: ${result.slides - result.keptSlides} new + ${result.keptSlides} kept from template)`
-          : `created ${basename(output)} (${result.slides} slides)`,
+          : `created ${basename(output)} (${result.slides} slides)`),
       outputPath: output,
       detail,
     }
@@ -284,13 +306,35 @@ async function createPptxFromSpec(
   }
   if (dir) {
     const stage = stageContext(dir, ctx, outlinePath ? resolveInput(outlinePath, ctx) : undefined)
+    const outlineTemplate = stage.outline?.outline.template
+    let defaultSkipped: string | undefined
+    let defaultRef: string | undefined
+    if (!flagBool(args, 'no-template') && templateReq.template === undefined && !outlineTemplate) {
+      const refs: unknown[] = stage.outline?.outline.pages.map((page) => page.layout) ?? []
+      for (const file of listPageFiles(dir)) {
+        try {
+          const page = JSON.parse(readFileSync(file, 'utf-8')) as { layout?: unknown }
+          refs.push(page?.layout)
+        } catch {
+          // The builder reports malformed page JSON with its path below.
+        }
+      }
+      const configured = configuredDefaultTemplate(ctx)
+      if (configured) {
+        defaultRef = await defaultTemplateForLayouts(refs, ctx)
+        if (!defaultRef) defaultSkipped = configured
+      }
+    }
+    const effectiveReq = defaultRef
+      ? { ...templateReq, template: defaultRef, source: 'default' as const }
+      : templateReq
     if (
-      templateReq.template !== undefined ||
-      (stage.outline?.outline.template !== undefined && stage.outline.outline.template !== '')
+      effectiveReq.template !== undefined ||
+      (outlineTemplate !== undefined && outlineTemplate !== '')
     ) {
       const built = await buildDeckFromTemplateDir(dir, ctx, stage, {
-        ...templateReq,
-        outlineTemplate: stage.outline?.outline.template,
+        ...effectiveReq,
+        outlineTemplate,
       })
       return {
         bytes: built.bytes,
@@ -324,6 +368,14 @@ async function createPptxFromSpec(
           : null,
         style: stage.style ? { file: stage.style.file, offPalette: built.offPalette } : null,
         notes: stage.notes,
+        ...(defaultSkipped
+          ? {
+              defaultTemplateSkipped: {
+                name: defaultSkipped,
+                reason: 'page layout names do not belong to this template',
+              },
+            }
+          : {}),
         next,
       },
     }
@@ -334,13 +386,30 @@ async function createPptxFromSpec(
     })
   const source = spec === '-' ? 'stdin' : resolveInput(spec, ctx)
   const text = spec === '-' ? readFileSync(0, 'utf-8') : readFileSync(source, 'utf-8')
-  if (templateReq.template !== undefined || deckSpecNamesTemplate(text)) {
+  let defaultSkipped: string | undefined
+  let defaultRef: string | undefined
+  if (
+    templateReq.template === undefined &&
+    !deckSpecNamesTemplate(text) &&
+    !flagBool(args, 'no-template')
+  ) {
+    const configured = configuredDefaultTemplate(ctx)
+    if (configured) {
+      const refs = specLayoutRefs(text)
+      defaultRef = await defaultTemplateForLayouts(refs, ctx)
+      if (!defaultRef) defaultSkipped = configured
+    }
+  }
+  const effectiveReq = defaultRef
+    ? { ...templateReq, template: defaultRef, source: 'default' as const }
+    : templateReq
+  if (effectiveReq.template !== undefined || deckSpecNamesTemplate(text)) {
     const built = await buildDeckFromTemplateText(
       text,
       source,
       ctx,
       spec === '-' ? undefined : dirname(source),
-      templateReq,
+      effectiveReq,
     )
     return {
       bytes: built.bytes,
@@ -364,7 +433,36 @@ async function createPptxFromSpec(
   return {
     bytes: built.bytes,
     slides: built.pages,
-    detail: { via: 'deck spec', issues: built.issues, imageFailures: built.imageFailures, next },
+    detail: {
+      via: 'deck spec',
+      issues: built.issues,
+      imageFailures: built.imageFailures,
+      ...(defaultSkipped
+        ? {
+            defaultTemplateSkipped: {
+              name: defaultSkipped,
+              reason: 'page layout names do not belong to this template',
+            },
+          }
+        : {}),
+      next,
+    },
+  }
+}
+
+function specLayoutRefs(text: string): unknown[] {
+  try {
+    const root: unknown = JSON.parse(text)
+    if (!root || typeof root !== 'object') return []
+    const record = root as { layout?: unknown; pages?: unknown }
+    if (Array.isArray(record.pages)) {
+      return record.pages
+        .filter((page) => page && typeof page === 'object')
+        .map((page) => (page as { layout?: unknown }).layout)
+    }
+    return record.layout === undefined ? [] : [record.layout]
+  } catch {
+    return []
   }
 }
 

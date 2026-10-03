@@ -38,7 +38,13 @@ export interface TemplateListItem {
   font?: string
   description?: string
   startLayout?: string
+  isDefault: boolean
   source: 'registry' | 'file'
+}
+
+interface TemplateRegistryData {
+  entries: Record<string, TemplateRegistryEntry>
+  defaultTemplate?: string
 }
 
 export interface ResolvedTemplate {
@@ -91,8 +97,7 @@ function cleanEntries(raw: unknown): Record<string, TemplateRegistryEntry> {
 
 // Lenient read for listing and resolving: a corrupt templates.json yields an
 // empty registry so file-based templates still resolve, with corrupt set.
-function readRegistryLenient(dir: string): {
-  entries: Record<string, TemplateRegistryEntry>
+function readRegistryLenient(dir: string): TemplateRegistryData & {
   corrupt?: string
 } {
   const path = registryPath(dir)
@@ -104,9 +109,14 @@ function readRegistryLenient(dir: string): {
     return { entries: {} }
   }
   try {
-    const parsed = JSON.parse(raw) as { templates?: unknown }
-    if (!parsed || typeof parsed !== 'object' || !parsed.templates) return { entries: {} }
-    return { entries: cleanEntries(parsed.templates) }
+    const parsed = JSON.parse(raw) as { templates?: unknown; default?: unknown }
+    if (!parsed || typeof parsed !== 'object') return { entries: {} }
+    return {
+      entries: cleanEntries(parsed.templates),
+      ...(typeof parsed.default === 'string' && parsed.default.trim()
+        ? { defaultTemplate: parsed.default.trim().toLowerCase() }
+        : {}),
+    }
   } catch (err) {
     return { entries: {}, corrupt: err instanceof Error ? err.message : String(err) }
   }
@@ -114,14 +124,19 @@ function readRegistryLenient(dir: string): {
 
 // Strict read for mutations: refuse to overwrite a corrupt registry file.
 // Copies the corrupt file aside before throwing, never writes the registry.
-function readRegistryStrict(dir: string): Record<string, TemplateRegistryEntry> {
+function readRegistryStrict(dir: string): TemplateRegistryData {
   const path = registryPath(dir)
-  if (!existsSync(path)) return {}
+  if (!existsSync(path)) return { entries: {} }
   const raw = readFileSync(path, 'utf-8')
   try {
-    const parsed = JSON.parse(raw) as { templates?: unknown }
-    if (!parsed || typeof parsed !== 'object' || !parsed.templates) return {}
-    return cleanEntries(parsed.templates)
+    const parsed = JSON.parse(raw) as { templates?: unknown; default?: unknown }
+    if (!parsed || typeof parsed !== 'object') return { entries: {} }
+    return {
+      entries: cleanEntries(parsed.templates),
+      ...(typeof parsed.default === 'string' && parsed.default.trim()
+        ? { defaultTemplate: parsed.default.trim().toLowerCase() }
+        : {}),
+    }
   } catch (err) {
     try {
       copyFileSync(path, path + '.bak-' + Date.now())
@@ -221,7 +236,11 @@ function withRegistryLock<T>(dir: string, fn: () => T): T {
 }
 
 // Atomic registry write: temp file in the same directory then rename.
-function writeRegistryAtomic(dir: string, entries: Record<string, TemplateRegistryEntry>): void {
+function writeRegistryAtomic(
+  dir: string,
+  entries: Record<string, TemplateRegistryEntry>,
+  defaultTemplate?: string,
+): void {
   mkdirSync(dir, { recursive: true })
   const target = registryPath(dir)
   const tmp = join(
@@ -229,7 +248,14 @@ function writeRegistryAtomic(dir: string, entries: Record<string, TemplateRegist
     'templates.json.' + process.pid + '.' + Math.random().toString(36).slice(2) + '.tmp',
   )
   try {
-    writeFileSync(tmp, JSON.stringify({ templates: entries }, null, 2) + '\n')
+    writeFileSync(
+      tmp,
+      JSON.stringify(
+        { templates: entries, ...(defaultTemplate ? { default: defaultTemplate } : {}) },
+        null,
+        2,
+      ) + '\n',
+    )
     renameSync(tmp, target)
   } finally {
     try {
@@ -259,6 +285,11 @@ export function registryReadError(env: NodeJS.ProcessEnv = process.env): string 
   }
 }
 
+/** Return the configured default name, even when it has since gone missing. */
+export function getDefaultTemplate(env: NodeJS.ProcessEnv = process.env): string | undefined {
+  return readRegistryLenient(templatesDir(env)).defaultTemplate
+}
+
 function entryPath(dir: string, entry: TemplateRegistryEntry): string {
   return isAbsolute(entry.path) ? entry.path : resolve(dir, entry.path)
 }
@@ -273,7 +304,8 @@ function isDeckFile(path: string): boolean {
 
 export function listTemplates(env: NodeJS.ProcessEnv = process.env): TemplateListItem[] {
   const dir = templatesDir(env)
-  const entries = readRegistryLenient(dir).entries
+  const data = readRegistryLenient(dir)
+  const entries = data.entries
   const out = new Map<string, TemplateListItem>()
   for (const [name, entry] of Object.entries(entries)) {
     const path = entryPath(dir, entry)
@@ -285,6 +317,7 @@ export function listTemplates(env: NodeJS.ProcessEnv = process.env): TemplateLis
       ...(entry.font !== undefined ? { font: entry.font } : {}),
       ...(entry.description !== undefined ? { description: entry.description } : {}),
       ...(entry.startLayout !== undefined ? { startLayout: entry.startLayout } : {}),
+      isDefault: data.defaultTemplate === name,
       source: 'registry',
     })
   }
@@ -300,7 +333,13 @@ export function listTemplates(env: NodeJS.ProcessEnv = process.env): TemplateLis
       if (!isDeckFile(full)) continue
       const name = stemOf(f).toLowerCase()
       if (!validName(name) || out.has(name)) continue
-      out.set(name, { name, path: full, exists: true, source: 'file' })
+      out.set(name, {
+        name,
+        path: full,
+        exists: true,
+        isDefault: data.defaultTemplate === name,
+        source: 'file',
+      })
     }
   }
   return [...out.values()].sort((a, b) => a.name.localeCompare(b.name))
@@ -481,7 +520,8 @@ export function addTemplate(
     }
   }
   return withRegistryLock(dir, () => {
-    const entries = readRegistryStrict(dir)
+    const data = readRegistryStrict(dir)
+    const entries = data.entries
     if (entries[key] && !opts.force) {
       throw new Error('template "' + key + '" already exists (pass --force to overwrite)')
     }
@@ -513,8 +553,63 @@ export function addTemplate(
       ...(startLayout !== undefined ? { startLayout } : {}),
       ...(copied ? { copied: true as const } : {}),
     }
-    writeRegistryAtomic(dir, entries)
+    writeRegistryAtomic(dir, entries, data.defaultTemplate)
     return { name: key, path: stored }
+  })
+}
+
+/** Set a registered template or a bare templates-directory PPTX as default. */
+export function setDefaultTemplate(name: string, env: NodeJS.ProcessEnv = process.env): string {
+  const trimmed = typeof name === 'string' ? name.trim() : ''
+  if (!validName(trimmed)) {
+    throw new Error('invalid template name "' + trimmed + '" (expected a registered template name)')
+  }
+  const key = trimmed.toLowerCase()
+  const dir = templatesDir(env)
+  return withRegistryLock(dir, () => {
+    const data = readRegistryStrict(dir)
+    const entry = data.entries[key]
+    const registeredExists = entry !== undefined && existsSync(entryPath(dir, entry))
+    let fileExists = false
+    if (entry === undefined && existsSync(dir)) {
+      try {
+        fileExists = readdirSync(dir).some((file) => {
+          const full = join(dir, file)
+          return (
+            extname(file).toLowerCase() === '.pptx' &&
+            stemOf(file).toLowerCase() === key &&
+            existsSync(full)
+          )
+        })
+      } catch {
+        fileExists = false
+      }
+    }
+    if (!registeredExists && !fileExists) {
+      const names = listTemplates(env).map((template) => template.name)
+      const hint = didYouMean(key, names)
+      throw new Error(
+        'unknown template "' +
+          trimmed +
+          '"; registered templates: ' +
+          (names.join(', ') || '(none)') +
+          (hint ? '; did you mean "' + hint + '"?' : ''),
+      )
+    }
+    writeRegistryAtomic(dir, data.entries, key)
+    return key
+  })
+}
+
+/** Remove the configured default while preserving all registered templates. */
+export function clearDefaultTemplate(env: NodeJS.ProcessEnv = process.env): string | undefined {
+  const dir = templatesDir(env)
+  return withRegistryLock(dir, () => {
+    const data = readRegistryStrict(dir)
+    const previous = data.defaultTemplate
+    if (previous === undefined) return undefined
+    writeRegistryAtomic(dir, data.entries)
+    return previous
   })
 }
 
@@ -525,11 +620,13 @@ export function removeTemplate(
   const key = name.toLowerCase()
   const dir = templatesDir(env)
   return withRegistryLock(dir, () => {
-    const entries = readRegistryStrict(dir)
+    const data = readRegistryStrict(dir)
+    const entries = data.entries
     const entry = entries[key]
     if (!entry) throw new Error('unknown template "' + name + '"')
     delete entries[key]
-    writeRegistryAtomic(dir, entries)
+    const defaultTemplate = data.defaultTemplate === key ? undefined : data.defaultTemplate
+    writeRegistryAtomic(dir, entries, defaultTemplate)
     const full = entryPath(dir, entry)
     const inside = relative(dir, full)
     const isInside = !inside.startsWith('..') && !isAbsolute(inside)

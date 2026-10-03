@@ -7,8 +7,10 @@ import { buildTemplateDeck, inspectTemplate, type SpecElement } from '@teleoffic
 import { PackageArchive } from '@teleoffice/pptx-engine'
 import {
   addTemplate,
+  clearDefaultTemplate,
   listTemplates,
   resolveRegisteredTemplate,
+  setDefaultTemplate,
   templatesDir,
 } from '@teleoffice/pipelines/slides/templates'
 
@@ -17,6 +19,7 @@ export interface SlideTemplateItem {
   path: string
   exists: boolean
   description?: string
+  isDefault: boolean
   source: 'registry' | 'file'
 }
 
@@ -27,8 +30,23 @@ export function listSlideTemplates(env: NodeJS.ProcessEnv = process.env): SlideT
     path: t.path,
     exists: t.exists,
     ...(t.description !== undefined ? { description: t.description } : {}),
+    isDefault: t.isDefault,
     source: t.source,
   }))
+}
+
+// The home IPC accepts template names only; paths are rejected by the same
+// resolver used when creating a starter deck.
+export function setDefaultSlideTemplate(
+  name: string | null,
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
+  if (name === null) {
+    clearDefaultTemplate(env)
+    return null
+  }
+  const resolved = resolveRegisteredTemplate(name, { env })
+  return setDefaultTemplate(resolved.name ?? name, env)
 }
 
 // Create the templates directory when it does not exist yet.

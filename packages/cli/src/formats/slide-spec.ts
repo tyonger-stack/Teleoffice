@@ -19,9 +19,14 @@ import {
   type OutlinePage,
   type PageSpec,
   type TemplateLayoutUsed,
+  type TemplateInfo,
   type TemplatePageSpec,
 } from '@teleoffice/pipelines/slides'
-import { listTemplates, resolveTemplate } from '@teleoffice/pipelines/slides/templates'
+import {
+  getDefaultTemplate,
+  listTemplates,
+  resolveTemplate,
+} from '@teleoffice/pipelines/slides/templates'
 import {
   deleteSlide,
   mergeSlideFromPptx,
@@ -541,6 +546,7 @@ export function resolveTemplateSource(ref: string, ctx: PathContext): TemplateSo
 export interface TemplateDeckDetail {
   name?: string
   path: string
+  source?: 'default'
   master: number
   slideSize: { w: number; h: number }
   layoutsUsed: TemplateLayoutUsed[]
@@ -569,8 +575,122 @@ export interface TemplateBuildRequest {
   /** --font flag (wins over the spec font and the registry default) */
   font?: string
   keepSlides?: boolean
+  source?: 'default'
   /** outline "template" field (weakest fallback) */
   outlineTemplate?: string
+}
+
+/** Return the configured default, failing clearly if its file has gone missing. */
+export function configuredDefaultTemplate(ctx: PathContext): string | undefined {
+  const name = getDefaultTemplate(ctx.env)
+  if (!name) return undefined
+  if (!listTemplates(ctx.env).some((template) => template.name === name && template.exists)) {
+    throw new CliError(
+      EXIT.usage,
+      'configured default template "' +
+        name +
+        '" is unavailable; run `teleoffice template default --clear` or set another default',
+      undefined,
+      INVALID,
+    )
+  }
+  return name
+}
+
+/** Check whether named layouts in a spec belong to a candidate default template. */
+export function templateHasLayouts(
+  info: TemplateInfo,
+  refs: unknown[],
+  preferredMaster?: number,
+): boolean {
+  const flat = info.masters.flatMap((master) => master.layouts)
+  const preferred =
+    preferredMaster === undefined ? flat : (info.masters[preferredMaster]?.layouts ?? flat)
+  return refs.every((ref) => {
+    if (ref === undefined || ref === null || ref === '') return true
+    if (typeof ref === 'number' && Number.isInteger(ref)) return flat[ref] !== undefined
+    if (typeof ref !== 'string' || !ref.trim()) return false
+    const raw = ref.trim()
+    if (/^\d+$/.test(raw)) return flat[Number(raw)] !== undefined
+    const scoped = /^(\d+)\s*:\s*(.+)$/.exec(raw)
+    const name = (scoped?.[2] ?? raw).trim().toLowerCase()
+    const layouts = scoped ? (info.masters[Number(scoped[1])]?.layouts ?? []) : preferred
+    return layouts.some((layout) => layout.name.toLowerCase() === name)
+  })
+}
+
+/** Use the default only when its named layouts do not conflict with the spec. */
+export async function defaultTemplateForLayouts(
+  refs: unknown[],
+  ctx: PathContext,
+): Promise<string | undefined> {
+  const name = configuredDefaultTemplate(ctx)
+  if (!name) return undefined
+  const { info, resolved } = await templateBytesAndInfo(name, ctx)
+  return templateHasLayouts(info, refs, resolved.master) ? name : undefined
+}
+
+export function templateDefaultLayout(
+  info: TemplateInfo,
+  resolved: TemplateSource,
+): number | undefined {
+  const preferred = resolved.master ?? info.defaultMaster
+  const candidates = info.masters[preferred]?.layouts ?? []
+  const kind = (layout: (typeof candidates)[number]): 'title' | 'ctrTitle' | undefined => {
+    if (layout.placeholders.some((placeholder) => placeholder.type === 'title')) return 'title'
+    if (layout.placeholders.some((placeholder) => placeholder.type === 'ctrTitle'))
+      return 'ctrTitle'
+    return undefined
+  }
+  const contentCount = (layout: (typeof candidates)[number]) =>
+    layout.placeholders.filter(
+      (placeholder) => !['title', 'ctrTitle', 'dt', 'ftr', 'sldNum'].includes(placeholder.type),
+    ).length
+  const decorations = (layout: (typeof candidates)[number]) => layout.decorations ?? 0
+  const titleLayouts = candidates.filter((layout) => kind(layout) !== undefined)
+  const sampled = titleLayouts.filter((layout) => (layout.usedBySamples ?? 0) > 0)
+  if (sampled.length) {
+    // A normal title placeholder is a better body-page fit than a centered title,
+    // which is commonly reserved for covers and closing pages.
+    const regularTitleSamples = sampled.filter((layout) => kind(layout) === 'title')
+    const pool = regularTitleSamples.length ? regularTitleSamples : sampled
+    pool.sort(
+      (a, b) =>
+        (b.usedBySamples ?? 0) - (a.usedBySamples ?? 0) ||
+        contentCount(a) - contentCount(b) ||
+        decorations(b) - decorations(a),
+    )
+    return pool[0]!.index
+  }
+
+  const regularTitles = titleLayouts.filter((layout) => kind(layout) === 'title')
+  const centeredTitles = titleLayouts.filter((layout) => kind(layout) === 'ctrTitle')
+  const simple = (layouts: typeof titleLayouts) =>
+    layouts.filter((layout) => {
+      const count = contentCount(layout)
+      return (
+        count === 0 ||
+        (count === 1 &&
+          layout.placeholders.some(
+            (placeholder) => placeholder.type === 'body' || placeholder.type === 'obj',
+          ))
+      )
+    })
+  const simpleTitles = simple(regularTitles)
+  const simpleCenteredTitles = simple(centeredTitles)
+  const simplePool = simpleTitles.length ? simpleTitles : simpleCenteredTitles
+  if (simplePool.length) {
+    simplePool.sort((a, b) => decorations(b) - decorations(a) || contentCount(a) - contentCount(b))
+    return simplePool[0]!.index
+  }
+
+  const titlePool = regularTitles.length ? regularTitles : centeredTitles
+  if (titlePool.length) {
+    // Complex layouts are a last resort; fewer empty content slots win.
+    titlePool.sort((a, b) => contentCount(a) - contentCount(b) || decorations(b) - decorations(a))
+    return titlePool[0]!.index
+  }
+  return candidates[0]?.index
 }
 
 function templateRefOf(text: string, req: TemplateBuildRequest): string {
@@ -610,7 +730,11 @@ export async function buildDeckFromTemplateText(
   req: TemplateBuildRequest,
 ): Promise<BuiltDeck & { template: TemplateDeckDetail }> {
   const { resolved, bytes, info } = await templateBytesAndInfo(templateRefOf(text, req), ctx)
-  const parsed = parseTemplateDeckSpec(text, info, { localImages: true, master: resolved.master })
+  const parsed = parseTemplateDeckSpec(text, info, {
+    localImages: true,
+    master: resolved.master,
+    ...(req.source === 'default' ? { defaultLayout: templateDefaultLayout(info, resolved) } : {}),
+  })
   if (!parsed.ok) throw new CliError(EXIT.usage, source + ': ' + parsed.error, undefined, INVALID)
   if (req.keepSlides) parsed.spec.keepSlides = true
   const font = req.font ?? parsed.spec.font ?? resolved.font
@@ -627,6 +751,7 @@ export async function buildDeckFromTemplateText(
     imageFailures: built.imageFailures,
     template: {
       ...(resolved.name ? { name: resolved.name } : {}),
+      ...(req.source ? { source: req.source } : {}),
       path: resolved.path,
       master: parsed.spec.master,
       slideSize: info.slideSize.px,
@@ -688,9 +813,25 @@ export async function buildDeckFromTemplateDir(
       )
     }
   }
-  const parsed = parseTemplateDeckSpec(JSON.stringify({ pages }), info, {
+  const pagesForBuild = pages.map((page, index) => {
+    const entry = outline?.pages[index]
+    if (!resolved.startLayout || entry?.type !== 'cover' || entry.layout.trim()) return page
+    const record = page && typeof page === 'object' ? (page as Record<string, unknown>) : null
+    if (!record) return page
+    const pageLayout = record.layout
+    if (
+      pageLayout !== undefined &&
+      pageLayout !== null &&
+      !(typeof pageLayout === 'string' && pageLayout.trim() === '')
+    ) {
+      return page
+    }
+    return { ...record, layout: resolved.startLayout }
+  })
+  const parsed = parseTemplateDeckSpec(JSON.stringify({ pages: pagesForBuild }), info, {
     localImages: true,
     master: resolved.master,
+    ...(req.source === 'default' ? { defaultLayout: templateDefaultLayout(info, resolved) } : {}),
   })
   if (!parsed.ok) throw new CliError(EXIT.usage, dir + ': ' + parsed.error, undefined, INVALID)
   if (req.keepSlides) parsed.spec.keepSlides = true
@@ -750,6 +891,7 @@ export async function buildDeckFromTemplateDir(
     files,
     template: {
       ...(resolved.name ? { name: resolved.name } : {}),
+      ...(req.source ? { source: req.source } : {}),
       path: resolved.path,
       master: parsed.spec.master,
       slideSize: info.slideSize.px,
@@ -810,7 +952,11 @@ export async function checkTemplatePageSpec(
   req: TemplateBuildRequest,
 ): Promise<TemplatePageCheck> {
   const { resolved, bytes, info } = await templateBytesAndInfo(templateRefOf(text, req), ctx)
-  const parsed = parseTemplateDeckSpec(text, info, { localImages: true, master: resolved.master })
+  const parsed = parseTemplateDeckSpec(text, info, {
+    localImages: true,
+    master: resolved.master,
+    ...(req.source === 'default' ? { defaultLayout: templateDefaultLayout(info, resolved) } : {}),
+  })
   if (!parsed.ok) throw new CliError(EXIT.usage, source + ': ' + parsed.error, undefined, INVALID)
   if (parsed.spec.pages.length !== 1) {
     throw new CliError(
@@ -836,6 +982,7 @@ export async function checkTemplatePageSpec(
     raw: JSON.parse(text) as unknown,
     template: {
       ...(resolved.name ? { name: resolved.name } : {}),
+      ...(req.source ? { source: req.source } : {}),
       path: resolved.path,
       master: parsed.spec.master,
       slideSize: info.slideSize.px,

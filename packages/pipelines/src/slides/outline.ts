@@ -68,6 +68,10 @@ export interface ParseOutlineOptions {
   /** flat layout count across all masters: numeric layouts are range-checked
       against it when present (slides.ts passes info.masters flat length) */
   templateLayoutCount?: number
+  /** Missing layouts are filled from this layout in implicit default-template mode. */
+  defaultTemplateLayout?: string
+  /** Missing cover layouts may use the registered template starter layout. */
+  defaultCoverTemplateLayout?: string
 }
 
 export function parseOutline(
@@ -136,7 +140,7 @@ function normalizePage(
   const p = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
   const title = typeof p.title === 'string' ? p.title.trim() : ''
   const type = typeof p.type === 'string' ? (p.type.trim() as PageType) : ('' as PageType)
-  const layout = typeof p.layout === 'string' ? p.layout.trim() : ''
+  let layout = typeof p.layout === 'string' ? p.layout.trim() : ''
   const brief = typeof p.brief === 'string' ? p.brief.trim() : ''
   const queries = Array.isArray(p.image_queries) ? p.image_queries : []
   const err = (message: string) => issues.push({ page: i, level: 'error', message })
@@ -147,7 +151,14 @@ function normalizePage(
     err('"type" must be one of ' + PAGE_TYPES.join(', '))
   } else if (opts.templateLayouts) {
     if (!layout) {
-      err('"layout" is missing; pick one of ' + opts.templateLayouts.join(', '))
+      const fallback =
+        type === 'cover'
+          ? (opts.defaultCoverTemplateLayout ?? opts.defaultTemplateLayout)
+          : opts.defaultTemplateLayout
+      if (fallback) layout = fallback
+      else {
+        err('"layout" is missing; pick one of ' + opts.templateLayouts.join(', '))
+      }
     } else if (/^\d+$/.test(layout)) {
       if (opts.templateLayoutCount !== undefined) {
         const n = Number(layout)

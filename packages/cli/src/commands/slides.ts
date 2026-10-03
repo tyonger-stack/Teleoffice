@@ -17,6 +17,8 @@ import {
   auditDeckBytes,
   checkPageSpec,
   checkTemplatePageSpec,
+  configuredDefaultTemplate,
+  defaultTemplateForLayouts,
   deckSpecNamesTemplate,
   deckAuditDetail,
   templateOutlineFindings,
@@ -25,6 +27,8 @@ import {
   replaceSlideFromSpec,
   stageContext,
   templateBytesAndInfo,
+  templateDefaultLayout,
+  templateHasLayouts,
   type StageContext,
 } from '../formats/slide-spec'
 import {
@@ -48,7 +52,7 @@ export const slidesCommand: CommandDef = {
   summary:
     'Read, edit, audit or render a .pptx with the ops and layout audit the in-app AI uses; check an outline or page spec; rebuild one slide from its spec.',
   usage:
-    'slides <read|apply|audit|render|replace|layouts> <file.pptx> [options] | slides check <outline.json|page.json> [--template <file|name>]',
+    'slides <read|apply|audit|render|replace|layouts> <file.pptx> [options] | slides check <outline.json|page.json> [--template <file|name>] [--no-template]',
   options: [
     {
       name: 'slide',
@@ -88,6 +92,11 @@ export const slidesCommand: CommandDef = {
       value: 'file|name',
       description:
         'check: validate the outline or page against a corporate template (a .pptx path or a registered name); pages build on the template layouts',
+    },
+    {
+      name: 'no-template',
+      description:
+        'check: do not use the configured default template (explicit template fields still apply)',
     },
     { name: 'dry-run', description: 'apply: validate and print the plan without writing' },
     ...BATCH_OPTIONS,
@@ -327,14 +336,40 @@ async function check(
   const text = readFileSync(path, 'utf-8')
   const dir = dirname(path)
   if (looksLikeOutline(text)) {
-    const templateRef = flagString(args, 'template') ?? outlineTemplateField(text)
+    let templateRef = flagString(args, 'template') ?? outlineTemplateField(text)
+    let defaultSource = false
+    let defaultSkipped: string | undefined
+    if (templateRef === undefined && !flagBool(args, 'no-template')) {
+      const configured = configuredDefaultTemplate(ctx)
+      if (configured) {
+        const candidate = await templateBytesAndInfo(configured, ctx)
+        if (
+          templateHasLayouts(candidate.info, outlineLayoutRefs(text), candidate.resolved.master)
+        ) {
+          templateRef = configured
+          defaultSource = true
+        } else {
+          defaultSkipped = configured
+        }
+      }
+    }
     const tmpl = templateRef ? await templateBytesAndInfo(templateRef, ctx) : null
+    const fallbackLayout =
+      defaultSource && tmpl
+        ? (tmpl.info.masters
+            .flatMap((master) => master.layouts)
+            .find((layout) => layout.index === templateDefaultLayout(tmpl.info, tmpl.resolved))
+            ?.name ?? '')
+        : undefined
+    const coverLayout = tmpl?.resolved.startLayout
     const r = parseOutline(
       text,
       tmpl
         ? {
             templateLayouts: templateCheckLayouts(tmpl.info, tmpl.resolved.master),
             templateLayoutCount: tmpl.info.masters.flatMap((m) => m.layouts).length,
+            ...(fallbackLayout ? { defaultTemplateLayout: fallbackLayout } : {}),
+            ...(coverLayout ? { defaultCoverTemplateLayout: coverLayout } : {}),
           }
         : {},
     )
@@ -353,9 +388,20 @@ async function check(
         ? {
             template: {
               ...(tmpl.resolved.name ? { name: tmpl.resolved.name } : {}),
+              ...(defaultSource ? { source: 'default' as const } : {}),
               path: tmpl.resolved.path,
               master: tmpl.resolved.master ?? tmpl.info.defaultMaster,
               slideSize: tmpl.info.slideSize.px,
+              ...(fallbackLayout ? { defaultLayout: fallbackLayout } : {}),
+              ...(coverLayout ? { coverLayout } : {}),
+            },
+          }
+        : {}),
+      ...(defaultSkipped
+        ? {
+            defaultTemplateSkipped: {
+              name: defaultSkipped,
+              reason: 'outline layout names do not belong to this template',
             },
           }
         : {}),
@@ -379,14 +425,44 @@ async function check(
   const explicit = flagString(args, 'outline')
   const stage = stageContext(dir, ctx, explicit ? resolveInput(explicit, ctx) : undefined)
   const page = pageFlagValue(args) ?? pageIndexOf(path)
-  const templateFlag = flagString(args, 'template')
+  let templateFlag = flagString(args, 'template')
   const outlineTemplate = stage.outline?.outline.template
+  let defaultSource = false
+  let defaultSkipped: string | undefined
+  if (
+    templateFlag === undefined &&
+    !outlineTemplate &&
+    !deckSpecNamesTemplate(text) &&
+    !flagBool(args, 'no-template')
+  ) {
+    const configured = configuredDefaultTemplate(ctx)
+    if (configured) {
+      const refs = pageLayoutRefs(text)
+      if (stage.outline) refs.push(...stage.outline.outline.pages.map((entry) => entry.layout))
+      const defaultRef = await defaultTemplateForLayouts(refs, ctx)
+      if (defaultRef) {
+        templateFlag = defaultRef
+        defaultSource = true
+      } else {
+        defaultSkipped = configured
+      }
+    }
+  }
   if (
     templateFlag !== undefined ||
     deckSpecNamesTemplate(text) ||
     (outlineTemplate !== undefined && outlineTemplate !== '')
   ) {
-    return checkTemplatePage(path, text, ctx, stage, page, templateFlag, outlineTemplate)
+    return checkTemplatePage(
+      path,
+      text,
+      ctx,
+      stage,
+      page,
+      templateFlag,
+      outlineTemplate,
+      defaultSource,
+    )
   }
   const r = await checkPageSpec(text, path, ctx, { context: stage, page })
   const outline = r.stage?.outline ?? []
@@ -412,6 +488,14 @@ async function check(
         }
       : null,
     notes: stage.notes,
+    ...(defaultSkipped
+      ? {
+          defaultTemplateSkipped: {
+            name: defaultSkipped,
+            reason: 'page layout names do not belong to this template',
+          },
+        }
+      : {}),
     metrics: 'heuristic glyph widths; overflow figures are approximate',
   }
   const errors = outline.filter((o) => o.level === 'error')
@@ -437,6 +521,33 @@ function outlineTemplateField(text: string): string | undefined {
     return typeof v?.template === 'string' && v.template.trim() ? v.template.trim() : undefined
   } catch {
     return undefined
+  }
+}
+
+function outlineLayoutRefs(text: string): unknown[] {
+  try {
+    const root = JSON.parse(text) as { pages?: unknown }
+    return Array.isArray(root?.pages)
+      ? root.pages
+          .filter((page) => page && typeof page === 'object')
+          .map((page) => (page as { layout?: unknown }).layout)
+      : []
+  } catch {
+    return []
+  }
+}
+
+function pageLayoutRefs(text: string): unknown[] {
+  try {
+    const root = JSON.parse(text) as { pages?: unknown; layout?: unknown }
+    if (Array.isArray(root?.pages)) {
+      return root.pages
+        .filter((page) => page && typeof page === 'object')
+        .map((page) => (page as { layout?: unknown }).layout)
+    }
+    return root?.layout === undefined ? [] : [root.layout]
+  } catch {
+    return []
   }
 }
 
@@ -474,10 +585,12 @@ async function checkTemplatePage(
   page: number,
   templateFlag: string | undefined,
   outlineTemplate: string | undefined,
+  defaultSource = false,
 ): Promise<CommandResult> {
   const r = await checkTemplatePageSpec(text, path, ctx, {
     ...(templateFlag !== undefined ? { template: templateFlag } : {}),
     ...(outlineTemplate ? { outlineTemplate } : {}),
+    ...(defaultSource ? { source: 'default' as const } : {}),
   })
   const entry = stage.outline?.outline.pages[page]
   const findings: OutlineIssue[] = stage.outline

@@ -74,7 +74,7 @@ export const DECK_TOOLS: DeckTool[] = [
         .string()
         .optional()
         .describe(
-          'a .pptx template path or registered name to build on; stored in the outline as "template" and checked with template_inspect',
+          'a .pptx template path or registered name to build on; stored in the outline as "template" and checked with template_inspect. Set this for staged decks: their page layout variants do not auto-select the CLI default template.',
         ),
     },
     async run(args, ctx) {

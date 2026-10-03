@@ -450,6 +450,8 @@ export interface TemplateDeckPageIssue {
 export interface TemplateDeckSpecOptions {
   localImages?: boolean
   master?: number | string
+  /** layout for pages without a layout field in implicit default-template mode */
+  defaultLayout?: number | string
 }
 
 function flatLayouts(info: TemplateInfo): TemplateLayout[] {
@@ -641,6 +643,7 @@ interface PageCtx {
   pxW: number
   pxH: number
   localImages: boolean
+  defaultLayout?: number | string
 }
 
 function parseTemplatePage(
@@ -662,7 +665,9 @@ function parseTemplatePage(
     }
   }
   const preferred = pageMaster ?? ctx.master
-  const resolved = resolveLayout(info, root.layout, preferred)
+  const missingLayout = root.layout === undefined || root.layout === null || root.layout === ''
+  const requestedLayout = missingLayout ? ctx.defaultLayout : root.layout
+  const resolved = resolveLayout(info, requestedLayout, preferred)
   if (!resolved.ok) return { error: resolved.error }
   const layout = resolved.resolved.layout
   const master = layout.master
@@ -852,6 +857,7 @@ export function parseTemplateDeckSpec(
     pxW: info.slideSize.px.w,
     pxH: info.slideSize.px.h,
     localImages: opts.localImages ?? false,
+    ...(opts.defaultLayout !== undefined ? { defaultLayout: opts.defaultLayout } : {}),
   }
   const pages: TemplatePageSpec[] = []
   const issues: TemplateDeckPageIssue[] = []

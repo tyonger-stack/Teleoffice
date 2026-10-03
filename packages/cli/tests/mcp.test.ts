@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, readFileSync } from 'node:fs'
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
@@ -19,6 +19,12 @@ import {
   TOOLS,
 } from '../src/mcp/tools'
 import { tempDir, writeMinimalPdf } from './helpers'
+import { createBlankPptx } from '@teleoffice/pptx-engine'
+import {
+  addTemplate,
+  removeTemplate,
+  setDefaultTemplate,
+} from '@teleoffice/pipelines/slides/templates'
 
 const REPO = resolve(__dirname, '../../..')
 const DOCX = join(REPO, 'apps/docs/tests/pagination-corpus/docx/01-simple-english.docx')
@@ -132,7 +138,11 @@ describe('mcp server', () => {
     dir = tempDir()
     ctx = createContext({
       cwd: dir,
-      env: { ...process.env, TELEOFFICE_AUDIT_LOG: 'off' },
+      env: {
+        ...process.env,
+        TELEOFFICE_AUDIT_LOG: 'off',
+        TELEOFFICE_TEMPLATES_DIR: join(dir, 'templates'),
+      },
       log: () => {},
     })
     const server = await createMcpServer(ctx, { registry })
@@ -264,6 +274,66 @@ describe('mcp server', () => {
     const names = props('create_pptx').ops!.items!.properties!.op!.enum!
     const slides = (await opsParam('slides_apply')).items!.anyOf!
     expect(names).toEqual(slides.map((v) => v.properties!.op!.enum![0]))
+  })
+
+  it('lists the default template and applies it to create_pptx specs, but not ops', async () => {
+    const source = join(dir, 'mcp-default.pptx')
+    writeFileSync(source, await createBlankPptx())
+    addTemplate('mcp-default', source, {}, ctx.env)
+    setDefaultTemplate('mcp-default', ctx.env)
+
+    const listed = await call('template_list', {})
+    expect(listed.isError).toBe(false)
+    expect(listed.json().detail.templates).toMatchObject([{ name: 'mcp-default', isDefault: true }])
+
+    const specBuild = await call('create_pptx', {
+      spec: { pages: [{ elements: [] }] },
+      out: join(dir, 'mcp-spec.pptx'),
+    })
+    expect(specBuild.isError).toBe(false)
+    expect(specBuild.json().detail.template).toMatchObject({
+      name: 'mcp-default',
+      source: 'default',
+    })
+
+    const opsBuild = await call('create_pptx', {
+      ops: [
+        {
+          op: 'addElement',
+          target: { slide: 0 },
+          kind: 'textbox',
+          offset: { x: 914400, y: 914400, cx: 3657600, cy: 914400 },
+          paragraphs: [{ runs: [{ text: 'ops remain blank' }] }],
+        },
+      ],
+      out: join(dir, 'mcp-ops.pptx'),
+    })
+    expect(opsBuild.isError).toBe(false)
+    expect(opsBuild.json().detail.template).toBeUndefined()
+
+    const optedOut = await call('create_pptx', {
+      spec: {
+        pages: [
+          {
+            elements: [
+              {
+                type: 'text',
+                x: 80,
+                y: 60,
+                w: 800,
+                h: 90,
+                paragraphs: [{ runs: [{ text: 'ordinary spec' }] }],
+              },
+            ],
+          },
+        ],
+      },
+      no_template: true,
+      out: join(dir, 'mcp-no-template.pptx'),
+    })
+    expect(optedOut.isError, optedOut.text).toBe(false)
+    expect(optedOut.json().detail.template).toBeUndefined()
+    removeTemplate('mcp-default', ctx.env)
   })
 
   it('emits no schema construct that Gemini or strict clients reject, within the size budget', async () => {

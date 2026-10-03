@@ -43,6 +43,13 @@ export const strings = {
     openLocal: '打开本地文件',
     newSlideFromTemplate: 'PPT模版',
     templateCardSub: '默认模版 / .pptx',
+    defaultBadge: '默认',
+
+    setTemplateDefault: '设为默认',
+
+    clearTemplateDefault: '取消默认',
+
+    templateDefaultNamed: '默认：{name}',
     defaultTemplatesHeading: '设置Office的默认模板',
     templateDoc: 'Docs模版',
     templateDocSub: '默认模版 / .docx',
@@ -445,6 +452,13 @@ export const strings = {
     openLocal: 'Open Local File',
     newSlideFromTemplate: 'PPT template',
     templateCardSub: 'Default template / .pptx',
+    defaultBadge: 'Default',
+
+    setTemplateDefault: 'Set as default',
+
+    clearTemplateDefault: 'Clear default',
+
+    templateDefaultNamed: 'Default: {name}',
     defaultTemplatesHeading: 'Set default Office templates',
     templateDoc: 'Docs template',
     templateDocSub: 'Default template / .docx',
@@ -863,6 +877,13 @@ export const strings = {
     openLocal: 'Mở tệp cục bộ',
     newSlideFromTemplate: 'Mẫu PPT',
     templateCardSub: 'Mẫu mặc định / .pptx',
+    defaultBadge: 'Mặc định',
+
+    setTemplateDefault: 'Đặt làm mặc định',
+
+    clearTemplateDefault: 'Bỏ mặc định',
+
+    templateDefaultNamed: 'Mặc định: {name}',
     defaultTemplatesHeading: 'Đặt mẫu Office mặc định',
     templateDoc: 'Mẫu Docs',
     templateDocSub: 'Mẫu mặc định / .docx',
@@ -1286,6 +1307,13 @@ export const strings = {
     openLocal: 'ローカルファイルを開く',
     newSlideFromTemplate: 'PPT テンプレート',
     templateCardSub: '既定のテンプレート / .pptx',
+    defaultBadge: '既定',
+
+    setTemplateDefault: '既定に設定',
+
+    clearTemplateDefault: '既定を解除',
+
+    templateDefaultNamed: '既定：{name}',
     defaultTemplatesHeading: 'Office の既定テンプレートを設定',
     templateDoc: 'Docs テンプレート',
     templateDocSub: '既定のテンプレート / .docx',
@@ -1718,6 +1746,13 @@ export const strings = {
     openLocal: '로컬 파일 열기',
     newSlideFromTemplate: 'PPT 템플릿',
     templateCardSub: '기본 템플릿 / .pptx',
+    defaultBadge: '기본값',
+
+    setTemplateDefault: '기본값으로 설정',
+
+    clearTemplateDefault: '기본값 해제',
+
+    templateDefaultNamed: '기본값: {name}',
     defaultTemplatesHeading: 'Office 기본 템플릿 설정',
     templateDoc: 'Docs 템플릿',
     templateDocSub: '기본 템플릿 / .docx',
@@ -2143,6 +2178,13 @@ export const strings = {
     openLocal: 'Ouvrir un fichier local',
     newSlideFromTemplate: 'Modèle PPT',
     templateCardSub: 'Modèle par défaut / .pptx',
+    defaultBadge: 'Par défaut',
+
+    setTemplateDefault: 'Définir par défaut',
+
+    clearTemplateDefault: 'Annuler le défaut',
+
+    templateDefaultNamed: 'Par défaut : {name}',
     defaultTemplatesHeading: 'Définir les modèles Office par défaut',
     templateDoc: 'Modèle Docs',
     templateDocSub: 'Modèle par défaut / .docx',
@@ -2581,6 +2623,13 @@ export const strings = {
     openLocal: 'Lokale Datei öffnen',
     newSlideFromTemplate: 'PPT-Vorlage',
     templateCardSub: 'Standardvorlage / .pptx',
+    defaultBadge: 'Standard',
+
+    setTemplateDefault: 'Als Standard festlegen',
+
+    clearTemplateDefault: 'Standard zurücksetzen',
+
+    templateDefaultNamed: 'Standard: {name}',
     defaultTemplatesHeading: 'Office-Standardvorlagen festlegen',
     templateDoc: 'Docs-Vorlage',
     templateDocSub: 'Standardvorlage / .docx',
@@ -3021,6 +3070,13 @@ export const strings = {
     openLocal: 'Abrir archivo local',
     newSlideFromTemplate: 'Plantilla PPT',
     templateCardSub: 'Plantilla predeterminada / .pptx',
+    defaultBadge: 'Predeterminada',
+
+    setTemplateDefault: 'Establecer como predeterminada',
+
+    clearTemplateDefault: 'Quitar predeterminada',
+
+    templateDefaultNamed: 'Predeterminada: {name}',
     defaultTemplatesHeading: 'Establecer plantillas predeterminadas de Office',
     templateDoc: 'Plantilla Docs',
     templateDocSub: 'Plantilla predeterminada / .docx',
@@ -3456,6 +3512,13 @@ export const strings = {
     openLocal: 'เปิดไฟล์ในเครื่อง',
     newSlideFromTemplate: 'เทมเพลต PPT',
     templateCardSub: 'เทมเพลตเริ่มต้น / .pptx',
+    defaultBadge: 'ค่าเริ่มต้น',
+
+    setTemplateDefault: 'ตั้งเป็นค่าเริ่มต้น',
+
+    clearTemplateDefault: 'ยกเลิกค่าเริ่มต้น',
+
+    templateDefaultNamed: 'ค่าเริ่มต้น: {name}',
     defaultTemplatesHeading: 'ตั้งค่าเทมเพลต Office เริ่มต้น',
     templateDoc: 'เทมเพลต Docs',
     templateDocSub: 'เทมเพลตเริ่มต้น / .docx',
@@ -3875,6 +3938,13 @@ export const strings = {
     openLocal: 'Buka File Lokal',
     newSlideFromTemplate: 'Templat PPT',
     templateCardSub: 'Templat bawaan / .pptx',
+    defaultBadge: 'Default',
+
+    setTemplateDefault: 'Jadikan default',
+
+    clearTemplateDefault: 'Hapus default',
+
+    templateDefaultNamed: 'Default: {name}',
     defaultTemplatesHeading: 'Atur templat Office bawaan',
     templateDoc: 'Templat Docs',
     templateDocSub: 'Templat bawaan / .docx',
@@ -4305,6 +4375,13 @@ export const strings = {
     openLocal: 'Открыть локальный файл',
     newSlideFromTemplate: 'Шаблон PPT',
     templateCardSub: 'Шаблон по умолчанию / .pptx',
+    defaultBadge: 'По умолчанию',
+
+    setTemplateDefault: 'Сделать стандартным',
+
+    clearTemplateDefault: 'Сбросить по умолчанию',
+
+    templateDefaultNamed: 'По умолчанию: {name}',
     defaultTemplatesHeading: 'Задать шаблоны Office по умолчанию',
     templateDoc: 'Шаблон Docs',
     templateDocSub: 'Шаблон по умолчанию / .docx',
@@ -4733,6 +4810,13 @@ export const strings = {
     openLocal: 'فتح ملف محلي',
     newSlideFromTemplate: 'قالب PPT',
     templateCardSub: 'القالب الافتراضي / .pptx',
+    defaultBadge: 'افتراضي',
+
+    setTemplateDefault: 'تعيين كافتراضي',
+
+    clearTemplateDefault: 'إلغاء الافتراضي',
+
+    templateDefaultNamed: 'الافتراضي: {name}',
     defaultTemplatesHeading: 'تعيين قوالب Office الافتراضية',
     templateDoc: 'قالب Docs',
     templateDocSub: 'القالب الافتراضي / .docx',
@@ -5152,6 +5236,13 @@ export const strings = {
     openLocal: 'Abrir arquivo local',
     newSlideFromTemplate: 'Modelo PPT',
     templateCardSub: 'Modelo padrão / .pptx',
+    defaultBadge: 'Padrão',
+
+    setTemplateDefault: 'Definir como padrão',
+
+    clearTemplateDefault: 'Remover padrão',
+
+    templateDefaultNamed: 'Padrão: {name}',
     defaultTemplatesHeading: 'Definir modelos padrão do Office',
     templateDoc: 'Modelo Docs',
     templateDocSub: 'Modelo padrão / .docx',
@@ -5577,6 +5668,13 @@ export const strings = {
     openLocal: 'Apri file locale',
     newSlideFromTemplate: 'Modello PPT',
     templateCardSub: 'Modello predefinito / .pptx',
+    defaultBadge: 'Predefinito',
+
+    setTemplateDefault: 'Imposta come predefinito',
+
+    clearTemplateDefault: 'Rimuovi predefinito',
+
+    templateDefaultNamed: 'Predefinito: {name}',
     defaultTemplatesHeading: 'Imposta i modelli Office predefiniti',
     templateDoc: 'Modello Docs',
     templateDocSub: 'Modello predefinito / .docx',
@@ -6000,6 +6098,13 @@ export const strings = {
     openLocal: 'Otwórz plik lokalny',
     newSlideFromTemplate: 'Szablon PPT',
     templateCardSub: 'Szablon domyślny / .pptx',
+    defaultBadge: 'Domyślny',
+
+    setTemplateDefault: 'Ustaw jako domyślny',
+
+    clearTemplateDefault: 'Usuń domyślny',
+
+    templateDefaultNamed: 'Domyślny: {name}',
     defaultTemplatesHeading: 'Ustaw domyślne szablony Office',
     templateDoc: 'Szablon Docs',
     templateDocSub: 'Szablon domyślny / .docx',
@@ -6422,6 +6527,13 @@ export const strings = {
     openLocal: 'Otevřít místní soubor',
     newSlideFromTemplate: 'Šablona PPT',
     templateCardSub: 'Výchozí šablona / .pptx',
+    defaultBadge: 'Výchozí',
+
+    setTemplateDefault: 'Nastavit jako výchozí',
+
+    clearTemplateDefault: 'Zrušit výchozí',
+
+    templateDefaultNamed: 'Výchozí: {name}',
     defaultTemplatesHeading: 'Nastavit výchozí šablony Office',
     templateDoc: 'Šablona Docs',
     templateDocSub: 'Výchozí šablona / .docx',
@@ -6842,6 +6954,13 @@ export const strings = {
     openLocal: 'Lokaal bestand openen',
     newSlideFromTemplate: 'PPT-sjabloon',
     templateCardSub: 'Standaardsjabloon / .pptx',
+    defaultBadge: 'Standaard',
+
+    setTemplateDefault: 'Instellen als standaard',
+
+    clearTemplateDefault: 'Standaard wissen',
+
+    templateDefaultNamed: 'Standaard: {name}',
     defaultTemplatesHeading: 'Standaard Office-sjablonen instellen',
     templateDoc: 'Docs-sjabloon',
     templateDocSub: 'Standaardsjabloon / .docx',
@@ -7263,6 +7382,13 @@ export const strings = {
     openLocal: 'Buka Fail Setempat',
     newSlideFromTemplate: 'Templat PPT',
     templateCardSub: 'Templat lalai / .pptx',
+    defaultBadge: 'Lalai',
+
+    setTemplateDefault: 'Tetapkan sebagai lalai',
+
+    clearTemplateDefault: 'Kosongkan lalai',
+
+    templateDefaultNamed: 'Lalai: {name}',
     defaultTemplatesHeading: 'Tetapkan templat Office lalai',
     templateDoc: 'Templat Docs',
     templateDocSub: 'Templat lalai / .docx',
@@ -7687,6 +7813,13 @@ export const strings = {
     openLocal: 'פתיחת קובץ מקומי',
     newSlideFromTemplate: 'תבנית PPT',
     templateCardSub: 'תבנית ברירת מחדל / .pptx',
+    defaultBadge: 'ברירת מחדל',
+
+    setTemplateDefault: 'הגדרה כברירת מחדל',
+
+    clearTemplateDefault: 'ביטול ברירת מחדל',
+
+    templateDefaultNamed: 'ברירת מחדל: {name}',
     defaultTemplatesHeading: 'הגדרת תבניות Office ברירת מחדל',
     templateDoc: 'תבנית Docs',
     templateDocSub: 'תבנית ברירת מחדל / .docx',
@@ -8093,6 +8226,13 @@ export const strings = {
     openLocal: 'स्थानीय फ़ाइल खोलें',
     newSlideFromTemplate: 'PPT टेम्पलेट',
     templateCardSub: 'डिफ़ॉल्ट टेम्पलेट / .pptx',
+    defaultBadge: 'डिफ़ॉल्ट',
+
+    setTemplateDefault: 'डिफ़ॉल्ट के रूप में सेट करें',
+
+    clearTemplateDefault: 'डिफ़ॉल्ट हटाएँ',
+
+    templateDefaultNamed: 'डिफ़ॉल्ट: {name}',
     defaultTemplatesHeading: 'Office के डिफ़ॉल्ट टेम्पलेट सेट करें',
     templateDoc: 'Docs टेम्पलेट',
     templateDocSub: 'डिफ़ॉल्ट टेम्पलेट / .docx',
@@ -8511,6 +8651,13 @@ export const strings = {
     openLocal: '開啟本機檔案',
     newSlideFromTemplate: 'PPT範本',
     templateCardSub: '預設範本 / .pptx',
+    defaultBadge: '預設',
+
+    setTemplateDefault: '設為預設',
+
+    clearTemplateDefault: '取消預設',
+
+    templateDefaultNamed: '預設：{name}',
     defaultTemplatesHeading: '設定Office的預設範本',
     templateDoc: 'Docs範本',
     templateDocSub: '預設範本 / .docx',

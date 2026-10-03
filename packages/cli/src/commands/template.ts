@@ -5,8 +5,11 @@ import { resolveTemplateSource } from '../formats/slide-spec'
 import { inspectTemplate, type TemplateInfo } from '@teleoffice/pipelines/slides'
 import {
   addTemplate,
+  clearDefaultTemplate,
+  getDefaultTemplate,
   listTemplates,
   removeTemplate,
+  setDefaultTemplate,
   templatesDir,
 } from '@teleoffice/pipelines/slides/templates'
 import type { CommandContext, CommandDef } from '../registry'
@@ -14,8 +17,8 @@ import { CliError, EXIT } from '../result'
 
 export const templateCommand: CommandDef = {
   name: 'template',
-  summary: 'Inspect, list and manage the .pptx templates for template-mode deck builds.',
-  usage: 'template <inspect|list|add|remove|path>',
+  summary: 'Inspect and manage .pptx templates, including the default used by deck specs.',
+  usage: 'template <inspect|list|add|remove|default|path>',
   options: [
     { name: 'copy', description: 'add: copy the file into the templates directory' },
     { name: 'master', value: 'n', description: 'add: default slide-master index' },
@@ -23,6 +26,8 @@ export const templateCommand: CommandDef = {
     { name: 'description', value: 'text', description: 'add: one-line note with the template' },
     { name: 'start-layout', value: 'name', description: 'add: starter layout for new decks' },
     { name: 'force', description: 'add: overwrite an existing template of the same name' },
+    { name: 'default', description: 'add: make the added template the default' },
+    { name: 'clear', description: 'default: clear the configured default template' },
   ],
   async run(args, ctx) {
     const [verb, first, second] = args.positionals
@@ -35,13 +40,15 @@ export const templateCommand: CommandDef = {
         return add(first, second, args, ctx)
       case 'remove':
         return remove(first, ctx)
+      case 'default':
+        return setDefault(first, args, ctx)
       case 'path':
         return path(ctx)
       default:
         throw new CliError(
           EXIT.usage,
-          'expected template inspect|list|add|remove|path',
-          { supported: ['inspect', 'list', 'add', 'remove', 'path'] },
+          'expected template inspect|list|add|remove|default|path',
+          { supported: ['inspect', 'list', 'add', 'remove', 'default', 'path'] },
           {
             reason: verb === undefined ? 'missing_argument' : 'invalid_argument',
             suggestion: 'run teleoffice help template',
@@ -109,12 +116,19 @@ export async function inspectTemplateFile(
 function list(ctx: CommandContext): { summary: string; detail: Record<string, unknown> } {
   const dir = templatesDir(ctx.env)
   const templates = listTemplates(ctx.env)
+  const defaultTemplate = getDefaultTemplate(ctx.env)
   return {
     summary:
       templates.length === 0
         ? 'no templates in ' + dir
-        : templates.length + ' template(s) in ' + dir,
-    detail: { dir, templates },
+        : templates.length +
+          ' template(s) in ' +
+          dir +
+          ': ' +
+          templates
+            .map((template) => template.name + (template.isDefault ? ' (default)' : ''))
+            .join(', '),
+    detail: { dir, default: defaultTemplate ?? null, templates },
   }
 }
 
@@ -175,7 +189,55 @@ async function add(
       },
       ctx.env,
     )
-    return { summary: 'added template ' + added.name, detail: { ...added } }
+    const isDefault = flagBool(args, 'default')
+    if (isDefault) setDefaultTemplate(added.name, ctx.env)
+    return {
+      summary: 'added template ' + added.name + (isDefault ? ' and set it as default' : ''),
+      detail: { ...added, ...(isDefault ? { isDefault: true } : {}) },
+    }
+  } catch (err) {
+    throw new CliError(EXIT.usage, err instanceof Error ? err.message : String(err), undefined, {
+      reason: 'invalid_argument',
+    })
+  }
+}
+
+function setDefault(
+  name: string | undefined,
+  args: Parameters<CommandDef['run']>[0],
+  ctx: CommandContext,
+): { summary: string; detail: Record<string, unknown> } {
+  const clear = flagBool(args, 'clear')
+  if (clear && name) {
+    throw new CliError(EXIT.usage, 'template default --clear does not take a name', undefined, {
+      reason: 'invalid_argument',
+    })
+  }
+  if (clear) {
+    const previous = clearDefaultTemplate(ctx.env)
+    return {
+      summary: previous ? 'cleared default template ' + previous : 'no default template to clear',
+      detail: { default: null, previous: previous ?? null },
+    }
+  }
+  if (!name) {
+    const current = getDefaultTemplate(ctx.env)
+    const available = current
+      ? listTemplates(ctx.env).some((template) => template.name === current && template.exists)
+      : false
+    return {
+      summary: current
+        ? 'default template: ' + current + (available ? '' : ' (unavailable)')
+        : 'no default template is set',
+      detail: { default: current ?? null, available: current ? available : null },
+    }
+  }
+  try {
+    const selected = setDefaultTemplate(name, ctx.env)
+    return {
+      summary: 'default template set to ' + selected,
+      detail: { default: selected },
+    }
   } catch (err) {
     throw new CliError(EXIT.usage, err instanceof Error ? err.message : String(err), undefined, {
       reason: 'invalid_argument',
