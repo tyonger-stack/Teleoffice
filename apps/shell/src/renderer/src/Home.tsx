@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties, DragEvent as ReactDragEvent, ReactElement } from 'react'
+import { createPortal } from 'react-dom'
 import logoLockup from './assets/teleoffice-logo.svg'
 import iconDocx from './assets/file-docx.svg'
 import iconXlsx from './assets/file-xlsx.svg'
@@ -28,6 +29,7 @@ import { SettingsModal } from './SettingsModal'
 import type { SettingsTarget } from './SettingsModal'
 import { skillUpdateDue } from './IntegrationsPane'
 import { onFilesChanged } from './file-events'
+import { computeTemplateMenuLayout, type TemplateMenuLayout } from './template-menu-layout'
 
 declare global {
   interface Window {
@@ -906,9 +908,18 @@ export function Home() {
   const rowMenuWrapRef = useRef<HTMLSpanElement>(null)
   // which default-template card's menu is open (loads that kind's list on open)
   const [templateMenuKind, setTemplateMenuKind] = useState<HomeTemplateKind | null>(null)
-  const [templateMenuPlacement, setTemplateMenuPlacement] = useState<'above' | 'below'>('below')
-  const [templateListMaxHeight, setTemplateListMaxHeight] = useState(320)
+  const [templateMenuLayout, setTemplateMenuLayout] = useState<
+    TemplateMenuLayout & { top: number; left: number; bottom: number }
+  >({
+    placement: 'below',
+    listMaxHeight: 320,
+    menuMaxHeight: 424,
+    top: 12,
+    left: 12,
+    bottom: 12,
+  })
   const templateMenuWrapRef = useRef<HTMLDivElement>(null)
+  const templateMenuRef = useRef<HTMLDivElement>(null)
   const [templateLists, setTemplateLists] = useState<
     Partial<Record<HomeTemplateKind, TemplateMenuEntry[] | null>>
   >({})
@@ -1199,8 +1210,22 @@ export function Home() {
     inside: () => [folderMenuWrapRef.current],
   })
   useDismissablePopover(templateMenuKind !== null, () => setTemplateMenuKind(null), {
-    inside: () => [templateMenuWrapRef.current],
+    inside: () => [templateMenuWrapRef.current, templateMenuRef.current],
   })
+  // The portaled menu is fixed to the viewport; close it if its anchor can move.
+  useEffect(() => {
+    if (!templateMenuKind) return
+    const close = (event: Event) => {
+      if (event.target instanceof Node && templateMenuRef.current?.contains(event.target)) return
+      setTemplateMenuKind(null)
+    }
+    window.addEventListener('scroll', close, true)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('scroll', close, true)
+      window.removeEventListener('resize', close)
+    }
+  }, [templateMenuKind])
   // the fixed-position folder menu would detach from its row while the tree scrolls
   useEffect(() => {
     if (!folderMenu) return
@@ -1674,12 +1699,23 @@ export function Home() {
                         return
                       }
                       const rect = event.currentTarget.getBoundingClientRect()
-                      const below = window.innerHeight - rect.bottom - 12
-                      const above = rect.top - 12
-                      const placement = below < 300 && above > below ? 'above' : 'below'
-                      const available = placement === 'above' ? above : below
-                      setTemplateMenuPlacement(placement)
-                      setTemplateListMaxHeight(Math.max(60, available - 124))
+                      const layout = computeTemplateMenuLayout({
+                        cardTop: rect.top,
+                        cardBottom: rect.bottom,
+                        viewportHeight: window.innerHeight,
+                        entryCount: templateLists[card.kind]?.length,
+                      })
+                      const menuWidth = Math.min(320, Math.max(0, window.innerWidth - 24))
+                      const maxLeft = Math.max(12, window.innerWidth - menuWidth - 12)
+                      const left = Math.max(12, Math.min(rect.left, maxLeft))
+                      const maxTop = Math.max(0, window.innerHeight - layout.menuMaxHeight)
+                      const top = Math.max(0, Math.min(rect.bottom + 12, maxTop))
+                      const minimumBottom = Math.max(0, window.innerHeight - layout.menuMaxHeight)
+                      const bottom = Math.max(
+                        minimumBottom,
+                        Math.min(window.innerHeight, window.innerHeight - rect.top + 12),
+                      )
+                      setTemplateMenuLayout({ ...layout, top, left, bottom })
                       setTemplateMenuKind(card.kind)
                       loadTemplateList(card.kind)
                     }}
@@ -1692,112 +1728,120 @@ export function Home() {
                       <span className="quick-sub">{cardSub}</span>
                     </span>
                   </button>
-                  {open && (
-                    <div
-                      className={`cloud-sort-menu template-menu template-menu-${templateMenuPlacement}`}
-                      role="menu"
-                      style={
-                        {
-                          '--template-list-max-height': `${templateListMaxHeight}px`,
-                        } as CSSProperties
-                      }
-                    >
-                      {listed && listed.length > 0 ? (
-                        <div className="template-list">
-                          {[...listed]
-                            .sort(
-                              (a, b) => Number(Boolean(b.isDefault)) - Number(Boolean(a.isDefault)),
-                            )
-                            .map((tpl) => (
-                              <div className="template-menu-entry" key={tpl.name}>
-                                <button
-                                  className="template-use-button"
-                                  role="menuitem"
-                                  disabled={!tpl.exists}
-                                  title={`${tpl.path}${tpl.description ? `\n${tpl.description}` : ''}`}
-                                  onClick={() => {
-                                    setTemplateMenuKind(null)
-                                    if (card.kind === 'pptx') {
-                                      void window.aiOffice.newSlideFromTemplate(
-                                        tpl.name,
-                                        newFileOpts,
-                                      )
-                                    } else {
-                                      void window.aiOffice.newOfficeFromTemplate(
-                                        card.kind,
-                                        tpl.name,
-                                        newFileOpts,
-                                      )
-                                    }
-                                  }}
-                                >
-                                  <span className="template-name-row">
-                                    <span className="template-name">{tpl.name}</span>
-                                    {card.kind === 'pptx' && tpl.isDefault ? (
-                                      <span className="template-default-badge">
-                                        {t('defaultBadge')}
-                                      </span>
-                                    ) : null}
-                                  </span>
-                                  {tpl.description ? (
-                                    <span className="template-desc">{tpl.description}</span>
-                                  ) : null}
-                                </button>
-                                {card.kind === 'pptx' ? (
+                  {open &&
+                    createPortal(
+                      <div
+                        ref={templateMenuRef}
+                        className={`cloud-sort-menu template-menu template-menu-${templateMenuLayout.placement}`}
+                        role="menu"
+                        style={
+                          {
+                            '--template-list-max-height': `${templateMenuLayout.listMaxHeight}px`,
+                            '--template-menu-max-height': `${templateMenuLayout.menuMaxHeight}px`,
+                            '--template-menu-top': `${templateMenuLayout.top}px`,
+                            '--template-menu-left': `${templateMenuLayout.left}px`,
+                            '--template-menu-bottom': `${templateMenuLayout.bottom}px`,
+                          } as CSSProperties
+                        }
+                      >
+                        {listed && listed.length > 0 ? (
+                          <div className="template-list">
+                            {[...listed]
+                              .sort(
+                                (a, b) =>
+                                  Number(Boolean(b.isDefault)) - Number(Boolean(a.isDefault)),
+                              )
+                              .map((tpl) => (
+                                <div className="template-menu-entry" key={tpl.name}>
                                   <button
-                                    className="template-default-action"
+                                    className="template-use-button"
                                     role="menuitem"
                                     disabled={!tpl.exists}
+                                    title={`${tpl.path}${tpl.description ? `\n${tpl.description}` : ''}`}
                                     onClick={() => {
-                                      void window.aiOffice
-                                        .setDefaultSlideTemplate(tpl.isDefault ? null : tpl.name)
-                                        .then(() => loadTemplateList('pptx'))
-                                        .catch((err: unknown) =>
-                                          console.warn('setting default template failed', err),
+                                      setTemplateMenuKind(null)
+                                      if (card.kind === 'pptx') {
+                                        void window.aiOffice.newSlideFromTemplate(
+                                          tpl.name,
+                                          newFileOpts,
                                         )
+                                      } else {
+                                        void window.aiOffice.newOfficeFromTemplate(
+                                          card.kind,
+                                          tpl.name,
+                                          newFileOpts,
+                                        )
+                                      }
                                     }}
                                   >
-                                    {tpl.isDefault
-                                      ? t('clearTemplateDefault')
-                                      : t('setTemplateDefault')}
+                                    <span className="template-name-row">
+                                      <span className="template-name">{tpl.name}</span>
+                                      {card.kind === 'pptx' && tpl.isDefault ? (
+                                        <span className="template-default-badge">
+                                          {t('defaultBadge')}
+                                        </span>
+                                      ) : null}
+                                    </span>
+                                    {tpl.description ? (
+                                      <span className="template-desc">{tpl.description}</span>
+                                    ) : null}
                                   </button>
-                                ) : null}
-                              </div>
-                            ))}
-                        </div>
-                      ) : null}
-                      {listed && listed.length === 0 ? (
-                        <div className="template-empty">{t('noTemplatesYet')}</div>
-                      ) : null}
-                      <div className="row-menu-divider" />
-                      <button
-                        role="menuitem"
-                        onClick={() => {
-                          const pending =
-                            card.kind === 'pptx'
-                              ? window.aiOffice.importSlideTemplate()
-                              : window.aiOffice.importOfficeTemplate(card.kind)
-                          void pending.then(
-                            (imported) => {
-                              if (imported) loadTemplateList(card.kind)
-                            },
-                            (err: unknown) => console.warn('template import failed', err),
-                          )
-                        }}
-                      >
-                        {t('importTemplate')}
-                      </button>
-                      <button
-                        role="menuitem"
-                        onClick={() => {
-                          if (card.kind === 'pptx') void window.aiOffice.openTemplatesFolder()
-                          else void window.aiOffice.openOfficeTemplatesFolder(card.kind)
-                        }}
-                      >
-                        {t('openTemplatesFolder')}
-                      </button>
-                    </div>
-                  )}
+                                  {card.kind === 'pptx' ? (
+                                    <button
+                                      className="template-default-action"
+                                      role="menuitem"
+                                      disabled={!tpl.exists}
+                                      onClick={() => {
+                                        void window.aiOffice
+                                          .setDefaultSlideTemplate(tpl.isDefault ? null : tpl.name)
+                                          .then(() => loadTemplateList('pptx'))
+                                          .catch((err: unknown) =>
+                                            console.warn('setting default template failed', err),
+                                          )
+                                      }}
+                                    >
+                                      {tpl.isDefault
+                                        ? t('clearTemplateDefault')
+                                        : t('setTemplateDefault')}
+                                    </button>
+                                  ) : null}
+                                </div>
+                              ))}
+                          </div>
+                        ) : null}
+                        {listed && listed.length === 0 ? (
+                          <div className="template-empty">{t('noTemplatesYet')}</div>
+                        ) : null}
+                        <div className="row-menu-divider" />
+                        <button
+                          role="menuitem"
+                          onClick={() => {
+                            const pending =
+                              card.kind === 'pptx'
+                                ? window.aiOffice.importSlideTemplate()
+                                : window.aiOffice.importOfficeTemplate(card.kind)
+                            void pending.then(
+                              (imported) => {
+                                if (imported) loadTemplateList(card.kind)
+                              },
+                              (err: unknown) => console.warn('template import failed', err),
+                            )
+                          }}
+                        >
+                          {t('importTemplate')}
+                        </button>
+                        <button
+                          role="menuitem"
+                          onClick={() => {
+                            if (card.kind === 'pptx') void window.aiOffice.openTemplatesFolder()
+                            else void window.aiOffice.openOfficeTemplatesFolder(card.kind)
+                          }}
+                        >
+                          {t('openTemplatesFolder')}
+                        </button>
+                      </div>,
+                      document.body,
+                    )}
                 </div>
               )
             })}
