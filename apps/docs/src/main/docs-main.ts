@@ -311,7 +311,6 @@ const tMain = createI18n({
     menuWindow: '窗口',
     menuHelp: '帮助',
     menuShortcuts: '键盘快捷键',
-    menuDocsHelp: 'TeleOffice Docs 帮助',
   },
   en: {
     dlgOpenDoc: 'Open Document',
@@ -443,7 +442,6 @@ const tMain = createI18n({
     menuWindow: 'Window',
     menuHelp: 'Help',
     menuShortcuts: 'Keyboard Shortcuts',
-    menuDocsHelp: 'TeleOffice Docs Help',
   },
   vi: {
     dlgOpenDoc: 'Mở tài liệu',
@@ -576,7 +574,6 @@ const tMain = createI18n({
     menuWindow: 'Cửa sổ',
     menuHelp: 'Trợ giúp',
     menuShortcuts: 'Phím tắt bàn phím',
-    menuDocsHelp: 'Trợ giúp TeleOffice Docs',
   },
   ja: {
     dlgOpenDoc: '文書を開く',
@@ -708,7 +705,6 @@ const tMain = createI18n({
     menuWindow: 'ウィンドウ',
     menuHelp: 'ヘルプ',
     menuShortcuts: 'キーボードショートカット',
-    menuDocsHelp: 'TeleOffice Docs ヘルプ',
   },
   ko: {
     dlgOpenDoc: '문서 열기',
@@ -841,7 +837,6 @@ const tMain = createI18n({
     menuWindow: '창',
     menuHelp: '도움말',
     menuShortcuts: '키보드 바로 가기',
-    menuDocsHelp: 'TeleOffice Docs 도움말',
   },
   fr: {
     dlgOpenDoc: 'Ouvrir un document',
@@ -975,7 +970,6 @@ const tMain = createI18n({
     menuWindow: 'Fenêtre',
     menuHelp: 'Aide',
     menuShortcuts: 'Raccourcis clavier',
-    menuDocsHelp: 'Aide TeleOffice Docs',
   },
   de: {
     dlgOpenDoc: 'Dokument öffnen',
@@ -1109,7 +1103,6 @@ const tMain = createI18n({
     menuWindow: 'Fenster',
     menuHelp: 'Hilfe',
     menuShortcuts: 'Tastenkombinationen',
-    menuDocsHelp: 'TeleOffice Docs-Hilfe',
   },
   es: {
     dlgOpenDoc: 'Abrir documento',
@@ -1243,7 +1236,6 @@ const tMain = createI18n({
     menuWindow: 'Ventana',
     menuHelp: 'Ayuda',
     menuShortcuts: 'Atajos de teclado',
-    menuDocsHelp: 'Ayuda de TeleOffice Docs',
   },
   th: {
     dlgOpenDoc: 'เปิดเอกสาร',
@@ -1375,7 +1367,6 @@ const tMain = createI18n({
     menuWindow: 'หน้าต่าง',
     menuHelp: 'วิธีใช้',
     menuShortcuts: 'แป้นพิมพ์ลัด',
-    menuDocsHelp: 'วิธีใช้ TeleOffice Docs',
   },
   id: {
     dlgOpenDoc: 'Buka Dokumen',
@@ -1508,7 +1499,6 @@ const tMain = createI18n({
     menuWindow: 'Jendela',
     menuHelp: 'Bantuan',
     menuShortcuts: 'Pintasan Papan Ketik',
-    menuDocsHelp: 'Bantuan TeleOffice Docs',
   },
   ru: {
     dlgOpenDoc: 'Открыть документ',
@@ -1641,7 +1631,6 @@ const tMain = createI18n({
     menuWindow: 'Окно',
     menuHelp: 'Справка',
     menuShortcuts: 'Сочетания клавиш',
-    menuDocsHelp: 'Справка TeleOffice Docs',
   },
   ar: {
     dlgOpenDoc: 'فتح مستند',
@@ -1774,7 +1763,6 @@ const tMain = createI18n({
     menuWindow: 'نافذة',
     menuHelp: 'تعليمات',
     menuShortcuts: 'اختصارات لوحة المفاتيح',
-    menuDocsHelp: 'تعليمات TeleOffice Docs',
   },
   pt: {
     dlgOpenDoc: 'Abrir Documento',
@@ -1907,7 +1895,6 @@ const tMain = createI18n({
     menuWindow: 'Janela',
     menuHelp: 'Ajuda',
     menuShortcuts: 'Atalhos de Teclado',
-    menuDocsHelp: 'Ajuda do TeleOffice Docs',
   },
   it: {
     dlgOpenDoc: 'Apri documento',
@@ -2040,7 +2027,6 @@ const tMain = createI18n({
     menuWindow: 'Finestra',
     menuHelp: 'Aiuto',
     menuShortcuts: 'Scelte rapide da tastiera',
-    menuDocsHelp: 'Guida di TeleOffice Docs',
   },
   pl: {
     dlgOpenDoc: 'Otwórz dokument',
@@ -2173,7 +2159,6 @@ const tMain = createI18n({
     menuWindow: 'Okno',
     menuHelp: 'Pomoc',
     menuShortcuts: 'Skróty klawiaturowe',
-    menuDocsHelp: 'Pomoc TeleOffice Docs',
   },
   cs: {
     dlgOpenDoc: 'Otevřít dokument',
@@ -2306,7 +2291,6 @@ const tMain = createI18n({
     menuWindow: 'Okno',
     menuHelp: 'Nápověda',
     menuShortcuts: 'Klávesové zkratky',
-    menuDocsHelp: 'Nápověda TeleOffice Docs',
   },
   nl: {
     dlgOpenDoc: 'Document openen',
@@ -2439,7 +2423,6 @@ const tMain = createI18n({
     menuWindow: 'Venster',
     menuHelp: 'Help',
     menuShortcuts: 'Sneltoetsen',
-    menuDocsHelp: 'TeleOffice Docs Help',
   },
   ms: {
     dlgOpenDoc: 'Buka Dokumen',
@@ -2572,7 +2555,6 @@ const tMain = createI18n({
     menuWindow: 'Tetingkap',
     menuHelp: 'Bantuan',
     menuShortcuts: 'Pintasan Papan Kekunci',
-    menuDocsHelp: 'Bantuan TeleOffice Docs',
   },
   he: {
     dlgOpenDoc: 'פתיחת מסמך',
@@ -2704,7 +2686,6 @@ const tMain = createI18n({
     menuWindow: 'חלון',
     menuHelp: 'עזרה',
     menuShortcuts: 'קיצורי מקלדת',
-    menuDocsHelp: 'עזרה של TeleOffice Docs',
   },
   hi: {
     dlgOpenDoc: 'दस्तावेज़ खोलें',
@@ -2837,7 +2818,6 @@ const tMain = createI18n({
     menuWindow: 'विंडो',
     menuHelp: 'सहायता',
     menuShortcuts: 'कीबोर्ड शॉर्टकट',
-    menuDocsHelp: 'TeleOffice Docs सहायता',
   },
   'zh-TW': {
     dlgOpenDoc: '開啟文件',
@@ -2968,7 +2948,6 @@ const tMain = createI18n({
     menuWindow: '視窗',
     menuHelp: '說明',
     menuShortcuts: '鍵盤快速鍵',
-    menuDocsHelp: 'TeleOffice Docs 說明',
   },
 })
 const tm = (key: Parameters<typeof tMain>[1], params?: Parameters<typeof tMain>[2]) =>
@@ -5657,8 +5636,6 @@ export function buildDocsMenu(): void {
           accelerator: 'CmdOrCtrl+/',
           click: () => sendCommand('shortcuts'),
         },
-        { type: 'separator' },
-        { label: tm('menuDocsHelp'), enabled: false },
         { type: 'separator' },
         checkUpdatesMenuItem(appMenuLabels(getUiLang())),
         aboutMenuItem(appMenuLabels(getUiLang())),

@@ -23,6 +23,7 @@
     "check:theme-colors": "node tools/check-theme-colors.mjs",
     "check:english-comments": "node tools/check-english-comments.mjs",
     "check:skill-version": "node tools/check-skill-version.mjs",
+    "check:help-langs": "node tools/check-help-langs.mjs",
     "lint": "eslint .",
     "fixtures": "npm run fixtures -w @teleoffice/docx-engine",
     "test": "npm run test -w @teleoffice/i18n && npm run test -w @teleoffice/electron-utils && npm run test -w @teleoffice/font-metrics && npm run test -w @teleoffice/docx-engine && npm run test -w @teleoffice/pdf2docx && npm run test -w @teleoffice/html2docx && npm run test -w @teleoffice/file-parse && npm run test -w @teleoffice/pptx-engine && npm run test -w @teleoffice/xlsx-gateway && npm run test -w @teleoffice/pptx-ops && npm run test -w @teleoffice/pptx-render && npm run test -w @teleoffice/pipelines && npm run test -w @teleoffice/ai-search && npm run test -w @teleoffice/agent-core && npm run test -w @teleoffice/ai-provider && npm run test -w @teleoffice/project-store && npm run test -w @teleoffice/cli && npm run test -w @teleoffice/ui && npm run test -w @teleoffice/docs && npm run test -w @teleoffice/sheets && npm run test -w @teleoffice/shell && npm run test -w @teleoffice/slides && npm run test -w @teleoffice/pdf && npm run test -w @teleoffice/markdown && npm run test -w @teleoffice/html",
