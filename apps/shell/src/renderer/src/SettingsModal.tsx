@@ -614,6 +614,7 @@ const DECISION_ENDPOINTS: { value: DecisionEndpoint; label: string }[] = [
   { value: 'openrouter', label: 'Jev (TypeSafe)' },
   { value: 'direct', label: 'Jev (TypeSafe API)' },
   { value: 'perplexity', label: 'Perplexity' },
+  { value: 'liquid', label: 'Liquid AI (d1)' },
   { value: 'cloudflare', label: 'Cloudflare' },
   { value: 'kev', label: 'Kev (local)' },
   { value: 'rizzo', label: 'Rizzo Flow (local)' },
