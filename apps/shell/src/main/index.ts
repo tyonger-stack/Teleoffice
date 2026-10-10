@@ -361,11 +361,30 @@ import { isUpdateChannel, type UpdateChannel } from '../shared/update-api'
 // run silently quits and forwards its argv to the running installed TeleOffice.
 // TELEOFFICE_USER_DATA: test drivers point this at a scratch dir so an
 // automated instance can run alongside the dev instance (separate lock).
-if (!app.isPackaged)
-  app.setPath(
-    'userData',
-    process.env.TELEOFFICE_USER_DATA ?? join(app.getPath('appData'), 'TeleOffice Dev'),
-  )
+if (!app.isPackaged) {
+  if (process.env.TELEOFFICE_USER_DATA) {
+    app.setPath('userData', process.env.TELEOFFICE_USER_DATA)
+  } else {
+    // The dev profile used to live in "TeleOffice Dev"; the space breaks
+    // unquoted shell expansions, rsync targets and .desktop Exec= lines, and
+    // XDG config entries are single tokens (#1817). "TeleOffice-Dev" keeps the
+    // family naming of the packaged profile ("TeleOffice"). The old directory
+    // moves once — it sits on the same volume as appData, so the rename is
+    // atomic, and a concurrent dev instance keeps its open file handles.
+    const appData = app.getPath('appData')
+    const devDir = join(appData, 'TeleOffice-Dev')
+    const oldDevDir = join(appData, 'TeleOffice Dev')
+    if (existsSync(oldDevDir) && !existsSync(devDir)) {
+      try {
+        renameSync(oldDevDir, devDir)
+      } catch {
+        // another dev instance is mid-migration or holds the directory:
+        // continuing with a fresh profile beats failing the launch
+      }
+    }
+    app.setPath('userData', devDir)
+  }
+}
 
 /**
  * `--headless-export <file> --to <format> --out <path> [--json]`: one document, no
@@ -384,7 +403,7 @@ if (app.isPackaged) {
   const newDir = app.getPath('userData')
   const newEmpty = !existsSync(newDir) || readdirSync(newDir).length === 0
   if (newEmpty) {
-    for (const legacy of ['GenOffice', 'AI Office']) {
+    for (const legacy of ['TeleOffice', 'AI Office']) {
       const oldDir = join(app.getPath('appData'), legacy)
       if (existsSync(oldDir)) {
         cpSync(oldDir, newDir, { recursive: true })
@@ -395,7 +414,7 @@ if (app.isPackaged) {
 }
 
 // The CLI rename from genoffice to teleoffice moved the per-user directory
-// (auth.json, launcher, audit log, templates) from ~/.genoffice to
+// (auth.json, launcher, audit log, templates) from ~/.teleoffice to
 // ~/.teleoffice; move it once, before anything below reads or writes it
 {
   const moved = migrateLegacyHome()
