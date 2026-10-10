@@ -25,6 +25,7 @@ import {
   IconRedo,
   IconSave,
   IconSearch,
+  IconEyeOff,
   IconSpellcheck,
   IconTable,
   IconTaskList,
@@ -49,6 +50,9 @@ interface Props {
   hasOutline: boolean
   spellcheck: boolean
   onToggleSpellcheck: () => void
+  /** withheld spans: right-click a selection to hide it from the model */
+  redactEnabled: boolean
+  onToggleRedact: (on: boolean) => void
   aiOpen: boolean
   onToggleAi: () => void
   onAiPreset: (instruction: string) => void
@@ -173,6 +177,8 @@ export function Ribbon({
   hasOutline,
   spellcheck,
   onToggleSpellcheck,
+  redactEnabled,
+  onToggleRedact,
   aiOpen,
   onToggleAi,
   onAiPreset,
@@ -532,6 +538,14 @@ export function Ribbon({
               onClick={onToggleSpellcheck}
             >
               <IconSpellcheck size={ICON} />
+            </IconBtn>
+            <IconBtn
+              title={t('redactEnable')}
+              active={redactEnabled}
+              disabled={disabled}
+              onClick={() => onToggleRedact(!redactEnabled)}
+            >
+              <IconEyeOff size={ICON} />
             </IconBtn>
           </div>
         </div>
