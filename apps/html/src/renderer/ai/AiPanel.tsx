@@ -10,6 +10,7 @@ import {
   AiComposer,
   AiScopeQuote,
   AiTypingIndicator,
+  createFileNav,
   Markdown,
   type AiScopeQuoteData,
 } from '@teleoffice/ui'
@@ -1017,6 +1018,10 @@ export function AiPanel({
       if (sid !== null) depsRef.current.navigateTo(sid)
     },
   }
+  // [name](filenav:///abs/path) citations open the cited file in its own app
+  const fileNav = createFileNav((path) => {
+    void window.htmlApi.openSourcePath(path)
+  })
 
   const draftNonceRef = useRef(0)
   useEffect(() => {
@@ -1276,7 +1281,7 @@ export function AiPanel({
               ) : (
                 entry.text && (
                   <div dir="auto">
-                    <Markdown text={entry.text} nav={docNav} />
+                    <Markdown text={entry.text} navs={[docNav, fileNav]} />
                   </div>
                 )
               )}

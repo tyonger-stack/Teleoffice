@@ -5,7 +5,7 @@ import { GensparkMark } from '../ribbon-icons'
 import type { ChangePlan } from '@teleoffice/xlsx-gateway/domain/workbook.types'
 import { ATTACHMENT_IMAGE_EXTS, type AttachmentMeta } from '../../shared/desktop-api'
 import { useI18n, type TFunc } from '../i18n/locale'
-import { Markdown } from '@teleoffice/ui'
+import { createFileNav, Markdown } from '@teleoffice/ui'
 import { SHEET_NAV_SCHEME } from './sheet-nav'
 import sendEnterOn from '../assets/send-enter-on.png'
 import sendEnterOff from '../assets/send-enter-off.png'
@@ -453,6 +453,10 @@ export function AiChatPanel({
 
   /** [B12](sheetnav://B12) links in answers jump the grid to the cited range */
   const citationNav = { scheme: SHEET_NAV_SCHEME, onNavigate: onCitation }
+  // [name](filenav:///abs/path) citations open the cited file in its own app
+  const fileNav = createFileNav((path) => {
+    void window.desktopApi.openSourcePath(path)
+  })
 
   const send = (): void => {
     if (!canSend) return
@@ -554,7 +558,7 @@ export function AiChatPanel({
                 {entry.tools.length > 0 && <ToolChipList tools={entry.tools} />}
                 {entry.text && (
                   <div dir="auto">
-                    <Markdown text={entry.text} nav={citationNav} />
+                    <Markdown text={entry.text} navs={[citationNav, fileNav]} />
                   </div>
                 )}
               </div>
@@ -603,7 +607,7 @@ export function AiChatPanel({
                 {entry.tools.length > 0 && <ToolChipList tools={entry.tools} />}
                 {entry.text ? (
                   <div dir="auto">
-                    <Markdown text={entry.text} nav={citationNav} />
+                    <Markdown text={entry.text} navs={[citationNav, fileNav]} />
                   </div>
                 ) : (
                   entry.streaming && (
