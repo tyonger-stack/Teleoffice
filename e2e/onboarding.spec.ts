@@ -4,24 +4,18 @@ import { join } from 'node:path'
 import { launchShell, closeAndSaveVideo, screenshotPath } from './helpers'
 
 test.describe('first-run onboarding', () => {
-  test('fresh install walks all slides and persists the seen flag', async () => {
+  test('fresh install shows the welcome and persists the seen flag', async () => {
     const launched = await launchShell({ videoDir: 'onboarding-walkthrough' })
     const { page, userDataDir } = launched
     try {
       const overlay = page.locator('.onb-overlay')
       await expect(overlay).toBeVisible()
       await expect(page.locator('.onb-slide.active .onb-title')).toHaveText('Welcome to TeleOffice')
+      await expect(page.locator('.onb-skip')).toHaveCount(0)
+      await expect(page.locator('.onb-next')).toHaveText('Get started')
       await page.screenshot({ path: screenshotPath('onboarding-slide-1') })
 
-      await page.locator('.onb-next').click()
-      await expect(page.locator('.onb-slide.active .onb-offer')).toBeVisible()
-      await page.screenshot({ path: screenshotPath('onboarding-slide-2') })
-
-      await page.locator('.onb-next').click()
-      await expect(page.locator('.onb-slide.active .onb-title')).toHaveText('Free for everyone')
-      await page.screenshot({ path: screenshotPath('onboarding-slide-3') })
-
-      // last slide's primary button finishes the onboarding
+      // the only slide's primary button finishes the welcome
       await page.locator('.onb-next').click()
       await expect(overlay).toBeHidden()
       await expect(page.locator('.home-hero')).toBeVisible()
@@ -51,12 +45,13 @@ test.describe('first-run onboarding', () => {
     }
   })
 
-  test('skip dismisses the onboarding and persists the seen flag', async () => {
+  test('Escape dismisses the welcome and persists the seen flag', async () => {
     const launched = await launchShell({ videoDir: 'onboarding-skip' })
     const { page, userDataDir } = launched
     try {
       await expect(page.locator('.onb-overlay')).toBeVisible()
-      await page.locator('.onb-skip').click()
+      await expect(page.locator('.onb-skip')).toHaveCount(0)
+      await page.keyboard.press('Escape')
       await expect(page.locator('.onb-overlay')).toBeHidden()
       await page.screenshot({ path: screenshotPath('onboarding-skipped-home') })
 
