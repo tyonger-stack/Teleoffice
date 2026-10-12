@@ -115,10 +115,12 @@ describe('vision capability fallback', () => {
   })
 
   it('does not send screenshots to text-only models under a vision-capable provider', () => {
-    const settings = defaultAiSettings()
-    settings.providers.genspark.model = 'deep-seek-v4-flash'
+    // Pin the provider: the default moved off Genspark (now Codex), so editing
+    // another provider's model would leave the active one untouched.
+    const settings = { ...defaultAiSettings(), provider: 'opencode-zen' as AiProviderId }
+    settings.providers['opencode-zen'].model = 'deepseek-v4-flash'
     expect(settingsSupportVision(settings)).toBe(false)
-    settings.providers.genspark.model = 'claude-opus-4-7'
+    settings.providers['opencode-zen'].model = 'claude-sonnet-5'
     expect(settingsSupportVision(settings)).toBe(true)
   })
 

@@ -8,7 +8,17 @@ const LAUNCHER = resolve(__dirname, '..', 'bin', 'teleoffice')
 function fakeMachine(agents: string[]) {
   const home = tempDir()
   for (const dot of agents) mkdirSync(join(home, dot), { recursive: true })
-  return { home, env: { TELEOFFICE_HOME: home } as NodeJS.ProcessEnv }
+  // OpenCode is probed at $XDG_CONFIG_HOME/opencode before ~/.config/opencode.
+  // GitHub-hosted runners export XDG_CONFIG_HOME to the real user config dir,
+  // and the test harness forwards process.env, so an inherited value would
+  // hide the fake home this fixture just created.
+  return {
+    home,
+    env: {
+      TELEOFFICE_HOME: home,
+      XDG_CONFIG_HOME: join(home, '.config'),
+    } as NodeJS.ProcessEnv,
+  }
 }
 
 const readJson = (path: string) => JSON.parse(readFileSync(path, 'utf-8'))

@@ -359,7 +359,10 @@ export function activeMediaConfig(
 } | null {
   const provider = activeMediaProvider(settings, capability)
   if (provider === 'genspark') return null
-  return { provider, config: settings.media!.providers[provider] }
+  // The Antigravity fallback also covers settings with no media block at all
+  // (pre-media files, partial in-memory settings): no config, no BYOK route.
+  const config = settings.media?.providers?.[provider]
+  return config ? { provider, config } : null
 }
 
 function byokModel(
