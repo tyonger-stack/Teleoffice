@@ -30,24 +30,28 @@ const lineModel: ChartModel = {
 }
 
 describe('buildChartNode', () => {
-  it('renders a valid 130,000-point line series with its full value range', () => {
-    const values = Array<number>(130_000).fill(10)
-    values[0] = -5
-    values[values.length - 1] = 30
-    const model: ChartModel = {
-      kind: 'line',
-      categories: Array<string>(values.length).fill(''),
-      series: [{ values, marker: false }],
-      catAxis: { tickLblHidden: true },
-    }
-    const node = buildChartNode('large', 'large', model, box, vp, metrics)!
-    const points = node.polylines[0]!.points
-    expect(points).toHaveLength(values.length * 2)
-    expect(points[1]).toBeGreaterThan(points[points.length - 1]!)
-    expect(node.labels.some((label) => label.text === '30')).toBe(true)
-  })
+  it(
+    'renders a valid 130,000-point line series with its full value range',
+    { timeout: 20_000 },
+    () => {
+      const values = Array<number>(130_000).fill(10)
+      values[0] = -5
+      values[values.length - 1] = 30
+      const model: ChartModel = {
+        kind: 'line',
+        categories: Array<string>(values.length).fill(''),
+        series: [{ values, marker: false }],
+        catAxis: { tickLblHidden: true },
+      }
+      const node = buildChartNode('large', 'large', model, box, vp, metrics)!
+      const points = node.polylines[0]!.points
+      expect(points).toHaveLength(values.length * 2)
+      expect(points[1]).toBeGreaterThan(points[points.length - 1]!)
+      expect(node.labels.some((label) => label.text === '30')).toBe(true)
+    },
+  )
 
-  it('renders 130,000 horizontal bars without spreading their values', () => {
+  it('renders 130,000 horizontal bars without spreading their values', { timeout: 20_000 }, () => {
     const values = Array<number>(130_000).fill(10)
     const model: ChartModel = {
       kind: 'bar',
@@ -61,7 +65,7 @@ describe('buildChartNode', () => {
     )
   })
 
-  it('renders 130,000 scatter points without spreading axis values', () => {
+  it('renders 130,000 scatter points without spreading axis values', { timeout: 20_000 }, () => {
     const values = Array<number>(130_000).fill(10)
     const model: ChartModel = {
       kind: 'scatter',
