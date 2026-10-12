@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { buildTemplateDeck, inspectTemplate, parseTemplateDeckSpec } from '../src/slides/template'
 import { toEngineParagraphs } from '../src/slides/page-spec'
@@ -424,13 +424,19 @@ describe('parseOutline in template mode', () => {
 })
 
 describe('company template', () => {
-  const REAL = '/home/box/shared/ppt-master/company-template.pptx'
-  it.skipIf(!existsSync(REAL))('matches the documented shape', async () => {
-    const fs = await import('node:fs')
-    const info = await inspectTemplate(new Uint8Array(fs.readFileSync(REAL)))
+  const templatePath = process.env.TELEOFFICE_COMPANY_TEMPLATE
+  it.skipIf(!templatePath)('inspects the deck at TELEOFFICE_COMPANY_TEMPLATE', async () => {
+    if (!templatePath) {
+      throw new Error('TELEOFFICE_COMPANY_TEMPLATE is not set')
+    }
+    if (!existsSync(templatePath)) {
+      throw new Error(
+        `TELEOFFICE_COMPANY_TEMPLATE is set but the file does not exist: ${templatePath}`,
+      )
+    }
+    const info = await inspectTemplate(new Uint8Array(readFileSync(templatePath)))
     expect(info.masters).toHaveLength(2)
     expect(info.masters.flatMap((m) => m.layouts)).toHaveLength(22)
-    // 18 of the 25 samples sit on master 0 copies, 7 on master 1: most-used wins
     expect(info.defaultMaster).toBe(0)
     expect(info.slideSize.px).toEqual({ w: 1280, h: 720 })
     expect(info.duplicateLayoutNames.length).toBeGreaterThan(0)

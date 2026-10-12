@@ -1,17 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
-<g ><rect width="240" height="240" rx="54" fill="#004494"/>
-<g transform="translate(47.403,36.000) scale(0.176719)"><path fill="#fff" d="M542.6400757,0l8.9433594,34.3346786c34.8651733,7.9206009,58.6011353,23.3824654,64.0328979,45.3246765
-	c12.4047852,49.7202072-73.3933716,113.9300461-191.6815186,143.4266357
-	c-7.6553955,1.907486-15.2348022,3.5875092-22.7510071,5.1156616c3.2972107-26.2745361,8.0720825-49.7957764,14.11026-69.0348206
-	c12.8851624-41.2444839,31.328125-68.5675888,53.7880859-68.5675888c8.893219,0,17.2937927,4.3199768,25.0751953,12.0632477
-	l26.2625732-6.8211365C494.6500549,40.0316849,458.8882141,5.4325461,419.2605591,5.4325461
-	c-66.7738342,0-122.7346191,98.404953-137.906189,230.9302521c-51.0344086-4.8003082-87.1370239-22.1573181-94.0472107-49.9106445
-	c-9.6002502-38.5282135,39.6909027-85.6462631,117.39151-118.7303619l-6.6950989-25.8458443
-	C165.3526154,92.4681702,78.9985657,177.6980896,96.7719193,249.1083832
-	c13.6303253,54.7988739,85.2426376,87.8953094,181.4243774,92.4304047
-	c7.769104,151.6116638,67.9615784,269.5972595,141.06427,269.5972595c66.6982422,0,122.6717529-98.2407837,137.8684082-230.6018372
-	l-46.473877,12.0262451c-9.3859253,70.7780762-30.2922668,120.0310364-54.5209351,120.0310364
-	c-30.4815369,0-55.6068726-77.9908752-59.2575989-178.7589722c17.0659485-2.8164978,34.3720703-6.3916931,51.8805847-10.7370911
-	c173.4660034-43.21521,297.0853271-146.50914,276.1281128-230.6018066C711.1415405,37.5814095,639.2385864,4.3585277,542.6400757,0"/></g>
-<g transform="translate(30,178)"><g opacity=".55"><rect width="26" height="33" rx="7" fill="#fff"/><g transform="translate(3,7) scale(0.9)"><path d="M0 0h22M0 8h22M0 16h12" stroke="#004494" stroke-width="3.6" stroke-linecap="round"/></g></g></g><g transform="translate(60,178)"><g opacity=".55"><rect width="26" height="33" rx="7" fill="#fff"/><g transform="translate(3,7) scale(0.9)"><path d="M0 0h22M0 8h22M0 16h22M7 0v16M15 0v16" stroke="#004494" stroke-width="3.2" stroke-linecap="round"/></g></g></g><g transform="translate(90,178)"><g opacity="1"><rect width="26" height="33" rx="7" fill="#fff"/><g transform="translate(3,7) scale(0.9)"><rect x="0" y="0" width="22" height="14" rx="1.6" fill="none" stroke="#004494" stroke-width="3"/><path d="M4 12v-4M9 12v-7M14 12v-10M19 12v-6" stroke="#004494" stroke-width="3" stroke-linecap="round"/><path d="M7 18h8" stroke="#004494" stroke-width="3" stroke-linecap="round"/></g></g></g><g transform="translate(120,178)"><g opacity="1"><rect width="26" height="33" rx="7" fill="#fff"/><g transform="translate(3,7) scale(0.9)"><text x="11" y="18" font-family="Helvetica,Arial" font-size="19" font-weight="700" fill="#004494" text-anchor="middle">P</text></g></g></g><g transform="translate(150,178)"><g opacity=".55"><rect width="26" height="33" rx="7" fill="#fff"/><g transform="translate(3,7) scale(0.9)"><path d="M2 0v18M2 1.5L11 10 20 1.5M2 18L11 9.5 20 18" stroke="#004494" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></g></g><g transform="translate(180,178)"><g opacity=".55"><rect width="26" height="33" rx="7" fill="#fff"/><g transform="translate(3,7) scale(0.9)"><path d="M2 2l8 7-8 7M14 16h7" stroke="#004494" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></g></g></g>
+  <title>TeleOffice</title>
+  <rect width="240" height="240" rx="54" fill="#14606F"/>
+  <rect x="46" y="54" width="148" height="46" rx="14" fill="#fff"/>
+  <rect x="97" y="84" width="46" height="108" rx="14" fill="#fff"/>
 </svg>
