@@ -1,6 +1,13 @@
 import { aiPanelWidthAtPointer, AiPanelSideButton } from '@teleoffice/ui'
 import React, { useEffect, useRef, useState } from 'react'
-import { AiComposer, AiScopeQuote, AiTypingIndicator, type AiScopeQuoteData } from '@teleoffice/ui'
+import {
+  AiComposer,
+  AiScopeQuote,
+  AiTypingIndicator,
+  AiUsageChip,
+  type AiScopeQuoteData,
+  type AiTokenUsageView,
+} from '@teleoffice/ui'
 import { GensparkMark } from '../ribbon-icons'
 import type { ChangePlan } from '@teleoffice/xlsx-gateway/domain/workbook.types'
 import { ATTACHMENT_IMAGE_EXTS, type AttachmentMeta } from '../../shared/desktop-api'
@@ -205,6 +212,8 @@ export interface AiChatMessage {
   readonly attachments?: readonly AttachmentMeta[] | undefined
   /** the range this user message targeted, frozen at send */
   readonly scope?: AiScopeQuoteData | undefined
+  /** tokens the provider billed for this reply, summed across its turns (absent when unreported) */
+  readonly usage?: AiTokenUsageView | undefined
 }
 
 export function AiChatPanel({
@@ -221,6 +230,7 @@ export function AiChatPanel({
   prompt,
   preview,
   aiBusy,
+  sessionUsage,
   onPromptChange,
   onSend,
   onStop,
@@ -252,6 +262,8 @@ export function AiChatPanel({
   readonly prompt: string
   readonly preview: ChangePlan | null
   readonly aiBusy: boolean
+  /** tokens billed across the session, shown beside the composer */
+  readonly sessionUsage?: AiTokenUsageView | undefined
   readonly onPromptChange: (prompt: string) => void
   /** Send the composer text, or the given instruction when provided (used by the
    *  failed-run Retry, which also resends the message's original attachments;
@@ -605,6 +617,11 @@ export function AiChatPanel({
             ) : (
               <>
                 {entry.tools.length > 0 && <ToolChipList tools={entry.tools} />}
+                {entry.usage && (
+                  <div className="ai-message-usage">
+                    <AiUsageChip usage={entry.usage} lang={lang} />
+                  </div>
+                )}
                 {entry.text ? (
                   <div dir="auto">
                     <Markdown text={entry.text} navs={[citationNav, fileNav]} />
@@ -811,14 +828,17 @@ export function AiChatPanel({
           sendIconDisabled={<img src={sendEnterOff} alt="" aria-hidden />}
           stopIcon={<img src={sendStop} alt="" aria-hidden />}
           footerStart={
-            <button
-              className="ai-attach-btn"
-              onClick={onPickAttachments}
-              data-tip={t('aiAttachTitle')}
-              aria-label={t('aiAttachTitle')}
-            >
-              <img src={attachIcon} alt="" aria-hidden />
-            </button>
+            <>
+              <button
+                className="ai-attach-btn"
+                onClick={onPickAttachments}
+                data-tip={t('aiAttachTitle')}
+                aria-label={t('aiAttachTitle')}
+              >
+                <img src={attachIcon} alt="" aria-hidden />
+              </button>
+              {sessionUsage && <AiUsageChip usage={sessionUsage} session lang={lang} />}
+            </>
           }
           textareaRef={inputRef}
           onChange={onPromptChange}

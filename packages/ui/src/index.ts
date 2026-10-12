@@ -2,6 +2,8 @@ export { AiPanelSideButton } from './AiPanelSideButton'
 export { TeleOfficeMark } from './TeleOfficeMark'
 export { AiComposer } from './AiComposer'
 export { AiScopeQuote, type AiScopeQuoteData } from './AiScopeQuote'
+export { AiUsageChip, addTokenUsage, formatTokenCount, type AiTokenUsageView } from './AiUsageChip'
+export { AI_USAGE_LABELS, type AiUsageLabels } from './strings-ai-usage'
 export {
   AI_CUSTOM_FONT_MAX_PX,
   AI_CUSTOM_FONT_MIN_PX,
