@@ -109,17 +109,23 @@ test.describe('docs Simple Markup view', () => {
       const balloon = page.locator('.comment-balloon')
       await expect(balloon).toHaveCount(1)
       await expect(balloon).toHaveAttribute('title', /Ann/)
-      // The node exists, but an unrendered one answers null to boundingBox().
-      // Wait for the layout instead of reading the box the moment the count
-      // settles.
+      // Every pagination remeasure empties the margin layer and recreates the
+      // balloon, so a one-shot boundingBox() can land on a node that was just
+      // replaced (null). Poll the box and the paper edge together until the
+      // glyph is laid out inside the right page margin.
       await expect(balloon).toBeVisible()
-      const paperRight = await page
-        .locator('.ProseMirror')
-        .first()
-        .evaluate((el) => el.getBoundingClientRect().right)
-      const balloonBox = await balloon.boundingBox()
-      expect(balloonBox).not.toBeNull()
-      expect(balloonBox!.x + balloonBox!.width).toBeLessThanOrEqual(paperRight + 1)
+      const paper = page.locator('.ProseMirror').first()
+      await expect
+        .poll(
+          async () => {
+            const box = await balloon.boundingBox()
+            if (!box || box.width <= 0 || box.height <= 0) return null
+            const paperRight = await paper.evaluate((el) => el.getBoundingClientRect().right)
+            return box.x + box.width - paperRight
+          },
+          { timeout: 15_000, message: 'comment balloon laid out inside the right page margin' },
+        )
+        .toBeLessThanOrEqual(1)
 
       // Markup menu in Word's order with the current view ticked
       await page.locator('.ribbon-tab', { hasText: /^Review$/ }).click()
