@@ -749,6 +749,10 @@ export function App({
     viewRow: number
     viewColumn: number
   } | null>(null)
+  /// The workbook a CLI `open --range` already placed the selection in: the
+  /// install's deferred origin reset (one frame after the file is in, when the
+  /// control channel already answers) must not snap that selection back to A1.
+  const controlGotoRef = useRef<LazyWorkbookState | null>(null)
   /// Set by a save's reopen: the next session-id change continues the same
   /// AI conversation instead of rehydrating it (which would show the live
   /// turn a second time under "Earlier conversation").
@@ -4126,10 +4130,11 @@ export function App({
             // scroll to the captured viewport origin — not the selection —
             // to reproduce the exact pre-save view.
             restoredSheet.scrollToCell(restore.viewRow, restore.viewColumn)
-          } else {
+          } else if (controlGotoRef.current !== state) {
             // Activate A1 so EditorBridge parks the hidden input on a real cell.
             // scrollToCell alone leaves a spare-adopted view without a primary
-            // selection the keyboard listener can open for typing.
+            // selection the keyboard listener can open for typing. Skipped when
+            // a CLI goto already activated (and scrolled to) its own range.
             worksheet.getRange(0, 0, 1, 1).activate()
             worksheet.scrollToCell(0, 0)
           }
@@ -4553,12 +4558,16 @@ export function App({
 
   // teleoffice CLI (`open --range`, `selection`): the shell evaluates this hook
   useEffect(() => {
-    ;(window as unknown as Record<string, unknown>).__teleofficeControl = (req: ControlRequest) =>
-      handleSheetsControl(
+    ;(window as unknown as Record<string, unknown>).__teleofficeControl = (req: ControlRequest) => {
+      const reply = handleSheetsControl(
         req,
         univerRef.current?.univerAPI.getActiveWorkbook(),
         lazyWorkbookRef.current !== null,
       )
+      if (req.cmd === 'goto' && reply.status === 'ok')
+        controlGotoRef.current = lazyWorkbookRef.current
+      return reply
+    }
   })
 
   const aiScopeChip = resolveScopeChip(aiRunScope, aiScope, aiScopeDismissed)
