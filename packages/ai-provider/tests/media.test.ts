@@ -187,6 +187,12 @@ describe('media settings', () => {
     expect(imageGenerationAvailable(withMedia(custom), false)).toBe(true)
     expect(imageGenerationAvailable(null, true)).toBe(true)
   })
+
+  it('treats settings without a media block as having no BYOK route instead of throwing', () => {
+    expect(activeMediaConfig({}, 'image')).toBeNull()
+    expect(imageGenerationAvailable({}, false)).toBe(false)
+    expect(mediaAnalysisAvailable({}, false)).toBe(false)
+  })
 })
 
 describe('sniffImageMime', () => {
