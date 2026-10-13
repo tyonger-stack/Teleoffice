@@ -41,7 +41,7 @@ import {
   readBodyCapped,
 } from '@teleoffice/electron-utils'
 import { createI18n, getUiLang } from '@teleoffice/i18n'
-import { generateImageTool } from '@teleoffice/ai-search'
+import { generateImageTool, documentMediaRoots } from '@teleoffice/ai-search'
 import { parseFileToText } from '@teleoffice/file-parse'
 import { convertHtmlToDocx } from '../../../../packages/html2docx/src'
 import { atomicWriteFile } from './atomic-write'
@@ -1582,11 +1582,20 @@ function registerHtmlIpc(): void {
   // shell-registered, but image generation is gated per app
   ipcMain.handle(
     HTML_CHANNELS.aiGenerateImage,
-    (_e, op: { prompt?: unknown; aspectRatio?: unknown }) =>
-      generateImageTool(join(app.getPath('userData'), 'ai-settings.json'), {
-        prompt: String(op?.prompt ?? ''),
-        aspectRatio: op?.aspectRatio ? String(op.aspectRatio) : undefined,
-      }),
+    (e, op: { prompt?: unknown; aspectRatio?: unknown }) =>
+      generateImageTool(
+        join(app.getPath('userData'), 'ai-settings.json'),
+        {
+          prompt: String(op?.prompt ?? ''),
+          aspectRatio: op?.aspectRatio ? String(op.aspectRatio) : undefined,
+        },
+        {
+          mediaRoots: documentMediaRoots(
+            htmlFilePath(e.sender.id),
+            join(app.getPath('temp'), 'teleoffice-pasted'),
+          ),
+        },
+      ),
   )
 
   const MIME_BY_EXT: Record<string, ImageData['mime']> = {

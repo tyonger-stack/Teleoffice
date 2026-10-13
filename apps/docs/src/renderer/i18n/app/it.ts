@@ -443,6 +443,7 @@ export const it = {
   appParaSpecialFirstLine: 'Prima riga',
   appParaSpecialHanging: 'Sporgente',
   appParaBy: 'Rientra di',
+  appParaUnitChars: 'Caratteri',
   appInsertEquation: 'Inserisci equazione',
   appLatexPlaceholder: 'ad es. x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}',
   appLatexPreviewHint: "Digita LaTeX per vedere l'anteprima",
