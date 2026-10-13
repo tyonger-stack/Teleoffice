@@ -70,7 +70,10 @@ const AI_SETTINGS_PATH = () => join(app.getPath('userData'), 'ai-settings.json')
  * user put next to the deck they are editing, and nothing else.
  */
 function slidesMediaRoots(wcId: number): string[] {
-  return documentMediaRoots(sessions.get(wcId)?.path, join(app.getPath('temp'), 'teleoffice-pasted'))
+  return documentMediaRoots(
+    sessions.get(wcId)?.path,
+    join(app.getPath('temp'), 'teleoffice-pasted'),
+  )
 }
 
 function readJson<T>(path: string, fallback: T): T {
