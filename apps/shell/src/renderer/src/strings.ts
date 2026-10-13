@@ -62,6 +62,8 @@ export const strings = {
     templatePdf: 'PDF模版',
     templatePdfSub: '默认模版 / .pdf',
     noTemplatesYet: '还没有模板。点「导入模板…」添加一个。',
+    templateRegistryCorrupt:
+      '模板注册表 templates.json 已损坏，已登记的模板暂时不显示。请修复或删除该文件。',
     importTemplate: '导入模板…',
     openTemplatesFolder: '打开模板文件夹',
     noTemplates: '还没有模板。用 `teleoffice template add <名称> <文件.pptx>` 或导入模板添加一个。',
@@ -471,6 +473,8 @@ export const strings = {
     templatePdf: 'PDF template',
     templatePdfSub: 'Default template / .pdf',
     noTemplatesYet: 'No templates yet. Use Import template… to add one.',
+    templateRegistryCorrupt:
+      'The template registry (templates.json) is damaged, so registered templates are hidden. Fix or remove the file.',
     importTemplate: 'Import template…',
     openTemplatesFolder: 'Open templates folder',
     noTemplates:
@@ -896,6 +900,8 @@ export const strings = {
     templatePdf: 'Mẫu PDF',
     templatePdfSub: 'Mẫu mặc định / .pdf',
     noTemplatesYet: 'Chưa có mẫu. Dùng Nhập mẫu… để thêm.',
+    templateRegistryCorrupt:
+      'Sổ đăng ký mẫu (templates.json) đã hỏng nên các mẫu đã đăng ký tạm thời bị ẩn. Hãy sửa hoặc xóa tệp này.',
     importTemplate: 'Nhập mẫu…',
     openTemplatesFolder: 'Mở thư mục mẫu',
     noTemplates:
@@ -1326,6 +1332,8 @@ export const strings = {
     templatePdf: 'PDF テンプレート',
     templatePdfSub: '既定のテンプレート / .pdf',
     noTemplatesYet: 'テンプレートはまだありません。「テンプレートをインポート」で追加します。',
+    templateRegistryCorrupt:
+      'テンプレートの登録情報（templates.json）が壊れているため、登録済みテンプレートは表示されません。ファイルを修復または削除してください。',
     importTemplate: 'テンプレートをインポート…',
     openTemplatesFolder: 'テンプレートフォルダーを開く',
     noTemplates:
@@ -1765,6 +1773,8 @@ export const strings = {
     templatePdf: 'PDF 템플릿',
     templatePdfSub: '기본 템플릿 / .pdf',
     noTemplatesYet: '아직 템플릿이 없습니다. 템플릿 가져오기로 추가하세요.',
+    templateRegistryCorrupt:
+      '템플릿 레지스트리(templates.json)가 손상되어 등록된 템플릿이 표시되지 않습니다. 파일을 수정하거나 삭제하세요.',
     importTemplate: '템플릿 가져오기…',
     openTemplatesFolder: '템플릿 폴더 열기',
     noTemplates:
@@ -2197,6 +2207,8 @@ export const strings = {
     templatePdf: 'Modèle PDF',
     templatePdfSub: 'Modèle par défaut / .pdf',
     noTemplatesYet: 'Aucun modèle. Utilisez Importer un modèle… pour en ajouter un.',
+    templateRegistryCorrupt:
+      'Le registre des modèles (templates.json) est endommagé, les modèles enregistrés sont donc masqués. Corrigez ou supprimez le fichier.',
     importTemplate: 'Importer un modèle…',
     openTemplatesFolder: 'Ouvrir le dossier des modèles',
     noTemplates:
@@ -2642,6 +2654,8 @@ export const strings = {
     templatePdf: 'PDF-Vorlage',
     templatePdfSub: 'Standardvorlage / .pdf',
     noTemplatesYet: 'Noch keine Vorlagen. Über „Vorlage importieren…“ hinzufügen.',
+    templateRegistryCorrupt:
+      'Die Vorlagenregistrierung (templates.json) ist beschädigt, daher werden registrierte Vorlagen ausgeblendet. Reparieren oder entfernen Sie die Datei.',
     importTemplate: 'Vorlage importieren…',
     openTemplatesFolder: 'Vorlagenordner öffnen',
     noTemplates:
@@ -3089,6 +3103,8 @@ export const strings = {
     templatePdf: 'Plantilla PDF',
     templatePdfSub: 'Plantilla predeterminada / .pdf',
     noTemplatesYet: 'Aún no hay plantillas. Usa Importar plantilla… para añadir una.',
+    templateRegistryCorrupt:
+      'El registro de plantillas (templates.json) está dañado, por lo que las plantillas registradas están ocultas. Corrige o elimina el archivo.',
     importTemplate: 'Importar plantilla…',
     openTemplatesFolder: 'Abrir carpeta de plantillas',
     noTemplates:
@@ -3531,6 +3547,8 @@ export const strings = {
     templatePdf: 'เทมเพลต PDF',
     templatePdfSub: 'เทมเพลตเริ่มต้น / .pdf',
     noTemplatesYet: 'ยังไม่มีเทมเพลต ใช้ นำเข้าเทมเพลต… เพื่อเพิ่ม',
+    templateRegistryCorrupt:
+      'รีจิสทรีเทมเพลต (templates.json) เสียหาย เทมเพลตที่ลงทะเบียนไว้จึงถูกซ่อนไว้ โปรดแก้ไขหรือลบไฟล์',
     importTemplate: 'นำเข้าเทมเพลต…',
     openTemplatesFolder: 'เปิดโฟลเดอร์เทมเพลต',
     noTemplates:
@@ -3957,6 +3975,8 @@ export const strings = {
     templatePdf: 'Templat PDF',
     templatePdfSub: 'Templat bawaan / .pdf',
     noTemplatesYet: 'Belum ada templat. Gunakan Impor Templat… untuk menambahkan.',
+    templateRegistryCorrupt:
+      'Registri templat (templates.json) rusak sehingga templat yang terdaftar disembunyikan. Perbaiki atau hapus berkas tersebut.',
     importTemplate: 'Impor templat…',
     openTemplatesFolder: 'Buka folder templat',
     noTemplates:
@@ -4394,6 +4414,8 @@ export const strings = {
     templatePdf: 'Шаблон PDF',
     templatePdfSub: 'Шаблон по умолчанию / .pdf',
     noTemplatesYet: 'Шаблонов пока нет. Добавьте через «Импорт шаблона…».',
+    templateRegistryCorrupt:
+      'Реестр шаблонов (templates.json) повреждён, поэтому зарегистрированные шаблоны скрыты. Исправьте или удалите файл.',
     importTemplate: 'Импортировать шаблон…',
     openTemplatesFolder: 'Открыть папку шаблонов',
     noTemplates:
@@ -4829,6 +4851,8 @@ export const strings = {
     templatePdf: 'قالب PDF',
     templatePdfSub: 'القالب الافتراضي / .pdf',
     noTemplatesYet: 'لا توجد قوالب بعد. استخدم «استيراد قالب…» للإضافة.',
+    templateRegistryCorrupt:
+      'سجل القوالب (templates.json) تالف، لذلك القوالب المسجلة مخفية. أصلح الملف أو احذفه.',
     importTemplate: 'استيراد قالب…',
     openTemplatesFolder: 'فتح مجلد القوالب',
     noTemplates:
@@ -5255,6 +5279,8 @@ export const strings = {
     templatePdf: 'Modelo PDF',
     templatePdfSub: 'Modelo padrão / .pdf',
     noTemplatesYet: 'Ainda não há modelos. Use Importar modelo… para adicionar.',
+    templateRegistryCorrupt:
+      'O registro de modelos (templates.json) está danificado, por isso os modelos registrados estão ocultos. Corrija ou remova o arquivo.',
     importTemplate: 'Importar modelo…',
     openTemplatesFolder: 'Abrir pasta de modelos',
     noTemplates:
@@ -5687,6 +5713,8 @@ export const strings = {
     templatePdf: 'Modello PDF',
     templatePdfSub: 'Modello predefinito / .pdf',
     noTemplatesYet: 'Nessun modello. Usa Importa modello… per aggiungerne uno.',
+    templateRegistryCorrupt:
+      'Il registro dei modelli (templates.json) è danneggiato, quindi i modelli registrati sono nascosti. Correggi o rimuovi il file.',
     importTemplate: 'Importa modello…',
     openTemplatesFolder: 'Apri cartella modelli',
     noTemplates:
@@ -6117,6 +6145,8 @@ export const strings = {
     templatePdf: 'Szablon PDF',
     templatePdfSub: 'Szablon domyślny / .pdf',
     noTemplatesYet: 'Nie ma jeszcze szablonów. Użyj Importuj szablon…, aby dodać.',
+    templateRegistryCorrupt:
+      'Rejestr szablonów (templates.json) jest uszkodzony, dlatego zarejestrowane szablony są ukryte. Napraw lub usuń ten plik.',
     importTemplate: 'Importuj szablon…',
     openTemplatesFolder: 'Otwórz folder szablonów',
     noTemplates:
@@ -6546,6 +6576,8 @@ export const strings = {
     templatePdf: 'Šablona PDF',
     templatePdfSub: 'Výchozí šablona / .pdf',
     noTemplatesYet: 'Zatím žádné šablony. Přidejte je přes Importovat šablonu….',
+    templateRegistryCorrupt:
+      'Registr šablon (templates.json) je poškozený, proto jsou registrované šablony skryté. Soubor opravte nebo odstraňte.',
     importTemplate: 'Importovat šablonu…',
     openTemplatesFolder: 'Otevřít složku šablon',
     noTemplates:
@@ -6973,6 +7005,8 @@ export const strings = {
     templatePdf: 'PDF-sjabloon',
     templatePdfSub: 'Standaardsjabloon / .pdf',
     noTemplatesYet: 'Nog geen sjablonen. Voeg er een toe via Sjabloon importeren….',
+    templateRegistryCorrupt:
+      'Het sjablonenregister (templates.json) is beschadigd, daarom zijn geregistreerde sjablonen verborgen. Herstel of verwijder het bestand.',
     importTemplate: 'Sjabloon importeren…',
     openTemplatesFolder: 'Sjablonenmap openen',
     noTemplates:
@@ -7401,6 +7435,8 @@ export const strings = {
     templatePdf: 'Templat PDF',
     templatePdfSub: 'Templat lalai / .pdf',
     noTemplatesYet: 'Belum ada templat. Gunakan Import Templat… untuk menambah.',
+    templateRegistryCorrupt:
+      'Pendaftaran templat (templates.json) rosak, jadi templat yang berdaftar disembunyikan. Baiki atau padamkan fail tersebut.',
     importTemplate: 'Import templat…',
     openTemplatesFolder: 'Buka folder templat',
     noTemplates:
@@ -7832,6 +7868,8 @@ export const strings = {
     templatePdf: 'תבנית PDF',
     templatePdfSub: 'תבנית ברירת מחדל / .pdf',
     noTemplatesYet: 'אין עדיין תבניות. הוסיפו באמצעות ייבוא תבנית….',
+    templateRegistryCorrupt:
+      'רישום התבניות (templates.json) פגום, ולכן התבניות הרשומות מוסתרות. תקנו או מחקו את הקובץ.',
     importTemplate: 'ייבוא תבנית…',
     openTemplatesFolder: 'פתיחת תיקיית תבניות',
     noTemplates: 'אין תבניות עדיין. הוסיפו עם `teleoffice template add <שם> <קובץ.pptx>` או ייבוא.',
@@ -8245,6 +8283,8 @@ export const strings = {
     templatePdf: 'PDF टेम्पलेट',
     templatePdfSub: 'डिफ़ॉल्ट टेम्पलेट / .pdf',
     noTemplatesYet: 'अभी कोई टेम्पलेट नहीं। जोड़ने के लिए टेम्पलेट आयात करें… का उपयोग करें।',
+    templateRegistryCorrupt:
+      'टेम्पलेट रजिस्ट्री (templates.json) क्षतिग्रस्त है, इसलिए पंजीकृत टेम्पलेट छिपे हुए हैं। फ़ाइल को ठीक करें या हटाएँ।',
     importTemplate: 'टेम्पलेट आयात करें…',
     openTemplatesFolder: 'टेम्पलेट फ़ोल्डर खोलें',
     noTemplates:
@@ -8670,6 +8710,8 @@ export const strings = {
     templatePdf: 'PDF範本',
     templatePdfSub: '預設範本 / .pdf',
     noTemplatesYet: '還沒有範本。點「匯入範本…」新增一個。',
+    templateRegistryCorrupt:
+      '範本登錄檔 templates.json 已損毀，已登記的範本暫時不會顯示。請修復或刪除該檔案。',
     importTemplate: '匯入範本…',
     openTemplatesFolder: '開啟範本資料夾',
     noTemplates: '還沒有範本。用 `teleoffice template add <名稱> <檔案.pptx>` 或匯入範本新增一個。',

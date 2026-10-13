@@ -8,6 +8,7 @@ import {
   closeSync,
   copyFileSync,
   existsSync,
+  fstatSync,
   mkdirSync,
   openSync,
   readFileSync,
@@ -158,6 +159,11 @@ function sleepSyncMs(ms: number): void {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
 }
 
+interface LockStamp {
+  ino: number
+  mtimeMs: number
+}
+
 // Exclusive lock for the read-modify-write cycle, kept synchronous for the
 // existing sync API. Uses open(wx) with jittered back-off up to ~10s.
 function acquireRegistryLock(dir: string): number {
@@ -175,11 +181,11 @@ function acquireRegistryLock(dir: string): number {
       return fd
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err
-      let stale = false
+      let stale: LockStamp | undefined
       try {
         const st = statSync(lockPath)
         if (Date.now() - st.mtimeMs > 30000) {
-          stale = true
+          stale = { ino: st.ino, mtimeMs: st.mtimeMs }
         } else {
           try {
             const pid = Number.parseInt(readFileSync(lockPath, 'utf-8').trim(), 10)
@@ -187,7 +193,9 @@ function acquireRegistryLock(dir: string): number {
               try {
                 process.kill(pid, 0)
               } catch (killErr) {
-                if ((killErr as NodeJS.ErrnoException).code === 'ESRCH') stale = true
+                if ((killErr as NodeJS.ErrnoException).code === 'ESRCH') {
+                  stale = { ino: st.ino, mtimeMs: st.mtimeMs }
+                }
               }
             }
           } catch {
@@ -197,14 +205,9 @@ function acquireRegistryLock(dir: string): number {
       } catch {
         // lock vanished between open and stat: retry immediately
       }
-      if (stale) {
-        try {
-          rmSync(lockPath, { force: true })
-        } catch {
-          // another process may have taken it; fall through to back-off
-        }
-        continue
-      }
+      // a claimed (or meanwhile replaced) lock is retried at once; a busy
+      // takeover guard falls through to the deadline and back-off below
+      if (stale && claimStaleLock(lockPath, stale)) continue
       if (Date.now() >= deadline) {
         throw new Error('timed out waiting for templates.json.lock in ' + dir, { cause: err })
       }
@@ -213,14 +216,71 @@ function acquireRegistryLock(dir: string): number {
   }
 }
 
+// Take over a lock judged stale. Takeovers are serialized by a short-lived
+// guard file (open wx), and under the guard the lock is checked again: only if
+// it is still the very file judged stale (same inode and mtime; a reused inode
+// number gets a new mtime) is it renamed to a name unique to this waiter and
+// then deleted. Without the guard, a second waiter that judged the same lock
+// stale could move away the fresh lock the first one has just created.
+// Returns false when another waiter holds the guard, so the caller backs off.
+function claimStaleLock(lockPath: string, stale: LockStamp): boolean {
+  const guard = lockPath + '.takeover'
+  let guardFd: number
+  try {
+    guardFd = openSync(guard, 'wx', 0o644)
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'EEXIST') return false
+    try {
+      // a guard is held for microseconds; one this old was left by a crash
+      if (Date.now() - statSync(guard).mtimeMs > 5000) rmSync(guard, { force: true })
+    } catch {
+      // guard released meanwhile
+    }
+    return false
+  }
+  try {
+    let st: { ino: number; mtimeMs: number }
+    try {
+      st = statSync(lockPath)
+    } catch {
+      return true
+    }
+    if (st.ino !== stale.ino || st.mtimeMs !== stale.mtimeMs) return true
+    const claimed =
+      lockPath + '.stale-' + process.pid + '-' + Math.random().toString(36).slice(2, 10)
+    try {
+      renameSync(lockPath, claimed)
+      rmSync(claimed, { force: true })
+    } catch {
+      // nothing else renames under the guard; a failure leaves the lock for the next try
+    }
+    return true
+  } finally {
+    try {
+      closeSync(guardFd)
+    } catch {
+      // ignore close errors; unlinking is what releases the guard
+    }
+    rmSync(guard, { force: true })
+  }
+}
+
 function releaseRegistryLock(dir: string, fd: number): void {
+  const lockPath = lockPathFor(dir)
+  let ours = false
+  try {
+    ours = fstatSync(fd).ino === statSync(lockPath).ino
+  } catch {
+    // lock path gone or fd unreadable: nothing of ours left to unlink
+  }
   try {
     closeSync(fd)
   } catch {
     // ignore close errors; unlinking is what releases the lock
   }
+  if (!ours) return
   try {
-    rmSync(lockPathFor(dir), { force: true })
+    rmSync(lockPath, { force: true })
   } catch {
     // ignore unlink errors; a stale lock is reclaimed by mtime/pid checks
   }

@@ -611,6 +611,8 @@ export function templateHasLayouts(
     if (typeof ref === 'number' && Number.isInteger(ref)) return flat[ref] !== undefined
     if (typeof ref !== 'string' || !ref.trim()) return false
     const raw = ref.trim()
+    // a layout name wins over the numeric reading, so a layout named "1" matches by name
+    if (preferred.some((layout) => layout.name.toLowerCase() === raw.toLowerCase())) return true
     if (/^\d+$/.test(raw)) return flat[Number(raw)] !== undefined
     const scoped = /^(\d+)\s*:\s*(.+)$/.exec(raw)
     const name = (scoped?.[2] ?? raw).trim().toLowerCase()

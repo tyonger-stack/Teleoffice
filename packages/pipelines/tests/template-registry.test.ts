@@ -1,5 +1,13 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { spawn } from 'node:child_process'
+import {
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  utimesSync,
+  writeFileSync,
+} from 'node:fs'
+import { spawn, spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -46,6 +54,38 @@ function srcDir(): string {
 
 async function writeDeck(path: string): Promise<void> {
   writeFileSync(path, await createBlankPptx())
+}
+
+const workerPath = join(
+  dirname(fileURLToPath(import.meta.url)),
+  'template-registry-concurrency-worker.ts',
+)
+
+// Eight worker processes, each adding 20 entries (c-w<i>-n<j>).
+function runWorkers(dir: string, src: string, startAt?: number): Promise<void[]> {
+  const workers: Array<Promise<void>> = []
+  for (let i = 0; i < 8; i++) {
+    workers.push(
+      new Promise<void>((done, fail) => {
+        const args = ['--import', 'tsx', workerPath, dir, String(i), src]
+        if (startAt !== undefined) args.push(String(startAt))
+        const child = spawn(process.execPath, args, { stdio: ['ignore', 'pipe', 'pipe'] })
+        let stderr = ''
+        const errStream = child.stderr
+        if (errStream) {
+          errStream.on('data', (d) => {
+            stderr += String(d)
+          })
+        }
+        child.on('error', fail)
+        child.on('exit', (code) => {
+          if (code === 0) done()
+          else fail(new Error('worker failed: ' + stderr))
+        })
+      }),
+    )
+  }
+  return Promise.all(workers)
 }
 
 describe('template registry', () => {
@@ -267,35 +307,7 @@ describe('template registry', () => {
     const { env, dir } = freshEnv()
     const src = join(srcDir(), 'src.pptx')
     await writeDeck(src)
-    const workerPath = join(
-      dirname(fileURLToPath(import.meta.url)),
-      'template-registry-concurrency-worker.ts',
-    )
-    const workers: Array<Promise<void>> = []
-    for (let i = 0; i < 8; i++) {
-      workers.push(
-        new Promise<void>((done, fail) => {
-          const child = spawn(
-            process.execPath,
-            ['--import', 'tsx', workerPath, dir, String(i), src],
-            { stdio: ['ignore', 'pipe', 'pipe'] },
-          )
-          let stderr = ''
-          const errStream = child.stderr
-          if (errStream) {
-            errStream.on('data', (d) => {
-              stderr += String(d)
-            })
-          }
-          child.on('error', fail)
-          child.on('exit', (code) => {
-            if (code === 0) done()
-            else fail(new Error('worker failed: ' + stderr))
-          })
-        }),
-      )
-    }
-    await Promise.all(workers)
+    await runWorkers(dir, src)
     const listed = listTemplates(env)
     expect(listed).toHaveLength(160)
     const names = new Set(listed.map((t) => t.name))
@@ -306,5 +318,25 @@ describe('template registry', () => {
     }
     const parsed = JSON.parse(readFileSync(join(dir, 'templates.json'), 'utf-8'))
     expect(Object.keys(parsed.templates)).toHaveLength(160)
+  }, 60000)
+
+  it('keeps every entry when many waiters take over a stale lock at once', async () => {
+    const { env, dir } = freshEnv()
+    const src = join(srcDir(), 'src.pptx')
+    await writeDeck(src)
+    // a lock left by a crashed writer: dead pid and an mtime past the 30 s limit
+    const dead = spawnSync(process.execPath, ['-e', ''])
+    const lockPath = join(dir, 'templates.json.lock')
+    writeFileSync(lockPath, String(dead.pid))
+    const old = new Date(Date.now() - 120000)
+    utimesSync(lockPath, old, old)
+    // all eight workers hit the stale lock together after tsx has loaded
+    await runWorkers(dir, src, Date.now() + 3000)
+    const listed = listTemplates(env)
+    expect(listed).toHaveLength(160)
+    const parsed = JSON.parse(readFileSync(join(dir, 'templates.json'), 'utf-8'))
+    expect(Object.keys(parsed.templates)).toHaveLength(160)
+    expect(existsSync(lockPath)).toBe(false)
+    expect(readdirSync(dir).filter((f) => f.includes('.lock'))).toEqual([])
   }, 60000)
 })

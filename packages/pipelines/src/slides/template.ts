@@ -475,6 +475,24 @@ interface ResolvedLayout {
   layout: TemplateLayout
 }
 
+// Exact name first, then case-insensitive, searching masters in the given order.
+function findLayoutByName(
+  info: TemplateInfo,
+  name: string,
+  masterOrder: number[],
+): TemplateLayout | undefined {
+  for (const mi of masterOrder) {
+    const layout = info.masters[mi]?.layouts.find((l) => l.name === name)
+    if (layout) return layout
+  }
+  const lower = name.toLowerCase()
+  for (const mi of masterOrder) {
+    const layout = info.masters[mi]?.layouts.find((l) => l.name.toLowerCase() === lower)
+    if (layout) return layout
+  }
+  return undefined
+}
+
 function resolveLayout(
   info: TemplateInfo,
   ref: unknown,
@@ -500,7 +518,15 @@ function resolveLayout(
   }
   if (typeof ref === 'string' && ref.trim()) {
     let name = ref.trim()
-    // Numeric strings are flat indexes, range-checked like numbers.
+    const masterOrder = [
+      preferred,
+      ...info.masters.map((m) => m.index).filter((x) => x !== preferred),
+    ]
+    // A layout name wins over the numeric and "<master>:<name>" readings, so a
+    // layout literally named "1" is still reachable by its name.
+    const named = findLayoutByName(info, name, masterOrder)
+    if (named) return { ok: true, resolved: { index: named.index, layout: named } }
+    // Other numeric strings are flat indexes, range-checked like numbers.
     if (/^\d+$/.test(name)) {
       const n = Number(name)
       const layout = flat[n]
@@ -540,19 +566,8 @@ function resolveLayout(
         }
       }
     }
-    const order =
-      scope !== undefined
-        ? [scope]
-        : [preferred, ...info.masters.map((m) => m.index).filter((x) => x !== preferred)]
-    for (const mi of order) {
-      const layout = info.masters[mi]?.layouts.find((l) => l.name === name)
-      if (layout) return { ok: true, resolved: { index: layout.index, layout } }
-    }
-    const lower = name.toLowerCase()
-    for (const mi of order) {
-      const layout = info.masters[mi]?.layouts.find((l) => l.name.toLowerCase() === lower)
-      if (layout) return { ok: true, resolved: { index: layout.index, layout } }
-    }
+    const layout = findLayoutByName(info, name, scope !== undefined ? [scope] : masterOrder)
+    if (layout) return { ok: true, resolved: { index: layout.index, layout } }
     const names = availableNames(info, scope ?? preferred)
     return {
       ok: false,
@@ -1073,8 +1088,50 @@ function setFontSlot(body: string, tag: 'latin' | 'ea', face: string): string {
   )
 }
 
+// Per-script theme fonts for Chinese (Hans simplified, Hant traditional). Office
+// themes carry e.g. SimSun / PMingLiU here; PowerPoint can fall back to them for
+// Chinese text when the ea slot does not apply, so they follow the template font.
+const CHINESE_SCRIPT_FONT_RE = /<a:font\b(?=[^>]*\bscript=(?:"Han[st]"|'Han[st]'))[^>]*?\/?>/g
+
+function setChineseScriptFonts(body: string, face: string): string {
+  return body.replace(CHINESE_SCRIPT_FONT_RE, (tag: string) =>
+    /\btypeface=/.test(tag)
+      ? tag.replace(/\btypeface=(?:"[^"]*"|'[^']*')/, 'typeface="' + face + '"')
+      : tag.replace(/^<a:font\b/, '<a:font typeface="' + face + '"'),
+  )
+}
+
+// Template chrome: masters and layouts (plus notes/handout masters) whose run
+// properties may name fonts outright, e.g. a slide-number field in SimSun.
+const TEMPLATE_CHROME_RE =
+  /^ppt\/(?:slideMasters|slideLayouts|notesMasters|handoutMasters)\/[^/]+\.xml$/
+const EXPLICIT_RUN_FONT_RE = /<a:(latin|ea|cs)\b([^>]*?)(\/?)>/g
+
+// Retype explicit latin/ea/cs fonts to the template font. Theme references
+// (+mn-lt, +mj-ea, ...) already follow the retyped theme and stay; bullet and
+// symbol fonts (a:buFont, a:sym) are other elements and stay too. The panose
+// and charset hints describe the old face, so they go with it.
+function retypeExplicitRunFonts(xml: string, face: string): string {
+  return xml.replace(
+    EXPLICIT_RUN_FONT_RE,
+    (tag: string, kind: string, attrs: string, end: string) => {
+      const current = /\btypeface=(?:"([^"]*)"|'([^']*)')/.exec(attrs)
+      const value = current ? (current[1] ?? current[2] ?? '') : ''
+      if (!value || value.startsWith('+')) return tag
+      return '<a:' + kind + ' typeface="' + face + '"' + end + '>'
+    },
+  )
+}
+
 function applyTemplateFont(archive: OpenedPptx['archive'], font: string): void {
   const face = escapeXmlAttr(font)
+  for (const path of [...archive.entries.keys()]) {
+    if (!TEMPLATE_CHROME_RE.test(path)) continue
+    const xml = archive.readText(path)
+    if (!xml) continue
+    const next = retypeExplicitRunFonts(xml, face)
+    if (next !== xml) archive.entries.set(path, Buffer.from(next, 'utf8'))
+  }
   for (const path of archive.entries.keys()) {
     if (!/^ppt\/theme\/theme\d+\.xml$/.test(path)) continue
     const xml = archive.readText(path)
@@ -1085,7 +1142,10 @@ function applyTemplateFont(archive: OpenedPptx['archive'], font: string): void {
         '<a:' +
         kind +
         'Font>' +
-        setFontSlot(setFontSlot(String(inner), 'latin', face), 'ea', face) +
+        setChineseScriptFonts(
+          setFontSlot(setFontSlot(String(inner), 'latin', face), 'ea', face),
+          face,
+        ) +
         '</a:' +
         kind +
         'Font>',

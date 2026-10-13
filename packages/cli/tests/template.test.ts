@@ -2,8 +2,9 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { templateDefaultLayout } from '../src/formats/slide-spec'
-import type { TemplateInfo } from '@teleoffice/pipelines/slides'
+import { templateDefaultLayout, templateHasLayouts } from '../src/formats/slide-spec'
+import { inspectTemplate, type TemplateInfo } from '@teleoffice/pipelines/slides'
+import { makeTwoMasterTemplate } from '../../pipelines/tests/template-fixture'
 import { run, tempDir } from './helpers'
 
 const owned: string[] = []
@@ -190,6 +191,29 @@ describe('teleoffice template', () => {
     expect((await run(['template', 'path', '--json'], ctx)).json().detail.path).toBe(
       ctx.env.TELEOFFICE_TEMPLATES_DIR,
     )
+  })
+
+  it('warns in template list when templates.json is corrupt', async () => {
+    const dir = ownedTempDir()
+    const ctx = templateEnv(dir)
+    const templates = ctx.env.TELEOFFICE_TEMPLATES_DIR!
+    const template = await makeTemplate(dir)
+    expect((await run(['template', 'add', 'base', template, '--json'], ctx)).code).toBe(0)
+    const clean = await run(['template', 'list', '--json'], ctx)
+    expect(clean.json().warnings).toBeUndefined()
+
+    writeFileSync(join(templates, 'loose.pptx'), readFileSync(template))
+    writeFileSync(join(templates, 'templates.json'), '{not json')
+    const listed = await run(['template', 'list', '--json'], ctx)
+    expect(listed.code).toBe(0)
+    // the registered entry drops out, the bare file still lists, and the list says why
+    expect(listed.json().detail.templates).toMatchObject([{ name: 'loose', source: 'file' }])
+    expect(listed.json().warnings).toMatchObject([
+      { code: 'template_registry_corrupt', message: expect.stringContaining('templates.json') },
+    ])
+    const human = await run(['template', 'list'], ctx)
+    expect(human.code).toBe(0)
+    expect(human.stdout).toContain('warning: templates.json is not valid JSON')
   })
 
   it('manages the default and applies it only to compatible deck specs', async () => {
@@ -672,6 +696,31 @@ describe('teleoffice template', () => {
     )
     expect(ordinary.code).toBe(1)
     expect(ordinary.json().message).toContain('"layout" is required')
+  })
+
+  it('reads a digit start layout as a layout name before a flat index', async () => {
+    const dir = ownedTempDir()
+    const ctx = templateEnv(dir)
+    // five layouts (flat 0-4); the last one is named "7"
+    const bytes = await makeTwoMasterTemplate({ coverName: '7' })
+    const template = join(dir, 'numeric.pptx')
+    writeFileSync(template, bytes)
+    const named = await run(
+      ['template', 'add', 'numeric', template, '--start-layout', '7', '--json'],
+      ctx,
+    )
+    expect(named.code, JSON.stringify(named.json())).toBe(0)
+    const bad = await run(
+      ['template', 'add', 'numeric-bad', template, '--start-layout', '8', '--json'],
+      ctx,
+    )
+    expect(bad.code).toBe(1)
+    expect(bad.json().message).toContain('unknown start layout index 8')
+    const info = await inspectTemplate(bytes)
+    expect(templateHasLayouts(info, ['7'])).toBe(true)
+    expect(templateHasLayouts(info, ['7'], 1)).toBe(true)
+    expect(templateHasLayouts(info, ['3'])).toBe(true)
+    expect(templateHasLayouts(info, ['8'])).toBe(false)
   })
 
   it('reports kept slides in the create summary', async () => {

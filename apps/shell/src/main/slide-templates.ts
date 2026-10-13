@@ -9,6 +9,7 @@ import {
   addTemplate,
   clearDefaultTemplate,
   listTemplates,
+  registryReadError,
   resolveRegisteredTemplate,
   setDefaultTemplate,
   templatesDir,
@@ -21,6 +22,11 @@ export interface SlideTemplateItem {
   description?: string
   isDefault: boolean
   source: 'registry' | 'file'
+}
+
+// Corrupt registry warning for the home picker: null when healthy or missing.
+export function slideTemplateRegistryWarning(env: NodeJS.ProcessEnv = process.env): string | null {
+  return registryReadError(env) ?? null
 }
 
 // List the registry templates for the home-screen picker.
@@ -126,6 +132,10 @@ export function pickStartLayout(
   if (pref.startLayout) {
     // "Name", "<master>:Name" or a flat layout index, as `template add --start-layout` accepts
     const raw = pref.startLayout.trim()
+    // the whole value as a layout name wins first, so a layout named "1" is not index 1
+    const whole = (l: TemplateLayoutOf): boolean => l.name.toLowerCase() === raw.toLowerCase()
+    const byName = flat.find((l) => whole(l) && l.master === pref.master) ?? flat.find(whole)
+    if (byName) return byName
     const scoped = /^(\d+)\s*:\s*(.+)$/.exec(raw)
     const scope = scoped ? Number(scoped[1]) : pref.master
     const wanted = (scoped ? scoped[2]! : raw).trim().toLowerCase()

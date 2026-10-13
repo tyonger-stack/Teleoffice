@@ -32,6 +32,7 @@ import {
   importSlideTemplate as importSlideTemplateFile,
   listSlideTemplates,
   setDefaultSlideTemplate,
+  slideTemplateRegistryWarning,
 } from './slide-templates'
 import {
   createFileFromTemplate,
@@ -3898,6 +3899,7 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.listSlideTemplates, () => listSlideTemplates())
+  ipcMain.handle(HOME_CHANNELS.slideTemplateRegistryWarning, () => slideTemplateRegistryWarning())
   ipcMain.handle(HOME_CHANNELS.setDefaultSlideTemplate, (_event, name: unknown) => {
     if (name !== null && (typeof name !== 'string' || !name || name.length > 128)) {
       throw new Error(tm('errBadArgs'))

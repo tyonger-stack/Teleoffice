@@ -923,6 +923,8 @@ export function Home() {
   const [templateLists, setTemplateLists] = useState<
     Partial<Record<HomeTemplateKind, TemplateMenuEntry[] | null>>
   >({})
+  // Corrupt templates.json warning for the pptx menu; null when healthy.
+  const [slideTemplateWarning, setSlideTemplateWarning] = useState<string | null>(null)
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set())
   const [renaming, setRenaming] = useState<{ path: string; value: string } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string[] | null>(null)
@@ -1629,6 +1631,17 @@ export function Home() {
       (list) => setTemplateLists((prev) => ({ ...prev, [kind]: list })),
       () => setTemplateLists((prev) => ({ ...prev, [kind]: [] })),
     )
+    if (kind === 'pptx') {
+      // Keep the corrupt-registry warning in step with the pptx list.
+      try {
+        void window.aiOffice.slideTemplateRegistryWarning().then(
+          (warning) => setSlideTemplateWarning(typeof warning === 'string' ? warning : null),
+          () => setSlideTemplateWarning(null),
+        )
+      } catch {
+        setSlideTemplateWarning(null)
+      }
+    }
   }
 
   useEffect(() => {
@@ -1744,6 +1757,15 @@ export function Home() {
                           } as CSSProperties
                         }
                       >
+                        {card.kind === 'pptx' && slideTemplateWarning ? (
+                          <div
+                            className="template-warning"
+                            role="alert"
+                            title={slideTemplateWarning}
+                          >
+                            {t('templateRegistryCorrupt')}
+                          </div>
+                        ) : null}
                         {listed && listed.length > 0 ? (
                           <div className="template-list">
                             {[...listed]

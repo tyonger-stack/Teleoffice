@@ -227,6 +227,45 @@ describe('buildTemplateDeck', () => {
     expect(slide).toContain('<a:cs typeface="Microsoft YaHei"/>')
   })
 
+  it('applies the font override to the Chinese per-script theme fonts too', async () => {
+    const bytes = await makeTwoMasterTemplate({ scriptFonts: true, explicitFonts: true })
+    const before = (await PackageArchive.open(bytes)).readText('ppt/theme/theme2.xml') ?? ''
+    expect(before).toContain('<a:font script="Hans" typeface="宋体"/>')
+    const info = await inspectTemplate(bytes)
+    const parsed = parseTemplateDeckSpec(
+      { font: 'Microsoft YaHei', pages: [{ layout: 'TitleAndContent', title: 'Fonts' }] },
+      info,
+    )
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    const built = await buildTemplateDeck(bytes, parsed.spec, deps)
+    const archive = await PackageArchive.open(built.bytes)
+    const theme = archive.readText('ppt/theme/theme2.xml') ?? ''
+    for (const kind of ['major', 'minor']) {
+      const scheme =
+        new RegExp('<a:' + kind + 'Font>[\\s\\S]*?</a:' + kind + 'Font>').exec(theme)?.[0] ?? ''
+      expect(scheme).toContain('<a:latin typeface="Microsoft YaHei"/>')
+      expect(scheme).toContain('<a:ea typeface="Microsoft YaHei"/>')
+      expect(scheme).toContain('<a:font script="Hans" typeface="Microsoft YaHei"/>')
+      expect(scheme).toContain('<a:font script="Hant" typeface="Microsoft YaHei"/>')
+      // other scripts are left to the template
+      expect(scheme).toContain('<a:font script="Jpan" typeface="Yu Gothic"/>')
+    }
+    expect(theme).not.toContain('宋体')
+    expect(theme).not.toContain('新細明體')
+    expect(theme).not.toContain('SimSun')
+    // explicit fonts in layout runs follow too; theme refs and symbol fonts stay
+    const layout = archive.readText('ppt/slideLayouts/slideLayout5.xml') ?? ''
+    expect(layout).toContain(
+      '<a:latin typeface="Microsoft YaHei"/><a:ea typeface="Microsoft YaHei"/><a:cs typeface="+mn-cs"/><a:sym typeface="Wingdings"/>',
+    )
+    for (const path of archive.entries.keys()) {
+      if (!path.endsWith('.xml')) continue
+      const xml = archive.readText(path) ?? ''
+      expect(xml, path).not.toMatch(/宋体|SimSun|新細明體|Calibri"/)
+    }
+  })
+
   it('fills picture placeholders and reports image failures per page', async () => {
     const bytes = await makeTwoMasterTemplate()
     const info = await inspectTemplate(bytes)
@@ -420,6 +459,78 @@ describe('parseOutline in template mode', () => {
     expect(r.ok).toBe(true)
     if (!r.ok) return
     expect(r.issues.filter((x) => x.level === 'error')).toEqual([])
+  })
+})
+
+describe('layout names that read as numbers', () => {
+  it('resolves a layout named "1" by name and other digit strings as flat indexes', async () => {
+    const bytes = await makeTwoMasterTemplate({ coverName: '1' })
+    const info = await inspectTemplate(bytes)
+    expect(info.masters.flatMap((m) => m.layouts.map((l) => l.name))).toEqual([
+      'Blank',
+      'TitleAndContent',
+      'TitleOnly',
+      'TitleAndContent',
+      '1',
+    ])
+    const parsed = parseTemplateDeckSpec(
+      {
+        pages: [
+          { layout: '1' },
+          { layout: '2', title: 'By index' },
+          { layout: 1, title: 'Number' },
+        ],
+      },
+      info,
+    )
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    // "1" is the layout named "1" (flat index 4); "2" has no such name, so it is index 2;
+    // a JSON number stays an index
+    expect(parsed.spec.pages.map((p) => [p.layoutIndex, p.layoutName])).toEqual([
+      [4, '1'],
+      [2, 'TitleOnly'],
+      [1, 'TitleAndContent'],
+    ])
+    const built = await buildTemplateDeck(bytes, parsed.spec, deps)
+    expect((await openPptx(built.bytes)).deck.slides).toHaveLength(3)
+    // without such a name, "1" is still flat index 1
+    const plain = parseTemplateDeckSpec(
+      { pages: [{ layout: '1', title: 'x' }] },
+      await inspectTemplate(await makeTwoMasterTemplate()),
+    )
+    expect(plain.ok && plain.spec.pages[0]!.layoutIndex).toBe(1)
+  })
+
+  it('accepts a digit layout name in outlines even past the flat count', () => {
+    const outline = JSON.stringify({
+      core_hook: 'Margins fell while volume grew',
+      pages: [
+        {
+          title: 'Page 1',
+          type: 'content',
+          layout: '7',
+          brief: 'Main title plus three supporting facts with the real figures for this page.',
+          image_queries: [],
+        },
+      ],
+    })
+    const named = parseOutline(outline, {
+      templateLayouts: ['TitleAndContent', '7'],
+      templateLayoutCount: 5,
+    })
+    expect(named.ok).toBe(true)
+    if (!named.ok) return
+    expect(named.issues.filter((x) => x.level === 'error')).toEqual([])
+    const unnamed = parseOutline(outline, {
+      templateLayouts: ['TitleAndContent'],
+      templateLayoutCount: 5,
+    })
+    expect(unnamed.ok).toBe(true)
+    if (!unnamed.ok) return
+    expect(
+      unnamed.issues.some((x) => x.level === 'error' && x.message.includes('out of range')),
+    ).toBe(true)
   })
 })
 
