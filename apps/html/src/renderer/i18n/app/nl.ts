@@ -16,6 +16,7 @@ export const nl = {
   saveFailed: 'Opslaan mislukt: {error}',
   saveFailedStatus: 'Opslaan mislukt',
   exportFailed: 'Exporteren mislukt',
+  printFailed: 'Afdrukken mislukt: {error}',
   exportHtmlSkipped:
     'Geëxporteerd, maar {count} bron(nen) konden niet worden ingesloten (bijv. {first})',
   viewPreview: 'Voorbeeld',
@@ -131,6 +132,7 @@ export const nl = {
   insertImageUrl: 'Afbeelding van URL…',
   insertConfirm: 'Invoegen',
   insertMore: 'Meer',
+  insertSkeleton: 'Skelet invoegen',
   insertTableSize: 'Tabel van {r}×{c}',
   insertTablePickSize: 'Tabelgrootte kiezen',
   insertPlaceholderTableHeader: 'Kop {n}',

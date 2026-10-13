@@ -16,6 +16,7 @@ export const it = {
   saveFailed: 'Salvataggio non riuscito: {error}',
   saveFailedStatus: 'Salvataggio non riuscito',
   exportFailed: 'Esportazione non riuscita',
+  printFailed: 'Stampa non riuscita: {error}',
   exportHtmlSkipped:
     'Esportato, ma {count} risorsa/e non è stato possibile incorporarle (es. {first})',
   viewPreview: 'Anteprima',
@@ -131,6 +132,7 @@ export const it = {
   insertImageUrl: 'Immagine da URL…',
   insertConfirm: 'Inserisci',
   insertMore: 'Altro',
+  insertSkeleton: 'Inserisci struttura',
   insertTableSize: 'Tabella {r}×{c}',
   insertTablePickSize: 'Scegli le dimensioni della tabella',
   insertPlaceholderTableHeader: 'Intestazione {n}',

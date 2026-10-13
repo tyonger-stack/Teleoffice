@@ -16,6 +16,7 @@ export const de = {
   saveFailed: 'Speichern fehlgeschlagen: {error}',
   saveFailedStatus: 'Speichern fehlgeschlagen',
   exportFailed: 'Export fehlgeschlagen',
+  printFailed: 'Druck fehlgeschlagen: {error}',
   exportHtmlSkipped:
     'Exportiert, aber {count} Ressource(n) konnten nicht eingebettet werden (z. B. {first})',
   viewPreview: 'Vorschau',
@@ -130,6 +131,7 @@ export const de = {
   insertImageUrl: 'Bild von URL…',
   insertConfirm: 'Einfügen',
   insertMore: 'Mehr',
+  insertSkeleton: 'Grundgerüst einfügen',
   insertTableSize: '{r}×{c} Tabelle',
   insertTablePickSize: 'Tabellengröße auswählen',
   insertPlaceholderTableHeader: 'Kopfzeile {n}',

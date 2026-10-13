@@ -45,7 +45,15 @@ import {
   settingsSupportVision,
 } from './slide-qc'
 import { useI18n, t as tGlobal, aiLangDirective, type TFunc } from '../i18n/locale'
-import { AiScopeQuote, Markdown, useAiPanelPrefs, type AiScopeQuoteData } from '@teleoffice/ui'
+import {
+  AiScopeQuote,
+  AiUsageChip,
+  Markdown,
+  addTokenUsage,
+  useAiPanelPrefs,
+  type AiScopeQuoteData,
+  type AiTokenUsageView,
+} from '@teleoffice/ui'
 import { GensparkMark } from '../components/icons'
 import sendEnterOn from '../assets/send-enter-on.png'
 import sendEnterOff from '../assets/send-enter-off.png'
@@ -234,6 +242,8 @@ interface ChatEntry {
   attachments?: AttachmentMeta[]
   /** the selection this user message targeted, frozen at send */
   scope?: AiScopeQuoteData
+  /** tokens the provider billed for this reply, summed across its turns (absent when unreported) */
+  usage?: AiTokenUsageView
 }
 
 /** Empty deck → generation starters; deck with content → polish starters */
@@ -554,6 +564,10 @@ export function AiPanel({
   >([])
   /** Last streamed text of the current turn: the only copy left when a run dies before onDone */
   const streamedTextRef = useRef('')
+  /** tokens billed so far in the in-flight run (summed across turns) */
+  const runUsageRef = useRef<AiTokenUsageView | undefined>(undefined)
+  /** tokens billed across the panel's session (the composer chip) */
+  const [sessionUsage, setSessionUsage] = useState<AiTokenUsageView | undefined>(undefined)
 
   // ── Chat history persistence ──────────────────────────────────────────────
   /** Resolve chatId and load history on first mount (AiPanel resets by key; no need to watch currentFilePath changes) */
@@ -1053,6 +1067,8 @@ export function AiPanel({
           '\n' +
           '## Visuals and assets\n' +
           '- Photos may only use URLs from the "available images" list, at most as many image elements as URLs. With no available images, fill with typography/color blocks/shapes — never fake photos.\n' +
+          "- Use a photo only when it genuinely matches this page's content and improves it — an irrelevant or generic stock photo is worse than none. When in doubt, skip the image and compose with typography/color blocks/shapes instead.\n" +
+          '- At most 3 image elements on one page; one strong, relevant image beats several weak ones.\n' +
           '- Icon-like decoration uses the allowed shapes only (at most 4-5 per page, strongly content-related). **Never use emoji**.\n' +
           '- Data visuals: compose bars/rings/timelines from rect/donut/line shapes with sizes proportional to the real values from the brief.\n' +
           '- Solid colors only (alpha allowed) — no gradients. **No placeholders of any kind**: all copy comes from the brief’s real content.\n' +
@@ -1068,12 +1084,13 @@ export function AiPanel({
         const ctxBlock = args.context
           ? `\n\nReference material (all real names/figures/facts come from here; do not invent):\n${args.context.slice(0, 4000)}`
           : ''
+        const skeletonBlock = args.skeleton ? `\n\n${args.skeleton}` : ''
         const userMsg =
           `This is the deck's unified style (this page must follow it strictly to stay consistent across pages):\n${args.style}\n\n` +
           (args.topic ? `Deck topic: ${args.topic}\n` : '') +
           `Deck-wide narrative Core Hook: ${args.coreHook}\n\n` +
           `Now design page ${args.pageIndex}/${args.totalPages}.\n` +
-          `Title: ${args.title}\nLayout: ${args.layout}\nContent brief (use real data/facts): ${args.brief}${imgBlock}${ctxBlock}\n\n` +
+          `Title: ${args.title}\nLayout: ${args.layout}\nContent brief (use real data/facts): ${args.brief}${imgBlock}${ctxBlock}${skeletonBlock}\n\n` +
           "Return only this page's spec JSON."
         // One repair round: feed the exact validation error back so the model can fix its JSON
         let lastErr = ''
@@ -1113,10 +1130,13 @@ export function AiPanel({
             briefParts.push(
               `Reference material (all real names/figures/facts come from here; do not invent):\n${args.context.slice(0, 4000)}`,
             )
+          // The cloud service owns its own page prompt; the template chrome rides
+          // in as part of the style so its pages pin the same geometry
+          const styleSkill = args.skeleton ? `${args.style}\n\n${args.skeleton}` : args.style
           const res = await window.slidesApi.cloudGeneratePage({
             brief: briefParts.join('\n\n'),
             title: args.title,
-            styleSkill: args.style,
+            styleSkill,
             deckContext: {
               ...(args.topic ? { topic: args.topic } : {}),
               core_hook: args.coreHook,
@@ -1413,6 +1433,11 @@ export function AiPanel({
           patchLastAssistant({ streaming: false })
           setChat((prev) => [...prev, { role: 'assistant', text: '', streaming: true }])
         },
+        onUsage: (usage) => {
+          runUsageRef.current = addTokenUsage(runUsageRef.current, usage)
+          setSessionUsage((prev) => addTokenUsage(prev, usage))
+          patchLastAssistant({ usage: runUsageRef.current })
+        },
         onDone: ({ text, cancelled, turnLimit, truncated }) => {
           const baseText = turnLimit
             ? [text, tGlobal('aiTurnLimit')].filter(Boolean).join('\n\n')
@@ -1632,6 +1657,7 @@ export function AiPanel({
     runToolsRef.current = []
     streamedTextRef.current = ''
     runSnapshotIdRef.current = null
+    runUsageRef.current = undefined
     stickToBottomRef.current = true
     // Internal orchestration prompts (like generate_deck step notes) skip the chat bubble and go only to the model
     const shown = displayText ?? instruction
@@ -1704,6 +1730,7 @@ export function AiPanel({
       runToolsRef.current = []
       streamedTextRef.current = ''
       runSnapshotIdRef.current = null
+      runUsageRef.current = undefined
       stickToBottomRef.current = true
       setChat((prev) => [
         ...prev.map((e) =>
@@ -2193,6 +2220,11 @@ export function AiPanel({
                 <span dir="auto">{entry.text}</span>
               )}
               {entry.tools && entry.tools.length > 0 && <ToolChipList tools={entry.tools} />}
+              {entry.role === 'assistant' && entry.usage && (
+                <div className="ai-message-usage">
+                  <AiUsageChip usage={entry.usage} lang={lang} />
+                </div>
+              )}
               {entry.error && (
                 <div className="ai-msg-error">{t('aiMsgError', { error: entry.error })}</div>
               )}
@@ -2424,6 +2456,7 @@ export function AiPanel({
               >
                 <img src={attachIcon} alt="" aria-hidden />
               </button>
+              {sessionUsage && <AiUsageChip usage={sessionUsage} session lang={lang} />}
               {busy ? (
                 <button
                   className="ai-send-btn ai-stop-btn"

@@ -16,6 +16,7 @@ export const ru = {
   saveFailed: 'Не удалось сохранить: {error}',
   saveFailedStatus: 'Не удалось сохранить',
   exportFailed: 'Не удалось экспортировать',
+  printFailed: 'Не удалось напечатать: {error}',
   exportHtmlSkipped:
     'Экспортировано, но {count} ресурс(ов) не удалось встроить (например, {first})',
   viewPreview: 'Просмотр',
@@ -128,6 +129,7 @@ export const ru = {
   insertImageUrl: 'Изображение по URL…',
   insertConfirm: 'Вставить',
   insertMore: 'Ещё',
+  insertSkeleton: 'Вставить каркас',
   insertTableSize: 'Таблица {r}×{c}',
   insertTablePickSize: 'Выберите размер таблицы',
   insertPlaceholderTableHeader: 'Заголовок {n}',
