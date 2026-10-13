@@ -10,6 +10,7 @@ import {
 } from '@teleoffice/ui'
 import type { AiFontSize, AiPanelPrefs, AiPanelSide } from '@teleoffice/ui'
 import type { DecisionEndpoint, DefaultAppStatus, FileSearchSettings } from '../../shared/home-api'
+import type { UpdateUiState } from '../../shared/update-api'
 import {
   DEFAULT_MAX_OUTPUT_TOKENS,
   MAX_MAX_OUTPUT_TOKENS,
@@ -26,7 +27,7 @@ import type {
 } from '@teleoffice/ai-provider'
 import { useI18n } from './locale'
 import type { StringKey, TFunc } from './locale'
-import type { AiCatalogEntry, UiTheme } from '../../shared/home-api'
+import type { AiCatalogEntry, DocTheme, UiTheme } from '../../shared/home-api'
 import { ProviderLogo } from './provider-logos'
 import { IntegrationsPane, skillUpdateDue } from './IntegrationsPane'
 import './settings.css'
@@ -67,6 +68,14 @@ const THEME_OPTIONS = [
   { value: 'light', labelKey: 'themeLight' },
   { value: 'dark', labelKey: 'themeDark' },
 ] as const satisfies readonly { value: UiTheme; labelKey: StringKey }[]
+
+// Document page theme (#1811): the canvas/paper preference the editors follow;
+// 'follow' keeps the pre-existing behavior of riding the UI theme
+const DOC_THEME_OPTIONS = [
+  { value: 'follow', labelKey: 'docThemeFollowApp' },
+  { value: 'light', labelKey: 'themeLight' },
+  { value: 'dark', labelKey: 'themeDark' },
+] as const satisfies readonly { value: DocTheme; labelKey: StringKey }[]
 
 const AI_FONT_SIZE_OPTIONS = [
   { value: 'default', labelKey: 'aiFontSizeDefault' },
@@ -1272,6 +1281,7 @@ export function SettingsModal({
   const { lang, setLang, t } = useI18n()
   const [section, setSection] = useState<SectionId>(target?.section ?? 'general')
   const [theme, setTheme] = useState<UiTheme>('system')
+  const [docTheme, setDocTheme] = useState<DocTheme>('follow')
   const [saveDir, setSaveDir] = useState('')
   const [autoSaveOn, setAutoSaveOn] = useState(false)
   const [defaultApp, setDefaultApp] = useState<DefaultAppStatus | null>(null)
@@ -1280,10 +1290,14 @@ export function SettingsModal({
   const [aiPrefs, setAiPrefs] = useState<AiPanelPrefs>(DEFAULT_AI_PANEL_PREFS)
   const [channel, setChannel] = useState<'stable' | 'beta'>('stable')
   const [appVersion, setAppVersion] = useState('')
+  const [updateState, setUpdateState] = useState<UpdateUiState | null>(null)
   useEffect(() => {
     let alive = true
     void window.aiOffice.getTheme?.().then((th) => {
       if (alive) setTheme(th)
+    })
+    void window.aiOffice.getDocumentTheme?.().then((th) => {
+      if (alive) setDocTheme(th)
     })
     void window.aiOffice.getDefaultSaveDir?.().then((dir) => {
       if (alive && dir) setSaveDir(dir)
@@ -1303,9 +1317,24 @@ export function SettingsModal({
     void window.aiOffice.getAppVersion?.().then((v) => {
       if (alive && v) setAppVersion(v)
     })
+    // a rejected invoke (main process not ready, a shell whose preload does
+    // not expose the channel) must not surface as an unhandled rejection;
+    // without a known state the About row simply stays hidden
+    void window.aiOffice
+      .getUpdateState?.()
+      .then((s) => {
+        if (alive) setUpdateState(s)
+      })
+      .catch(() => undefined)
     return () => {
       alive = false
     }
+  }, [])
+
+  // live update state: the About row offers the update as soon as one is known
+  useEffect(() => {
+    const off = window.aiOffice.onUpdateStateChanged?.((s) => setUpdateState(s))
+    return () => off?.()
   }, [])
 
   useEffect(() => {
@@ -1321,6 +1350,11 @@ export function SettingsModal({
     void window.aiOffice.setTheme(next)
     if (next === 'system') document.documentElement.removeAttribute('data-theme')
     else document.documentElement.setAttribute('data-theme', next)
+  }
+
+  const applyDocumentTheme = (next: DocTheme) => {
+    setDocTheme(next)
+    void window.aiOffice.setDocumentTheme(next)
   }
 
   const updateAiPrefs = (patch: Partial<AiPanelPrefs>) => {
@@ -1441,6 +1475,21 @@ export function SettingsModal({
                       label: t(opt.labelKey),
                     }))}
                     onPick={(v) => applyTheme(v as UiTheme)}
+                  />
+                </div>
+                <div className="set-field">
+                  <div className="set-field-text">
+                    <label className="set-field-label">{t('documentTheme')}</label>
+                  </div>
+                  <Dropdown
+                    className="set-dd"
+                    value={docTheme}
+                    ariaLabel={t('documentTheme')}
+                    options={DOC_THEME_OPTIONS.map((opt) => ({
+                      value: opt.value,
+                      label: t(opt.labelKey),
+                    }))}
+                    onPick={(v) => applyDocumentTheme(v as DocTheme)}
                   />
                 </div>
                 <div className="set-field">
@@ -1575,6 +1624,26 @@ export function SettingsModal({
               <>
                 <h3 className="set-pane-title">{t('setSecAbout')}</h3>
                 <Field label={t('versionLabel')} value={appVersion || '—'} />
+                {updateState && (
+                  <div className="set-field">
+                    <div className="set-field-text">
+                      <label className="set-field-label">{t('setUpdateAvailableLabel')}</label>
+                    </div>
+                    <button
+                      type="button"
+                      className="set-update-btn"
+                      onClick={() => void window.aiOffice.openUpdateDialog?.()}
+                    >
+                      {updateState.phase === 'downloading'
+                        ? t('setUpdateDownloading', {
+                            percent: Math.round(updateState.percent),
+                          })
+                        : updateState.phase === 'downloaded'
+                          ? t('setUpdateRestart')
+                          : t('setUpdateTo', { version: updateState.version })}
+                    </button>
+                  </div>
+                )}
                 <div className="set-field">
                   <div className="set-field-text">
                     <label className="set-field-label">{t('updateChannel')}</label>

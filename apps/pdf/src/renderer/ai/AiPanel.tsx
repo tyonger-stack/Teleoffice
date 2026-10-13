@@ -3,9 +3,17 @@ import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent, ReactElement } from 'react'
 import { AgentLoop } from '@teleoffice/agent-core'
 import { imageGenerationAvailable, type AiSettings } from '@teleoffice/ai-provider/browser'
-import { AiComposer, AiScopeQuote, AiTypingIndicator, type AiScopeQuoteData } from '@teleoffice/ui'
+import {
+  AiComposer,
+  AiScopeQuote,
+  AiTypingIndicator,
+  AiUsageChip,
+  addTokenUsage,
+  type AiScopeQuoteData,
+  type AiTokenUsageView,
+} from '@teleoffice/ui'
 import { aiLangDirective, t as tGlobal, useI18n } from '../i18n/locale'
-import { Markdown } from '@teleoffice/ui'
+import { createFileNav, Markdown } from '@teleoffice/ui'
 import sendEnterOn from '../assets/send-enter-on.png'
 import sendEnterOff from '../assets/send-enter-off.png'
 import sendStop from '../assets/send-stop.png'
@@ -60,6 +68,8 @@ interface ChatEntry {
   tools?: ToolActivity[]
   /** the passage this user message targeted, frozen at send */
   scope?: AiScopeQuoteData
+  /** tokens the provider billed for this reply, summed across its turns (absent when unreported) */
+  usage?: AiTokenUsageView
 }
 
 /** longest selection excerpt echoed on a user bubble */
@@ -109,6 +119,10 @@ export function AiPanel({
       assistant rows would break restore() on strict-alternation providers) */
   const runTextsRef = useRef<string[]>([])
   const runToolsRef = useRef<ToolActivity[]>([])
+  /** tokens billed so far in the in-flight run (summed across turns) */
+  const runUsageRef = useRef<AiTokenUsageView | undefined>(undefined)
+  /** tokens billed across the panel's session (the composer chip) */
+  const [sessionUsage, setSessionUsage] = useState<AiTokenUsageView | undefined>(undefined)
   const chatStore = () =>
     (
       window as Window & {
@@ -416,6 +430,11 @@ export function AiPanel({
           patchLast({ streaming: false })
           setChat((prev) => [...prev, { role: 'assistant', text: '', streaming: true }])
         },
+        onUsage: (usage) => {
+          runUsageRef.current = addTokenUsage(runUsageRef.current, usage)
+          setSessionUsage((prev) => addTokenUsage(prev, usage))
+          patchLast({ usage: runUsageRef.current })
+        },
         onDone: ({ text, cancelled, turnLimit, truncated }) => {
           const base = turnLimit
             ? [text, tGlobal('aiTurnLimit')].filter(Boolean).join('\n\n')
@@ -490,6 +509,7 @@ export function AiPanel({
     segTextRef.current = ''
     runTextsRef.current = []
     runToolsRef.current = []
+    runUsageRef.current = undefined
     setChat((prev) => [
       ...prev,
       { role: 'user', text: instruction, ...(scope ? { scope } : {}) },
@@ -604,6 +624,10 @@ export function AiPanel({
       if (page !== null) apiRef.current.gotoPage(page)
     },
   }
+  // [name](filenav:///abs/path) citations open the cited file in its own app
+  const fileNav = createFileNav((path) => {
+    void window.pdfApi.openSourcePath(path)
+  })
 
   return (
     <aside
@@ -712,9 +736,14 @@ export function AiPanel({
               className={`ai-msg ai-msg-assistant${entry.isError ? ' ai-msg-error' : ''}`}
             >
               {hasTools && <ToolChipList tools={entry.tools!} />}
+              {entry.usage && (
+                <div className="ai-message-usage">
+                  <AiUsageChip usage={entry.usage} lang={lang} />
+                </div>
+              )}
               {entry.text && (
                 <div dir="auto">
-                  <Markdown text={entry.text} nav={pdfNav} />
+                  <Markdown text={entry.text} navs={[pdfNav, fileNav]} />
                 </div>
               )}
             </div>
@@ -811,6 +840,9 @@ export function AiPanel({
           sendIconEnabled={<img src={sendEnterOn} alt="" aria-hidden />}
           sendIconDisabled={<img src={sendEnterOff} alt="" aria-hidden />}
           stopIcon={<img src={sendStop} alt="" aria-hidden />}
+          footerStart={
+            sessionUsage ? <AiUsageChip usage={sessionUsage} session lang={lang} /> : undefined
+          }
           onChange={setPrompt}
           onSend={() => send(prompt)}
           onStop={stop}
