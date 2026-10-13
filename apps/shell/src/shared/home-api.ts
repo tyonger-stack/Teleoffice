@@ -7,9 +7,12 @@ import type {
   AiSearchProviderId,
   AiSearchProviderMeta,
   AiSettings,
+  AiStreamChunk,
+  AiStreamRequest,
   CodexModelCatalog,
 } from '@teleoffice/ai-provider'
 import type { UpdateChannel } from './update-api'
+import type { KbFileInfo, KbReadPage, KbSearchHit } from '@teleoffice/agent-core'
 import type { AiPanelPrefs } from '@teleoffice/ui/ai-panel-prefs'
 
 /** UI language; kept self-contained here (mirrors Lang in @teleoffice/i18n) */
@@ -185,6 +188,20 @@ export interface HomeApi {
   statPaths(paths: string[]): Promise<RecentEntry[]>
   /** star / unstar a file */
   toggleStar(path: string): Promise<void>
+  // ---- knowledge-base ask panel: the reader's starred corpus, askable ----
+  /** the starred corpus as the AI's knowledge base */
+  kbList(): Promise<KbFileInfo[]>
+  /** full-text search over the corpus */
+  kbSearch(query: { q: string; limit?: number }): Promise<KbSearchHit[]>
+  /** one page of a corpus file's parsed text (path must be in kbList) */
+  kbRead(path: string, offset: number): Promise<KbReadPage>
+  /** the user's AI provider settings (shared with every app's panel) */
+  aiGetSettings(): Promise<AiSettings>
+  /** one streamed model turn over the shared ai:stream handler */
+  aiStream(request: AiStreamRequest): Promise<void>
+  aiStreamCancel(requestId: string): Promise<void>
+  /** subscribe to stream chunks; returns unsubscribe */
+  onAiStream(handler: (chunk: AiStreamChunk) => void): () => void
   /** open an existing file, routing to the right module by extension */
   openPath(path: string): Promise<void>
   /** file picker accepting every supported extension, then routes */
