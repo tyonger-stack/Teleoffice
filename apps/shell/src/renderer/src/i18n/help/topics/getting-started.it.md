@@ -26,7 +26,7 @@ Un nuovo documento si apre senza titolo; il file su disco viene creato solo al p
 
 - Il menu **File ▸ Apri…** (⌘O/ctrl+O) apre il selettore di sistema: .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html.
 - Fai clic su qualsiasi voce dell'elenco **Recenti** di Home.
-- Anche `genoffice <file>` eseguito da un terminale apre i file.
+- Anche `teleoffice <file>` eseguito da un terminale apre i file.
 
 ## Il modello di salvataggio
 

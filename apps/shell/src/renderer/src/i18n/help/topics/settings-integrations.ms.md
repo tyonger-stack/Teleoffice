@@ -2,7 +2,7 @@
 
 ## Membuka tetapan
 
-Baris akaun di penjuru kiri bawah pada Laman Utama akan membuka panel tetapan. Ia memaparkan Log masuk apabila anda belum log masuk. Panel ini mempunyai enam bahagian: Akaun, Model AI, Media & Carian AI, Umum, Integrasi dan Perihal.
+Butang tetapan di penjuru kiri bawah pada Laman Utama akan membuka panel tetapan. Panel ini mempunyai lima bahagian: Model AI, Media dan carian, Umum, Integrasi dan Perihal.
 
 ![Tetapan ▸ Umum, tempat bahasa, tema, autosimpan dan suis statistik penggunaan berada](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Tiga pilihan ialah Cerah, Gelap, dan Ikut Sistem. Mod Ikut Sistem mengikut rupa 
 
 ## Umum
 
-- **Hantar statistik penggunaan tanpa nama** — diaktifkan secara lalai. Menggunakan Google Analytics 4 dan menghantar IP awam serta metadata pengangkutan anda; kandungan dokumen dan nama fail tidak pernah dikumpulkan, dan setiap peristiwa hanya membawa satu jenis seperti "membuka .docx". Anda boleh mematikannya di sini pada bila-bila masa.
 - **Kedudukan bar sisi AI** (kiri atau kanan), **Saiz teks panel AI** dan **Semakan ejaan dalam sembang AI**.
 - **Buka panel AI dalam dokumen baharu** — dimatikan, dokumen baharu bermula dengan panel tertutup, sekali klik sahaja.
 - **Simpan automatik semua dokumen** membolehkan AutoSave secara lalai dalam setiap editor; anda masih boleh mematikannya untuk satu tetingkap sahaja.
@@ -56,8 +55,8 @@ Di bawah **Pelayan HTTP tempatan**, aplikasi ini juga boleh menjalankan pelayan 
 
 ## Ringkasan baris arahan
 
-| Perintah           | Fungsinya                             |
-| ------------------ | ------------------------------------- |
-| `genoffice <fail>` | membuka fail                          |
-| `genoffice mcp`    | memulakan pelayan MCP tempatan        |
-| `genoffice --help` | memaparkan semua perintah dan pilihan |
+| Perintah            | Fungsinya                             |
+| ------------------- | ------------------------------------- |
+| `teleoffice <fail>` | membuka fail                          |
+| `teleoffice mcp`    | memulakan pelayan MCP tempatan        |
+| `teleoffice --help` | memaparkan semua perintah dan pilihan |

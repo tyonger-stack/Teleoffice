@@ -26,7 +26,7 @@ Dokumen baharu dibuka tanpa tajuk; fail pada cakera hanya dicipta semasa simpana
 
 - Menu **Fail ▸ Buka…** (⌘O/ctrl+O) membuka pemilih sistem: .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html.
 - Klik mana-mana item dalam senarai **Terkini** pada Laman Utama.
-- `genoffice <fail>` daripada terminal turut membuka fail.
+- `teleoffice <fail>` daripada terminal turut membuka fail.
 
 ## Model simpanan
 

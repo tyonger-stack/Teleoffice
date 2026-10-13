@@ -1,6 +1,6 @@
 # 安装 TeleOffice
 
-每个构建都发布在 [Releases 页面](https://github.com/genspark-ai/genoffice/releases/latest)。它们全部出自 `main`；macOS 与 Windows 的安装包已签名。
+每个构建都发布在 [Releases 页面](https://github.com/tyonger-stack/Teleoffice/releases/latest)。它们全部出自 `main`；macOS 与 Windows 的安装包已签名。
 
 ## 选择适合你机器的文件
 
@@ -29,14 +29,14 @@
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — 免安装，放在哪儿就在哪儿运行：
@@ -64,4 +64,4 @@ chmod +x TeleOffice-<version>.AppImage
 
 ## 命令行随包附带
 
-每个安装版本都带一个 `genoffice` 命令，它和窗口调用的是同一套引擎，因此两者对同一个文件不会给出不同的结果。在 macOS 和 Windows 上它位于应用包内；`genoffice install-cli` 会把它放进你的 `PATH`。它能做什么，见**命令行与代理**。
+每个安装版本都带一个 `teleoffice` 命令，它和窗口调用的是同一套引擎，因此两者对同一个文件不会给出不同的结果。在 macOS 和 Windows 上它位于应用包内；`teleoffice install-cli` 会把它放进你的 `PATH`。它能做什么，见**命令行与代理**。

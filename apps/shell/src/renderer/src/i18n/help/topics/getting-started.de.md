@@ -26,7 +26,7 @@ Ein neues Dokument öffnet sich ohne Namen; die Datei auf dem Datenträger entst
 
 - Menü **Datei ▸ Öffnen** (⌘O/ctrl+O) öffnet die Systemauswahl: .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html.
 - Klicken Sie auf einen Eintrag in der Liste **Zuletzt verwendet** auf der Startseite.
-- `genoffice <file>` in einem Terminal öffnet Dateien ebenfalls.
+- `teleoffice <file>` in einem Terminal öffnet Dateien ebenfalls.
 
 ## Das Speichermodell
 

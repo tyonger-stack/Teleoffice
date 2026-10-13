@@ -26,7 +26,7 @@ Nový dokument se otevře bez názvu; soubor na disku vznikne až při prvním u
 
 - Nabídka **Soubor ▸ Otevřít…** (⌘O/ctrl+O) otevře systémový výběr: .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html.
 - Klikněte na cokoliv v seznamu **Nedávné** na domovské stránce.
-- Také `genoffice <soubor>` z terminálu soubory otevírá.
+- Také `teleoffice <soubor>` z terminálu soubory otevírá.
 
 ## Model ukládání
 

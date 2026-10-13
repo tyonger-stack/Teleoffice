@@ -2,7 +2,7 @@
 
 ## Otevření nastavení
 
-Řádek účtu vlevo dole na domovské stránce otevře panel nastavení (při nepřihlášení ukazuje Přihlásit se). Má šest částí: Účet, Model AI, AI média a vyhledávání, Obecné, Integrace a O aplikaci.
+Tlačítko nastavení vlevo dole na domovské stránce otevře panel nastavení. Má pět částí: Model AI, AI média a vyhledávání, Obecné, Integrace a O aplikaci.
 
 ![Nastavení ▸ Obecné, kde žijí jazyk, motiv, automatické ukládání a přepínač statistik používání](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Světlý / Tmavý / Podle systému. Volba Podle systému sleduje vzhled operačn
 
 ## Obecné
 
-- **Odesílat anonymní statistiky používání** — ve výchozím stavu zapnuto. Používá Google Analytics 4 a odesílá vaši veřejnou IP adresu a přenosová metadata; obsah dokumentů ani názvy souborů se nikdy neshromažďují a každá událost nese jen typ, například „otevřen soubor .docx“. Kdykoli to zde vypnete.
 - **Pozice postranního panelu AI** (vlevo nebo vpravo), **Velikost textu panelu AI** a **Kontrola pravopisu v chatu AI**.
 - **Otevírat panel AI v nových dokumentech** — vypnuto, nový dokument začíná se složeným panelem, na jedno kliknutí.
 - **Automaticky ukládat všechny dokumenty** zapne ve výchozím stavu automatické ukládání v každém editoru; pro jedno okno ho můžete i nadále vypnout.
@@ -56,8 +55,8 @@ Pod **Místní HTTP server** umí aplikace server spustit sama — přepínač z
 
 ## Přehled příkazů
 
-| Příkaz               | Co dělá                     |
-| -------------------- | --------------------------- |
-| `genoffice <soubor>` | otevře soubor               |
-| `genoffice mcp`      | spustí místní server MCP    |
-| `genoffice --help`   | všechny příkazy a přepínače |
+| Příkaz                | Co dělá                     |
+| --------------------- | --------------------------- |
+| `teleoffice <soubor>` | otevře soubor               |
+| `teleoffice mcp`      | spustí místní server MCP    |
+| `teleoffice --help`   | všechny příkazy a přepínače |

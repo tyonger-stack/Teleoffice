@@ -15,29 +15,29 @@ Inilah tempatnya: **Pengaturan ▸ Integrasi**. Panel ini punya dua bagian, dan 
 Hal yang sama dari sebuah terminal — inilah jalur mahir, dan yang sebaiknya dipakai ketika agen ada di tempat yang tidak bisa ditemukan panel:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Perintah ini menemukan agen pemrograman di komputer ini — Claude Code, Codex, Cursor, Gemini CLI, Copilot CLI, OpenCode, Windsurf — dan menulis entri server stdio ke dalam konfigurasi masing-masing, meninggalkan sisa berkas itu persis seperti ditemukannya.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Agen yang Anda pasang di lokasi tidak biasa menerima `--dir <path>`; `--force` menulis ulang entri yang sudah ada di sana.
 
 Semua yang diterima server ada dalam satu layar — bentuk untuk mendaftar, melepas, dan mencantumkan, menyajikan lewat HTTP, serta dua opsi skema:
 
-![Keluaran nyata dari genoffice mcp --help: bentuk install, uninstall, dan list, beserta opsi --http, --host, --token, --compact-schemas, --dir, dan --force](img/mcp.png)
+![Keluaran nyata dari teleoffice mcp --help: bentuk install, uninstall, dan list, beserta opsi --http, --host, --token, --compact-schemas, --dir, dan --force](img/mcp.png)
 
 ## Menjalankannya tanpa asisten
 
 Untuk klien di komputer lain, sajikan lewat HTTP sebagai gantinya:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` menentukan ke mana ia mendengarkan. Berikan token yang sama kepada kliennya.
@@ -57,22 +57,22 @@ Setiap perintah adalah sebuah alat. Yang menarik:
 
 ## Skema, dan anggaran yang lebih kecil
 
-`apply` dan `create` mengumumkan parameter `ops`, `cells`, dan `data` dengan skema bertipe per-op, yang dibangkitkan dari `genoffice guide <domain> --json`. Itu akurat, dan ukurannya tidak kecil. Klien dengan jendela konteks sempit bisa meminta larik biasa sebagai gantinya:
+`apply` dan `create` mengumumkan parameter `ops`, `cells`, dan `data` dengan skema bertipe per-op, yang dibangkitkan dari `teleoffice guide <domain> --json`. Itu akurat, dan ukurannya tidak kecil. Klien dengan jendela konteks sempit bisa meminta larik biasa sebagai gantinya:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Mengapa perlu skill
 
-Agen yang tidak mengenal kosakata op akan menebak. Skill itu membawa referensi dan panduan desain — materi yang sama dengan yang dicetak `genoffice guide` —, sehingga asisten menulis op yang spesifikasinya memang sudah dibacanya. Pasang dari panel di atas, atau dengan `genoffice skill` dari terminal.
+Agen yang tidak mengenal kosakata op akan menebak. Skill itu membawa referensi dan panduan desain — materi yang sama dengan yang dicetak `teleoffice guide` —, sehingga asisten menulis op yang spesifikasinya memang sudah dibacanya. Pasang dari panel di atas, atau dengan `teleoffice skill` dari terminal.
 
 ## Apa yang bisa dicapainya di dalam aplikasi
 
 Server itu tidak dibatasi pada berkas di disk. Selama TeleOffice berjalan, agen juga bisa bekerja melalui jendela:
 
-- **`open_in_genoffice`** membuka berkas di sebuah tab dan memfokuskannya.
+- **`open_in_teleoffice`** membuka berkas di sebuah tab dan memfokuskannya.
 - **`open_documents`** mencantumkan setiap dokumen yang Anda buka — id, jenis, path, dan apakah ada perubahan yang belum disimpan —, lalu membaca isi terkini salah satunya atau menutupnya, dengan menyimpan lebih dulu kecuali Anda menyuruhnya membuang.
 - **Alat konten** mengambil id itu (atau path-nya) sebagai argumen `document`, sehingga hasil suntingan mendarat di tab yang memang sudah Anda buka, dan jendela beralih menampilkannya.
 

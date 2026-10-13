@@ -15,29 +15,29 @@
 ‏אותו דבר מתוך מסוף — זו הדרך המתקדמת, וזו לה גונבים כאשר הסוכן יושב במקום שהחלונית אינה יכולה למצוא:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 ‏היא מוצאת את סוכני התכנון שבמחשב הזה — Claude Code, Codex, Cursor, Gemini CLI, Copilot CLI, OpenCode, Windsurf — וכותבת את רשומת שרת ה-stdio בהגדרות של כל אחד מהם, ומשאירה את שאר הקובץ כפי שמצאה אותו.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 ‏סוכן שהתקנתם במקום לא שגרתי זקוק ל-`--dir <path>`; ו-`--force` כותב מחדש רשומה שכבר קיימת.
 
 כל מה שהשרת מקבל נמצא במסך אחד — הצורות להתקנה, להסרה ולהצגה, הגשה דרך HTTP, ושני הדגלים של הסכמות:
 
-![הפלט האמיתי של genoffice mcp --help: הצורות install, uninstall ו-list, עם האפשרויות --http, --host, --token, --compact-schemas, --dir ו--force](img/mcp.png)
+![הפלט האמיתי של teleoffice mcp --help: הצורות install, uninstall ו-list, עם האפשרויות --http, --host, --token, --compact-schemas, --dir ו--force](img/mcp.png)
 
 ## הרצה ללא עוזר
 
 עבור לקוח במחשב אחר, הגישו אותו ב-HTTP במקום זאת:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 ‏`--host <addr>` משנה את הכתובת שבה הוא מאזין. העבירו ללקוח את אותו אסימון.
@@ -57,22 +57,22 @@ genoffice mcp --http 8765 --token <secret>
 
 ## סכמות, ותקציב קטן יותר
 
-‏`apply` ו-`create` מכריזות על הפרמטרים `ops`, `cells` ו-`data` שלהן עם הסכמה המוטיפה של כל פעולה, שנוצרה מ-`genoffice guide <domain> --json`. זה מדויק אך לא קטן. לקוח עם חלון הקשר צר יכול לבקש מערכים פשוטים במקום זאת:
+‏`apply` ו-`create` מכריזות על הפרמטרים `ops`, `cells` ו-`data` שלהן עם הסכמה המוטיפה של כל פעולה, שנוצרה מ-`teleoffice guide <domain> --json`. זה מדויק אך לא קטן. לקוח עם חלון הקשר צר יכול לבקש מערכים פשוטים במקום זאת:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## למה צריך skill
 
-סוכן שאינו מכיר את מילון הפעולות ינחש. ה-skill נושא איתו את המפנייה ואת מדריכי העיצוב — אותו חומר ש-`genoffice guide` מדפיס — כך שהעוזר כותב פעולות שאת המפרט שלהן קרא באמת. התקינו אותו מהחלונית למעלה, או בעזרת `genoffice skill` ממסוף.
+סוכן שאינו מכיר את מילון הפעולות ינחש. ה-skill נושא איתו את המפנייה ואת מדריכי העיצוב — אותו חומר ש-`teleoffice guide` מדפיס — כך שהעוזר כותב פעולות שאת המפרט שלהן קרא באמת. התקינו אותו מהחלונית למעלה, או בעזרת `teleoffice skill` ממסוף.
 
 ## מה הוא מצליח להשיג באפליקציה
 
 השרת אינו מוגבל לקבצים שעל הדיסק. כל עוד TeleOffice רצה, הסוכן יכול לעבוד גם דרך החלון:
 
-- **`open_in_genoffice`** פותח קובץ בכרטיסייה ומעביר אליה את המיקוד.
+- **`open_in_teleoffice`** פותח קובץ בכרטיסייה ומעביר אליה את המיקוד.
 - **`open_documents`** מפרט כל מסמך פתוח אצלכם — מזהה, סוג, נתיב, ואם יש בו שינויים שלא נשמרו — ואז קורא את התוכן העדכני של אחד מהם או סוגר אותו, תוך שמירה תחילה אלא אם ביקשתם ממנו להיפטר מהשינויים.
 - **כלי התוכן** לוקחים את המזהה (או הנתיב) הזה כארגומנט `document`, כך שעריכה נופלת בכרטיסייה שכבר פתוחה אצלכם, והחלון עובר להציג אותה.
 

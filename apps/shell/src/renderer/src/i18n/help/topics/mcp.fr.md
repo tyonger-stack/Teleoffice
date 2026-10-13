@@ -15,29 +15,29 @@ C’est dans **Paramètres ▸ Intégrations** qu’on fait cela. Le panneau a d
 La même chose depuis un terminal — c’est la voie avancée, celle qu’il faut prendre quand l’agent se trouve là où le panneau ne peut pas le trouver :
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Il trouve les agents de programmation présents sur cette machine et écrit l’entrée du serveur stdio dans la configuration de chacun, en laissant le reste du fichier tel qu’il l’a trouvé.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Un agent installé ailleurs demande `--dir <path>` ; `--force` réécrit une entrée déjà présente.
 
 Tout ce que le serveur accepte tient sur un seul écran — les formes d’enregistrement, de retrait et de liste, le service en HTTP, et les deux options de schéma :
 
-![La vraie sortie de genoffice mcp --help : les formes install, uninstall et list, avec les options --http, --host, --token, --compact-schemas, --dir et --force](img/mcp.png)
+![La vraie sortie de teleoffice mcp --help : les formes install, uninstall et list, avec les options --http, --host, --token, --compact-schemas, --dir et --force](img/mcp.png)
 
 ## L’exécuter sans assistant
 
 Pour un client sur une autre machine, servez-le plutôt en HTTP :
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` change le point d’écoute. Passez le même jeton au client.
@@ -57,22 +57,22 @@ Chaque commande est un outil. Les plus intéressantes :
 
 ## Schémas et budget plus serré
 
-`apply` et `create` annoncent leurs paramètres `ops`, `cells` et `data` avec le schéma typé de chaque op, généré à partir de `genoffice guide <domain> --json`. C’est précis, et ce n’est pas petit. Un client dont la fenêtre de contexte est serrée peut demander de simples tableaux à la place :
+`apply` et `create` annoncent leurs paramètres `ops`, `cells` et `data` avec le schéma typé de chaque op, généré à partir de `teleoffice guide <domain> --json`. C’est précis, et ce n’est pas petit. Un client dont la fenêtre de contexte est serrée peut demander de simples tableaux à la place :
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Pourquoi la compétence
 
-Un agent qui ne connaît pas le vocabulaire des ops devine. La compétence embarque la référence et les guides de conception — le même contenu que celui qu’imprime `genoffice guide` —, si bien que l’assistant écrit des ops dont il a réellement lu la spécification. Installez-la depuis le panneau ci-dessus, ou avec `genoffice skill` depuis un terminal.
+Un agent qui ne connaît pas le vocabulaire des ops devine. La compétence embarque la référence et les guides de conception — le même contenu que celui qu’imprime `teleoffice guide` —, si bien que l’assistant écrit des ops dont il a réellement lu la spécification. Installez-la depuis le panneau ci-dessus, ou avec `teleoffice skill` depuis un terminal.
 
 ## Ce qu’il atteint dans l’application
 
 Le serveur ne se limite pas aux fichiers sur le disque. Tant que TeleOffice tourne, l’agent peut aussi travailler par la fenêtre :
 
-- **`open_in_genoffice`** ouvre un fichier dans un onglet et le met au premier plan.
+- **`open_in_teleoffice`** ouvre un fichier dans un onglet et le met au premier plan.
 - **`open_documents`** liste tous les documents que vous avez ouverts — id, type, chemin, et s’ils ont des modifications non enregistrées —, puis lit le contenu actuel de l’un d’eux ou le ferme, en enregistrant d’abord, sauf si vous lui demandez de jeter.
 - **Les outils de contenu** prennent cet id (ou le chemin) comme argument `document`, si bien qu’une modification atterrit dans l’onglet que vous avez déjà ouvert et que la fenêtre bascule pour l’afficher.
 

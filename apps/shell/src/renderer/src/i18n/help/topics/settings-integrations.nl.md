@@ -2,7 +2,7 @@
 
 ## Instellingen openen
 
-De accountregel linksonder op Start opent het instellingenpaneel (als je niet bent aangemeld staat er Inloggen). Het paneel heeft zes secties: Account, AI-model, AI-media en zoeken, Algemeen, Integraties en Over.
+De instellingenknop linksonder op Start opent het instellingenpaneel. Het paneel heeft vijf secties: AI-model, AI-media en zoeken, Algemeen, Integraties en Info.
 
 ![Instellingen ▸ Algemeen, waar taal, thema, automatisch opslaan en de schakelaar voor gebruiksstatistieken staan](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Licht / Donker / Systeem volgen. Systeem volgen volgt het uiterlijk van het best
 
 ## Algemeen
 
-- **Anonieme gebruiksstatistieken verzenden** — standaard ingeschakeld. Gebruikt Google Analytics 4 en stuurt uw openbare IP en transportmetadata; documentinhoud en bestandsnamen worden nooit verzameld, en elke gebeurtenis draagt slechts een type zoals "een .docx geopend". U kunt dit hier op elk moment uitschakelen.
 - **Positie AI-zijbalk** (links of rechts), **Tekstgrootte AI-paneel** en **Spellingcontrole in AI-chat**.
 - **AI-paneel openen in nieuwe documenten** — uit, een nieuw document begint met het paneel ingeklapt, één klik verderop.
 - **Alle documenten automatisch opslaan** zet AutoSave standaard aan in elke editor; u kunt het voor één venster nog steeds uitschakelen.
@@ -56,8 +55,8 @@ Onder **Lokale HTTP-server** kan de app de server ook zelf draaien — een insch
 
 ## Commandoregel in één oogopslag
 
-| Opdracht              | Wat het doet               |
-| --------------------- | -------------------------- |
-| `genoffice <bestand>` | opent een bestand          |
-| `genoffice mcp`       | start de lokale MCP-server |
-| `genoffice --help`    | alle opdrachten en opties  |
+| Opdracht               | Wat het doet               |
+| ---------------------- | -------------------------- |
+| `teleoffice <bestand>` | opent een bestand          |
+| `teleoffice mcp`       | start de lokale MCP-server |
+| `teleoffice --help`    | alle opdrachten en opties  |

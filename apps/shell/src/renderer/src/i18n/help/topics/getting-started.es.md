@@ -26,7 +26,7 @@ Un documento nuevo se abre sin título; el archivo en el disco solo se crea al g
 
 - El menú **Archivo ▸ Abrir** (⌘O/ctrl+O) abre el selector del sistema: .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html.
 - Haga clic en cualquier elemento de la lista **Recientes** de la pantalla de inicio.
-- `genoffice <file>` en un terminal también abre archivos.
+- `teleoffice <file>` en un terminal también abre archivos.
 
 ## El modelo de guardado
 

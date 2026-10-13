@@ -26,7 +26,7 @@ Nowy dokument otwiera się bez tytułu; plik na dysku powstaje dopiero przy pier
 
 - Menu **Plik ▸ Otwórz…** (⌘O/ctrl+O) otwiera systemowy selektor: .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html.
 - Kliknij dowolny element na liście **Ostatnie** na stronie głównej.
-- Także `genoffice <plik>` wpisane w terminalu otwiera pliki.
+- Także `teleoffice <plik>` wpisane w terminalu otwiera pliki.
 
 ## Model zapisywania
 

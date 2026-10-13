@@ -15,29 +15,29 @@ TeleOffice 说 Model Context Protocol，所以编程代理可以通过应用所�
 同样的事，在终端里也能做——这是高级路径，当代理装在面板找不到的地方，就该用它：
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 它会找出本机上的编程代理，把 stdio 服务器条目写进各自的配置文件，其余部分保持原样。
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 装在不常见位置的代理要加上 `--dir <path>`；`--force` 会重写已经存在的条目。
 
 服务器能接受的东西都在一屏之内——注册、移除与列举这三种形式，用 HTTP 提供服务，以及两个 schema 开关：
 
-![genoffice mcp --help 的真实输出：install、uninstall 与 list 三种形式，以及 --http、--host、--token、--compact-schemas、--dir 和 --force 选项](img/mcp.png)
+![teleoffice mcp --help 的真实输出：install、uninstall 与 list 三种形式，以及 --http、--host、--token、--compact-schemas、--dir 和 --force 选项](img/mcp.png)
 
 ## 不用助手，自行运行
 
 如果客户端在另一台机器上，就改用 HTTP 提供服务：
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` 决定它监听的地址。把同一个令牌传给客户端。
@@ -57,22 +57,22 @@ genoffice mcp --http 8765 --token <secret>
 
 ## Schema 与更小的预算
 
-`apply` 和 `create` 会用逐 op 的类型化 schema 来声明它们的 `ops`、`cells` 和 `data` 参数，schema 由 `genoffice guide <domain> --json` 生成。这样很精确，但体积不小。上下文窗口吃紧的客户端可以改要朴素数组：
+`apply` 和 `create` 会用逐 op 的类型化 schema 来声明它们的 `ops`、`cells` 和 `data` 参数，schema 由 `teleoffice guide <domain> --json` 生成。这样很精确，但体积不小。上下文窗口吃紧的客户端可以改要朴素数组：
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## 为什么要技能
 
-不了解 op 词汇表的代理只能靠猜。技能里带着参考手册和设计指南——和 `genoffice guide` 打印出来的是同一份材料——这样助手写下的 op，它的规格是真的读过的。可以从上面那个面板安装，也可以用终端里的 `genoffice skill`。
+不了解 op 词汇表的代理只能靠猜。技能里带着参考手册和设计指南——和 `teleoffice guide` 打印出来的是同一份材料——这样助手写下的 op，它的规格是真的读过的。可以从上面那个面板安装，也可以用终端里的 `teleoffice skill`。
 
 ## 它在应用里能触达什么
 
 服务器不只限于磁盘上的文件。TeleOffice 运行期间，代理还可以通过窗口来干活：
 
-- **`open_in_genoffice`** 在一个标签页里打开文件，并把它切到前台。
+- **`open_in_teleoffice`** 在一个标签页里打开文件，并把它切到前台。
 - **`open_documents`** 列出你已经打开的每个文档——id、类型、路径，以及有没有未保存的改动——然后读取某个文档的当前内容或把它关掉，默认先保存，除非你让它丢弃。
 - **内容类工具** 把那个 id（或路径）当作 `document` 参数，于是改动就落在你已经开着的那个标签页里，窗口也会切过去显示它。
 

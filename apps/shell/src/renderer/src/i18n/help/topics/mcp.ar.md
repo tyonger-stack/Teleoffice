@@ -15,29 +15,29 @@
 الشيء نفسه من طرفية — وهذا هو المسار المتقدم، وهو ما تلجأ إليه حين يكون الوكيل في مكان لا تعثر عليه اللوحة:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 يجد وكلاء البرمجة الموجودين على هذا الجهاز — Claude Code، وCodex، وCursor، وGemini CLI، وCopilot CLI، وOpenCode، وWindsurf — ويكتب مدخل خادم stdio في إعداد كل واحد منهم، تاركًا بقية ذلك الملف كما وجدها.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 الوكيل الذي ثبّتّه في مكان غير معتاد يحتاج إلى `--dir <path>`؛ وعلامة `--force` تعيد كتابة مدخل موجود بالفعل.
 
 كل ما يقبله الخادم معروض في شاشة واحدة — صيغ التسجيل والإزالة والعرض، والإتاحة عبر HTTP، وعَلَمَي المخططات:
 
-![المخرجات الحقيقية لـ genoffice mcp --help: صيغ install وuninstall وlist، مع الخيارات --http و--host و--token و--compact-schemas و--dir و--force](img/mcp.png)
+![المخرجات الحقيقية لـ teleoffice mcp --help: صيغ install وuninstall وlist، مع الخيارات --http و--host و--token و--compact-schemas و--dir و--force](img/mcp.png)
 
 ## تشغيله من دون مساعد
 
 لعميل على جهاز آخر، قدّمه عبر HTTP بدلًا من ذلك:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 تغيّر `--host <addr>` موضع الاستماع. ومرّر الرمز نفسه إلى العميل.
@@ -57,22 +57,22 @@ genoffice mcp --http 8765 --token <secret>
 
 ## المخططات، وميزانية أصغر
 
-يُعلن `apply` و`create` معاملي `ops` و`cells` و`data` مع مخطط مُنمَّط لكل عملية، مولَّدًا من `genoffice guide <domain> --json`. هذا دقيق لكنه ليس صغيرًا. والعميل الذي له نافذة سياق ضيقة يمكنه أن يطلب المصفوفات البسيطة بدلًا من ذلك:
+يُعلن `apply` و`create` معاملي `ops` و`cells` و`data` مع مخطط مُنمَّط لكل عملية، مولَّدًا من `teleoffice guide <domain> --json`. هذا دقيق لكنه ليس صغيرًا. والعميل الذي له نافذة سياق ضيقة يمكنه أن يطلب المصفوفات البسيطة بدلًا من ذلك:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## لماذا هذه المهارة
 
-الوكيل الذي لا يعرف مفردات العمليات سيخمّن. وتحمل المهارة المرجع وأدلة التصميم — وهي المادة نفسها التي يطبعها `genoffice guide` —، فيكتب المساعد عمليات قد قرأ مواصفاتها حقًا. ثبّتها من اللوحة أعلاه، أو بأمر `genoffice skill` من طرفية.
+الوكيل الذي لا يعرف مفردات العمليات سيخمّن. وتحمل المهارة المرجع وأدلة التصميم — وهي المادة نفسها التي يطبعها `teleoffice guide` —، فيكتب المساعد عمليات قد قرأ مواصفاتها حقًا. ثبّتها من اللوحة أعلاه، أو بأمر `teleoffice skill` من طرفية.
 
 ## ما الذي يصل إليه داخل التطبيق
 
 الخادم لا يقتصر على الملفات الموجودة على القرص. ما دام TeleOffice يعمل، يستطيع الوكيل أن يعمل عبر النافذة أيضًا:
 
-- **`open_in_genoffice`** يفتح ملفًا في علامة تبويب ويجعلها نشطة.
+- **`open_in_teleoffice`** يفتح ملفًا في علامة تبويب ويجعلها نشطة.
 - **`open_documents`** يسرد كل مستند فتحته — المعرّف والنوع والمسار وهل لدى أي منها تغييرات غير محفوظة —، ثم يقرأ المحتوى الحيّ لأحدها أو يغلقه، مع الحفظ أولًا ما لم تطلب منه أصحاببه.
 - **أدوات المحتوى** تأخذ ذلك المعرّف (أو المسار) كوسيط `document`، فأي تعديل يقع في علامة التبويب التي فتحتها أصلًا، وتتحوّل النافذة لعرضها.
 

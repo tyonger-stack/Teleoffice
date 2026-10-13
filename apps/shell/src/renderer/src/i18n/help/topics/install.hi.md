@@ -1,6 +1,6 @@
 # TeleOffice इंस्टॉल करना
 
-हर बिल्ड [Releases पेज](https://github.com/genspark-ai/genoffice/releases/latest) पर प्रकाशित होता है। सभी `main` से बनी होती हैं; और macOS तथा Windows के इंस्टॉलर हस्ताक्षरित होते हैं।
+हर बिल्ड [Releases पेज](https://github.com/tyonger-stack/Teleoffice/releases/latest) पर प्रकाशित होता है। सभी `main` से बनी होती हैं; और macOS तथा Windows के इंस्टॉलर हस्ताक्षरित होते हैं।
 
 ## अपने मशीन के लिए फ़ाइल चुनें
 
@@ -29,14 +29,14 @@
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — बिना किसी इंस्टॉल चरण के, जहाँ है वहीं चलता है:
@@ -64,4 +64,4 @@ chmod +x TeleOffice-<version>.AppImage
 
 ## कमांड लाइन भी साथ आती है
 
-हर इंस्टॉल में `genoffice` कमांड रहती है जो उसी इंजनों से बात करती है जिन्हें विंडो इस्तेमाल करती है, इसलिए दोनों किसी फ़ाइल पर कभी असहमत नहीं होतीं। macOS और Windows पर यह ऐप बंडल के भीतर होती है; और `genoffice install-cli` इसे आपके `PATH` में रख देती है। यह क्या कर सकती है, इसके लिए **कमांड लाइन और एजेंट** देखें।
+हर इंस्टॉल में `teleoffice` कमांड रहती है जो उसी इंजनों से बात करती है जिन्हें विंडो इस्तेमाल करती है, इसलिए दोनों किसी फ़ाइल पर कभी असहमत नहीं होतीं। macOS और Windows पर यह ऐप बंडल के भीतर होती है; और `teleoffice install-cli` इसे आपके `PATH` में रख देती है। यह क्या कर सकती है, इसके लिए **कमांड लाइन और एजेंट** देखें।

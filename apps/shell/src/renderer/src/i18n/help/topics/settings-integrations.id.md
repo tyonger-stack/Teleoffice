@@ -2,7 +2,7 @@
 
 ## Membuka pengaturan
 
-Baris akun di kiri bawah Beranda membuka panel pengaturan (bacaannya Masuk saat Anda belum masuk). Panel ini punya enam bagian: Akun, Model AI, Media & Pencarian AI, Umum, Integrasi, dan Tentang.
+Tombol pengaturan di kiri bawah Beranda membuka panel pengaturan. Panel ini punya lima bagian: Model AI, Media dan pencarian, Umum, Integrasi, dan Tentang.
 
 ![Pengaturan ▸ Umum, tempat bahasa, tema, Autosave, dan sakelar statistik penggunaan berada](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Terang / Gelap / Ikuti Sistem. Mode Ikuti Sistem mengikuti tampilan sistem opera
 
 ## Umum
 
-- **Kirim statistik penggunaan anonim** — aktif secara default. Menggunakan Google Analytics 4 dan mengirim IP publik serta metadata transport Anda; isi dokumen dan nama file tidak pernah dikumpulkan, dan setiap peristiwa hanya membawa jenis seperti "membuka .docx". Anda bisa mematikannya di sini kapan saja.
 - **Posisi bilah samping AI** (kiri atau kanan), **Ukuran teks panel AI** dan **Pemeriksaan ejaan di obrolan AI**.
 - **Buka panel AI di dokumen baru** — nonaktif, dokumen baru dimulai dengan panel tertutup, sekali klik lagi.
 - **Simpan otomatis semua dokumen** menyalakan AutoSave secara default di setiap editor; Anda tetap bisa mematikannya untuk satu jendela.
@@ -56,8 +55,8 @@ Di bawah **Server HTTP lokal**, aplikasi juga bisa menjalankan server itu sendir
 
 ## Lembar pintasan baris perintah
 
-| Perintah           | Fungsinya                |
-| ------------------ | ------------------------ |
-| `genoffice <file>` | membuka sebuah file      |
-| `genoffice mcp`    | memulai server MCP lokal |
-| `genoffice --help` | semua perintah dan opsi  |
+| Perintah            | Fungsinya                |
+| ------------------- | ------------------------ |
+| `teleoffice <file>` | membuka sebuah file      |
+| `teleoffice mcp`    | memulai server MCP lokal |
+| `teleoffice --help` | semua perintah dan opsi  |

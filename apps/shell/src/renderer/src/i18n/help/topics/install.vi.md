@@ -1,6 +1,6 @@
 # Cài đặt TeleOffice
 
-Mọi bản dựng đều được công bố trên [trang phát hành](https://github.com/genspark-ai/genoffice/releases/latest). Tất cả đều đến từ `main`; và trình cài đặt cho macOS và Windows đã được ký.
+Mọi bản dựng đều được công bố trên [trang phát hành](https://github.com/tyonger-stack/Teleoffice/releases/latest). Tất cả đều đến từ `main`; và trình cài đặt cho macOS và Windows đã được ký.
 
 ## Chọn tệp cho máy của bạn
 
@@ -29,14 +29,14 @@ Chạy trình cài đặt `.exe`. Nó đưa TeleOffice vào menu Start và đăn
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — chạy ngay tại chỗ, không cần bước cài đặt:
@@ -64,4 +64,4 @@ Cả ba đều bọc các tệp đã phát hành thay vì dựng lại ứng d�
 
 ## Dòng lệnh đi kèm luôn
 
-Mọi bản cài đặt đều kèm lệnh `genoffice` nói chuyện với đúng những engine mà cửa sổ dùng, nên cả hai không bao giờ bất đồng về một tệp. Trên macOS và Windows nó nằm trong gói ứng dụng; và `genoffice install-cli` đưa nó vào `PATH` của bạn. Xem **Dòng lệnh và tác nhân** để biết nó làm được gì.
+Mọi bản cài đặt đều kèm lệnh `teleoffice` nói chuyện với đúng những engine mà cửa sổ dùng, nên cả hai không bao giờ bất đồng về một tệp. Trên macOS và Windows nó nằm trong gói ứng dụng; và `teleoffice install-cli` đưa nó vào `PATH` của bạn. Xem **Dòng lệnh và tác nhân** để biết nó làm được gì.

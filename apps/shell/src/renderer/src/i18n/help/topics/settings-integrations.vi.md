@@ -2,7 +2,7 @@
 
 ## Mở cài đặt
 
-Hàng tài khoản ở góc dưới bên trái của Trang chủ mở bảng cài đặt (khi bạn chưa đăng nhập, hàng đó ghi "Đăng nhập"). Bảng đó có sáu mục: Tài khoản, Mô hình AI, Phương tiện AI & Tìm kiếm, Chung, Tích hợp và Giới thiệu.
+Nút cài đặt ở góc dưới bên trái của Trang chủ mở bảng cài đặt. Bảng đó có năm mục: Mô hình AI, Phương tiện và tìm kiếm, Chung, Tích hợp và Giới thiệu.
 
 ![Cài đặt ▸ Chung, nơi có ngôn ngữ, chủ đề, tự động lưu và công tắc thống kê sử dụng](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Sáng / Tối / Theo hệ thống. Khi chọn Theo hệ thống, giao diện bá
 
 ## Chung
 
-- **Gửi số liệu thống kê sử dụng ẩn danh** — được bật theo mặc định. Sử dụng Google Analytics 4 và gửi địa chỉ IP công khai cùng siêu dữ liệu truyền tải của bạn; nội dung tài liệu và tên tệp không bao giờ bị thu thập, và mỗi sự kiện chỉ mang một loại như "đã mở một tệp .docx". Bạn có thể tắt ở đây bất cứ lúc nào.
 - **Vị trí thanh bên AI** (trái hoặc phải), **Cỡ chữ bảng điều khiển AI** và **Kiểm tra chính tả trong trò chuyện AI**.
 - **Mở bảng AI trong tài liệu mới** — tắt, tài liệu mới sẽ bắt đầu với bảng AI đã thu gọn, chỉ một cú nhấp là mở ra.
 - **Tự động lưu tất cả tài liệu** bật AutoSave theo mặc định trong mọi trình soạn thảo; bạn vẫn có thể tắt nó cho một cửa sổ.
@@ -56,8 +55,8 @@ Dưới **Máy chủ HTTP cục bộ**, ứng dụng cũng có thể tự chạy
 
 ## Bảng tra nhanh dòng lệnh
 
-| Lệnh               | Tác dụng                     |
-| ------------------ | ---------------------------- |
-| `genoffice <file>` | mở một tập tin               |
-| `genoffice mcp`    | khởi động máy chủ MCP cục bộ |
-| `genoffice --help` | mọi lệnh và tuỳ chọn         |
+| Lệnh                | Tác dụng                     |
+| ------------------- | ---------------------------- |
+| `teleoffice <file>` | mở một tập tin               |
+| `teleoffice mcp`    | khởi động máy chủ MCP cục bộ |
+| `teleoffice --help` | mọi lệnh và tuỳ chọn         |

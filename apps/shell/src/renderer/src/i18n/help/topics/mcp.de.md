@@ -15,29 +15,29 @@ TeleOffice spricht das Model Context Protocol: Ein Coding-Agent kann Ihre Dokume
 Dasselbe aus einem Terminal — das ist der fortgeschrittene Weg, und der richtige, wenn der Agent dort liegt, wo der Bereich ihn nicht findet:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Er findet die Coding-Agenten auf diesem Rechner und schreibt den Eintrag für den stdio-Server in die Konfiguration jedes einzelnen; den Rest der Datei lässt er, wie er ihn vorgefunden hat.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Einen Agent, den Sie an einem ungewöhnlichen Ort installiert haben, erreicht man mit `--dir <path>`; `--force` überschreibt einen Eintrag, der schon vorhanden ist.
 
 Alles, was der Server annimmt, steht auf einem Bildschirm — die Formen zum Registrieren, Entfernen und Auflisten, das Bereitstellen über HTTP und die beiden Schema-Schalter:
 
-![Die echte Ausgabe von genoffice mcp --help: die Formen install, uninstall und list mit den Optionen --http, --host, --token, --compact-schemas, --dir und --force](img/mcp.png)
+![Die echte Ausgabe von teleoffice mcp --help: die Formen install, uninstall und list mit den Optionen --http, --host, --token, --compact-schemas, --dir und --force](img/mcp.png)
 
 ## Ohne Assistenten ausführen
 
 Für einen Client auf einem anderen Rechner: Stattdessen über HTTP bereitstellen:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` legt fest, wo er lauscht. Geben Sie demselben Client dasselbe Token.
@@ -57,22 +57,22 @@ Jeder Befehl ist ein Werkzeug. Die interessanten:
 
 ## Schemas und ein kleineres Budget
 
-`apply` und `create` geben ihre Parameter `ops`, `cells` und `data` mit dem typisierten Schema pro op bekannt, erzeugt aus `genoffice guide <domain> --json`. Das ist präzise und nicht klein. Ein Client mit knappem Kontextfenster kann stattdessen einfache Arrays anfordern:
+`apply` und `create` geben ihre Parameter `ops`, `cells` und `data` mit dem typisierten Schema pro op bekannt, erzeugt aus `teleoffice guide <domain> --json`. Das ist präzise und nicht klein. Ein Client mit knappem Kontextfenster kann stattdessen einfache Arrays anfordern:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Wozu der Skill gut ist
 
-Ein Agent, der das op-Vokabular nicht kennt, wird raten. Der Skill bringt die Referenz und die Design-Leitfäden mit — dasselbe Material, das `genoffice guide` ausgibt —, damit der Assistent Ops schreibt, deren Spezifikation er wirklich gelesen hat. Installieren Sie ihn aus dem Bereich oben oder mit `genoffice skill` aus einem Terminal.
+Ein Agent, der das op-Vokabular nicht kennt, wird raten. Der Skill bringt die Referenz und die Design-Leitfäden mit — dasselbe Material, das `teleoffice guide` ausgibt —, damit der Assistent Ops schreibt, deren Spezifikation er wirklich gelesen hat. Installieren Sie ihn aus dem Bereich oben oder mit `teleoffice skill` aus einem Terminal.
 
 ## Was er in der App erreichen kann
 
 Der Server ist nicht auf Dateien auf der Festplatte beschränkt. Solange TeleOffice läuft, kann der Agent auch durch das Fenster arbeiten:
 
-- **`open_in_genoffice`** öffnet eine Datei in einem Tab und holt ihn in den Vordergrund.
+- **`open_in_teleoffice`** öffnet eine Datei in einem Tab und holt ihn in den Vordergrund.
 - **`open_documents`** listet jedes Dokument auf, das Sie geöffnet haben — id, Typ, Pfad und ob es ungespeicherte Änderungen gibt —, und liest dann den aktuellen Inhalt eines Dokuments oder schließt es, wobei vorher gesichert wird, sofern Sie es nicht dem Verwerfen überlassen.
 - **Die Inhaltswerkzeuge** nehmen diese id (oder den Pfad) als ihr `document`-Argument, sodass eine Änderung in dem Tab landet, den Sie ohnehin geöffnet haben, und das Fenster darauf umschaltet.
 

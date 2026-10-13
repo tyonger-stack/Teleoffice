@@ -2,7 +2,7 @@
 
 ## Einstellungen öffnen
 
-Die Kontenzeile unten links auf der Startseite öffnet den Einstellungsbereich (wenn Sie abgemeldet sind, steht dort „Anmelden“). Er hat sechs Abschnitte: Konto, KI-Modell, KI-Medien & Suche, Allgemein, Integrationen und Über.
+Die Einstellungsschaltfläche unten links auf der Startseite öffnet den Einstellungsbereich. Er hat fünf Abschnitte: KI-Modell, KI-Medien & Suche, Allgemein, Integrationen und Über.
 
 ![Einstellungen ▸ Allgemein, wo Sprache, Design, AutoSave und der Schalter für die Nutzungsstatistik liegen](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Hell / Dunkel / System folgen. „System folgen“ richtet sich nach dem Erschei
 
 ## Allgemein
 
-- **Anonyme Nutzungsstatistiken senden** — standardmäßig aktiviert. Verwendet Google Analytics 4 und sendet Ihre öffentliche IP-Adresse und Transportmetadaten; Dokumentinhalte und Dateinamen werden nie erhoben, und jedes Ereignis trägt nur einen Typ wie „eine .docx geöffnet“. Sie können das hier jederzeit abschalten.
 - **Position der KI-Seitenleiste** (links oder rechts), **Textgröße im KI-Bereich** und **Rechtschreibprüfung im KI-Chat**.
 - **KI-Panel in neuen Dokumenten öffnen** — aus, ein neues Dokument startet mit eingeklapptem Panel, einen Klick entfernt.
 - **Alle Dokumente automatisch speichern** schaltet AutoSave in jedem Editor standardmäßig ein; für ein einzelnes Fenster können Sie es weiterhin abschalten.
@@ -56,8 +55,8 @@ Unter **Lokaler HTTP-Server** kann die App den Server auch selbst betreiben — 
 
 ## Spickzettel für die Kommandozeile
 
-| Befehl             | Was er bewirkt             |
-| ------------------ | -------------------------- |
-| `genoffice <file>` | eine Datei öffnen          |
-| `genoffice mcp`    | lokalen MCP-Server starten |
-| `genoffice --help` | alle Befehle und Optionen  |
+| Befehl              | Was er bewirkt             |
+| ------------------- | -------------------------- |
+| `teleoffice <file>` | eine Datei öffnen          |
+| `teleoffice mcp`    | lokalen MCP-Server starten |
+| `teleoffice --help` | alle Befehle und Optionen  |

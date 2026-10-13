@@ -1,6 +1,6 @@
 # Установка TeleOffice
 
-Каждая сборка опубликована на [странице релизов](https://github.com/genspark-ai/genoffice/releases/latest). Все они собраны из `main`; установщики для macOS и Windows подписаны.
+Каждая сборка опубликована на [странице релизов](https://github.com/tyonger-stack/Teleoffice/releases/latest). Все они собраны из `main`; установщики для macOS и Windows подписаны.
 
 ## Выберите файл для своего компьютера
 
@@ -29,14 +29,14 @@
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — запускается оттуда, где лежит, без шага установки:
@@ -64,4 +64,4 @@ chmod +x TeleOffice-<version>.AppImage
 
 ## Командная строка идёт в комплекте
 
-Каждая установка включает команду `genoffice`, которая работает через те же движки, что и окно, поэтому они никогда не расходятся во мнении о файле. В macOS и Windows она лежит внутри пакета приложения; `genoffice install-cli` помещает её в ваш `PATH`. Что она умеет — см. **Командная строка и агенты**.
+Каждая установка включает команду `teleoffice`, которая работает через те же движки, что и окно, поэтому они никогда не расходятся во мнении о файле. В macOS и Windows она лежит внутри пакета приложения; `teleoffice install-cli` помещает её в ваш `PATH`. Что она умеет — см. **Командная строка и агенты**.

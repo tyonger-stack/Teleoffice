@@ -15,29 +15,29 @@ TeleOffice parla il Model Context Protocol, così un agente di programmazione pu
 La stessa cosa da un terminale: questo è il percorso avanzato, quello da usare quando l'agente si trova dove il pannello non può cercarlo:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Trova gli agenti di programmazione su questa macchina e scrive la voce del server stdio nella configurazione di ciascuno, lasciando intatto tutto il resto del file.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Un agente installato in una posizione non convenzionale richiede `--dir <path>`; `--force` riscrive una voce già presente.
 
 Tutto ciò che il server accetta sta su una sola schermata: le forme per installare, rimuovere e elencare, l'erogazione via HTTP e le due opzioni sugli schemi:
 
-![L'output reale di genoffice mcp --help: le forme install, uninstall e list, con le opzioni --http, --host, --token, --compact-schemas, --dir e --force](img/mcp.png)
+![L'output reale di teleoffice mcp --help: le forme install, uninstall e list, con le opzioni --http, --host, --token, --compact-schemas, --dir e --force](img/mcp.png)
 
 ## Eseguirlo senza un assistente
 
 Per un client su un'altra macchina, pubblicalo via HTTP:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` cambia l'indirizzo su cui è in ascolto. Passa lo stesso token al client.
@@ -57,22 +57,22 @@ Ogni comando è uno strumento. Quelli più interessanti:
 
 ## Schemi e un budget più piccolo
 
-`apply` e `create` annunciano i loro parametri `ops`, `cells` e `data` con lo schema tipizzato per ogni op, generato da `genoffice guide <domain> --json`. È preciso e non è piccolo. Un client con una finestra di contesto ridotta può chiedere invece semplici array:
+`apply` e `create` annunciano i loro parametri `ops`, `cells` e `data` con lo schema tipizzato per ogni op, generato da `teleoffice guide <domain> --json`. È preciso e non è piccolo. Un client con una finestra di contesto ridotta può chiedere invece semplici array:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Perché la skill
 
-Un agente che non conosce il vocabolario delle op indovinerà. La skill porta con sé il riferimento e le guide di progettazione — lo stesso materiale che stampa `genoffice guide` —, così l'assistente scrive op di cui ha davvero letto la specifica. Installala dal pannello qui sopra, oppure con `genoffice skill` da un terminale.
+Un agente che non conosce il vocabolario delle op indovinerà. La skill porta con sé il riferimento e le guide di progettazione — lo stesso materiale che stampa `teleoffice guide` —, così l'assistente scrive op di cui ha davvero letto la specifica. Installala dal pannello qui sopra, oppure con `teleoffice skill` da un terminale.
 
 ## Che cosa raggiunge nell'app
 
 Il server non è limitato ai file su disco. Finché TeleOffice è in esecuzione, l'agente può lavorare anche attraverso la finestra:
 
-- **`open_in_genoffice`** apre un file in una scheda e la porta in primo piano.
+- **`open_in_teleoffice`** apre un file in una scheda e la porta in primo piano.
 - **`open_documents`** elenca ogni documento che hai aperto — id, tipo, percorso e se ha modifiche non salvate — e poi legge il contenuto attuale di uno o lo chiude, salvando prima a meno che tu non gli chieda di scartare.
 - **Gli strumenti di contenuto** prendono quell'id (o il percorso) come argomento `document`, così una modifica finisce nella scheda che hai già aperto e la finestra passa a mostrarla.
 

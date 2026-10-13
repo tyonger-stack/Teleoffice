@@ -26,7 +26,7 @@ TeleOffice 是一个完全运行在本机的办公套件：一个窗口、一排
 
 - 菜单 **文件 ▸ 打开**（⌘O/ctrl+O）弹出系统选择框，支持 .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html。
 - 主页的「最近使用」列表直接点开。
-- 命令行 `genoffice <文件>` 也可以打开（适配脚本）。
+- 命令行 `teleoffice <文件>` 也可以打开（适配脚本）。
 
 ## 保存模型
 

@@ -1,6 +1,6 @@
 # Instalar TeleOffice
 
-Cada versión publicada está en la [página de versiones](https://github.com/genspark-ai/genoffice/releases/latest). Todas salen de `main`; los instaladores de macOS y Windows están firmados.
+Cada versión publicada está en la [página de versiones](https://github.com/tyonger-stack/Teleoffice/releases/latest). Todas salen de `main`; los instaladores de macOS y Windows están firmados.
 
 ## Elija el archivo para su equipo
 
@@ -29,14 +29,14 @@ Ejecute el instalador `.exe`. Coloca TeleOffice en el menú Inicio y registra `.
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — se ejecuta donde esté, sin ningún paso de instalación:
@@ -64,4 +64,4 @@ Las tres envuelven los artefactos publicados en lugar de recompilar la aplicaci�
 
 ## La línea de comandos viene incluida
 
-Cada instalación trae un comando `genoffice` que habla con los mismos motores que la ventana, de modo que ambos nunca discrepan sobre un archivo. En macOS y Windows está dentro del paquete de la aplicación; `genoffice install-cli` lo pone en su `PATH`. Vea **Línea de comandos y agentes** para saber qué puede hacer.
+Cada instalación trae un comando `teleoffice` que habla con los mismos motores que la ventana, de modo que ambos nunca discrepan sobre un archivo. En macOS y Windows está dentro del paquete de la aplicación; `teleoffice install-cli` lo pone en su `PATH`. Vea **Línea de comandos y agentes** para saber qué puede hacer.

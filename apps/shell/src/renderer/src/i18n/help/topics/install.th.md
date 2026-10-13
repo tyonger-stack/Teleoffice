@@ -1,6 +1,6 @@
 # การติดตั้ง TeleOffice
 
-ทุกเวอร์ชันถูกเผยแพร่ไว้ที่ [หน้าเผยแพร่](https://github.com/genspark-ai/genoffice/releases/latest) ทุกเวอร์ชันมาจาก `main` ตัวติดตั้งสำหรับ macOS และ Windows มีลายเซ็นกำกับ
+ทุกเวอร์ชันถูกเผยแพร่ไว้ที่ [หน้าเผยแพร่](https://github.com/tyonger-stack/Teleoffice/releases/latest) ทุกเวอร์ชันมาจาก `main` ตัวติดตั้งสำหรับ macOS และ Windows มีลายเซ็นกำกับ
 
 ## เลือกไฟล์ให้ตรงกับเครื่องของคุณ
 
@@ -29,14 +29,14 @@
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — รันจากที่วางไว้ได้เลย ไม่ต้องมีขั้นตอนติดตั้ง
@@ -64,4 +64,4 @@ chmod +x TeleOffice-<version>.AppImage
 
 ## บรรทัดคำสั่งมาให้ด้วย
 
-ทุกการติดตั้งมีคำสั่ง `genoffice` ที่คุยกับเอนจินตัวเดียวกับที่หน้าต่างใช้ ทั้งสองฝ่ายจึงไม่มีวันขัดแย้งกันเรื่องไฟล์ บน macOS และ Windows คำสั่งนี้อยู่ในแพ็กเกจของแอป ถ้าต้องการเรียกด้วยชื่อ ให้รัน `genoffice install-cli` ครั้งเดียว คำสั่งจะไปอยู่ใน `PATH` ของคุณ ดู **บรรทัดคำสั่งและเอเจนต์** ว่ามันทำอะไรได้บ้าง
+ทุกการติดตั้งมีคำสั่ง `teleoffice` ที่คุยกับเอนจินตัวเดียวกับที่หน้าต่างใช้ ทั้งสองฝ่ายจึงไม่มีวันขัดแย้งกันเรื่องไฟล์ บน macOS และ Windows คำสั่งนี้อยู่ในแพ็กเกจของแอป ถ้าต้องการเรียกด้วยชื่อ ให้รัน `teleoffice install-cli` ครั้งเดียว คำสั่งจะไปอยู่ใน `PATH` ของคุณ ดู **บรรทัดคำสั่งและเอเจนต์** ว่ามันทำอะไรได้บ้าง

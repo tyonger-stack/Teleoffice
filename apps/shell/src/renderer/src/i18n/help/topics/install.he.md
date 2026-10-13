@@ -1,6 +1,6 @@
 # התקנת TeleOffice
 
-כל גרסה מתפרסמת ב[עמוד ההפצות](https://github.com/genspark-ai/genoffice/releases/latest). כולן מגיעות מ-`main`; ומתקיני macOS ו-Windows חתומים.
+כל גרסה מתפרסמת ב[עמוד ההפצות](https://github.com/tyonger-stack/Teleoffice/releases/latest). כולן מגיעות מ-`main`; ומתקיני macOS ו-Windows חתומים.
 
 ## בחירת הקובץ למחשב שלך
 
@@ -29,14 +29,14 @@
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — רץ מהמקום שבו הוא נמצא, בלי שום שלב התקנה:
@@ -64,4 +64,4 @@ chmod +x TeleOffice-<version>.AppImage
 
 ## שורת הפקודה מגיעה עמה
 
-כל התקנה כוללת פקודת `genoffice` שמדברת עם אותם מנועים שהחלון משתמש בהם, ולכן השניים לעולם אינם חלוקים לגבי קובץ. ב-macOS וב-Windows היא נמצאת בתוך חבילת האפליקציה; ו-`genoffice install-cli` מציבה אותה ב-`PATH` שלכם. ראו **שורת פקודה וסוכנים** למה שהיא יודעת לעשות.
+כל התקנה כוללת פקודת `teleoffice` שמדברת עם אותם מנועים שהחלון משתמש בהם, ולכן השניים לעולם אינם חלוקים לגבי קובץ. ב-macOS וב-Windows היא נמצאת בתוך חבילת האפליקציה; ו-`teleoffice install-cli` מציבה אותה ב-`PATH` שלכם. ראו **שורת פקודה וסוכנים** למה שהיא יודעת לעשות.

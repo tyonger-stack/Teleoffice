@@ -2,7 +2,7 @@
 
 ## Abrir la configuración
 
-La fila de cuenta de la parte inferior izquierda de Inicio abre el panel de configuración (muestra «Iniciar sesión» cuando está desconectado). Tiene seis secciones: Cuenta, Modelo de IA, Medios de IA y búsqueda, General, Integraciones y Acerca de.
+El botón de ajustes de la parte inferior izquierda de Inicio abre el panel de configuración. Tiene cinco secciones: Modelo de IA, Medios y búsqueda, General, Integraciones y Acerca de.
 
 ![Configuración ▸ General, donde están el idioma, el tema, el guardado automático y el interruptor de estadísticas de uso](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Claro / Oscuro / Seguir el sistema. «Seguir el sistema» sigue la apariencia de
 
 ## General
 
-- **Enviar estadísticas de uso anónimas** — activado de forma predeterminada. Usa Google Analytics 4 y envía tu IP pública y metadatos de transporte; nunca se recopilan los contenidos de los documentos ni los nombres de archivo, y cada evento lleva solo un tipo como «se abrió un .docx». Puedes desactivarlo aquí en cualquier momento.
 - **Posición de la barra lateral de IA** (izquierda o derecha), **Tamaño del texto del panel de IA** y **Corrección ortográfica en el chat de IA**.
 - **Abrir el panel de IA en documentos nuevos** — desactivado, un documento nuevo empieza con el panel plegado, a un clic de distancia.
 - **Guardar automáticamente todos los documentos** activa el guardado automático de forma predeterminada en todos los editores; todavía puedes desactivarlo para una ventana.
@@ -56,8 +55,8 @@ En **Servidor HTTP local**, la aplicación también puede ejecutar el servidor p
 
 ## Chuleta de la línea de comandos
 
-| Comando            | Qué hace                      |
-| ------------------ | ----------------------------- |
-| `genoffice <file>` | abrir un archivo              |
-| `genoffice mcp`    | iniciar el servidor MCP local |
-| `genoffice --help` | todos los comandos y opciones |
+| Comando             | Qué hace                      |
+| ------------------- | ----------------------------- |
+| `teleoffice <file>` | abrir un archivo              |
+| `teleoffice mcp`    | iniciar el servidor MCP local |
+| `teleoffice --help` | todos los comandos y opciones |

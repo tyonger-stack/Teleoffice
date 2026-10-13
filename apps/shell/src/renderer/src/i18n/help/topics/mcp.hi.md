@@ -15,29 +15,29 @@ TeleOffice Model Context Protocol बोलता है, इसलिए को
 यही काम टर्मिनल से भी हो जाता है — यह उन्नत रास्ता है, और तब लेना चाहिए जब एजेंट ऐसी जगह हो जहाँ पैनल उसे नहीं ढूँढ सकता:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 यह इस मशीन पर मिले कोडिंग एजेंट ढूँढता है और हर एक के अपने कॉन्फ़िग में stdio सर्वर प्रविष्टि लिख देता है, उस फ़ाइल का बाक़ी हिस्सा जैसा मिला वैसा ही छोड़ देता है।
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 किसी असामान्य जगह इंस्टॉल किया गया एजेंट `--dir <path>` लेता है; और `--force` पहले से मौजूद प्रविष्टि दोबारा लिख देता है।
 
 सर्वर जो कुछ लेता है, वह सब एक ही स्क्रीन पर है — पंजीकरण, हटाने और सूची बनाने के रूप, HTTP पर देना, और स्कीमा के दो स्विच:
 
-![genoffice mcp --help का असली आउटपुट: install, uninstall और list के रूप, साथ में --http, --host, --token, --compact-schemas, --dir और --force विकल्प](img/mcp.png)
+![teleoffice mcp --help का असली आउटपुट: install, uninstall और list के रूप, साथ में --http, --host, --token, --compact-schemas, --dir और --force विकल्प](img/mcp.png)
 
 ## इसे बिना सहायक चलाना
 
 किसी दूसरी मशीन के क्लाइंट के लिए, उसकी जगह इसे HTTP पर परोसें:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` बदलता है कि यह कहाँ सुनता है। वही टोकन क्लाइंट को भी दें।
@@ -57,22 +57,22 @@ HTTP पर फ़ाइलें भी आती-जाती हैं: `PUT 
 
 ## स्कीमाएँ, और छोटा बजट
 
-`apply` और `create` अपने `ops`, `cells` और `data` पैरामीटर टाइप की गई प्रति-ऑप स्कीमा के साथ बताते हैं, जो `genoffice guide <domain> --json` से बनती है। यह सटीक है पर छोटी नहीं। कम संदर्भ-विंडो वाला क्लाइंट उसके बजाय सादे एरे माँग सकता है:
+`apply` और `create` अपने `ops`, `cells` और `data` पैरामीटर टाइप की गई प्रति-ऑप स्कीमा के साथ बताते हैं, जो `teleoffice guide <domain> --json` से बनती है। यह सटीक है पर छोटी नहीं। कम संदर्भ-विंडो वाला क्लाइंट उसके बजाय सादे एरे माँग सकता है:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## स्किल क्यों है
 
-जिस एजेंट को ऑप शब्दावली नहीं आती, वह अंदाज़ा लगाएगा। स्किल में संदर्भ और डिज़ाइन गाइड रहते हैं — वही सामग्री जो `genoffice guide` छापता है — इसलिए सहायक ऐसे ऑप लिखता है जिनकी स्पेक उसने सचमुच पढ़ी है। इसे ऊपर वाले पैनल से इंस्टॉल करें, या टर्मिनल में `genoffice skill` चलाकर।
+जिस एजेंट को ऑप शब्दावली नहीं आती, वह अंदाज़ा लगाएगा। स्किल में संदर्भ और डिज़ाइन गाइड रहते हैं — वही सामग्री जो `teleoffice guide` छापता है — इसलिए सहायक ऐसे ऑप लिखता है जिनकी स्पेक उसने सचमुच पढ़ी है। इसे ऊपर वाले पैनल से इंस्टॉल करें, या टर्मिनल में `teleoffice skill` चलाकर।
 
 ## ऐप के भीतर यह क्या तक पहुँच सकता है
 
 सर्वर सिर्फ़ डिस्क पर मौजूद फ़ाइलों तक सीमित नहीं है। जब तक TeleOffice चल रहा है, एजेंट विंडो के ज़रिए भी काम कर सकता है:
 
-- **`open_in_genoffice`** किसी फ़ाइल को टैब में खोलता है और उसी टैब को फ़ोकस में ले आता है।
+- **`open_in_teleoffice`** किसी फ़ाइल को टैब में खोलता है और उसी टैब को फ़ोकस में ले आता है।
 - **`open_documents`** आपके खुले हर दस्तावेज़ की सूची बनाता है — id, प्रकार, पथ, और उसमें बचे बदलाव हैं या नहीं — और फिर किसी एक का मौजूदा सामग्री पढ़ता है या उसे बंद कर देता है, पहले सहेजकर, जब तक आप उसे फेंकने न कहें।
 - **कॉन्टेंट टूल** उस id (या पथ) को अपने `document` तर्क के रूप में लेते हैं, इसलिए बदलाव उसी टैब में जाता है जो पहले से खुला है, और विंडो उसी को दिखाने लग जाती है।
 

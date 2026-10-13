@@ -1,6 +1,6 @@
 # Memasang TeleOffice
 
-Setiap build dipublikasikan di [halaman Rilis](https://github.com/genspark-ai/genoffice/releases/latest). Semuanya berasal dari `main`; installer untuk macOS dan Windows sudah ditandatangani.
+Setiap build dipublikasikan di [halaman Rilis](https://github.com/tyonger-stack/Teleoffice/releases/latest). Semuanya berasal dari `main`; installer untuk macOS dan Windows sudah ditandatangani.
 
 ## Pilih berkas untuk komputer Anda
 
@@ -29,14 +29,14 @@ Jalankan installer `.exe`. Ia menaruh TeleOffice di menu Start dan mendaftarkan 
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — berjalan di mana pun diletakkan, tanpa langkah pemasangan:
@@ -64,4 +64,4 @@ Ketiganya membungkus artefak yang sudah diterbitkan, bukan membangun ulang aplik
 
 ## Baris perintahnya sudah ikut
 
-Setiap pemasangan membawa perintah `genoffice` yang berbicara dengan mesin yang sama dengan jendela, sehingga keduanya tidak pernah berbeda pendapat tentang sebuah berkas. Di macOS dan Windows perintahnya berada di dalam bundel aplikasi; `genoffice install-cli` menaruhnya di `PATH` Anda. Lihat **Perintah baris perintah dan agen** untuk mengetahui apa saja yang dapat dilaukannya.
+Setiap pemasangan membawa perintah `teleoffice` yang berbicara dengan mesin yang sama dengan jendela, sehingga keduanya tidak pernah berbeda pendapat tentang sebuah berkas. Di macOS dan Windows perintahnya berada di dalam bundel aplikasi; `teleoffice install-cli` menaruhnya di `PATH` Anda. Lihat **Perintah baris perintah dan agen** untuk mengetahui apa saja yang dapat dilaukannya.

@@ -15,29 +15,29 @@ Việc này làm ở **Cài đặt ▸ Tích hợp**. Bảng đó có hai nửa,
 Cũng làm được từ terminal — đây là đường nâng cao, dùng khi tác nhân nằm ở nơi bảng kia không tìm thấy:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Lệnh này tìm các tác nhân lập trình có trên máy này — Claude Code, Codex, Cursor, Gemini CLI, Copilot CLI, OpenCode, Windsurf — rồi ghi mục máy chủ stdio vào cấu hình riêng của từng tác nhân, giữ nguyên phần còn lại của tệp đó như cũ.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Một tác nhân bạn cài ở chỗ không mấy quen thuộc cần `--dir <path>`; còn `--force` ghi đè một mục đã có sẵn.
 
 Mọi thứ mà máy chủ nhận đều nằm trong một màn hình — các dạng đăng ký, gỡ bỏ và liệt kê, phục vụ qua HTTP, cùng hai cờ lược đồ:
 
-![Kết quả thật của genoffice mcp --help: các dạng install, uninstall và list, kèm các tùy chọn --http, --host, --token, --compact-schemas, --dir và --force](img/mcp.png)
+![Kết quả thật của teleoffice mcp --help: các dạng install, uninstall và list, kèm các tùy chọn --http, --host, --token, --compact-schemas, --dir và --force](img/mcp.png)
 
 ## Tự chạy nó
 
 Với một ứng dụng trên máy khác, hãy phục vụ qua HTTP thay thế:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` đổi nơi nó lắng nghe. Hãy truyền cùng mã thông báo đó cho ứng dụng.
@@ -57,22 +57,22 @@ Mỗi lệnh là một công cụ. Những cái đáng chú ý:
 
 ## Lược đồ, và một hạn mức nhỏ hơn
 
-`apply` và `create` công bố các tham số `ops`, `cells` và `data` kèm lược đồ có kiểu cho từng thao tác, sinh từ `genoffice guide <domain> --json`. Nó chính xác và không hề nhỏ. Một ứng dụng có cửa sổ ngữ cảnh chật hẹp có thể xin các mảng thuần thay vì thế:
+`apply` và `create` công bố các tham số `ops`, `cells` và `data` kèm lược đồ có kiểu cho từng thao tác, sinh từ `teleoffice guide <domain> --json`. Nó chính xác và không hề nhỏ. Một ứng dụng có cửa sổ ngữ cảnh chật hẹp có thể xin các mảng thuần thay vì thế:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Vì sao cần kỹ năng
 
-Một tác nhân không biết từ vựng thao tác sẽ đoán mò. Kỹ năng mang theo tài liệu tham chiếu và các hướng dẫn thiết kế — đúng những tài liệu mà `genoffice guide` in ra —, nên trợ lý viết ra thao tác mà nó đã thực sự đọc đặc tả. Cài nó từ bảng kia ở trên, hoặc bằng `genoffice skill` trong terminal.
+Một tác nhân không biết từ vựng thao tác sẽ đoán mò. Kỹ năng mang theo tài liệu tham chiếu và các hướng dẫn thiết kế — đúng những tài liệu mà `teleoffice guide` in ra —, nên trợ lý viết ra thao tác mà nó đã thực sự đọc đặc tả. Cài nó từ bảng kia ở trên, hoặc bằng `teleoffice skill` trong terminal.
 
 ## Nó chạm được gì trong ứng dụng
 
 Máy chủ không chỉ dừng ở các tệp trên đĩa. Chừng nào TeleOffice còn chạy, tác nhân cũng có thể làm việc qua cửa sổ:
 
-- **`open_in_genoffice`** mở một tệp trong một thẻ và đưa thẻ đó lên tiền cảnh.
+- **`open_in_teleoffice`** mở một tệp trong một thẻ và đưa thẻ đó lên tiền cảnh.
 - **`open_documents`** liệt kê mọi tài liệu bạn đang mở — id, loại, đường dẫn và có thay đổi chưa lưu hay không —, rồi đọc nội dung hiện tại của một tài liệu hoặc đóng nó lại, lưu trước trừ khi bạn bảo nó bỏ thay đổi.
 - **Các công cụ nội dung** nhận id (hoặc đường dẫn) đó làm tham số `document`, nên một thay đổi sẽ rơi vào đúng thẻ bạn đang mở và cửa sổ chuyển sang hiển thị nó.
 

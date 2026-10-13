@@ -2,7 +2,7 @@
 
 ## Otwieranie ustawień
 
-Wiersz konta w lewym dolnym rogu strony głównej otwiera panel ustawień (gdy nie jesteś zalogowany, pokazuje Zaloguj się). Ma sześć sekcji: Konto, Model AI, Media i wyszukiwanie AI, Ogólne, Integracje i O aplikacji.
+Przycisk ustawień w lewym dolnym rogu strony głównej otwiera panel ustawień. Ma pięć sekcji: Model AI, Media i wyszukiwanie, Ogólne, Integracje i Informacje.
 
 ![Ustawienia ▸ Ogólne, gdzie znajdują się język, motyw, automatyczny zapis i przełącznik statystyk użycia](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Jasny / Ciemny / Zgodnie z systemem. Opcja Zgodnie z systemem podąża za wyglą
 
 ## Ogólne
 
-- **Wysyłaj anonimowe statystyki użytkowania** — domyślnie włączone. Korzysta z Google Analytics 4 i wysyła publiczny adres IP i metadane transportowe; treść dokumentów ani nazwy plików nigdy nie są zbierane, a każde zdarzenie niesie tylko typ, na przykład „otwarto .docx”. W każdej chwili można je tu wyłączyć.
 - **Położenie panelu bocznego AI** (po lewej lub po prawej), **Rozmiar tekstu panelu AI** i **Sprawdzanie pisowni w czacie AI**.
 - **Otwieraj panel AI w nowych dokumentach** — wyłączone, nowy dokument zaczyna się ze zwiniętym panelem, jedno kliknięcie stąd.
 - **Automatycznie zapisuj wszystkie dokumenty** włącza AutoSave domyślnie w każdym edytorze; nadal można je wyłączyć dla jednego okna.
@@ -56,8 +55,8 @@ W sekcji **Lokalny serwer HTTP** aplikacja może też sama uruchomić ten serwer
 
 ## Ściągawka z poleceń
 
-| Polecenie          | Co robi                      |
-| ------------------ | ---------------------------- |
-| `genoffice <plik>` | otwiera plik                 |
-| `genoffice mcp`    | uruchamia lokalny serwer MCP |
-| `genoffice --help` | wszystkie polecenia i opcje  |
+| Polecenie           | Co robi                      |
+| ------------------- | ---------------------------- |
+| `teleoffice <plik>` | otwiera plik                 |
+| `teleoffice mcp`    | uruchamia lokalny serwer MCP |
+| `teleoffice --help` | wszystkie polecenia i opcje  |

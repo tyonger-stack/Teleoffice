@@ -2,7 +2,7 @@
 
 ## Ouvrir les paramètres
 
-La ligne de compte en bas à gauche de l’accueil ouvre le panneau des paramètres (elle affiche Se connecter lorsque vous êtes déconnecté). Il comporte six sections : Compte, Modèle IA, Médias IA et recherche, Général, Intégrations et À propos.
+Le bouton Réglages en bas à gauche de l’accueil ouvre le panneau des paramètres. Il comporte cinq sections : Modèle d’IA, Médias et recherche, Général, Intégrations et À propos.
 
 ![Paramètres ▸ Général, où se trouvent la langue, le thème, l’enregistrement automatique et l’interrupteur des statistiques d’utilisation](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Clair / Sombre / Suivre le système. Suivre le système suit l’apparence de l�
 
 ## Général
 
-- **Envoyer des statistiques d'utilisation anonymes** — activé par défaut. Utilise Google Analytics 4 et envoie votre adresse IP publique et les métadonnées de transport ; le contenu des documents et les noms de fichiers ne sont jamais collectés, et chaque événement ne porte qu'un type comme « ouverture d'un .docx ». Vous pouvez le désactiver ici à tout moment.
 - **Position de la barre latérale IA** (à gauche ou à droite), **Taille du texte du panneau IA** et **Correction orthographique dans le chat IA**.
 - **Ouvrir le panneau IA dans les nouveaux documents** — désactivé, un nouveau document démarre avec le panneau replié, à un clic de là.
 - **Enregistrer automatiquement tous les documents** active l'enregistrement automatique par défaut dans tous les éditeurs ; vous pouvez toujours le désactiver pour une fenêtre.
@@ -56,8 +55,8 @@ Sous **Serveur HTTP local**, l’application peut aussi lancer le serveur elle-m
 
 ## Aide-mémoire de la ligne de commande
 
-| Commande           | Ce qu’elle fait                 |
-| ------------------ | ------------------------------- |
-| `genoffice <file>` | ouvrir un fichier               |
-| `genoffice mcp`    | démarrer le serveur MCP local   |
-| `genoffice --help` | toutes les commandes et options |
+| Commande            | Ce qu’elle fait                 |
+| ------------------- | ------------------------------- |
+| `teleoffice <file>` | ouvrir un fichier               |
+| `teleoffice mcp`    | démarrer le serveur MCP local   |
+| `teleoffice --help` | toutes les commandes et options |

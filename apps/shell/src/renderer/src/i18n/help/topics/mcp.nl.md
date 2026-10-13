@@ -15,29 +15,29 @@ TeleOffice spreekt het Model Context Protocol, zodat een coding agent je documen
 Hetzelfde vanaf een terminal — dit is de geavanceerde route, en degene om naar te grijpen wanneer de agent ergens staat waar het paneel hem niet kan vinden:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Het vindt de coding agents op deze computer en schrijft de stdio-serververmelding in elk van hun eigen configuraties, en laat de rest van dat bestand met rust.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Een agent die je op een ongebruikelijke plek hebt geïnstalleerd, heeft `--dir <path>` nodig; `--force` herschrijft een vermelding die er al staat.
 
 Alles wat de server accepteert staat op één scherm — de vormen om te registreren, te verwijderen en op te sommen, het aanbieden via HTTP, en de twee schema-opties:
 
-![De echte uitvoer van genoffice mcp --help: de vormen install, uninstall en list, met de opties --http, --host, --token, --compact-schemas, --dir en --force](img/mcp.png)
+![De echte uitvoer van teleoffice mcp --help: de vormen install, uninstall en list, met de opties --http, --host, --token, --compact-schemas, --dir en --force](img/mcp.png)
 
 ## Zonder assistent uitvoeren
 
 Voor een client op een andere computer bied je die in plaats daarvan via HTTP aan:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` bepaalt waar hij luistert. Geef de client hetzelfde token.
@@ -57,22 +57,22 @@ Elke opdracht is een tool. De interessantste:
 
 ## Schema's en een kleinere budget
 
-`apply` en `create` geven hun parameters `ops`, `cells` en `data` aan met het getypte schema per op, gegenereerd uit `genoffice guide <domain> --json`. Dat is nauwkeurig en niet klein. Een client met een krap contextvenster kan in plaats daarvan om gewone arrays vragen:
+`apply` en `create` geven hun parameters `ops`, `cells` en `data` aan met het getypte schema per op, gegenereerd uit `teleoffice guide <domain> --json`. Dat is nauwkeurig en niet klein. Een client met een krap contextvenster kan in plaats daarvan om gewone arrays vragen:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Waarom de skill
 
-Een agent die de op-woordenlijst niet kent, gaat gokken. De skill neemt de referentie en de ontwerphoogedelen mee — hetzelfde materiaal als `genoffice guide` afdrukt —, zodat de assistent ops schrijft waarvan hij de specificatie echt heeft gelezen. Installeer hem vanuit het paneel hierboven, of met `genoffice skill` vanaf een terminal.
+Een agent die de op-woordenlijst niet kent, gaat gokken. De skill neemt de referentie en de ontwerphoogedelen mee — hetzelfde materiaal als `teleoffice guide` afdrukt —, zodat de assistent ops schrijft waarvan hij de specificatie echt heeft gelezen. Installeer hem vanuit het paneel hierboven, of met `teleoffice skill` vanaf een terminal.
 
 ## Wat hij in de app kan bereiken
 
 De server is niet beperkt tot bestanden op schijf. Zolang TeleOffice draait, kan de agent ook via het venster werken:
 
-- **`open_in_genoffice`** opent een bestand in een tabblad en brengt dat tabblad op de voorgrond.
+- **`open_in_teleoffice`** opent een bestand in een tabblad en brengt dat tabblad op de voorgrond.
 - **`open_documents`** somt elk document op dat je open hebt — id, type, pad en of er onopgeslagen wijzigingen zijn —, en leest daarna de actuele inhoud van een document of sluit het, waarbij eerst wordt opgeslagen tenzij je hem vraagt het weg te gooien.
 - **De inhoudsgereedschappen** nemen die id (of dat pad) als hun `document`-argument, zodat een bewerking terechtkomt in het tabblad dat je al open hebt en het venster ernaar toe overschakelt.
 

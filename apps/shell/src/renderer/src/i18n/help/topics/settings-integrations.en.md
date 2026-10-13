@@ -2,7 +2,7 @@
 
 ## Opening settings
 
-The account row at the bottom left of Home opens the settings panel (it reads Sign in when you are logged out). It has six sections: Account, AI Model, AI Media & Search, General, Integrations and About.
+The settings button at the bottom left of Home opens the settings panel. It has five sections: AI Model, AI Media & Search, General, Integrations and About.
 
 ![Settings ▸ General, where language, theme, AutoSave and the usage-statistics switch live](img/settings-general.png)
 
@@ -19,7 +19,6 @@ Light / Dark / System. System follows the OS appearance, and the editors re-skin
 
 ## General
 
-- **Send anonymous usage statistics** — on by default. It uses Google Analytics 4 and sends your public IP address and transport metadata; document contents and file names are never collected, and every event carries only a type like "opened a .docx". Turn it off here at any time.
 - **AI sidebar position** (left or right), **AI panel text size**, and **Spell check in AI chat**.
 - **Open the AI panel in new documents** — off, a new document starts with the panel collapsed and one click away.
 - **Auto-save all documents** turns AutoSave on by default in every editor; you can still switch it off for one window.
@@ -56,8 +55,8 @@ Under **Local HTTP server** the app can run the server itself — an enable swit
 
 ## Command-line cheat sheet
 
-| Command            | What it does               |
-| ------------------ | -------------------------- |
-| `genoffice <file>` | open a file                |
-| `genoffice mcp`    | start the local MCP server |
-| `genoffice --help` | every command and flag     |
+| Command             | What it does               |
+| ------------------- | -------------------------- |
+| `teleoffice <file>` | open a file                |
+| `teleoffice mcp`    | start the local MCP server |
+| `teleoffice --help` | every command and flag     |

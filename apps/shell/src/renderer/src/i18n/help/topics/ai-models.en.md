@@ -2,7 +2,7 @@
 
 ## Providers and models
 
-Models and keys are configured in Settings (the account row at the bottom left of Home):
+Models and keys are configured in Settings (the settings button at the bottom left of Home):
 
 ![The Settings window](img/settings-general.png)
 

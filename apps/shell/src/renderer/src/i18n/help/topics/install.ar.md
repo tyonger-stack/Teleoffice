@@ -1,6 +1,6 @@
 # تثبيت TeleOffice
 
-كل نسخة منشورة على [صفحة الإصدارات](https://github.com/genspark-ai/genoffice/releases/latest). وجميعها مبنية من `main`؛ وحزّامات التثبيت لنظامي macOS وWindows موقّعة.
+كل نسخة منشورة على [صفحة الإصدارات](https://github.com/tyonger-stack/Teleoffice/releases/latest). وجميعها مبنية من `main`؛ وحزّامات التثبيت لنظامي macOS وWindows موقّعة.
 
 ## اختر الملف المناسب لجهازك
 
@@ -29,14 +29,14 @@
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — يعمل من مكانه، بلا خطوة تثبيت:
@@ -64,4 +64,4 @@ chmod +x TeleOffice-<version>.AppImage
 
 ## سطر الأوامر يأتي معه
 
-كل تثبيت يشحن أمر `genoffice` يتحدث إلى المحركات نفسها التي تستخدمها النافذة، فلا يتناقض الطرفان حول أي ملف. وعلى macOS وWindows يوجد داخل حزمة التطبيق؛ و`genoffice install-cli` يضعه في `PATH` لديك. انظر **سطر الأوامر والوكلاء** لمعرفة ما يمكنه فعله.
+كل تثبيت يشحن أمر `teleoffice` يتحدث إلى المحركات نفسها التي تستخدمها النافذة، فلا يتناقض الطرفان حول أي ملف. وعلى macOS وWindows يوجد داخل حزمة التطبيق؛ و`teleoffice install-cli` يضعه في `PATH` لديك. انظر **سطر الأوامر والوكلاء** لمعرفة ما يمكنه فعله.

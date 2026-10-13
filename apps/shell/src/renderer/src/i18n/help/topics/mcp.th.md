@@ -15,29 +15,29 @@ TeleOffice สื่อสารด้วย Model Context Protocol เอเจ
 ทำสิ่งเดียวกันนี้จากเทอร์มินัลได้ นี่คือเส้นทางขั้นสูง ที่ควรใช้เมื่อเอเจนต์ตั้งอยู่ในที่ที่แผงค้นหาไม่พบ
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 คำสั่งนี้จะหาเอเจนต์เขียนโค้ดที่อยู่บนเครื่องนี้ ได้แก่ Claude Code, Codex, Cursor, Gemini CLI, Copilot CLI, OpenCode และ Windsurf แล้วเขียนรายการเซิร์ฟเวอร์แบบ stdio ลงในค่าตั้งของแต่ละตัว ส่วนที่เหลือของไฟล์นั้นจะยังคงเดิม
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 ถ้าติดตั้งเอเจนต์ไว้ในตำแหน่งที่ไม่ปกติ ให้ใช้ `--dir <path>` ส่วน `--force` จะเขียนรายการที่มีอยู่แล้วทับ
 
 ทุกอย่างที่เซิร์ฟเวอร์รับอยู่ในหน้าจอเดียว ทั้งรูปแบบติดตั้ง ถอดออก และแสดงรายการ การให้บริการผ่าน HTTP และสวิตช์สคีมาสองตัว
 
-![ผลลัพธ์จริงของ genoffice mcp --help: รูปแบบ install, uninstall และ list พร้อมตัวเลือก --http, --host, --token, --compact-schemas, --dir และ --force](img/mcp.png)
+![ผลลัพธ์จริงของ teleoffice mcp --help: รูปแบบ install, uninstall และ list พร้อมตัวเลือก --http, --host, --token, --compact-schemas, --dir และ --force](img/mcp.png)
 
 ## รันเองโดยไม่ต้องมีผู้ช่วย
 
 สำหรับไคลเอ็นต์ที่อยู่คนละเครื่อง ให้เปิดเป็น HTTP แทน
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` กำหนดที่ที่เซิร์ฟเวอร์จะรับ และต้องส่งโทเคนเดียวกันนั้นให้ไคลเอ็นต์
@@ -57,22 +57,22 @@ genoffice mcp --http 8765 --token <secret>
 
 ## สคีมาและงบที่เล็กลง
 
-`apply` และ `create` ประกาศพารามิเตอร์ `ops`, `cells` และ `data` พร้อมสคีมาที่มีชนิดของแต่ละ op ซึ่งสร้างจาก `genoffice guide <domain> --json` แบบนี้แม่นยำแต่ไม่เล็ก ไคลเอ็นต์ที่หน้าต่างบริบทแคบสามารถขอเป็นอาร์เรย์ธรรมดาแทนได้
+`apply` และ `create` ประกาศพารามิเตอร์ `ops`, `cells` และ `data` พร้อมสคีมาที่มีชนิดของแต่ละ op ซึ่งสร้างจาก `teleoffice guide <domain> --json` แบบนี้แม่นยำแต่ไม่เล็ก ไคลเอ็นต์ที่หน้าต่างบริบทแคบสามารถขอเป็นอาร์เรย์ธรรมดาแทนได้
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## ทำไมต้องมีสกิล
 
-เอเจนต์ที่ไม่รู้จักศัพท์ของ op ก็จะเดา สกิลมีคู่มืออ้างอิงและแนวทางการออกแบบติดไปด้วย ซึ่งเป็นเนื้อหาเดียวกับที่ `genoffice guide` พิมพ์ออกมา ผู้ช่วยจึงเขียน op ที่อ่านสเปกของมันจริง ๆ แล้ว ติดตั้งจากแผงด้านบน หรือใช้ `genoffice skill` จากเทอร์มินัลก็ได้
+เอเจนต์ที่ไม่รู้จักศัพท์ของ op ก็จะเดา สกิลมีคู่มืออ้างอิงและแนวทางการออกแบบติดไปด้วย ซึ่งเป็นเนื้อหาเดียวกับที่ `teleoffice guide` พิมพ์ออกมา ผู้ช่วยจึงเขียน op ที่อ่านสเปกของมันจริง ๆ แล้ว ติดตั้งจากแผงด้านบน หรือใช้ `teleoffice skill` จากเทอร์มินัลก็ได้
 
 ## ในแอปมันเข้าถึงอะไรได้บ้าง
 
 เซิร์ฟเวอร์ไม่ได้จำกัดอยู่แค่ไฟล์บนดิสก์ ตราบใดที่ TeleOffice ยังทำงานอยู่ เอเจนต์ก็ทำงานผ่านหน้าต่างได้ด้วย
 
-- **`open_in_genoffice`** เปิดไฟล์ในแท็บใหม่และโฟกัสไปที่แท็บนั้น
+- **`open_in_teleoffice`** เปิดไฟล์ในแท็บใหม่และโฟกัสไปที่แท็บนั้น
 - **`open_documents`** แสดงรายการเอกสารทุกฉบับที่คุณเปิดอยู่ ทั้ง id ชนิด พาธ และมีการแก้ไขที่ยังไม่บันทึกหรือไม่ จากนั้นจึงอ่านเนื้อหาปัจจุบันของเอกสารหนึ่ง หรือปิดมัน โดยจะบันทึกก่อนเว้นแต่คุณสั่งให้ทิ้ง
 - **เครื่องมือเนื้อหา** รับ id (หรือพาธ) นั้นเป็นอาร์กิวเมนต์ `document` การแก้ไขจึงตกลงในแท็บที่คุณเปิดค้างไว้แล้ว และหน้าต่างจะสลับไปแสดงแท็บนั้น
 

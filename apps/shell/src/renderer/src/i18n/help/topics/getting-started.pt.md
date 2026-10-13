@@ -26,7 +26,7 @@ O documento novo abre sem título; o ficheiro no disco só é criado no primeiro
 
 - O menu **Arquivo ▸ Abrir…** (⌘O/ctrl+O) abre o seletor de ficheiros do sistema: .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html.
 - Clique em qualquer item da lista **Recentes** no ecrã Início.
-- `genoffice <ficheiro>` a partir de um terminal também abre ficheiros.
+- `teleoffice <ficheiro>` a partir de um terminal também abre ficheiros.
 
 ## Como funciona o salvamento
 

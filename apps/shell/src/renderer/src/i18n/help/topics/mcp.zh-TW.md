@@ -15,29 +15,29 @@ TeleOffice 支援 Model Context Protocol，因此程式開發代理可以透過�
 同樣的事，在終端機裡也做得到——這是進階路線，當代理裝在面板找不到的地方時，就該走這條：
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 它會找出本機上的程式開發代理，把 stdio 伺服器項目寫進各自的設定檔，其餘部分維持原樣。
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 裝在不常見位置的代理要加上 `--dir <path>`；`--force` 會改寫已經存在的項目。
 
 伺服器能接受的東西都列在一個畫面上——註冊、移除與列出這三種形式，改用 HTTP 提供服務，以及兩個 schema 開關：
 
-![genoffice mcp --help 的真實輸出：install、uninstall 與 list 三種形式，以及 --http、--host、--token、--compact-schemas、--dir 和 --force 選項](img/mcp.png)
+![teleoffice mcp --help 的真實輸出：install、uninstall 與 list 三種形式，以及 --http、--host、--token、--compact-schemas、--dir 和 --force 選項](img/mcp.png)
 
 ## 沒有助理也能執行
 
 如果用戶端在另一台電腦上，就改用 HTTP 提供服務：
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` 決定它監聽的位址。把同一個權杖傳給用戶端。
@@ -57,22 +57,22 @@ genoffice mcp --http 8765 --token <secret>
 
 ## Schema 與更小的預算
 
-`apply` 與 `create` 會用逐 op 的型別化 schema 宣告它們的 `ops`、`cells` 與 `data` 參數，schema 由 `genoffice guide <domain> --json` 產生。這樣很精確，但體積不小。上下文視窗吃緊的用戶端可以改用單純的陣列：
+`apply` 與 `create` 會用逐 op 的型別化 schema 宣告它們的 `ops`、`cells` 與 `data` 參數，schema 由 `teleoffice guide <domain> --json` 產生。這樣很精確，但體積不小。上下文視窗吃緊的用戶端可以改用單純的陣列：
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## 為什麼需要技能
 
-不熟悉 op 詞彙的代理只能靠猜。技能裡附著參考手冊與設計指南——和 `genoffice guide` 印出來的是同一份材料——所以助理寫下的 op，它的規格是真的讀過的。可以從上面的面板安裝，也可以用終端機裡的 `genoffice skill`。
+不熟悉 op 詞彙的代理只能靠猜。技能裡附著參考手冊與設計指南——和 `teleoffice guide` 印出來的是同一份材料——所以助理寫下的 op，它的規格是真的讀過的。可以從上面的面板安裝，也可以用終端機裡的 `teleoffice skill`。
 
 ## 它在應用程式裡能碰到什麼
 
 伺服器不只限於磁碟上的檔案。TeleOffice 執行期間，代理還可以透過視窗來做事：
 
-- **`open_in_genoffice`** 在一個分頁裡開啟檔案，並把它帶到前景。
+- **`open_in_teleoffice`** 在一個分頁裡開啟檔案，並把它帶到前景。
 - **`open_documents`** 列出你已經開啟的每份文件——id、類型、路徑，以及有沒有尚未儲存的變更——然後讀取某份文件的目前內容或把它關掉，預設會先儲存，除非你讓它丟棄。
 - **內容類工具** 把那個 id（或路徑）當作 `document` 參數，因此修改會落在你已經開著的那個分頁裡，視窗也會切過去顯示它。
 

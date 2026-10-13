@@ -15,29 +15,29 @@ TeleOffice は Model Context Protocol を話せます。コーディングエー
 同じことをターミナルから行うこともできます——これは上級者向けの経路で、パネルが見つけられない場所にエージェントがいるときはこちらを使ってください：
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 このマシンにあるコーディングエージェントを見つけ、それぞれの設定に stdio サーバーのエントリを書き、そのファイルの残りは見つかったときの様子のままにしておきます。
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 通常以外の場所にインストールしたエージェントには `--dir <path>` を指定します。`--force` を付けると、すでに存在するエントリを上書きします。
 
 サーバーが受け取れるものは 1 画面にまとまっています——登録・削除・一覧の各形、HTTP での配信、そして 2 つのスキーマ用のフラグ：
 
-![genoffice mcp --help の実際の出力：install、uninstall、list の各形と、--http、--host、--token、--compact-schemas、--dir、--force の各オプション](img/mcp.png)
+![teleoffice mcp --help の実際の出力：install、uninstall、list の各形と、--http、--host、--token、--compact-schemas、--dir、--force の各オプション](img/mcp.png)
 
 ## アシスタントなしで動かす
 
 別のマシンにあるクライアントには、代わりに HTTP で配信します。
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` で待ち受ける先が変わります。クライアントには同じトークンを渡してください。
@@ -57,22 +57,22 @@ HTTP の上でもファイルは運べます。`PUT /files/<name>` で 1 つを�
 
 ## スキーマと小さめの予算
 
-`apply` と `create` は `ops`、`cells`、`data` パラメーターを、op ごとの型付きスキーマ付きで公開します。そのスキーマは `genoffice guide <domain> --json` から生成されます。正確ですが、大きなものです。コンテキストウィンドウの狭いクライアントは、代わりに単純な配列を要求できます：
+`apply` と `create` は `ops`、`cells`、`data` パラメーターを、op ごとの型付きスキーマ付きで公開します。そのスキーマは `teleoffice guide <domain> --json` から生成されます。正確ですが、大きなものです。コンテキストウィンドウの狭いクライアントは、代わりに単純な配列を要求できます：
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## なぜスキルなのか
 
-op の語彙を知らないエージェントは当て推量します。スキルにはリファレンスとデザインガイド—— `genoffice guide` が出すのと同じ内容——が入っているので、アシスタントは実際に spec を読んでから op を書けます。上のパネルからインストールするか、ターミナルの `genoffice skill` で入れてください。
+op の語彙を知らないエージェントは当て推量します。スキルにはリファレンスとデザインガイド—— `teleoffice guide` が出すのと同じ内容——が入っているので、アシスタントは実際に spec を読んでから op を書けます。上のパネルからインストールするか、ターミナルの `teleoffice skill` で入れてください。
 
 ## アプリの中で何に手が届くか
 
 サーバーはディスク上のファイルだけに限られません。TeleOffice が動いている間、エージェントはウィンドウ越しにも作業できます：
 
-- **`open_in_genoffice`** はファイルをタブで開き、そのタブを前面に出します。
+- **`open_in_teleoffice`** はファイルをタブで開き、そのタブを前面に出します。
 - **`open_documents`** は、開いているすべてのドキュメントを id・種類・パス・未保存の変更の有無まで一覧し、あるドキュメントの内容をその場で読むか、閉じるかを行います。閉じる前に保存しますが、破棄するよう指示されれば保存しません。
 - **コンテンツツール群** は、その id（またはパス）を `document` 引数として取るので、編集はすでに開いているタブに反映され、ウィンドウもそのタブを表示に切り替わります。
 

@@ -15,29 +15,29 @@ O TeleOffice fala o Model Context Protocol, por isso um agente de programação 
 A mesma coisa a partir de um terminal — esta é a via avançada, e a que deve usar quando o agente está num sítio onde o painel o não consegue encontrar:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Encontra os agentes de programação desta máquina e escreve a entrada do servidor stdio na configuração de cada um deles, deixando o resto desse ficheiro como o encontrou.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Um agente instalado num sítio fora do comum precisa de `--dir <path>`; e `--force` reescreve uma entrada que já lá está.
 
 Tudo aquilo que o servidor aceita cabe num ecrã — as formas de instalar, remover e listar, a publicação por HTTP e as duas opções de esquema:
 
-![A saída real de genoffice mcp --help: as formas install, uninstall e list, com as opções --http, --host, --token, --compact-schemas, --dir e --force](img/mcp.png)
+![A saída real de teleoffice mcp --help: as formas install, uninstall e list, com as opções --http, --host, --token, --compact-schemas, --dir e --force](img/mcp.png)
 
 ## Executá-lo sem um assistente
 
 Para um cliente noutra máquina, sirva-o por HTTP:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` muda o endereço onde escuta. Passe o mesmo token ao cliente.
@@ -57,22 +57,22 @@ Cada comando é uma ferramenta. As interessantes:
 
 ## Esquemas, e um orçamento mais pequeno
 
-`apply` e `create` anunciam os seus parâmetros `ops`, `cells` e `data` com o esquema tipado de cada operação, gerado a partir de `genoffice guide <domain> --json`. É preciso, mas não é pequeno. Um cliente com uma janela de contexto apertada pode pedir matrizes simples em vez disso:
+`apply` e `create` anunciam os seus parâmetros `ops`, `cells` e `data` com o esquema tipado de cada operação, gerado a partir de `teleoffice guide <domain> --json`. É preciso, mas não é pequeno. Um cliente com uma janela de contexto apertada pode pedir matrizes simples em vez disso:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Porque é que a skill
 
-Um agente que não conhece o vocabulário das operações vai adivinhar. A skill traz a referência e os guias de design — o mesmo material que o `genoffice guide` imprime —, de modo que o assistente escreve operações cuja especificação leu mesmo. Instale-a a partir do painel acima, ou com `genoffice skill` a partir de um terminal.
+Um agente que não conhece o vocabulário das operações vai adivinhar. A skill traz a referência e os guias de design — o mesmo material que o `teleoffice guide` imprime —, de modo que o assistente escreve operações cuja especificação leu mesmo. Instale-a a partir do painel acima, ou com `teleoffice skill` a partir de um terminal.
 
 ## O que consegue alcançar na aplicação
 
 O servidor não se limita aos ficheiros em disco. Enquanto o TeleOffice estiver a correr, o agente também pode trabalhar através da janela:
 
-- **`open_in_genoffice`** abre um ficheiro num separador e dá-lhe o foco.
+- **`open_in_teleoffice`** abre um ficheiro num separador e dá-lhe o foco.
 - **`open_documents`** lista todos os documentos que tem abertos — id, tipo, caminho e se têm alterações por guardar —, e depois lê o conteúdo atual de um deles ou fecha-o, guardando primeiro, a não ser que lhe peça para descartar.
 - **As ferramentas de conteúdo** recebem esse id (ou o caminho) como argumento `document`, pelo que uma alteração aterra no separador que já tem aberto e a janela muda para o mostrar.
 

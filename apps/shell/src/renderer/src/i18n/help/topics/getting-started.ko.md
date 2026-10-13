@@ -26,7 +26,7 @@ TeleOffice는 전적으로 내 컴퓨터에서 동작하는 오피스 스위트�
 
 - 메뉴 **파일 ▸ 열기**(⌘O/ctrl+O)는 시스템 선택 창을 엽니다. .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html을 지원합니다.
 - 홈의 **최근 사용** 목록에서 아무 항목이나 누릅니다.
-- 터미널에서 `genoffice <file>`을 실행해도 열 수 있습니다.
+- 터미널에서 `teleoffice <file>`을 실행해도 열 수 있습니다.
 
 ## 저장 방식
 

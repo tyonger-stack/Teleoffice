@@ -26,7 +26,7 @@ TeleOffice 是一套完全在你電腦上運作的辦公套件：單一視窗、
 
 - 選單 **檔案 ▸ 開啟**（⌘O/ctrl+O）會開啟系統選擇視窗：.docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html。
 - 直接點首頁「最近」的任一項目。
-- 終端機裡執行 `genoffice <file>` 也能開啟檔案。
+- 終端機裡執行 `teleoffice <file>` 也能開啟檔案。
 
 ## 儲存模式
 

@@ -26,7 +26,7 @@ Een nieuw document opent zonder titel; het bestand op schijf wordt pas aangemaak
 
 - Menu **Bestand ▸ Openen…** (⌘O/ctrl+O) opent de systeemkiezer: .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html.
 - Klik op een willekeurig item in de lijst **Recent** op Start.
-- Ook `genoffice <bestand>` in een terminal opent bestanden.
+- Ook `teleoffice <bestand>` in een terminal opent bestanden.
 
 ## Het opslagmodel
 

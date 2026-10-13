@@ -15,29 +15,29 @@ Robisz to w **Ustawienia ▸ Integracje**. Panel ma dwie połowy i możesz skorz
 To samo z terminala — to jest ścieżka zaawansowana, po którą sięgasz, gdy agent jest tam, gdzie panel nie potrafi go znaleźć:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Znajduje agentów programistycznych na tym komputerze i zapisuje wpis serwera stdio we własnej konfiguracji każdego z nich, nie ruszając reszty pliku.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Agent zainstalowany w nietypowym miejscu wymaga `--dir <path>`; `--force` przepisuje wpis, który już tam jest.
 
 Wszystko, co przyjmuje serwer, mieści się na jednym ekranie — formularze rejestracji, usuwania i listowania, udostępnianie przez HTTP oraz dwie flagi schematów:
 
-![Prawdziwe wyjście genoffice mcp --help: formularze install, uninstall i list wraz z opcjami --http, --host, --token, --compact-schemas, --dir i --force](img/mcp.png)
+![Prawdziwe wyjście teleoffice mcp --help: formularze install, uninstall i list wraz z opcjami --http, --host, --token, --compact-schemas, --dir i --force](img/mcp.png)
 
 ## Uruchamianie samodzielne
 
 Dla klienta na innym komputerze udostępnij go przez HTTP:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` zmienia adres nasłuchu. Przekaż ten sam token klientowi.
@@ -57,22 +57,22 @@ Każde polecenie jest narzędziem. Najciekawsze:
 
 ## Schematy i mniejszy budżet
 
-`apply` i `create` deklarują parametry `ops`, `cells` i `data` wraz z typowanym schematem dla każdej op, wygenerowanym z `genoffice guide <domain> --json`. To jest precyzyjne, ale nie małe. Klient o ciasnym oknie kontekstowym może zamiast tego poprosić o zwykłe tablice:
+`apply` i `create` deklarują parametry `ops`, `cells` i `data` wraz z typowanym schematem dla każdej op, wygenerowanym z `teleoffice guide <domain> --json`. To jest precyzyjne, ale nie małe. Klient o ciasnym oknie kontekstowym może zamiast tego poprosić o zwykłe tablice:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Po co jest skill
 
-Agent, który nie zna słownictwa op, będzie zgadywał. Skill zabiera ze sobą referencję i przewodniki projektowe — dokładnie te materiały, które wypisuje `genoffice guide` —, więc asystent pisze op, których specyfikację naprawdę przeczytał. Zainstaluj go z panelu powyżej albo poleceniem `genoffice skill` z terminala.
+Agent, który nie zna słownictwa op, będzie zgadywał. Skill zabiera ze sobą referencję i przewodniki projektowe — dokładnie te materiały, które wypisuje `teleoffice guide` —, więc asystent pisze op, których specyfikację naprawdę przeczytał. Zainstaluj go z panelu powyżej albo poleceniem `teleoffice skill` z terminala.
 
 ## Do czego sięga w aplikacji
 
 Serwer nie ogranicza się do plików na dysku. Dopóki TeleOffice działa, agent może pracować także przez okno:
 
-- **`open_in_genoffice`** otwiera plik w karcie i ustawia na niej fokus.
+- **`open_in_teleoffice`** otwiera plik w karcie i ustawia na niej fokus.
 - **`open_documents`** wymienia każdy otwarty dokument — id, typ, ścieżkę i to, czy ma niezapisane zmiany —, a następnie czyta bieżącą zawartość jednego z nich albo go zamyka, najpierw zapisując, chyba że każesz mu odrzucić zmiany.
 - **Narzędzia od treści** przyjmują to id (albo ścieżkę) jako argument `document`, więc zmiana trafia do karty, którą już masz otwartą, a okno przełącza się na jej pokazanie.
 

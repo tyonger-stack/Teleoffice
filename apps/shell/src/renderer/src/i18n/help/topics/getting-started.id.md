@@ -26,7 +26,7 @@ Dokumen baru terbuka tanpa nama; file di disk baru dibuat saat disimpan pertama 
 
 - Menu **File ▸ Buka…** (⌘O/ctrl+O) membuka pemilih file sistem: .docx / .doc / .xlsx / .xls / .csv / .tsv / .pptx / .ppt / .pdf / .md / .html.
 - Klik apa pun di daftar **Terbaru** pada Beranda.
-- `genoffice <file>` dari terminal juga dapat membuka file.
+- `teleoffice <file>` dari terminal juga dapat membuka file.
 
 ## Cara kerja penyimpanan
 

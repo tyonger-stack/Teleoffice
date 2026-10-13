@@ -2,7 +2,7 @@
 
 ## Penyedia dan model
 
-Model dan kunci dikonfigurasi di Pengaturan (baris akun di kiri bawah Beranda):
+Model dan kunci dikonfigurasi di Pengaturan (tombol pengaturan di kiri bawah Beranda):
 
 ![Jendela Pengaturan](img/settings-general.png)
 

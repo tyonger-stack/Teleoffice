@@ -1,19 +1,19 @@
 # Kommandozeile und Agenten
 
-Jede Installation bringt den Befehl `genoffice` mit, der dieselben Engines antreibt wie das Fenster: dieselben Parser, denselben Writer, denselben Renderer. Eine Datei, die die App speichert, und eine Datei, die der Befehl schreibt, sind dieselbe Datei, und eine Prüfung, die der KI-Bereich der App besteht, besteht auch der Befehl.
+Jede Installation bringt den Befehl `teleoffice` mit, der dieselben Engines antreibt wie das Fenster: dieselben Parser, denselben Writer, denselben Renderer. Eine Datei, die die App speichert, und eine Datei, die der Befehl schreibt, sind dieselbe Datei, und eine Prüfung, die der KI-Bereich der App besteht, besteht auch der Befehl.
 
 ```sh
-genoffice --help          # every command
-genoffice guide slides    # the op reference, for writing your own
+teleoffice --help          # every command
+teleoffice guide slides    # the op reference, for writing your own
 ```
 
 Das ist die gesamte Oberfläche auf einem Bildschirm — jeder Befehl mit einer Zeile dazu, was er bewirkt, dann die globalen Optionen und die Exit-Codes:
 
-![Die echte Ausgabe von genoffice --help: die Versionsbanner, jeder Befehl mit einzeiliger Beschreibung sowie die globalen Optionen und die Exit-Codes](img/cli.png)
+![Die echte Ausgabe von teleoffice --help: die Versionsbanner, jeder Befehl mit einzeiliger Beschreibung sowie die globalen Optionen und die Exit-Codes](img/cli.png)
 
 ## Den Befehl bereitstellen
 
-Unter macOS und Windows liefert die App ihn im Bundle mit. Um ihn beim Namen aufzurufen, führen Sie einmal `genoffice install-cli` aus: Das legt einen symbolischen Link zum mitgelieferten Binary in `/usr/local/bin` an, unter Windows im Benutzer-`PATH`.
+Unter macOS und Windows liefert die App ihn im Bundle mit. Um ihn beim Namen aufzurufen, führen Sie einmal `teleoffice install-cli` aus: Das legt einen symbolischen Link zum mitgelieferten Binary in `/usr/local/bin` an, unter Windows im Benutzer-`PATH`.
 
 ## Die Befehle, die man kennen sollte
 
@@ -31,26 +31,26 @@ Unter macOS und Windows liefert die App ihn im Bundle mit. Um ihn beim Namen auf
 | `merge`           | Die Platzhalter `{{key}}` in einer Vorlage `.docx`, `.pptx` oder `.xlsx` füllen.                                                                                                                                                                                      |
 | `capabilities`    | Melden, welche Cloud-Funktionen auf diesem Rechner konfiguriert sind.                                                                                                                                                                                                 |
 | `guide`           | Die op-Referenz und die Design-Leitfäden, erzeugt aus genau den Definitionen, gegen die der Executor prüft — sie kann also nicht von dem abweichen, was `apply` akzeptiert. `--json` liefert sie mit dem Schema jedes ops.                                            |
-| `install-cli`     | `genoffice` in den `PATH` legen.                                                                                                                                                                                                                                      |
-| `skill`           | Die auf diesem Rechner gefundenen Coding-Agenten auflisten und den TeleOffice-Skill dort installieren oder aktualisieren.                                                                                                                                              |
+| `install-cli`     | `teleoffice` in den `PATH` legen.                                                                                                                                                                                                                                     |
+| `skill`           | Die auf diesem Rechner gefundenen Coding-Agenten auflisten und den TeleOffice-Skill dort installieren oder aktualisieren.                                                                                                                                             |
 | `mcp`             | Jeden Befehl als Model-Context-Protocol-Werkzeug bereitstellen. Siehe **Einen Coding-Agenten anbinden**.                                                                                                                                                              |
 
 ## Bearbeiten: Dokumente, Tabellen, Folien
 
-`genoffice docs`, `genoffice sheet` und `genoffice slides` lesen und schreiben über denselben Pfad wie die App und teilen ein Vokabular: ein **op** ist eine einzelne Änderung, und eine **spec** ist eine Liste von ops, die der Reihe nach angewendet werden.
+`teleoffice docs`, `teleoffice sheet` und `teleoffice slides` lesen und schreiben über denselben Pfad wie die App und teilen ein Vokabular: ein **op** ist eine einzelne Änderung, und eine **spec** ist eine Liste von ops, die der Reihe nach angewendet werden.
 
 ```sh
-genoffice sheet read report.xlsx
-genoffice slides apply deck.pptx --ops ops.json --dry-run
-genoffice docs apply brief.docx --ops ops.json
+teleoffice sheet read report.xlsx
+teleoffice slides apply deck.pptx --ops ops.json --dry-run
+teleoffice docs apply brief.docx --ops ops.json
 ```
 
 `--dry-run` meldet, was ein Stapel tun würde, und schreibt nichts — so prüfen Sie eine spec günstig, bevor sie landet. Der KI-Bereich der App läuft auf genau diesen ops, Sie können also alles, was Sie ihm anvertrauen können, auch skripten.
 
 ## Model Context Protocol
 
-`genoffice mcp` stellt jeden Befehl als MCP-Werkzeug bereit, und `genoffice mcp install <agent|all>` registriert es in der Konfiguration eines Coding-Agenten. Diese Seite steht in **Einen Coding-Agenten anbinden**.
+`teleoffice mcp` stellt jeden Befehl als MCP-Werkzeug bereit, und `teleoffice mcp install <agent|all>` registriert es in der Konfiguration eines Coding-Agenten. Diese Seite steht in **Einen Coding-Agenten anbinden**.
 
 ## Was der Befehl nicht tut
 
-Er liest und schreibt die Datei. Er ist nicht die App: es gibt kein Fenster, und der Aktualisierungsdialog in der App gilt hierfür nicht. Alles, was das Fenster braucht — der KI-Bereich, die QC-Prüfung einer gerenderten Folie —, wartet darauf, dass Sie die Datei öffnen. `genoffice render` liefert Ihnen die Pixel auch ohne Fenster, und `genoffice slides` prüft das Layout eines Decks eigenständig.
+Er liest und schreibt die Datei. Er ist nicht die App: es gibt kein Fenster, und der Aktualisierungsdialog in der App gilt hierfür nicht. Alles, was das Fenster braucht — der KI-Bereich, die QC-Prüfung einer gerenderten Folie —, wartet darauf, dass Sie die Datei öffnen. `teleoffice render` liefert Ihnen die Pixel auch ohne Fenster, und `teleoffice slides` prüft das Layout eines Decks eigenständig.

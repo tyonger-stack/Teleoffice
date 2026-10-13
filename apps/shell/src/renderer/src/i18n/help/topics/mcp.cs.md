@@ -15,29 +15,29 @@ Uděláte to v **Nastavení ▸ Integrace**. Panel má dvě poloviny a můžete 
 Totéž z terminálu — to je pokročilá cesta, po které sáhnete, když je agent tam, kde panel nemůže najít:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Najde programové agenty v tomto počítači a zapíše záznam stdio serveru do vlastní konfigurace každého z nich, zatímco zbytek souboru nechá být, jak ho našel.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Agent nainstalovaný na neobvyklém místě vyžaduje `--dir <path>`; `--force` přepíše záznam, který tam už je.
 
 Všechno, co server přijímá, se vejde na jednu obrazovku — tvary pro registraci, odebrání a výpis, poskytování přes HTTP a dva přepínače schémat:
 
-![Skutečný výstup genoffice mcp --help: tvary install, uninstall a list s volbami --http, --host, --token, --compact-schemas, --dir a --force](img/mcp.png)
+![Skutečný výstup teleoffice mcp --help: tvary install, uninstall a list s volbami --http, --host, --token, --compact-schemas, --dir a --force](img/mcp.png)
 
 ## Spuštění vlastníma rukama
 
 Pro klienta v jiném počítači jej místo toho vystavte přes HTTP:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` mění, kde naslouchá. Klientovi předáte stejný token.
@@ -57,22 +57,22 @@ Každý příkaz je nástroj. Zajímavé jsou tyto:
 
 ## Schémata a menší rozpočet
 
-`apply` a `create` oznamují své parametry `ops`, `cells` a `data` s typovaným schématem pro každou op, vygenerovaným z `genoffice guide <domain> --json`. Je to přesné a ne malé. Klient s úzkým kontextovým oknem si může místo toho požádat o prostá pole:
+`apply` a `create` oznamují své parametry `ops`, `cells` a `data` s typovaným schématem pro každou op, vygenerovaným z `teleoffice guide <domain> --json`. Je to přesné a ne malé. Klient s úzkým kontextovým oknem si může místo toho požádat o prostá pole:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Proč skill
 
-Agent, který nezná slovní zásobu op, bude hádat. Skill přináší referenční příručku a návrhové průvodce — přesně ty materiály, které vypíše `genoffice guide` —, takže asistent píše ops, jejichž specifikaci si opravdu přečetl. Nainstalujte ho z panelu nahoře nebo příkazem `genoffice skill` z terminálu.
+Agent, který nezná slovní zásobu op, bude hádat. Skill přináší referenční příručku a návrhové průvodce — přesně ty materiály, které vypíše `teleoffice guide` —, takže asistent píše ops, jejichž specifikaci si opravdu přečetl. Nainstalujte ho z panelu nahoře nebo příkazem `teleoffice skill` z terminálu.
 
 ## Čeho se v aplikaci dostane
 
 Server není omezen na soubory na disku. Dokud TeleOffice běží, může agent pracovat i přes okno:
 
-- **`open_in_genoffice`** otevře soubor v kartě a dá jí fokus.
+- **`open_in_teleoffice`** otevře soubor v kartě a dá jí fokus.
 - **`open_documents`** vypíše každý dokument, který máte otevřený — id, typ, cestu a zda v něm jsou neuložené změny — a pak přečte aktuální obsah jednoho z nich nebo ho zavře, přičemž nejdřív uloží, pokud mu neřeknete, aby změny zahodil.
 - **Nástroje pro obsah** berou to id (nebo cestu) jako svůj argument `document`, takže úprava dopadne do karty, kterou už otevřenou máte, a okno se na ni přepne.
 

@@ -1,6 +1,6 @@
 # TeleOffice 설치
 
-모든 빌드는 [Releases 페이지](https://github.com/genspark-ai/genoffice/releases/latest)에 올라 있습니다. 모두 `main`에서 나오며, macOS와 Windows 설치 프로그램은 서명되어 있습니다.
+모든 빌드는 [Releases 페이지](https://github.com/tyonger-stack/Teleoffice/releases/latest)에 올라 있습니다. 모두 `main`에서 나오며, macOS와 Windows 설치 프로그램은 서명되어 있습니다.
 
 ## 내 컴퓨터에 맞는 파일 고르기
 
@@ -29,14 +29,14 @@
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — 설치 단계 없이, 그 자리에서 실행됩니다:
@@ -64,4 +64,4 @@ FUSE 2 런타임이 필요합니다. 설치하기를 꺼리면 `--appimage-extra
 
 ## 명령줄도 함께 옵니다
 
-모든 설치본에는 `genoffice` 명령이 들어 있고, 창이 쓰는 바로 그 엔진을 구동합니다. 같은 파일에 대한 둘의 판단이 어긋날 일은 없습니다. macOS와 Windows에서는 앱 번들 안에 있으며, `genoffice install-cli`로 `PATH`에 넣습니다. 무엇을 할 수 있는지는 **명령줄과 에이전트**를 보세요.
+모든 설치본에는 `teleoffice` 명령이 들어 있고, 창이 쓰는 바로 그 엔진을 구동합니다. 같은 파일에 대한 둘의 판단이 어긋날 일은 없습니다. macOS와 Windows에서는 앱 번들 안에 있으며, `teleoffice install-cli`로 `PATH`에 넣습니다. 무엇을 할 수 있는지는 **명령줄과 에이전트**를 보세요.

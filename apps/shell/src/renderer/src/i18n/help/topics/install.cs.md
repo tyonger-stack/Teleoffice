@@ -1,6 +1,6 @@
 # Instalace TeleOffice
 
-Každá sestavení je zveřejněno na [stránce Releases](https://github.com/genspark-ai/genoffice/releases/latest). Všechna pocházejí z `main`; instalátory pro macOS a Windows jsou podepsané.
+Každá sestavení je zveřejněno na [stránce Releases](https://github.com/tyonger-stack/Teleoffice/releases/latest). Všechna pocházejí z `main`; instalátory pro macOS a Windows jsou podepsané.
 
 ## Vyberte soubor pro svůj počítač
 
@@ -29,14 +29,14 @@ Spusťte instalátor `.exe`. Umístí TeleOffice do nabídky Start a zaregistruj
 **Debian / Ubuntu**
 
 ```sh
-sudo apt install ./genoffice_<version>_amd64.deb
+sudo apt install ./teleoffice_<version>_amd64.deb
 ```
 
 **Fedora / RHEL / openSUSE**
 
 ```sh
-sudo dnf install ./genoffice-<version>.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-<version>.x86_64.rpm  # openSUSE
+sudo dnf install ./teleoffice-<version>.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./teleoffice-<version>.x86_64.rpm  # openSUSE
 ```
 
 **AppImage** — běží tam, kde je, bez žádného instalačního kroku:
@@ -64,4 +64,4 @@ Všechny tři obalí zveřejněné artefakty místo toho, aby aplikaci znovu ses
 
 ## Příkazová řádka je součástí
 
-Každá instalace obsahuje příkaz `genoffice`, který mluví se stejnými enginy jako okno, takže se nikdy neshodnou v tom, jaký soubor je. V systémech macOS a Windows je uvnitř balíčku aplikace; `genoffice install-cli` jej umístí do vaší `PATH`. Co umí, se dozvíte v kapitole **Příkazová řádka a agenti**.
+Každá instalace obsahuje příkaz `teleoffice`, který mluví se stejnými enginy jako okno, takže se nikdy neshodnou v tom, jaký soubor je. V systémech macOS a Windows je uvnitř balíčku aplikace; `teleoffice install-cli` jej umístí do vaší `PATH`. Co umí, se dozvíte v kapitole **Příkazová řádka a agenti**.

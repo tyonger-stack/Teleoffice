@@ -15,29 +15,29 @@ Tempatnya ialah **Tetapan ▸ Integrasi**. Panel itu mempunyai dua bahagian, dan
 Perkara yang sama daripada satu terminal — inilah laluan lanjutan, dan laluan yang perlu digunakan apabila ejen berada di tempat yang tidak dapat dicari oleh panel:
 
 ```sh
-genoffice mcp install all
+teleoffice mcp install all
 ```
 
 Ia menemui ejen penulisan kod pada mesin ini — Claude Code, Codex, Cursor, Gemini CLI, Copilot CLI, OpenCode, Windsurf — lalu menulis entri pelayan stdio ke dalam konfigurasi sendiri setiap satu, dan meninggalkan bahagian lain fail itu seperti yang dijumpainya.
 
 ```sh
-genoffice mcp list             # where each agent stands
-genoffice mcp install cursor    # just one
-genoffice mcp uninstall cursor  # take it back out
+teleoffice mcp list             # where each agent stands
+teleoffice mcp install cursor    # just one
+teleoffice mcp uninstall cursor  # take it back out
 ```
 
 Ejen yang anda pasang di tempat yang luar biasa menggunakan `--dir <path>`; `--force` menulis semula entri yang sudah ada di situ.
 
 Segala yang diterima oleh pelayan itu muat pada satu skrin — borang untuk memasang, mengeluarkan dan menyenaraikan, menyajikan melalui HTTP, dan dua pilihan skema:
 
-![Keluaran sebenar genoffice mcp --help: borang install, uninstall dan list, bersama pilihan --http, --host, --token, --compact-schemas, --dir dan --force](img/mcp.png)
+![Keluaran sebenar teleoffice mcp --help: borang install, uninstall dan list, bersama pilihan --http, --host, --token, --compact-schemas, --dir dan --force](img/mcp.png)
 
 ## Menjalankannya tanpa pembantu
 
 Bagi klien pada mesin lain, layankannya melalui HTTP:
 
 ```sh
-genoffice mcp --http 8765 --token <secret>
+teleoffice mcp --http 8765 --token <secret>
 ```
 
 `--host <addr>` menukar tempat ia mendengarkan. Berikan token yang sama kepada klien.
@@ -57,22 +57,22 @@ Setiap perintah ialah sebuah alat. Yang menarik:
 
 ## Skema, dan bajet yang lebih kecil
 
-`apply` dan `create` membentangkan parameter `ops`, `cells` dan `data` mereka bersama skema bertip bagi setiap op, yang dijana daripada `genoffice guide <domain> --json`. Itu tepat, tetapi tidak kecil. Klien dengan tetingkap konteks yang sempit boleh meminta tatasusunan biasa sebagai gantinya:
+`apply` dan `create` membentangkan parameter `ops`, `cells` dan `data` mereka bersama skema bertip bagi setiap op, yang dijana daripada `teleoffice guide <domain> --json`. Itu tepat, tetapi tidak kecil. Klien dengan tetingkap konteks yang sempit boleh meminta tatasusunan biasa sebagai gantinya:
 
 ```sh
-genoffice mcp --compact-schemas
-TELEOFFICE_MCP_COMPACT_SCHEMAS=1 genoffice mcp
+teleoffice mcp --compact-schemas
+TELEOFFICE_MCP_COMPACT_SCHEMAS=1 teleoffice mcp
 ```
 
 ## Mengapa perlu skill
 
-Ejen yang tidak tahu kosa kata op akan meneka. Skill itu membawa rujukan dan panduan reka bentuk — bahan yang sama seperti yang dicetak oleh `genoffice guide` —, jadi pembantu menulis op yang spesifikasinya memang telah dibaca. Pasang ia daripada panel di atas, atau dengan `genoffice skill` daripada terminal.
+Ejen yang tidak tahu kosa kata op akan meneka. Skill itu membawa rujukan dan panduan reka bentuk — bahan yang sama seperti yang dicetak oleh `teleoffice guide` —, jadi pembantu menulis op yang spesifikasinya memang telah dibaca. Pasang ia daripada panel di atas, atau dengan `teleoffice skill` daripada terminal.
 
 ## Apa yang boleh dicapainya dalam aplikasi
 
 Pelayan itu tidak terhad kepada fail pada cakera. Selagi TeleOffice berjalan, ejen juga boleh bekerja melalui tetingkap:
 
-- **`open_in_genoffice`** membuka fail dalam satu tab dan memberikan tumpu kepadanya.
+- **`open_in_teleoffice`** membuka fail dalam satu tab dan memberikan tumpu kepadanya.
 - **`open_documents`** menyenaraikan setiap dokumen yang anda buka — id, jenis, laluan, dan sama ada ia mempunyai perubahan yang belum disimpan —, kemudian membaca kandungan terkini sesuatu dokumen atau menutupnya, dengan menyimpan dahulu melainkan anda menyuruhnya membuang.
 - **Alat kandungan** mengambil id itu (atau laluannya) sebagai argumen `document`, jadi satu suntingan mendarat pada tab yang memang sudah anda buka, dan tetingkap bertukar untuk mempaparkannya.
 
