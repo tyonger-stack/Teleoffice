@@ -7,6 +7,8 @@ import {
   patchFieldParagraphXml,
   applyImageWrap,
   applyImageZOrder,
+  applyShapeWrapAt,
+  applyShapeZOrderAt,
   patchImageParagraphXml,
   patchMathTokens,
   patchTableCellTexts,
@@ -61,6 +63,7 @@ import { borderDrawnPx, borderTotalPt, collapsedEdgePx } from './border-metrics'
 import { parseRunBorderAttr } from './run-border'
 import { parseTextOutlineAttr } from './text-outline'
 import { charScaleXAttr, parseGlowAttr, parseTextEffectAttr } from './text-effects'
+import { shapeWrapOf } from './floating-z-order'
 
 /** minimal ProseMirror JSON shapes */
 export interface PmMark {
@@ -152,6 +155,10 @@ function formatAttrs(format: ParaFormat | undefined, runs?: Run[]): Record<strin
     indentLeft: format?.indentLeft ?? null,
     indentRight: format?.indentRight ?? null,
     indentFirstLine: format?.indentFirstLine ?? null,
+    // only the paragraph's OWN character unit becomes direct formatting — a
+    // a character-unit indent inherited from the style chain shows through and
+    // must not be copied onto the pPr as direct formatting
+    indentFirstLineChars: format?.directCharIndents?.firstLine ?? null,
     spaceBefore: format?.spaceBefore ?? null,
     spaceAfter: format?.spaceAfter ?? null,
     spaceBeforeAuto: format?.spaceBeforeAuto ?? null,
@@ -2054,6 +2061,7 @@ export function pmDocToSavePlan(inputDoc: PmNode, originalBlocks: Block[]): Save
         const textboxTexts = textboxParasPatch(node, original)
         const textboxSizes = textboxSizesPatch(node, original)
         const textboxStyles = textboxStylesPatch(node, original)
+        const shapeWrapChanges = shapeWrapPatchOf(node, original)
         const textboxOffsetX =
           node.attrs?.imageOffsetXEmu != null ? Number(node.attrs.imageOffsetXEmu) : undefined
         const textboxOffsetY =
@@ -2149,7 +2157,11 @@ export function pmDocToSavePlan(inputDoc: PmNode, originalBlocks: Block[]): Save
           changedCount++
           pushBlock({ kind: 'xml', xml: patchTableCellTexts(original.originalXml, tableTexts) })
         } else if (
-          (textboxTexts || textboxSizes || textboxStyles || textboxPositionChanged) &&
+          (textboxTexts ||
+            textboxSizes ||
+            textboxStyles ||
+            textboxPositionChanged ||
+            shapeWrapChanges.length > 0) &&
           original.originalXml
         ) {
           changedCount++
@@ -2157,10 +2169,39 @@ export function pmDocToSavePlan(inputDoc: PmNode, originalBlocks: Block[]): Save
           if (textboxTexts) xml = patchTextboxParas(xml, textboxTexts)
           if (textboxSizes) xml = patchTextboxSizes(xml, textboxSizes)
           if (textboxStyles) xml = patchShapeStyles(xml, textboxStyles)
+          for (const change of [...shapeWrapChanges].sort((a, b) => b.index - a.index)) {
+            const location = { shapeId: change.shapeId, boxIndex: change.index }
+            if (change.wrapChanged) {
+              xml = applyShapeWrapAt(
+                xml,
+                location,
+                change.wrap,
+                change.zChanged ? change.z : undefined,
+              )
+            } else if (change.zChanged) {
+              xml = applyShapeZOrderAt(xml, location, change.z ?? 0)
+            }
+          }
           if (textboxPositionChanged) {
+            const firstBox = (node.attrs?.textboxes as TextboxDisplay[] | undefined)?.[0]
             const wrap =
-              (node.attrs?.imageWrap as ImageWrap | null) ?? original.imageWrap ?? 'square-left'
-            xml = applyImageWrap(xml, wrap, { x: textboxOffsetX!, y: textboxOffsetY! })
+              (firstBox ? shapeWrapOf(firstBox) : null) ??
+              (node.attrs?.imageWrap as ImageWrap | null) ??
+              original.imageWrap ??
+              'square-left'
+            const rank =
+              firstBox?.z !== undefined
+                ? Number(firstBox.z)
+                : node.attrs?.imageZOrder != null
+                  ? Number(node.attrs.imageZOrder)
+                  : undefined
+            xml = applyImageWrap(
+              xml,
+              wrap,
+              { x: textboxOffsetX!, y: textboxOffsetY! },
+              undefined,
+              rank,
+            )
           }
           pushBlock({ kind: 'xml', xml })
         } else if (fieldText && original.originalXml) {
@@ -2267,8 +2308,14 @@ export function pmDocToSavePlan(inputDoc: PmNode, originalBlocks: Block[]): Save
             genOffsetX !== undefined && genOffsetY !== undefined
               ? { x: genOffsetX, y: genOffsetY }
               : undefined
-          xml = applyImageWrap(xml, genWrap, posOffset)
+          // a moved shape rebuilds its position from the drag offsets; a pure
+          // wrap change keeps the anchor's own position bytes
+          xml = posOffset
+            ? applyImageWrap(xml, genWrap, posOffset)
+            : applyShapeWrapAt(xml, { boxIndex: 0 }, genWrap)
         }
+        const genZ = node.attrs?.imageZOrder != null ? Number(node.attrs.imageZOrder) : undefined
+        if (genZ !== undefined) xml = applyShapeZOrderAt(xml, { boxIndex: 0 }, genZ)
         pushBlock({ kind: 'xml', xml })
       } else if (node.attrs?.genImage) {
         changedCount++
@@ -2805,6 +2852,46 @@ function textboxStylesPatch(node: PmNode, original: Block): (ShapeStylePatch | n
   return changed ? styles : null
 }
 
+interface ShapeWrapChange {
+  index: number
+  shapeId?: string
+  wrap: ImageWrap | null
+  wrapChanged: boolean
+  z?: number
+  zChanged: boolean
+}
+
+/** Per-box wrap/rank changes of a shape node vs its parsed original. */
+function shapeWrapPatchOf(
+  node: { attrs?: Record<string, unknown> } | null,
+  original: Block,
+): ShapeWrapChange[] {
+  const boxes = node?.attrs?.textboxes as TextboxDisplay[] | undefined
+  const originals = original.textboxes
+  if (!Array.isArray(boxes) || !originals?.length) return []
+  const out: ShapeWrapChange[] = []
+  const count = Math.min(boxes.length, originals.length)
+  for (let i = 0; i < count; i++) {
+    const mode = shapeWrapOf(boxes[i])
+    const origMode = shapeWrapOf(originals[i])
+    const z = boxes[i].z ?? 0
+    const origZ = originals[i].z ?? 0
+    const wrapChanged = mode !== origMode
+    const zChanged = z !== origZ
+    if (wrapChanged || zChanged) {
+      out.push({
+        index: i,
+        shapeId: boxes[i].shapeId,
+        wrap: mode,
+        wrapChanged,
+        ...(zChanged ? { z } : {}),
+        zChanged,
+      })
+    }
+  }
+  return out
+}
+
 function fieldTextPatch(node: PmNode, original: Block): FieldTextPatch | null {
   const current = node.attrs?.fieldDisplay as FieldDisplay | null
   const initial = original.fieldDisplay
@@ -2887,6 +2974,23 @@ function nodeFormat(node: PmNode): ParaFormat | undefined {
   if (node.attrs?.indentRight != null) format.indentRight = Number(node.attrs.indentRight)
   if (node.attrs?.indentFirstLine != null)
     format.indentFirstLine = Number(node.attrs.indentFirstLine)
+  // the character-unit special indent rides along its twips twin and is written
+  // as w:firstLineChars next to it (Word prefers the character unit on reload).
+  //
+  // Two fields, because the parser's two mean different things: `charIndents`
+  // there is the EFFECTIVE value (style chain merged in) and is what generate
+  // and the cancel-attr merge read, while `directCharIndents` is only what the
+  // paragraph's own w:ind declares. nodeFormat has no style chain to consult —
+  // it reads the node's attributes — so what it sets is the direct value, and
+  // setting both keeps generate correct and gives the signature a direct value
+  // on both sides. Before this, the signature compared the effective value with
+  // the direct one, so every style-inherited paragraph looked edited and an
+  // untouched document came back carrying a frozen direct indent.
+  const firstLineChars = Number(node.attrs?.indentFirstLineChars)
+  if (Number.isFinite(firstLineChars) && firstLineChars > 0) {
+    format.charIndents = { ...format.charIndents, firstLine: firstLineChars }
+    format.directCharIndents = { ...format.directCharIndents, firstLine: firstLineChars }
+  }
   if (node.attrs?.spaceBefore != null) format.spaceBefore = Number(node.attrs.spaceBefore)
   if (node.attrs?.spaceAfter != null) format.spaceAfter = Number(node.attrs.spaceAfter)
   if (node.attrs?.spaceBeforeAuto != null)
@@ -3411,6 +3515,13 @@ function normalizedFormat(format: ParaFormat | undefined): unknown {
     format.indentLeft ?? null,
     format.indentRight ?? null,
     format.indentFirstLine ?? null,
+    // the DIRECT character-unit indent, like the line above and like
+    // nodeFormat, which reads it from the node's own attribute. Taking
+    // format.charIndents here would fold the style-inherited value in, and the
+    // two signatures would then disagree for every paragraph that inherits
+    // its indent — so an untouched document would come back with a frozen
+    // direct indent the original never had.
+    format.directCharIndents?.firstLine ?? null,
     format.spaceBefore ?? null,
     format.spaceAfter ?? null,
     format.pageBreakBefore ?? false,
