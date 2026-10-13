@@ -6221,7 +6221,7 @@ export default function App() {
     setStatus('loading')
     try {
       await loadDoc(path, doc)
-      searchIndexRef.current = null
+      searchIndexCache.clear()
       setSearchMatches([])
       setSearchCur(0)
       setStatus('ready')
