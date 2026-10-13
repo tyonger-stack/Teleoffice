@@ -8,8 +8,8 @@ import type { AiProviderId } from '@teleoffice/ai-provider'
 // generic icon for the "custom" endpoint.
 // Brand-colored logos keep their official colors in both themes (brand
 // assets, not chrome — see CLAUDE.md theming rules); monochrome marks
-// (OpenAI, Kimi, Grok, OpenRouter, Requesty, Opper, OpenCode, Genspark, Custom) use
-// currentColor so they stay legible in dark mode.
+// (OpenAI, Kimi, Grok, OpenRouter, Requesty, Opper, Cheaper Inference, OpenCode,
+// Genspark, Custom) use currentColor so they stay legible in dark mode.
 //
 // Gradient-filled marks (Gemini, Qwen, MiniMax) are components so useId can
 // namespace their <linearGradient> ids per mount: the dropdown renders the
@@ -237,6 +237,19 @@ const LOGOS: Record<AiProviderId, ReactNode> = {
       <path d="M159.78 315C71.53 315 0 244.49 0 157.5C0 -18.9499 159.78 0.650075 159.78 0.650075C159.78 87.2201 88.36 157.4 0.2 157.5C149.8 157.64 159.78 315 159.78 315ZM160.52 217.98C160.52 217.98 156.94 161.65 105.04 157.52C120.6 157.34 160.52 151.54 160.52 96.5601C160.52 151.54 200.44 157.34 216 157.52C164.1 161.63 160.52 217.98 160.52 217.98Z" />
     </svg>
   ),
+  // Cheaper Inference's mark (cheaperinference.com): a "C" with a bar, 24-unit frame
+  cheaperinference: (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M9.107 2.786H15.429V8.839H9.589a3.213 3.213 0 0 0 0.321 6.375H15.214L9.434 20.994A9.107 9.107 0 1 1 9.107 2.786Z" />
+      <path d="M22.179 3.429H22.607a1.286 1.286 0 0 1 1.286 1.286V19.714a1.393 1.393 0 0 1 -1.393 1.393H17.464V8.143Z" />
+    </svg>
+  ),
+  // Atlas Cloud's mark (atlascloud.ai/logo.svg): an outlined "A" peak
+  atlascloud: (
+    <svg viewBox="0 0 27 26" fill="currentColor" aria-hidden="true">
+      <path d="M13.4447 0L0 25.9887C6.22692 23.5227 11.249 23.1623 15.7643 23.3763L13.7037 18.8159C12.8029 18.7258 10.1905 18.7258 8.9519 19.0523L13.4447 9.06451C13.4447 9.06451 20.2009 23.7366 20.2121 23.7366C21.5183 23.9393 24.9977 25.1104 26.8895 25.9887L13.4447 0Z" />
+    </svg>
+  ),
   'opencode-zen': opencodeLogo,
   'opencode-go': opencodeLogo,
   mimo: (
@@ -247,6 +260,27 @@ const LOGOS: Record<AiProviderId, ReactNode> = {
   hunyuan: (
     <svg viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" aria-hidden="true">
       <path d="M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zm1.652 1.123l-.01-.001c.533.097 1.023.233 1.41.404 6.084 2.683 7.396 9.214 1.601 14.338a3.781 3.781 0 01-5.337-.328 3.654 3.654 0 01-.884-3.044c-1.934.6-3.295 2.305-3.524 4.45-.204 1.912.324 4.044 2.056 5.634l.245.067C10.1 22.876 11.036 23 12 23c6.075 0 11-4.925 11-11 0-5.513-4.056-10.08-9.348-10.877zM2.748 6.21c-.178.269-.348.536-.51.803l-.235.394.078-.167A10.957 10.957 0 001 12c0 4.919 3.228 9.083 7.682 10.49l.214.065C3.523 18.528 2.84 14.149 6.47 8.68A2.234 2.234 0 102.748 6.21zm10.157-5.172c4.408 1.33 3.61 5.41 2.447 6.924-.86 1.117-2.922 1.46-3.708 2.238-.666.657-1.077 1.462-1.212 2.291A5.303 5.303 0 0112 12.258a5.672 5.672 0 001.404-11.169 10.51 10.51 0 00-.5-.052z" />
+    </svg>
+  ),
+  ling: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="#1668DC" strokeWidth="1.9" aria-hidden="true">
+      <path d="M4 18V6l4 6 4-6v12" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 6v7.5a2.5 2.5 0 005 0V6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  spark: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="#0A9BFF" strokeWidth="1.9" aria-hidden="true">
+      <path
+        d="M12 2.5l2.2 5.4 5.4-2.2-2.2 5.4 5.4 2.2-5.4 2.2 2.2 5.4-5.4-2.2-2.2 5.4-2.2-5.4-5.4 2.2 2.2-5.4-5.4-2.2 5.4-2.2z"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12" r="1.6" fill="#0A9BFF" stroke="none" />
+    </svg>
+  ),
+  longcat: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="#1AAD19" strokeWidth="1.9" aria-hidden="true">
+      <path d="M3 14c0-4.4 4-8 9-8s9 3.6 9 8v6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.5 14.2c.9-1 2.2-1.5 3.5-1.5s2.6.5 3.5 1.5" strokeLinecap="round" />
     </svg>
   ),
   custom: (
