@@ -526,7 +526,9 @@ const config = {
       { target: 'zip', arch: includeMacX64 ? ['arm64', 'x64'] : ['arm64'] },
     ],
     category: 'public.app-category.productivity',
-    hardenedRuntime: true,
+    // Hardened runtime enforces library validation, which rejects the
+    // ad-hoc signed Electron frameworks of an unsigned build at launch.
+    hardenedRuntime: macSigned,
     gatekeeperAssess: false,
     entitlements: 'build/entitlements.mac.plist',
     entitlementsInherit: 'build/entitlements.mac.plist',
