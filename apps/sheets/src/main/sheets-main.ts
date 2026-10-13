@@ -91,6 +91,7 @@ import {
   webSearchTool,
   imageSearchTool,
   generateImageTool,
+  localMediaRoots,
 } from '@teleoffice/ai-search'
 import { parseFileToText } from '@teleoffice/file-parse'
 import type { CellEdit, SheetStructuralOps } from '@teleoffice/xlsx-gateway/gateway/xlsx-gateway'
@@ -1665,6 +1666,19 @@ function sessionFor(event: IpcMainInvokeEvent): SheetsTabSession {
   return entry
 }
 
+/**
+ * Local media roots for a sheets renderer: the directories of the workbooks its
+ * tab has open, plus the directory sheets stages pasted images in. A tab can
+ * hold several workbook sessions, so every open one contributes its directory —
+ * a tool call naming a file the user put next to the workbook they are editing
+ * is the legitimate case, and nothing else is readable.
+ */
+function sheetsMediaRoots(wcId: number): string[] {
+  const tab = sheetsTabs.get(wcId)
+  const workbookDirs = tab ? [...tab.sessions.values()].map((s) => dirname(s.path)) : []
+  return localMediaRoots(...workbookDirs, join(app.getPath('temp'), 'teleoffice-pasted'))
+}
+
 /// A save request referencing a chunked edit transfer gets the accumulated
 /// edits spliced back in; the transfer is consumed either way.
 function resolveTransferredEdits(
@@ -2528,11 +2542,15 @@ export function registerSheetsIpc(): void {
   // owns its channel the way pdf does.
   ipcMain.handle(
     IPC_CHANNELS.aiGenerateImage,
-    (_event, op: { prompt?: unknown; aspectRatio?: unknown }) =>
-      generateImageTool(SETTINGS_PATH(), {
-        prompt: String(op?.prompt ?? ''),
-        ...(op?.aspectRatio ? { aspectRatio: String(op.aspectRatio) } : {}),
-      }),
+    (event, op: { prompt?: unknown; aspectRatio?: unknown }) =>
+      generateImageTool(
+        SETTINGS_PATH(),
+        {
+          prompt: String(op?.prompt ?? ''),
+          ...(op?.aspectRatio ? { aspectRatio: String(op.aspectRatio) } : {}),
+        },
+        { mediaRoots: sheetsMediaRoots(event.sender.id) },
+      ),
   )
 
   ipcMain.on(IPC_CHANNELS.recoveryPromptReply, (event, restore: unknown) => {
@@ -3637,6 +3655,7 @@ export function registerSheetsAiIpc(): void {
         onStopReason: (reason) => {
           stopReason = reason
         },
+        onUsage: (usage) => send({ requestId, type: 'usage', usage }),
       })
       // sheets tsconfig sets exactOptionalPropertyTypes: an explicit
       // `stopReason: undefined` is not assignable to AiStreamChunk, so only

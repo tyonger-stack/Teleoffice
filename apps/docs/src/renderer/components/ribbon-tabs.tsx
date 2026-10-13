@@ -129,6 +129,7 @@ const DIRECT_PARA_ATTRS: Record<string, unknown> = {
   indentLeft: null,
   indentRight: null,
   indentFirstLine: null,
+  indentFirstLineChars: null,
   spaceBefore: null,
   spaceAfter: null,
   spaceBeforeAuto: null,
