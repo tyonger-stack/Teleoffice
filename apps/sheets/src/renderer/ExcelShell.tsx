@@ -29,6 +29,7 @@ import {
   SaveIcon,
   UndoIcon,
 } from './ribbon-icons'
+import { sheetContextMenuAction } from './sheet-context-menu'
 
 import { ColorDropdown } from './ColorDropdown'
 import { FormatCellsDialog } from './FormatCellsDialog'
@@ -327,6 +328,8 @@ export interface PageLayoutEcho {
   readonly printHeadings?: boolean | undefined
   readonly showGridlines: boolean
   readonly showHeadings: boolean
+  /// Mirrored grid (column A at the right edge) for the active sheet.
+  readonly rightToLeft: boolean
   readonly printArea?: string | null | undefined
   readonly printTitles?: string | null | undefined
   readonly header?: HeaderFooterParts | null | undefined
@@ -454,12 +457,13 @@ export function ExcelShell({
   useEffect(() => {
     // Univer owns the footer that hosts the sheet tabs and the statistics;
     // right-clicking anywhere in it outside the tab strip opens our menu.
+    // Everything else the decision covers is sheet-context-menu.ts's: the
+    // grid right-click must cancel the DOM event or Electron's native menu
+    // stacks on top of Univer's own (#1816).
     const onContextMenu = (event: MouseEvent): void => {
-      const target = event.target
-      if (!(target instanceof Element)) return
-      const footer = target.closest('#univer-container section[data-range-selector]')
-      if (!footer || footer.firstElementChild?.contains(target)) return
-      openStatsMenu(event)
+      const action = sheetContextMenuAction(event.target)
+      if (action.statsMenu) openStatsMenu(event)
+      else if (action.suppressNativeMenu) event.preventDefault()
     }
     document.addEventListener('contextmenu', onContextMenu)
     return () => document.removeEventListener('contextmenu', onContextMenu)
@@ -2436,6 +2440,14 @@ function Ribbon({
             >
               <i className="check-box">{pageLayout.showHeadings ? '✓' : ''}</i>
               {t('appHeadings')}
+            </button>
+            <button
+              className="check-item"
+              data-tip={t('appRightToLeft')}
+              onClick={() => onCommand('toggle-right-to-left')}
+            >
+              <i className="check-box">{pageLayout.rightToLeft ? '✓' : ''}</i>
+              {t('appRightToLeft')}
             </button>
             <button
               className="check-item"

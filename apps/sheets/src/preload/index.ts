@@ -109,6 +109,20 @@ const desktopApi: DesktopApi = {
     if (!Array.isArray(result)) throw new Error('Invalid merge open result.')
     return result.map((file) => parseWorkbookFile(file))
   },
+  async reopenWorkbook(path) {
+    if (typeof path !== 'string' || path.length === 0) {
+      throw new Error('Invalid reopen path.')
+    }
+    const result: unknown = await ipcRenderer.invoke(IPC_CHANNELS.reopenWorkbook, path)
+    return result === null ? null : parseWorkbookFile(result)
+  },
+  onSidecarCrashed(callback) {
+    const listener = (): void => {
+      callback()
+    }
+    ipcRenderer.on(IPC_CHANNELS.sidecarCrashed, listener)
+    return () => ipcRenderer.removeListener(IPC_CHANNELS.sidecarCrashed, listener)
+  },
   async readWorkbookRange(request) {
     const validatedRequest = parseRangeRequest(request)
     const result: unknown = await ipcRenderer.invoke(
@@ -2327,6 +2341,7 @@ function isPageSetupState(input: unknown): boolean {
     'showGridlines',
     'showFormulas',
     'showHeadings',
+    'rightToLeft',
     'fitToPage',
   ]) {
     if (input[key] !== undefined && typeof input[key] !== 'boolean') return false

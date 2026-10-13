@@ -10,6 +10,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { copyFile, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import { refreshCsvDigest } from './csv-digest'
 import { createServer } from 'node:http'
 import { basename, dirname, isAbsolute, join } from 'node:path'
 
@@ -43,6 +44,7 @@ import {
   fetchRemoteImage,
   installContextMenu,
   installNavigationGuard,
+  isHeadlessMode,
   printHtmlToPdf,
   safeExternalUrl,
   showOpenDialogWithMemory,
@@ -1549,6 +1551,9 @@ export function configureSheetsRuntime(config: SheetsRuntimeConfig): void {
  * (shell) or reveal it in the folder (standalone). Tab-opening failure must
  * not report the write itself as failed — the file is already persisted. */
 function openGeneratedFile(path: string): void {
+  // Headless export must stay silent: no tab, no file-manager window
+  // (same guard as markdown-main's openExportedPdf, #1815).
+  if (isHeadlessMode()) return
   try {
     if (runtime.openGeneratedPath?.(path)) return
   } catch (err) {
@@ -1710,9 +1715,35 @@ async function saveFileDialog(event: IpcMainInvokeEvent, options: SaveDialogOpti
   )
 }
 
+/** Workbook file extensions the open pipeline accepts. Single source for the
+ *  picker filters, the merge-source check, and the crash re-open check. */
+const WORKBOOK_EXTS = new Set(['xlsx', 'xlsm', 'xls', 'csv', 'tsv'])
+
 /** register a tab's webContents/client pair and wire up cleanup on teardown */
+/** Clients whose process-death notification is already wired. A sidecar client
+ *  is shared by every tab (the `sidecar ?? new XlsxSidecarClient(...)` reuse),
+ *  so the wiring is per client and the crash is broadcast to the tabs using
+ *  it — not attached once per tab, which would notify N times over. */
+const crashNotifiedClients = new WeakSet<XlsxSidecarClient>()
+
+/** Tell every live tab that the sidecar died, so it can re-open its workbook
+ *  and adopt a live session. Positive signal: a workbook the app closed on
+ *  purpose (closeWorkbook) or swapped during Save never reaches the client,
+ *  because those only send a `close` command down the live pipe. */
+function broadcastSidecarCrash(client: XlsxSidecarClient): void {
+  for (const entry of sheetsTabs.values()) {
+    if (entry.client !== client) continue
+    if (entry.webContents.isDestroyed()) continue
+    entry.webContents.send(IPC_CHANNELS.sidecarCrashed)
+  }
+}
+
 function registerSheetsSession(webContents: WebContents, client: XlsxSidecarClient): void {
   startPastedTempCleanup()
+  if (!crashNotifiedClients.has(client)) {
+    crashNotifiedClients.add(client)
+    client.onProcessExit(() => broadcastSidecarCrash(client))
+  }
   sheetsTabs.set(webContents.id, {
     webContents,
     client,
@@ -2620,9 +2651,14 @@ export function registerSheetsIpc(): void {
     })
   })
 
-  const openSelectedWorkbook = async (event: IpcMainInvokeEvent) => {
+  /// `explicitPath` re-opens a known file without the picker or the shell
+  /// queue — the crash-recovery entry point. It runs the SAME pipeline
+  /// (prepareWorkbookForOpen + openWorkbookSession + the opened hook) as a
+  /// user-picked or shell-queued open, so a recovered workbook is a normal
+  /// session rather than a merge source.
+  const openSelectedWorkbook = async (event: IpcMainInvokeEvent, explicitPath?: string) => {
     const entry = sessionFor(event)
-    let path = queuedWorkbookPaths.get(event.sender.id) ?? forcedWorkbookPath
+    let path = explicitPath ?? queuedWorkbookPaths.get(event.sender.id) ?? forcedWorkbookPath
     // consume immediately (before the slow session open) so the shell's
     // retry loop stops re-sending 'open' for the same file
     queuedWorkbookPaths.delete(event.sender.id)
@@ -2692,6 +2728,17 @@ export function registerSheetsIpc(): void {
       failHeadlessExport(event.sender.id, `the input workbook did not open (${String(err)})`)
       throw err
     }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.reopenWorkbook, async (event, path: unknown) => {
+    const validated = z.string().min(1).parse(path)
+    // A crash re-open targets the file the user already has open, so a
+    // missing/deleted file is a real failure rather than a reason to pop the
+    // picker at someone who did not ask to open anything.
+    if (!existsSync(validated)) throw new Error('Workbook file not found.')
+    const ext = validated.slice(validated.lastIndexOf('.') + 1).toLowerCase()
+    if (!WORKBOOK_EXTS.has(ext)) throw new Error(`Unsupported workbook: ${ext}`)
+    return openSelectedWorkbook(event, validated)
   })
 
   // Merge sources: same open pipeline as selectWorkbook, but multi-select,
@@ -2768,7 +2815,7 @@ export function registerSheetsIpc(): void {
     return openMergeSources(event, selection.filePaths)
   })
 
-  const MERGE_SOURCE_EXTS = new Set(['xlsx', 'xlsm', 'xls', 'csv', 'tsv'])
+  const MERGE_SOURCE_EXTS = WORKBOOK_EXTS
   ipcMain.handle(IPC_CHANNELS.openWorkbooksForMerge, async (event, input: unknown) => {
     const paths = z.array(z.string().min(1)).min(1).max(20).parse(input)
     for (const path of paths) {
@@ -3054,17 +3101,10 @@ export function registerSheetsIpc(): void {
       Buffer.from(request.content, 'utf8'),
     ])
     await atomicWriteFile(targetPath, csvBytes)
-    // An export can land on a CSV session's own source file — refresh that
-    // session's guard digest so its next Save doesn't mistake this write for
-    // an external change.
+    // An export can land on a CSV session's own source file; refresh the
+    // digest so the next Save does not read this write as an external change.
     const writtenSha = await sha256File(targetPath).catch(() => undefined)
-    if (writtenSha !== undefined) {
-      for (const [sessionId, session] of entry.sessions) {
-        if (session.csvSourcePath === targetPath) {
-          entry.sessions.set(sessionId, { ...session, csvSourceSha: writtenSha })
-        }
-      }
-    }
+    if (writtenSha !== undefined) refreshCsvDigest(entry.sessions, targetPath, writtenSha)
     return { canceled: false, path: targetPath }
   })
 
