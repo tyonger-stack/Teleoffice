@@ -170,11 +170,18 @@ jobs:
           esac
           if [ ${#installers[@]} -eq 0 ]; then echo "no installers produced" >&2; exit 1; fi
           if [ ! -f "$meta" ]; then echo "missing update metadata $meta" >&2; exit 1; fi
-          if [ ${#blockmaps[@]} -eq 0 ]; then echo "no blockmap files produced" >&2; exit 1; fi
+          # Windows NSIS and mac zip/dmg emit sidecar *.blockmap files. The
+          # Linux AppImage embeds its block map, so that job has none; still
+          # require the sidecar on win and mac.
+          if [ "$PLATFORM" != "linux" ] && [ ${#blockmaps[@]} -eq 0 ]; then
+            echo "no blockmap files produced" >&2
+            exit 1
+          fi
           # rpm is uploaded as an installer but stays out of latest-linux.yml
           # (electron-builder rpm.publish is null). Metadata stays on the draft
           # until a maintainer publishes the release by hand.
-          files=("${installers[@]}" "$meta" "${blockmaps[@]}")
+          files=("${installers[@]}" "$meta")
+          if [ ${#blockmaps[@]} -gt 0 ]; then files+=("${blockmaps[@]}"); fi
           ls -l "${files[@]}"
           [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "true" ] || { echo "release is not a draft" >&2; exit 1; }
           gh release upload "$TAG" "${files[@]}" --clobber
