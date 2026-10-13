@@ -7,6 +7,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: '最近',
     navStarred: '收藏',
+    navUserGuide: '使用手册',
     navAsk: 'AI 问答',
     askTitle: '问知识库',
     askEmptyCorpusHint: '还没有收藏文件——先在最近或文件夹里点星收藏,AI 就能读它们。',
@@ -440,6 +441,13 @@ export const strings = {
     onbBody3: '无授权费用，无广告，无水印。',
     onbNote3: '可选的 AI 功能需要在设置中配置你自己的 API 密钥；核心编辑完全本地。',
     onbBack: '上一步',
+    helpSearchPlaceholder: '搜索手册…（按 / 聚焦）',
+    helpSearchLabel: '搜索手册',
+    helpContentsLabel: '手册目录',
+    helpOnThisPage: '本页目录',
+    helpTopicMissing: '本主题的内容尚未编写。',
+    helpHitCountOne: '{n} 个主题',
+    helpHitCount: '{n} 个主题',
   },
   en: {
     addFolderRoot: 'Add folder…',
@@ -447,6 +455,7 @@ export const strings = {
     rootUnavailable: 'Not available',
     navRecent: 'Recent',
     navStarred: 'Starred',
+    navUserGuide: 'User Guide',
     navAsk: 'Ask AI',
     askTitle: 'Ask your knowledge base',
     askEmptyCorpusHint: 'No starred files yet — star some files first and the AI can read them.',
@@ -897,6 +906,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Back',
+    helpSearchPlaceholder: 'Search the manual… (press /)',
+    helpSearchLabel: 'Search the manual',
+    helpContentsLabel: 'Manual contents',
+    helpOnThisPage: 'On this page',
+    helpTopicMissing: 'This topic has not been written yet.',
+    helpHitCountOne: '{n} topic',
+    helpHitCount: '{n} topics',
   },
   vi: {
     addFolderRoot: 'Thêm thư mục…',
@@ -904,6 +920,7 @@ export const strings = {
     rootUnavailable: 'Không khả dụng',
     navRecent: 'Gần đây',
     navStarred: 'Đã gắn sao',
+    navUserGuide: 'Hướng dẫn sử dụng',
     navAsk: 'Hỏi AI',
     askTitle: 'Hỏi cơ sở tri thức của bạn',
     askEmptyCorpusHint:
@@ -1356,6 +1373,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Quay lại',
+    helpSearchPlaceholder: 'Tìm kiếm trong sổ tay… (nhấn /)',
+    helpSearchLabel: 'Tìm kiếm trong sổ tay',
+    helpContentsLabel: 'Mục lục sổ tay',
+    helpOnThisPage: 'Trên trang này',
+    helpTopicMissing: 'Chủ đề này chưa được viết.',
+    helpHitCountOne: '{n} chủ đề',
+    helpHitCount: '{n} chủ đề',
   },
   ja: {
     addFolderRoot: 'フォルダーを追加…',
@@ -1364,6 +1388,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: '最近使用',
     navStarred: 'お気に入り',
+    navUserGuide: 'ユーザーガイド',
     navAsk: 'AIに質問',
     askTitle: 'ナレッジベースに質問',
     askEmptyCorpusHint:
@@ -1829,6 +1854,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: '戻る',
+    helpSearchPlaceholder: 'マニュアル内を検索…（/ キーでフォーカス）',
+    helpSearchLabel: 'マニュアル内を検索',
+    helpContentsLabel: 'マニュアル目次',
+    helpOnThisPage: 'このページの内容',
+    helpTopicMissing: 'このトピックはまだ書かれていません。',
+    helpHitCountOne: '{n} 件のトピック',
+    helpHitCount: '{n} 件のトピック',
   },
   ko: {
     addFolderRoot: '폴더 추가…',
@@ -1837,6 +1869,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: '최근 사용',
     navStarred: '즐겨찾기',
+    navUserGuide: '사용자 가이드',
     navAsk: 'AI 질문',
     askTitle: '지식 베이스에 질문',
     askEmptyCorpusHint:
@@ -2292,6 +2325,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: '이전',
+    helpSearchPlaceholder: '매뉴얼 검색…(/ 키로 포커스)',
+    helpSearchLabel: '매뉴얼 검색',
+    helpContentsLabel: '매뉴얼 목차',
+    helpOnThisPage: '이 페이지의 내용',
+    helpTopicMissing: '이 항목은 아직 작성되지 않았습니다.',
+    helpHitCountOne: '주제 {n}개',
+    helpHitCount: '주제 {n}개',
   },
   fr: {
     addFolderRoot: 'Ajouter un dossier…',
@@ -2300,6 +2340,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: 'Récents',
     navStarred: 'Favoris',
+    navUserGuide: "Guide de l'utilisateur",
     navAsk: 'Demander à l’IA',
     askTitle: 'Interroger votre base de connaissances',
     askEmptyCorpusHint:
@@ -2771,6 +2812,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Retour',
+    helpSearchPlaceholder: 'Rechercher dans le manuel… (appuyez sur /)',
+    helpSearchLabel: 'Rechercher dans le manuel',
+    helpContentsLabel: 'Sommaire du manuel',
+    helpOnThisPage: 'Sur cette page',
+    helpTopicMissing: "Cette rubrique n'a pas encore été rédigée.",
+    helpHitCountOne: '{n} rubrique',
+    helpHitCount: '{n} rubriques',
   },
   de: {
     addFolderRoot: 'Ordner hinzufügen…',
@@ -2779,6 +2827,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: 'Zuletzt verwendet',
     navStarred: 'Favoriten',
+    navUserGuide: 'Benutzerhandbuch',
     navAsk: 'KI fragen',
     askTitle: 'Ihre Wissensbasis befragen',
     askEmptyCorpusHint:
@@ -3252,6 +3301,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Zurück',
+    helpSearchPlaceholder: 'Handbuch durchsuchen… (/) drücken',
+    helpSearchLabel: 'Handbuch durchsuchen',
+    helpContentsLabel: 'Handbuchinhalt',
+    helpOnThisPage: 'Auf dieser Seite',
+    helpTopicMissing: 'Dieser Abschnitt wurde noch nicht geschrieben.',
+    helpHitCountOne: '{n} Abschnitt',
+    helpHitCount: '{n} Abschnitte',
   },
   es: {
     addFolderRoot: 'Añadir carpeta…',
@@ -3260,6 +3316,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: 'Recientes',
     navStarred: 'Destacados',
+    navUserGuide: 'Guía del usuario',
     navAsk: 'Preguntar a la IA',
     askTitle: 'Consulta tu base de conocimientos',
     askEmptyCorpusHint:
@@ -3730,6 +3787,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Atrás',
+    helpSearchPlaceholder: 'Buscar en el manual… (pulsa /)',
+    helpSearchLabel: 'Buscar en el manual',
+    helpContentsLabel: 'Contenido del manual',
+    helpOnThisPage: 'En esta página',
+    helpTopicMissing: 'Este tema aún no se ha redactado.',
+    helpHitCountOne: '{n} tema',
+    helpHitCount: '{n} temas',
   },
   th: {
     addFolderRoot: 'เพิ่มโฟลเดอร์…',
@@ -3738,6 +3802,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: 'ล่าสุด',
     navStarred: 'รายการโปรด',
+    navUserGuide: 'คู่มือผู้ใช้',
     navAsk: 'ถาม AI',
     askTitle: 'ถามคลังความรู้ของคุณ',
     askEmptyCorpusHint: 'ยังไม่มีไฟล์ที่ติดดาว — ติดดาวไฟล์ก่อนเพื่อให้ AI อ่านได้',
@@ -4187,6 +4252,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'ย้อนกลับ',
+    helpSearchPlaceholder: 'ค้นหาในคู่มือ… (กด /)',
+    helpSearchLabel: 'ค้นหาในคู่มือ',
+    helpContentsLabel: 'สารบัญคู่มือ',
+    helpOnThisPage: 'ในหน้านี้',
+    helpTopicMissing: 'หัวข้อนี้ยังไม่ได้เขียน',
+    helpHitCountOne: '{n} หัวข้อ',
+    helpHitCount: '{n} หัวข้อ',
   },
   id: {
     addFolderRoot: 'Tambah folder…',
@@ -4195,6 +4267,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: 'Terbaru',
     navStarred: 'Berbintang',
+    navUserGuide: 'Panduan Pengguna',
     navAsk: 'Tanya AI',
     askTitle: 'Tanya basis pengetahuan anda',
     askEmptyCorpusHint:
@@ -4659,6 +4732,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Kembali',
+    helpSearchPlaceholder: 'Cari di manual… (tekan /)',
+    helpSearchLabel: 'Cari di manual',
+    helpContentsLabel: 'Isi manual',
+    helpOnThisPage: 'Di halaman ini',
+    helpTopicMissing: 'Topik ini belum ditulis.',
+    helpHitCountOne: '{n} topik',
+    helpHitCount: '{n} topik',
   },
   ru: {
     addFolderRoot: 'Добавить папку…',
@@ -4667,6 +4747,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: 'Недавние',
     navStarred: 'Избранное',
+    navUserGuide: 'Руководство пользователя',
     navAsk: 'Спросить ИИ',
     askTitle: 'Спросите базу знаний',
     askEmptyCorpusHint:
@@ -5128,6 +5209,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Назад',
+    helpSearchPlaceholder: 'Поиск по руководству… (нажмите /)',
+    helpSearchLabel: 'Поиск по руководству',
+    helpContentsLabel: 'Содержание руководства',
+    helpOnThisPage: 'На этой странице',
+    helpTopicMissing: 'Эта тема ещё не написана.',
+    helpHitCountOne: '{n} тема',
+    helpHitCount: '{n} тем',
   },
   ar: {
     addFolderRoot: 'إضافة مجلد…',
@@ -5136,6 +5224,7 @@ export const strings = {
     // Sidebar navigation
     navRecent: 'الأخيرة',
     navStarred: 'المفضلة',
+    navUserGuide: 'دليل المستخدم',
     navAsk: 'اسأل الذكاء الاصطناعي',
     askTitle: 'اسأل قاعدة معارفك',
     askEmptyCorpusHint:
@@ -5589,6 +5678,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'رجوع',
+    helpSearchPlaceholder: 'البحث في الدليل… (اضغط /)',
+    helpSearchLabel: 'البحث في الدليل',
+    helpContentsLabel: 'فهرس الدليل',
+    helpOnThisPage: 'في هذه الصفحة',
+    helpTopicMissing: 'لم تُكتب هذه الصفحة بعد.',
+    helpHitCountOne: '{n} موضوع',
+    helpHitCount: '{n} مواضيع',
   },
   pt: {
     addFolderRoot: 'Adicionar pasta…',
@@ -5596,6 +5692,7 @@ export const strings = {
     rootUnavailable: 'Indisponível',
     navRecent: 'Recentes',
     navStarred: 'Favoritos',
+    navUserGuide: 'Guia do Usuário',
     navAsk: 'Perguntar à IA',
     askTitle: 'Consulte sua base de conhecimento',
     askEmptyCorpusHint:
@@ -6056,6 +6153,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Voltar',
+    helpSearchPlaceholder: 'Pesquisar no manual… (pressione /)',
+    helpSearchLabel: 'Pesquisar no manual',
+    helpContentsLabel: 'Conteúdo do manual',
+    helpOnThisPage: 'Nesta página',
+    helpTopicMissing: 'Este tópico ainda não foi escrito.',
+    helpHitCountOne: '{n} tópico',
+    helpHitCount: '{n} tópicos',
   },
   it: {
     addFolderRoot: 'Aggiungi cartella…',
@@ -6063,6 +6167,7 @@ export const strings = {
     rootUnavailable: 'Non disponibile',
     navRecent: 'Recenti',
     navStarred: 'Preferiti',
+    navUserGuide: "Guida dell'utente",
     navAsk: 'Chiedi all’IA',
     askTitle: 'Interroga la tua base di conoscenza',
     askEmptyCorpusHint:
@@ -6521,6 +6626,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Indietro',
+    helpSearchPlaceholder: 'Cerca nel manuale… (premi /)',
+    helpSearchLabel: 'Cerca nel manuale',
+    helpContentsLabel: 'Indice del manuale',
+    helpOnThisPage: 'In questa pagina',
+    helpTopicMissing: 'Questo argomento non è ancora stato scritto.',
+    helpHitCountOne: '{n} argomento',
+    helpHitCount: '{n} argomenti',
   },
   pl: {
     addFolderRoot: 'Dodaj folder…',
@@ -6528,6 +6640,7 @@ export const strings = {
     rootUnavailable: 'Niedostępny',
     navRecent: 'Ostatnie',
     navStarred: 'Ulubione',
+    navUserGuide: 'Podręcznik użytkownika',
     navAsk: 'Zapytaj AI',
     askTitle: 'Zapytaj swoją bazę wiedzy',
     askEmptyCorpusHint:
@@ -6982,6 +7095,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Wstecz',
+    helpSearchPlaceholder: 'Szukaj w podręczniku… (naciśnij /)',
+    helpSearchLabel: 'Szukaj w podręczniku',
+    helpContentsLabel: 'Spis podręcznika',
+    helpOnThisPage: 'Na tej stronie',
+    helpTopicMissing: 'Ten temat nie został jeszcze napisany.',
+    helpHitCountOne: '{n} temat',
+    helpHitCount: '{n} tematów',
   },
   cs: {
     addFolderRoot: 'Přidat složku…',
@@ -6989,6 +7109,7 @@ export const strings = {
     rootUnavailable: 'Nedostupné',
     navRecent: 'Nedávné',
     navStarred: 'Oblíbené',
+    navUserGuide: 'Uživatelská příručka',
     navAsk: 'Zeptat se AI',
     askTitle: 'Ptejte se své znalostní databáze',
     askEmptyCorpusHint:
@@ -7441,6 +7562,13 @@ export const strings = {
     setAiOpenInNewDocs: 'Otevírat panel AI v nových dokumentech',
     setAiOpenInNewDocsDesc:
       'Když je vypnuto, nově otevřené dokumenty začínají se sbaleným panelem AI; v případě potřeby stačí jedno kliknutí.',
+    helpSearchPlaceholder: 'Hledat v příručce… (stiskněte /)',
+    helpSearchLabel: 'Hledat v příručce',
+    helpContentsLabel: 'Obsah příručky',
+    helpOnThisPage: 'Na této stránce',
+    helpTopicMissing: 'Toto téma ještě nebylo napsáno.',
+    helpHitCountOne: '{n} téma',
+    helpHitCount: '{n} témat',
   },
   nl: {
     addFolderRoot: 'Map toevoegen…',
@@ -7448,6 +7576,7 @@ export const strings = {
     rootUnavailable: 'Niet beschikbaar',
     navRecent: 'Recent',
     navStarred: 'Favorieten',
+    navUserGuide: 'Gebruikershandleiding',
     navAsk: 'Vraag het de AI',
     askTitle: 'Vraag je kennisbank',
     askEmptyCorpusHint: 'Nog geen favorieten — markeer eerst bestanden zodat de AI ze kan lezen.',
@@ -7902,6 +8031,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Terug',
+    helpSearchPlaceholder: 'Zoek in de handleiding… (druk op /)',
+    helpSearchLabel: 'Zoek in de handleiding',
+    helpContentsLabel: 'Inhoud van de handleiding',
+    helpOnThisPage: 'Op deze pagina',
+    helpTopicMissing: 'Dit onderwerp is nog niet geschreven.',
+    helpHitCountOne: '{n} onderwerp',
+    helpHitCount: '{n} onderwerpen',
   },
   ms: {
     addFolderRoot: 'Tambah folder…',
@@ -7909,6 +8045,7 @@ export const strings = {
     rootUnavailable: 'Tidak tersedia',
     navRecent: 'Terkini',
     navStarred: 'Berbintang',
+    navUserGuide: 'Panduan Pengguna',
     navAsk: 'Tanya AI',
     askTitle: 'Tanya pangkalan pengetahuan anda',
     askEmptyCorpusHint:
@@ -8367,6 +8504,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'Kembali',
+    helpSearchPlaceholder: 'Cari dalam manual… (tekan /)',
+    helpSearchLabel: 'Cari dalam manual',
+    helpContentsLabel: 'Kandungan manual',
+    helpOnThisPage: 'Pada halaman ini',
+    helpTopicMissing: 'Topik ini belum ditulis.',
+    helpHitCountOne: '{n} topik',
+    helpHitCount: '{n} topik',
   },
   he: {
     addFolderRoot: 'הוספת תיקייה…',
@@ -8374,6 +8518,7 @@ export const strings = {
     rootUnavailable: 'לא זמין',
     navRecent: 'אחרונים',
     navStarred: 'מועדפים',
+    navUserGuide: 'מדריך למשתמש',
     navAsk: 'שאל את ה-AI',
     askTitle: 'שאל את בסיס הידע שלך',
     askEmptyCorpusHint:
@@ -8813,6 +8958,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'חזרה',
+    helpSearchPlaceholder: 'חיפוש במדריך… (הקש /)',
+    helpSearchLabel: 'חיפוש במדריך',
+    helpContentsLabel: 'תוכן המדריך',
+    helpOnThisPage: 'בעמוד זה',
+    helpTopicMissing: 'נושא זה עדיין לא נכתב.',
+    helpHitCountOne: '{n} נושא',
+    helpHitCount: '{n} נושאים',
   },
   hi: {
     addFolderRoot: 'फ़ोल्डर जोड़ें…',
@@ -8820,6 +8972,7 @@ export const strings = {
     rootUnavailable: 'उपलब्ध नहीं',
     navRecent: 'हाल के',
     navStarred: 'तारांकित',
+    navUserGuide: 'उपयोगकर्ता गाइड',
     navAsk: 'AI से पूछें',
     askTitle: 'अपने नॉलेज बेस से पूछें',
     askEmptyCorpusHint:
@@ -9273,6 +9426,13 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: 'वापस',
+    helpSearchPlaceholder: 'मैनुअल में खोजें… (/) दबाएँ',
+    helpSearchLabel: 'मैनुअल में खोजें',
+    helpContentsLabel: 'मैनुअल की सामग्री',
+    helpOnThisPage: 'इस पृष्ठ पर',
+    helpTopicMissing: 'यह विषय अभी तक लिखा नहीं गया है।',
+    helpHitCountOne: '{n} विषय',
+    helpHitCount: '{n} विषय',
   },
   'zh-TW': {
     addFolderRoot: '加入資料夾…',
@@ -9280,6 +9440,7 @@ export const strings = {
     rootUnavailable: '無法使用',
     navRecent: '最近',
     navStarred: '收藏',
+    navUserGuide: '使用手冊',
     navAsk: 'AI 問答',
     askTitle: '問知識庫',
     askEmptyCorpusHint: '還沒有收藏檔案——先在最近或資料夾裡點星收藏,AI 就能讀取它們。',
@@ -9709,5 +9870,12 @@ export const strings = {
     onbNote3:
       'Optional AI features need your own API key in Settings; core editing stays fully local.',
     onbBack: '上一步',
+    helpSearchPlaceholder: '搜尋手冊…（按 / 聚焦）',
+    helpSearchLabel: '搜尋手冊',
+    helpContentsLabel: '手冊目錄',
+    helpOnThisPage: '本頁目錄',
+    helpTopicMissing: '本主題的內容尚未編寫。',
+    helpHitCountOne: '{n} 個主題',
+    helpHitCount: '{n} 個主題',
   },
 } as const
