@@ -19,6 +19,7 @@ import type {
   ScreenCaptureResult,
   ScreenSourcesResult,
   AutoSaveDefault,
+  DocTheme,
   UiTheme,
   WorkbookCellStyle,
   WorkbookConditionalRule,
@@ -57,6 +58,7 @@ import { installDropOpenBridge } from '@teleoffice/electron-utils/drop-open'
 
 const desktopApi: DesktopApi = {
   getLanguage: () => ipcRenderer.invoke('app:get-language'),
+  openSourcePath: (path: string) => ipcRenderer.invoke('home:open-path', path),
   onLanguageChanged(handler) {
     const listener = (
       _event: Electron.IpcRendererEvent,
@@ -70,6 +72,15 @@ const desktopApi: DesktopApi = {
     const listener = (_event: Electron.IpcRendererEvent, theme: UiTheme) => handler(theme)
     ipcRenderer.on('app:theme-changed', listener)
     return () => ipcRenderer.removeListener('app:theme-changed', listener)
+  },
+  getDocumentTheme: async () => {
+    const result: unknown = await ipcRenderer.invoke('app:get-document-theme')
+    return result === 'dark' || result === 'light' ? result : 'follow'
+  },
+  onDocumentThemeChanged(handler) {
+    const listener = (_event: Electron.IpcRendererEvent, theme: DocTheme) => handler(theme)
+    ipcRenderer.on('app:document-theme-changed', listener)
+    return () => ipcRenderer.removeListener('app:document-theme-changed', listener)
   },
   getAutoSaveDefault: () => ipcRenderer.invoke('app:get-auto-save-default'),
   onAutoSaveDefaultChanged(handler) {
@@ -107,6 +118,20 @@ const desktopApi: DesktopApi = {
     if (result === null) return null
     if (!Array.isArray(result)) throw new Error('Invalid merge open result.')
     return result.map((file) => parseWorkbookFile(file))
+  },
+  async reopenWorkbook(path) {
+    if (typeof path !== 'string' || path.length === 0) {
+      throw new Error('Invalid reopen path.')
+    }
+    const result: unknown = await ipcRenderer.invoke(IPC_CHANNELS.reopenWorkbook, path)
+    return result === null ? null : parseWorkbookFile(result)
+  },
+  onSidecarCrashed(callback) {
+    const listener = (): void => {
+      callback()
+    }
+    ipcRenderer.on(IPC_CHANNELS.sidecarCrashed, listener)
+    return () => ipcRenderer.removeListener(IPC_CHANNELS.sidecarCrashed, listener)
   },
   async readWorkbookRange(request) {
     const validatedRequest = parseRangeRequest(request)
@@ -2326,6 +2351,7 @@ function isPageSetupState(input: unknown): boolean {
     'showGridlines',
     'showFormulas',
     'showHeadings',
+    'rightToLeft',
     'fitToPage',
   ]) {
     if (input[key] !== undefined && typeof input[key] !== 'boolean') return false

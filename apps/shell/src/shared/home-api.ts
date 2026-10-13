@@ -7,9 +7,12 @@ import type {
   AiSearchProviderId,
   AiSearchProviderMeta,
   AiSettings,
+  AiStreamChunk,
+  AiStreamRequest,
   CodexModelCatalog,
 } from '@teleoffice/ai-provider'
 import type { UpdateChannel } from './update-api'
+import type { KbFileInfo, KbReadPage, KbSearchHit } from '@teleoffice/agent-core'
 import type { AiPanelPrefs } from '@teleoffice/ui/ai-panel-prefs'
 
 /** UI language; kept self-contained here (mirrors Lang in @teleoffice/i18n) */
@@ -38,6 +41,13 @@ export type UiLanguage =
 
 /** UI theme preference */
 export type UiTheme = 'light' | 'dark' | 'system'
+
+/**
+ * Document page theme preference (#1811): what the editors' canvas/paper does
+ * relative to the UI theme. 'follow' reproduces the previous single-theme
+ * behavior; 'light'/'dark' pin the paper regardless of the UI theme.
+ */
+export type DocTheme = 'follow' | 'light' | 'dark'
 
 /** shell-wide AutoSave default for every editor; updatedAt is 0 until first set */
 export interface AutoSaveDefault {
@@ -156,6 +166,8 @@ export interface DefaultAppStatus {
   manualOnly: boolean
 }
 
+import type { UpdateUiState } from './update-api'
+
 export interface HomeApi {
   /** unified recents across document types, newest first (paged) */
   recents(query?: RecentQuery): Promise<RecentPage>
@@ -176,6 +188,20 @@ export interface HomeApi {
   statPaths(paths: string[]): Promise<RecentEntry[]>
   /** star / unstar a file */
   toggleStar(path: string): Promise<void>
+  // ---- knowledge-base ask panel: the reader's starred corpus, askable ----
+  /** the starred corpus as the AI's knowledge base */
+  kbList(): Promise<KbFileInfo[]>
+  /** full-text search over the corpus */
+  kbSearch(query: { q: string; limit?: number }): Promise<KbSearchHit[]>
+  /** one page of a corpus file's parsed text (path must be in kbList) */
+  kbRead(path: string, offset: number): Promise<KbReadPage>
+  /** the user's AI provider settings (shared with every app's panel) */
+  aiGetSettings(): Promise<AiSettings>
+  /** one streamed model turn over the shared ai:stream handler */
+  aiStream(request: AiStreamRequest): Promise<void>
+  aiStreamCancel(requestId: string): Promise<void>
+  /** subscribe to stream chunks; returns unsubscribe */
+  onAiStream(handler: (chunk: AiStreamChunk) => void): () => void
   /** open an existing file, routing to the right module by extension */
   openHelp(): Promise<void>
   openPath(path: string): Promise<void>
@@ -257,6 +283,11 @@ export interface HomeApi {
   setUpdateChannel(channel: UpdateChannel): Promise<void>
   /** app version (from package.json / electron app.getVersion) */
   getAppVersion(): Promise<string>
+  /** live updater state (null until an update was first seen); Settings → About */
+  getUpdateState(): Promise<UpdateUiState | null>
+  /** re-open the (minimized) update dialog; a not-yet-started download also starts */
+  openUpdateDialog(): Promise<boolean>
+  onUpdateStateChanged(handler: (state: UpdateUiState) => void): () => void
   /** whether the first-run onboarding has been completed or skipped (persisted in userData/app-settings.json) */
   onboardingSeen(): Promise<boolean>
   /** mark onboarding done */
@@ -265,6 +296,10 @@ export interface HomeApi {
   getTheme(): Promise<UiTheme>
   /** switch + persist the UI theme; broadcasts 'app:theme-changed' to all web contents */
   setTheme(theme: UiTheme): Promise<void>
+  /** current document page theme preference (#1811, persisted in userData/app-settings.json) */
+  getDocumentTheme(): Promise<DocTheme>
+  /** switch + persist the document page theme; broadcasts 'app:document-theme-changed' to all web contents */
+  setDocumentTheme(theme: DocTheme): Promise<void>
   /** AutoSave default applied by every editor window (persisted in userData/app-settings.json) */
   getAutoSaveDefault(): Promise<AutoSaveDefault>
   /** persist the AutoSave default; broadcasts 'app:auto-save-default-changed' to all web contents */
@@ -298,6 +333,8 @@ export interface HomeApi {
   setDefaultApp(): Promise<DefaultAppStatus>
   /** theme switched anywhere (broadcast from the main process) */
   onThemeChanged(handler: (theme: UiTheme) => void): () => void
+  /** document page theme switched anywhere (broadcast from the main process) */
+  onDocumentThemeChanged(handler: (theme: DocTheme) => void): () => void
   /** open the GenTeam community page in the default browser */
   openGenTeam(): Promise<void>
   /** open the public GitHub repository in the default browser */
@@ -500,6 +537,8 @@ export const HOME_CHANNELS = {
   setOnboardingSeen: 'home:set-onboarding-seen',
   getTheme: 'home:get-theme',
   setTheme: 'home:set-theme',
+  getDocumentTheme: 'home:get-document-theme',
+  setDocumentTheme: 'home:set-document-theme',
   getAutoSaveDefault: 'home:get-auto-save-default',
   setAutoSaveDefault: 'home:set-auto-save-default',
   getMcpStatus: 'home:get-mcp-status',

@@ -169,6 +169,7 @@ vi.mock('../../html/src/main/html-main', () => ({
 }))
 
 import { TabManager } from '../src/main/tab-manager'
+import type { TabKind } from '../src/shared/tabs-api'
 
 const TAB_STRIP_HEIGHT = 40
 const WINDOW_WIDTH = 800

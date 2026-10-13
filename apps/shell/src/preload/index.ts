@@ -8,6 +8,7 @@ import {
 } from '@teleoffice/ai-provider/browser'
 import type { AiSettings, CodexModelCatalog } from '@teleoffice/ai-provider/browser'
 import { installDropOpenBridge } from '@teleoffice/electron-utils/drop-open'
+import type { UpdateUiState } from '../shared/update-api'
 import { normalizeAiPanelPrefs } from '@teleoffice/ui/ai-panel-prefs'
 import type {
   DefaultAppStatus,
@@ -137,6 +138,31 @@ const homeApi: HomeApi = {
   },
   async openHelp() {
     await ipcRenderer.invoke(HOME_CHANNELS.openHelp)
+  },
+  // knowledge-base ask panel (handlers live in the shell main, same process
+  // that owns the index and the shared ai:stream registration)
+  async kbList() {
+    return ipcRenderer.invoke('kb:list')
+  },
+  async kbSearch(query) {
+    return ipcRenderer.invoke('kb:search', query)
+  },
+  async kbRead(path, offset) {
+    return ipcRenderer.invoke('kb:read', { path, offset })
+  },
+  async aiGetSettings() {
+    return ipcRenderer.invoke('ai:get-settings')
+  },
+  async aiStream(request) {
+    await ipcRenderer.invoke('ai:stream', request)
+  },
+  async aiStreamCancel(requestId) {
+    await ipcRenderer.invoke('ai:stream-cancel', requestId)
+  },
+  onAiStream(handler) {
+    const listener = (_event: Electron.IpcRendererEvent, chunk: unknown) => handler(chunk as never)
+    ipcRenderer.on('ai:stream-chunk', listener)
+    return () => ipcRenderer.removeListener('ai:stream-chunk', listener)
   },
   async openPath(path) {
     if (typeof path !== 'string' || !path) throw new Error('Invalid path.')
@@ -308,6 +334,19 @@ const homeApi: HomeApi = {
     const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getAppVersion)
     return typeof result === 'string' ? result : ''
   },
+  async getUpdateState() {
+    const result: unknown = await ipcRenderer.invoke('update:get-state')
+    return (result as UpdateUiState | null) ?? null
+  },
+  async openUpdateDialog() {
+    const result: unknown = await ipcRenderer.invoke('update:open-for-update')
+    return result === true
+  },
+  onUpdateStateChanged(handler: (state: UpdateUiState) => void) {
+    const listener = (_e: IpcRendererEvent, state: UpdateUiState) => handler(state)
+    ipcRenderer.on('update:state-changed', listener)
+    return () => ipcRenderer.removeListener('update:state-changed', listener)
+  },
   async onboardingSeen() {
     const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.onboardingSeen)
     return result === true
@@ -324,6 +363,15 @@ const homeApi: HomeApi = {
     if (theme !== 'light' && theme !== 'dark' && theme !== 'system')
       throw new Error('Invalid theme.')
     await ipcRenderer.invoke(HOME_CHANNELS.setTheme, theme)
+  },
+  async getDocumentTheme() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getDocumentTheme)
+    return result === 'dark' || result === 'light' ? result : 'follow'
+  },
+  async setDocumentTheme(theme) {
+    if (theme !== 'light' && theme !== 'dark' && theme !== 'follow')
+      throw new Error('Invalid document theme.')
+    await ipcRenderer.invoke(HOME_CHANNELS.setDocumentTheme, theme)
   },
   async getAutoSaveDefault() {
     const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getAutoSaveDefault)
@@ -428,6 +476,13 @@ const homeApi: HomeApi = {
     }
     ipcRenderer.on('app:theme-changed', listener)
     return () => ipcRenderer.removeListener('app:theme-changed', listener)
+  },
+  onDocumentThemeChanged(handler) {
+    const listener = (_event: Electron.IpcRendererEvent, theme: unknown) => {
+      if (theme === 'light' || theme === 'dark' || theme === 'follow') handler(theme)
+    }
+    ipcRenderer.on('app:document-theme-changed', listener)
+    return () => ipcRenderer.removeListener('app:document-theme-changed', listener)
   },
   async openGenTeam() {
     await ipcRenderer.invoke(HOME_CHANNELS.openGenTeam)
