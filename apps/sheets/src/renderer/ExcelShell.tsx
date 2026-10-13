@@ -2288,7 +2288,7 @@ function Ribbon({
           <RibbonButton
             large
             label={t('appFilter')}
-            detail={t('appFilterToggleDetail')}
+            detail={platformShortcuts(t('appFilterToggleDetail'))}
             symbol="▽"
             onClick={() => onCommand('filter-toggle')}
           />

@@ -6,6 +6,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  renameSync,
   statSync,
   unlinkSync,
   writeFileSync,
@@ -117,6 +118,7 @@ import {
   webSearchTool,
   imageSearchTool,
   analyzeMediaTool,
+  documentMediaRoots,
 } from '@teleoffice/ai-search'
 import type {
   AiDocContent,
@@ -3303,6 +3305,28 @@ const docWritablePaths = new Map<number, Set<string>>()
 const pdfWritablePaths = new Map<number, Set<string>>()
 const tornDownWcIds = new Set<number>()
 
+/**
+ * The document each renderer currently has open (set on open and on every
+ * save, so a first-save/save-as keeps it current). Only the local-media
+ * allowlist reads it: a tool call naming a file next to the open document is
+ * the legitimate local-path case for analyze_media / generate_image. Absent for
+ * an untitled document.
+ */
+const openDocByWc = new Map<number, string>()
+
+function rememberOpenDoc(wcId: number, filePath: string): void {
+  openDocByWc.set(wcId, filePath)
+}
+
+/**
+ * Local media roots for a renderer: the open document's directory plus the
+ * directory docs stages pasted images in. A tool call may read a media file
+ * from either, and nothing else.
+ */
+function docsMediaRoots(wcId: number): string[] {
+  return documentMediaRoots(openDocByWc.get(wcId), join(app.getPath('temp'), 'teleoffice-pasted'))
+}
+
 function allowDocWrite(wcId: number, filePath: string): void {
   const set = docWritablePaths.get(wcId) ?? new Set<string>()
   set.add(filePath)
@@ -3367,6 +3391,7 @@ function dropDocWriter(wcId: number): void {
   releaseSpellIgnores(wcId)
   docWritablePaths.delete(wcId)
   pdfWritablePaths.delete(wcId)
+  openDocByWc.delete(wcId)
   for (const p of imageExportTemps.get(wcId) ?? []) void rm(p, { force: true })
   imageExportTemps.delete(wcId)
   imageExportDirs.delete(wcId)
@@ -3559,6 +3584,7 @@ async function loadDocx(
   if (recovered) await adoptLazyMediaHashes(bytes, filePath, wcId)
   pushRecent(filePath)
   allowDocWrite(wcId, filePath)
+  rememberOpenDoc(wcId, filePath)
   if (fileOpenedHook) fileOpenedHook(wcId, filePath)
   markDiskEncrypted(wcId, filePath, encrypted)
   // record the on-disk file, not the recovery copy: what matters is what save would overwrite
@@ -3899,7 +3925,7 @@ export function registerAiIpc(): void {
   // docs-prefixed: slides registers its own ai:analyze-media in the same shell process.
   ipcMain.handle(
     'docs:analyze-media',
-    async (_event, op: { mediaUrls: string[]; requirements: string }) => {
+    async (event, op: { mediaUrls: string[]; requirements: string }) => {
       const mediaUrls = (op.mediaUrls ?? []).map(String).filter(Boolean)
       // a picture opened lazily from a large docx is only addressable by its main-process
       // store; hand its bytes over as a data URL so the loader can read them like any other
@@ -3908,10 +3934,14 @@ export function registerAiIpc(): void {
         const lazy = await readLazyMedia(url).catch(() => null)
         resolved.push(lazy ? `data:${lazy.mime};base64,${lazy.body.toString('base64')}` : url)
       }
-      return analyzeMediaTool(SETTINGS_PATH(), {
-        mediaUrls: resolved,
-        requirements: String(op.requirements ?? ''),
-      })
+      return analyzeMediaTool(
+        SETTINGS_PATH(),
+        {
+          mediaUrls: resolved,
+          requirements: String(op.requirements ?? ''),
+        },
+        { mediaRoots: docsMediaRoots(event.sender.id) },
+      )
     },
   )
 
@@ -3944,11 +3974,15 @@ export function registerAiIpc(): void {
   // registered once a slides view exists, so docs needs its own channel
   ipcMain.handle(
     'docs:ai-generate-image',
-    (_event, op: { prompt?: unknown; aspectRatio?: unknown }) =>
-      generateImageTool(SETTINGS_PATH(), {
-        prompt: String(op?.prompt ?? ''),
-        aspectRatio: op?.aspectRatio ? String(op.aspectRatio) : undefined,
-      }),
+    (event, op: { prompt?: unknown; aspectRatio?: unknown }) =>
+      generateImageTool(
+        SETTINGS_PATH(),
+        {
+          prompt: String(op?.prompt ?? ''),
+          aspectRatio: op?.aspectRatio ? String(op.aspectRatio) : undefined,
+        },
+        { mediaRoots: docsMediaRoots(event.sender.id) },
+      ),
   )
 
   ipcMain.handle('ai:search-test', (_event, input: unknown) => {
@@ -4779,6 +4813,7 @@ export function registerDocsIpc(): void {
           filePath,
         )
         pushRecent(filePath)
+        rememberOpenDoc(event.sender.id, filePath)
         notifyFileSaved(event.sender, filePath)
         return {
           ok: true,
@@ -6030,7 +6065,22 @@ export function startDocsStandalone(): void {
   // AI_OFFICE_USER_DATA: E2E/screenshot runs isolate userData (and the
   // single-instance lock) so parallel automation sessions don't evict each other
   if (process.env.AI_OFFICE_USER_DATA) app.setPath('userData', process.env.AI_OFFICE_USER_DATA)
-  else if (isDev) app.setPath('userData', join(app.getPath('appData'), 'TeleOffice Docs Dev'))
+  else if (isDev) {
+    // "TeleOffice Docs Dev" carried a space, against the XDG one-token
+    // convention (#1817); move the old profile once, as the shell does.
+    const appData = app.getPath('appData')
+    const devDir = join(appData, 'TeleOffice-Docs-Dev')
+    const oldDevDir = join(appData, 'TeleOffice Docs Dev')
+    if (existsSync(oldDevDir) && !existsSync(devDir)) {
+      try {
+        renameSync(oldDevDir, devDir)
+      } catch {
+        // another dev instance is mid-migration or holds the directory:
+        // continuing with a fresh profile beats failing the launch
+      }
+    }
+    app.setPath('userData', devDir)
+  }
 
   const hasSingleInstanceLock = app.requestSingleInstanceLock()
   if (!hasSingleInstanceLock) {
