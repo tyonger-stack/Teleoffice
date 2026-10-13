@@ -282,11 +282,13 @@ import { TABS_CHANNELS } from '../shared/tabs-api'
 import { showErrorDialog } from './error-dialog'
 import { startRendererWatchdog } from './renderer-watchdog'
 import {
+  capStatPaths,
   matchesExtFamily,
   normalizeRecentQuery,
   pageRecentPaths,
   statPathEntries,
 } from './recent-files'
+import { isMoveSource, isUserVisibleFile, type FileTargetSources } from './file-targets'
 import { isSameFile, pdfSaveAsTarget, isValidRawRenameName } from './rename-validation'
 import {
   FolderWatcher,
@@ -317,6 +319,7 @@ import {
   probeJev,
   SearchReranker,
 } from './file-index/rerank'
+import { listKnowledgeFiles, readKnowledgeFilePage, searchKnowledgeBase } from './knowledge-base'
 import { runHeadlessExport, type HeadlessExporters } from './headless-export'
 import { SHELL_TITLE, TabManager } from './tab-manager'
 import {
@@ -361,11 +364,30 @@ import { isUpdateChannel, type UpdateChannel } from '../shared/update-api'
 // run silently quits and forwards its argv to the running installed TeleOffice.
 // TELEOFFICE_USER_DATA: test drivers point this at a scratch dir so an
 // automated instance can run alongside the dev instance (separate lock).
-if (!app.isPackaged)
-  app.setPath(
-    'userData',
-    process.env.TELEOFFICE_USER_DATA ?? join(app.getPath('appData'), 'TeleOffice Dev'),
-  )
+if (!app.isPackaged) {
+  if (process.env.TELEOFFICE_USER_DATA) {
+    app.setPath('userData', process.env.TELEOFFICE_USER_DATA)
+  } else {
+    // The dev profile used to live in "TeleOffice Dev"; the space breaks
+    // unquoted shell expansions, rsync targets and .desktop Exec= lines, and
+    // XDG config entries are single tokens (#1817). "TeleOffice-Dev" keeps the
+    // family naming of the packaged profile ("TeleOffice"). The old directory
+    // moves once — it sits on the same volume as appData, so the rename is
+    // atomic, and a concurrent dev instance keeps its open file handles.
+    const appData = app.getPath('appData')
+    const devDir = join(appData, 'TeleOffice-Dev')
+    const oldDevDir = join(appData, 'TeleOffice Dev')
+    if (existsSync(oldDevDir) && !existsSync(devDir)) {
+      try {
+        renameSync(oldDevDir, devDir)
+      } catch {
+        // another dev instance is mid-migration or holds the directory:
+        // continuing with a fresh profile beats failing the launch
+      }
+    }
+    app.setPath('userData', devDir)
+  }
+}
 
 /**
  * `--headless-export <file> --to <format> --out <path> [--json]`: one document, no
@@ -384,7 +406,7 @@ if (app.isPackaged) {
   const newDir = app.getPath('userData')
   const newEmpty = !existsSync(newDir) || readdirSync(newDir).length === 0
   if (newEmpty) {
-    for (const legacy of ['GenOffice', 'AI Office']) {
+    for (const legacy of ['TeleOffice', 'AI Office']) {
       const oldDir = join(app.getPath('appData'), legacy)
       if (existsSync(oldDir)) {
         cpSync(oldDir, newDir, { recursive: true })
@@ -395,7 +417,7 @@ if (app.isPackaged) {
 }
 
 // The CLI rename from genoffice to teleoffice moved the per-user directory
-// (auth.json, launcher, audit log, templates) from ~/.genoffice to
+// (auth.json, launcher, audit log, templates) from ~/.teleoffice to
 // ~/.teleoffice; move it once, before anything below reads or writes it
 {
   const moved = migrateLegacyHome()
@@ -2906,6 +2928,30 @@ function trackedFilesUnder(dir: string): string[] {
   ])
 }
 
+/** stat that tolerates races: the answer is only advisory for the delete gate */
+function statMaybeFile(path: string): { isFile: () => boolean } | null {
+  try {
+    return statSync(path)
+  } catch {
+    return null
+  }
+}
+
+/** the union trackedFilesUnder uses, as a membership check for the file IPCs */
+function fileTargetSources(): FileTargetSources {
+  return {
+    insideAnyRoot: (p) => insideAnyRoot(p),
+    trackedPaths: [
+      ...readRecentFiles(),
+      ...readStarredFiles(),
+      ...projectFilePaths(),
+      ...readSlidesRecentFiles(),
+      ...(tabManager?.openFilePaths() ?? []),
+      ...detachedFilePaths(),
+    ],
+  }
+}
+
 /** a folder moved/renamed: re-key every tracked file that lived under it */
 function afterFolderMoved(oldDir: string, newDir: string, filesBefore: readonly string[]): void {
   for (const file of filesBefore) afterFileMoved(file, rebasePath(file, oldDir, newDir))
@@ -3795,6 +3841,50 @@ function registerHomeIpc(): void {
     }
   })
 
+  // Knowledge-base channel: the AI-side read access to the reader's starred
+  // files (docs wires these into its panel; see knowledge-base.ts). Path
+  // arguments are validated against the starred set — a corpus file is the
+  // only thing a knowledge tool may read.
+  ipcMain.handle('kb:list', (): unknown => listKnowledgeFiles(readStarredFiles()))
+
+  ipcMain.handle('kb:search', (_event, raw: unknown): unknown => {
+    const query = (raw && typeof raw === 'object' ? raw : {}) as { q?: unknown; limit?: unknown }
+    const q = typeof query.q === 'string' ? query.q : ''
+    const limitRaw = Number(query.limit)
+    const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.floor(limitRaw)) : 8
+    const store = fileIndexStore
+    if (!q.trim() || !store) return []
+    ensureFileIndexer()?.refreshIfStale(60_000)
+    const starred = readStarredFiles()
+    const hits = searchKnowledgeBase(
+      (qq, pool) =>
+        store.search(qq, { limit: pool }).hits.map((h) => ({
+          path: h.path,
+          name: h.name,
+          ext: h.ext,
+          snippetText: (h.snippet ?? []).map((part) => part.text).join(''),
+        })),
+      q,
+      starred,
+      Math.min(limit, 20),
+    )
+    return hits
+  })
+
+  ipcMain.handle('kb:read', async (_event, raw: unknown): Promise<unknown> => {
+    const req = (raw && typeof raw === 'object' ? raw : {}) as {
+      path?: unknown
+      offset?: unknown
+    }
+    const path = typeof req.path === 'string' ? req.path : ''
+    const offsetRaw = Number(req.offset)
+    const offset = Number.isFinite(offsetRaw) ? Math.floor(offsetRaw) : 0
+    if (!path || !readStarredFiles().includes(path)) {
+      throw new Error('path is not in the knowledge base')
+    }
+    return readKnowledgeFilePage(path, offset)
+  })
+
   ipcMain.handle(
     HOME_CHANNELS.rerankSearch,
     async (_event, raw: unknown): Promise<FileSearchRerank | null> => {
@@ -3851,7 +3941,7 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.statPaths, (_event, paths: unknown): RecentEntry[] =>
-    statEntries(stringPaths(paths)),
+    statEntries(capStatPaths(stringPaths(paths))),
   )
 
   ipcMain.handle(HOME_CHANNELS.toggleStar, (_event, path: unknown) => {
@@ -4028,6 +4118,10 @@ function registerHomeIpc(): void {
       // with the localized gate instead of renaming to a different
       // name than requested.
       if (!isValidRawRenameName(newName)) return { ok: false, error: tm('errBadName') }
+      // only paths the UI could have shown: a compromised renderer must not
+      // rename arbitrary files outside every tracked source
+      if (!isUserVisibleFile(path, fileTargetSources()))
+        return { ok: false, error: tm('errBadArgs') }
       const name = newName.trim()
       if (!existsSync(path)) return { ok: false, error: tm('errMissing') }
       const target = join(dirname(path), name)
@@ -4049,6 +4143,7 @@ function registerHomeIpc(): void {
 
   ipcMain.handle(HOME_CHANNELS.duplicateFile, async (_event, path: unknown) => {
     if (typeof path !== 'string' || !existsSync(path)) return
+    if (!isUserVisibleFile(path, fileTargetSources())) return
     const ext = extname(path)
     const base = basename(path, ext)
     const dir = dirname(path)
@@ -4067,7 +4162,10 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.deleteFiles, async (_event, paths: unknown) => {
-    const list = stringPaths(paths)
+    const targets = fileTargetSources()
+    const list = stringPaths(paths).filter(
+      (p) => isUserVisibleFile(p, targets) && statMaybeFile(p)?.isFile() === true,
+    )
     for (const p of list) {
       try {
         await shell.trashItem(p)
@@ -4345,8 +4443,9 @@ function registerHomeIpc(): void {
           return false
         }
       }
-      // files may come from anywhere (the Recent list); folders only from inside the tree, never a root itself
-      const sources = list.filter((p) => !isDir(p) || (insideAnyRoot(p) && !isAnyRoot(p)))
+      // files may come from anywhere the UI can show (the Recent list); folders only from inside the tree, never a root itself
+      const moveSources = { ...fileTargetSources(), isDirectory: isDir, isAnyRoot }
+      const sources = list.filter((p) => isMoveSource(p, moveSources))
       const dirFiles = new Map(sources.filter(isDir).map((p) => [p, trackedFilesUnder(p)]))
       // 'replace' must not destroy data: the displaced target goes to the trash,
       // and everything keyed on its path (recents, stars, chat history) leaves
