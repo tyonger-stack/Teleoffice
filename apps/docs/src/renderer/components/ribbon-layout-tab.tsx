@@ -1,9 +1,5 @@
 import { useRef, useState } from 'react'
-<<<<<<< HEAD
-import { type SectionSettings } from '@teleoffice/docx-engine'
-=======
 import { type SectionSettings, type TextboxDisplay } from '@teleoffice/docx-engine'
->>>>>>> cc97bcd4 (feat(docs): add the Shape Format Arrange group and make shape wrap/stacking persist (#1822))
 import { WRAP_OPTIONS } from './ContextMenu'
 import { MarginDialog, marginsFitPage, type PageMargins } from './MarginDialog'
 import { LengthInput } from './LengthInput'

@@ -13,12 +13,8 @@ import {
   mergeCells,
   splitCell,
 } from '@tiptap/pm/tables'
-<<<<<<< HEAD
-import { platformShortcuts } from '@teleoffice/i18n'
-=======
 import { platformShortcuts } from '@teleoffice/i18n'
 import type { TextboxDisplay } from '@teleoffice/docx-engine'
->>>>>>> cc97bcd4 (feat(docs): add the Shape Format Arrange group and make shape wrap/stacking persist (#1822))
 
 import { useI18n, type StringKey } from '../i18n/locale'
 import { wordRangeAtCaret } from '../editor/comments'
