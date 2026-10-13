@@ -84,7 +84,7 @@ type MdBlock =
   | { kind: 'p'; lines: string[] }
   | { kind: 'ul'; items: string[] }
   | { kind: 'ol'; items: string[] }
-  | { kind: 'h'; text: string }
+  | { kind: 'h'; text: string; level: number }
   | { kind: 'table'; align: CellAlign[]; head: string[]; rows: string[][] }
   | { kind: 'code'; lines: string[] }
 
@@ -178,10 +178,10 @@ function parseBlocks(text: string): MdBlock[] {
         }
       }
     }
-    const h = /^#{1,6}\s+(.*)$/.exec(line)
+    const h = /^(#{1,6})\s+(.*)$/.exec(line)
     if (h) {
       flush()
-      blocks.push({ kind: 'h', text: h[1] ?? '' })
+      blocks.push({ kind: 'h', text: h[2] ?? '', level: (h[1] ?? '#').length })
       continue
     }
     const ul = /^\s*[-*•]\s+(.*)$/.exec(line)

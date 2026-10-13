@@ -65,13 +65,13 @@ export function KbAskPanel({
   const settingsRef = useRef<AiSettings | null>(null)
   const loopRef = useRef<AgentLoop<unknown> | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-
-  const refreshSettings = (): void => {
-    void window.aiOffice
   /** tokens billed so far in the in-flight answer (summed across turns) */
   const runUsageRef = useRef<AiTokenUsageView | undefined>(undefined)
   /** tokens billed across the panel's session (the composer chip) */
   const [sessionUsage, setSessionUsage] = useState<AiTokenUsageView | undefined>(undefined)
+
+  const refreshSettings = (): void => {
+    void window.aiOffice
       .aiGetSettings()
       .then((settings) => {
         settingsRef.current = settings
