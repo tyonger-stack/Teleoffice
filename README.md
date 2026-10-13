@@ -10,17 +10,19 @@
 <p align="center">
   <a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/github/license/tyonger-stack/Teleoffice"></a>
   <a href="https://github.com/tyonger-stack/Teleoffice/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/tyonger-stack/Teleoffice"></a>
-  <img alt="Version 0.11.0" src="https://img.shields.io/badge/version-0.11.0-informational">
+  <img alt="Version 0.12.0" src="https://img.shields.io/badge/version-0.12.0-informational">
   <a href="https://github.com/genspark-ai/genoffice"><img alt="Based on genspark-ai/genoffice" src="https://img.shields.io/badge/based_on-genspark--ai%2Fgenoffice-informational"></a>
   <img alt="Platforms: macOS, Windows, Linux" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-informational">
 </p>
 
 <p align="center">
   <a href="#快速上手"><b>快速上手</b></a> ·
+  <a href="#能做什么"><b>界面一览</b></a> ·
   <a href="#命令速查"><b>命令速查</b></a> ·
   <a href="#格式支持矩阵"><b>格式矩阵</b></a> ·
   <a href="#mcp-server"><b>助手与 MCP</b></a> ·
   <a href="#架构与调用链"><b>架构</b></a> ·
+  <a href="#download"><b>安装与构建</b></a> ·
   <a href="#和上游-genoffice-的差异"><b>与上游的差异</b></a> ·
   <a href="PRIVACY.md"><b>隐私</b></a>
   <!-- 待确认：官网与社区链接（teleoffice.ai 目前无法访问）
@@ -30,6 +32,11 @@
 </p>
 
 TeleOffice 是 [genspark-ai/genoffice](https://github.com/genspark-ai/genoffice) 的定制版，以 Apache-2.0 开源。在上游的基础上，它把本机的 `mmx` / `agy` 命令行设为搜索和媒体的默认服务商，增加了企业品牌 PPT 模板模式，并把命令、目录和品牌统一改为 TeleOffice。
+
+<p align="center">
+  <img src="docs/assets/screenshots/home.webp" alt="TeleOffice 首页：新建 AI 文档、表格、演示、PDF，下方是最近文件和全文搜索" width="100%"><br>
+  <sub><b>首页</b> · 一键新建 Docs / Sheets / Slides / Markdown / HTML / PDF，设置默认模板，按正文搜索最近文件</sub>
+</p>
 
 <details>
 <summary><b>目录</b></summary>
@@ -56,7 +63,7 @@ TeleOffice 是 [genspark-ai/genoffice](https://github.com/genspark-ai/genoffice)
 装好 TeleOffice 之后，`teleoffice` 就在应用里（Linux：`/opt/TeleOffice/resources/cli/teleoffice`；macOS：`/Applications/TeleOffice.app/Contents/Resources/cli/teleoffice`）。`teleoffice install-cli` 会把它链接到 `/usr/local/bin`。
 
 ```bash
-teleoffice --version                                         # teleoffice 0.11.0
+teleoffice --version                                         # teleoffice 0.12.0
 teleoffice create --type docx --from report.md --out report.docx
 teleoffice convert report.docx --to pdf                      # 写出 report.pdf
 teleoffice render report.docx --out shots/                   # 每页一张 PNG：shots/report-01.png
@@ -65,6 +72,11 @@ teleoffice convert report.pdf --to docx --out report-from-pdf.docx
 ```
 
 `table.json` 是二维数组，例如 `[["地区","订单额"],["华东",49300],["华北",43250],["合计","=SUM(B2:B3)"]]`。以 `=` 开头的字符串写成会重新计算的公式，同时带上缓存值。
+
+<p align="center">
+  <img src="docs/assets/screenshots/cli-convert.webp" alt="终端里运行 teleoffice：从 Markdown 生成 Word、转 PDF、查看表格信息、PDF 转回 Word" width="100%"><br>
+  <sub><b>命令行</b> · Markdown → Word → PDF，<code>info</code> 查看工作簿结构，PDF 再转回 Word</sub>
+</p>
 
 > [!NOTE]
 > 转 PDF、`render` 和 HTML ↔ Word 会在后台启动一个不显示窗口的 TeleOffice 进程。Linux 服务器或容器没有显示器时，要用 `xvfb-run` 包一层，见[无头环境](#无头环境xvfb-run)。
@@ -82,27 +94,17 @@ teleoffice convert report.pdf --to docx --out report-from-pdf.docx
 
 首页还会给文件夹里的文档建本机全文索引（SQLite，支持中文），可以按正文搜索；需要时可把前 20 条命中片段交给 TypeSafe Jev 重排（默认关闭）。
 
-### 使用截图
-
-以下截图均在 Linux（xvfb）上实际运行 TeleOffice 0.12.0 截取，示例文件由 `teleoffice create` 生成。
-
 <table>
-  <tr>
-    <td width="50%"><img src="docs/assets/screenshots/home.webp" alt="首页：一键新建 AI 文档、表格、演示、PDF，下方列出最近文件并可按正文搜索"><br><sub>首页：一键新建 AI 文档、表格、演示、PDF，下方列出最近文件并可按正文搜索</sub></td>
-    <td width="50%"><img src="docs/assets/screenshots/docs-editor.webp" alt="Docs：打开 .docx 直接编辑，左侧 AI 面板可总结、润色、续写"><br><sub>Docs：打开 .docx 直接编辑，左侧 AI 面板可总结、润色、续写</sub></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/assets/screenshots/sheets-editor.webp" alt="Sheets：打开 .xlsx，公式实时重算，AI 可分析或修改工作簿"><br><sub>Sheets：打开 .xlsx，公式实时重算，AI 可分析或修改工作簿</sub></td>
-    <td width="50%"><img src="docs/assets/screenshots/slides-editor.webp" alt="Slides：编辑 .pptx，带缩略图、演讲者备注和 AI 美化、配图"><br><sub>Slides：编辑 .pptx，带缩略图、演讲者备注和 AI 美化、配图</sub></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/assets/screenshots/pdf-viewer.webp" alt="PDF：阅读、批注、页内改字，AI 可总结全文、提取要点"><br><sub>PDF：阅读、批注、页内改字，AI 可总结全文、提取要点</sub></td>
-    <td width="50%"><img src="docs/assets/screenshots/pdf-convert.webp" alt="格式转换：PDF 在本机转 Word、Excel 或 PPT"><br><sub>格式转换：PDF 在本机转 Word、Excel 或 PPT</sub></td>
-  </tr>
-  <tr>
-    <td colspan="2"><img src="docs/assets/screenshots/cli-convert.webp" alt="命令行"><br><sub>命令行：<code>teleoffice</code> 从 Markdown 生成 Word、转 PDF、查看表格信息、PDF 转回 Word</sub></td>
-  </tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/assets/screenshots/docs-editor.webp" alt="Docs 编辑 .docx，左侧 AI 面板" width="100%"><br><sub><b>Docs</b> · 直接编辑 .docx，AI 面板总结、润色、续写</sub></td>
+<td width="50%" valign="top"><img src="docs/assets/screenshots/sheets-editor.webp" alt="Sheets 打开 .xlsx，公式实时重算" width="100%"><br><sub><b>Sheets</b> · 打开 .xlsx，公式实时重算，AI 分析或修改工作簿</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/assets/screenshots/slides-editor.webp" alt="Slides 编辑 .pptx，缩略图与 AI 按钮" width="100%"><br><sub><b>Slides</b> · 编辑 .pptx，缩略图、演讲者备注，AI 美化与配图</sub></td>
+<td width="50%" valign="top"><img src="docs/assets/screenshots/pdf-viewer.webp" alt="PDF 阅读与编辑，AI 总结全文" width="100%"><br><sub><b>PDF</b> · 批注、页内改字，AI 总结全文、提取要点</sub></td>
+</tr>
 </table>
+<p align="center"><sub>以上截图均在 Linux（xvfb）上实际运行 TeleOffice 0.12.0 截取，示例文件由 <code>teleoffice create</code> 生成。</sub></p>
 
 ## 命令速查
 
@@ -138,6 +140,11 @@ teleoffice convert report.pdf --to docx --out report-from-pdf.docx
 `teleoffice` 本身不调用大模型：思考交给助手，构建和检查交给 CLI。
 
 ## 格式支持矩阵
+
+<p align="center">
+  <img src="docs/assets/screenshots/pdf-convert.webp" alt="PDF 编辑器的「PDF 转换」菜单：转 Word、Excel、PPT" width="100%"><br>
+  <sub><b>格式转换</b> · 在 PDF 编辑器里点「PDF 转换」，本机转成 Word、Excel 或 PPT；命令行用 <code>teleoffice convert</code></sub>
+</p>
 
 取自 `teleoffice convert --help`。● 由命令行完成，不需要显示器（xlsx / xls 相关经 Rust sidecar）；○ 由隐藏的应用进程完成，需要显示器或 `xvfb-run`。
 
@@ -223,7 +230,8 @@ exec xvfb-run -a /opt/TeleOffice/resources/cli/teleoffice "$@"
 
 支持 Claude Code、Codex、Cursor、Gemini CLI、GitHub Copilot、OpenCode 和 Windsurf。装好后新开一个对话，直接说需求即可，例如「把 ~/Downloads/report.md 转成 Word 文档」。
 
-做演示文稿时，助手按 skill 的分阶段流程推进，CLI 在每一步做检查：
+<details>
+<summary><b>做演示文稿时，助手按 skill 的分阶段流程推进，CLI 在每一步做检查</b></summary>
 
 ```bash
 teleoffice capabilities --json                        # 这台机器配了哪些联网能力
@@ -235,6 +243,8 @@ teleoffice slides render deck/deck.pptx --out deck/shots --json
 teleoffice slides audit deck/deck.pptx --json
 teleoffice slides replace deck/deck.pptx --slide 4 --spec deck/pages/05.json --json
 ```
+
+</details>
 
 <a id="mcp-server"></a>
 
@@ -359,6 +369,9 @@ flowchart LR
   shell -->|"设置中开启后监听"| appmcp["应用内 MCP<br/>127.0.0.1:3093/mcp"]
 ```
 
+<details>
+<summary><b>调用链与源码位置（24 项）</b></summary>
+
 | #   | 调用                       | 机制                                                                                           | 源码                                                                                                                                           |
 | --- | -------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | MCP 工具 → CLI 命令        | 每次工具调用都在同一进程里执行 `runCli([...argv, '--json'])`                                   | `packages/cli/src/mcp/run.ts:64`、`packages/cli/src/cli.ts:98`                                                                                 |
@@ -386,7 +399,10 @@ flowchart LR
 | 23  | 应用内 MCP                 | 默认端口 3093，同时提供 Streamable HTTP 与旧 SSE                                               | `apps/shell/src/main/mcp/mcp-server.ts:49`                                                                                                     |
 | 24  | `ee/` 企业模块（规划中）   | 目前只有说明和许可证，留给以后的私有部署、离线授权等                                           | `ee/README.md`                                                                                                                                 |
 
-`.docx` 的保存方式：
+</details>
+
+<details>
+<summary><b><code>.docx</code> 的保存方式</b></summary>
 
 ```mermaid
 flowchart TB
@@ -396,6 +412,8 @@ flowchart TB
   edit -->|"saveDocx"| patch["未改块：复制原 XML 子串<br/>改过的块：只引用已有样式的新片段"]
   patch -->|"其余 zip 条目逐字节复制"| out["写回 .docx"]
 ```
+
+</details>
 
 各个包的说明见 [CONTRIBUTING.md](CONTRIBUTING.md#engine-packages)。
 
