@@ -58,6 +58,7 @@ export { safeExternalUrl, type SafeExternalUrlOptions } from './safe-external-ur
 export {
   fetchWithSsrfGuard,
   isBlockedAddress,
+  isFakeIpDnsArtifact,
   isSafeRemoteUrl,
   type FetchWithSsrfGuardOptions,
 } from './safe-remote-url'

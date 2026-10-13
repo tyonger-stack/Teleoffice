@@ -311,7 +311,7 @@ flowchart TB
 
 `--via mmx|agy`（或 `--region cn|intl`）可以强制指定。`detail.method` 给出实际用到的后端，`detail.attempts` 记下失败的尝试。
 
-**自带密钥。** 「设置 → AI 模型」支持 Claude、OpenAI、Gemini、DeepSeek、Kimi、GLM、Qwen、Doubao、MiniMax、Grok、Mistral、OpenRouter、Requesty、Opper、OpenCode Zen/Go，以及任何 OpenAI 兼容端点（包括本机模型服务）。网页搜索可改用 Serper、Serply、Tavily、Parallel、Exa 或 Firecrawl 的密钥；生图和媒体解析也能分别指定服务商。
+**自带密钥。** 「设置 → AI 模型」支持 Claude、OpenAI、Gemini、DeepSeek、Kimi、GLM、Qwen、Doubao、MiniMax、Grok、Mistral、OpenRouter、Requesty、Opper、Cheaper Inference、Atlas Cloud、OpenCode Zen/Go，以及任何 OpenAI 兼容端点（包括本机模型服务）。网页搜索可改用 Serper、Serply、Tavily、Parallel、Exa 或 Firecrawl 的密钥；生图和媒体解析也能分别指定服务商。
 
 <p align="center">
   <img src="docs/assets/readme/search-jev-settings.webp" alt="设置中的生图、媒体与搜索：网络搜索为 Local CLIs，Jev 搜索重排已打开，生图使用 Antigravity CLI" width="70%"><br>
