@@ -11,6 +11,7 @@ import type { AiPanelPrefs } from '@teleoffice/ui'
 import type { RenderSlide } from '@teleoffice/pptx-render'
 import type { CustGeomPathCmd, SlideComment, SectionInfo } from '@teleoffice/pptx-engine'
 import type { FontSizeStep } from '@teleoffice/pptx-ops/font-size'
+import type { LayoutSkeleton } from '../renderer/ai/layout-skeleton'
 import type {
   AiSettings,
   AiStreamChunk,
@@ -1784,14 +1785,24 @@ export interface SlidesApi {
   /** Store styleSkill in userData/style-templates/<name>.json */
   saveStyleTemplate: (
     name: string,
-    data: { topic: string; styleSkill: string; createdAt: string },
+    data: {
+      topic: string
+      styleSkill: string
+      createdAt: string
+      /** Deck chrome skeleton extracted at save time (layout-skeleton.ts); absent in older templates */
+      layout?: LayoutSkeleton
+    },
   ) => Promise<{ ok: boolean; error?: string }>
   /** List saved Style templates */
   listStyleTemplates: () => Promise<Array<{ name: string; topic: string; createdAt: string }>>
   /** Load a given Style template's content */
-  loadStyleTemplate: (
-    name: string,
-  ) => Promise<{ ok: boolean; styleSkill?: string; topic?: string; error?: string }>
+  loadStyleTemplate: (name: string) => Promise<{
+    ok: boolean
+    styleSkill?: string
+    topic?: string
+    layout?: LayoutSkeleton
+    error?: string
+  }>
   /** New blank page (with a specific layout): inserted after slide sourceIndex, rels pointing at the chosen layout */
   addSlideWithLayout: (
     op: AddSlideWithLayoutOp,
