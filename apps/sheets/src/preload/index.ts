@@ -2340,6 +2340,7 @@ function isPageSetupState(input: unknown): boolean {
     'showGridlines',
     'showFormulas',
     'showHeadings',
+    'rightToLeft',
     'fitToPage',
   ]) {
     if (input[key] !== undefined && typeof input[key] !== 'boolean') return false
