@@ -5516,7 +5516,7 @@ export function App() {
           setShowAi((v) => !v)
           break
         case 'toggle-dark':
-          setDarkPage((v) => !v)
+          updateDarkPage(!darkPageRef.current)
           break
         case 'insert-table':
           // Word semantics: the menu opens the Insert Table dialog (custom rows/cols)
@@ -5673,6 +5673,7 @@ export function App() {
     runAiProofread,
     toggleTableGridlines,
     tableSectionWidthPx,
+    updateDarkPage,
   ])
 
   // Resolve the bookmark anchor against the original block XML, fall back to
@@ -6583,7 +6584,7 @@ export function App() {
     onZoom: setZoom,
     onZoomFit: zoomFit,
     onZoomDialog: () => setShowZoomDialog(true),
-    onDarkPage: setDarkPage,
+    onDarkPage: updateDarkPage,
     onAiPreset: (text: string) => {
       // Word's Editor / Translate start working as soon as they're clicked
       setShowAi(true)
