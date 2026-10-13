@@ -6,6 +6,7 @@ import { LocaleProvider } from './locale'
 import '@teleoffice/ui/tokens.css'
 import '@teleoffice/ui/screentip.css'
 import '@teleoffice/ui/dropdown.css'
+import '@teleoffice/ui/ai-usage.css'
 import './home.css'
 import './tabbar.css'
 import { installScreenTips } from '@teleoffice/ui'
@@ -36,10 +37,27 @@ void Promise.all([
     if (next === 'system') document.documentElement.removeAttribute('data-theme')
     else document.documentElement.setAttribute('data-theme', next)
   })
+  // The manual tab is the same bundle branched on ?mode=help: no onboarding,
+  // no home state, just the searchable topic browser (issue #1520).
+  //
+  // Split, though: this entry chunk is parsed on every launch whatever the tab
+  // is, and the screen plus its stylesheet are only ever wanted on the other
+  // one. A static import meant Home's first paint paid for a manual nobody had
+  // opened.
+  const isHelp = new URLSearchParams(location.search).get('mode') === 'help'
+  const HelpScreen = React.lazy(() =>
+    import('./i18n/help/HelpScreen').then((m) => ({ default: m.HelpScreen })),
+  )
   createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <LocaleProvider initial={lang}>
-        <AppFrame initialOnboardingSeen={onboardingSeen} />
+        {isHelp ? (
+          <React.Suspense fallback={<div className="boot" />}>
+            <HelpScreen />
+          </React.Suspense>
+        ) : (
+          <AppFrame initialOnboardingSeen={onboardingSeen} />
+        )}
       </LocaleProvider>
     </React.StrictMode>,
   )

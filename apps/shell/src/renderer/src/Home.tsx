@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties, DragEvent as ReactDragEvent, ReactElement } from 'react'
 import { createPortal } from 'react-dom'
 import logoLockup from './assets/teleoffice-logo.svg'
+import { KbAskPanel } from './KbAskPanel'
 import iconDocx from './assets/file-docx.svg'
 import iconXlsx from './assets/file-xlsx.svg'
 import iconPptx from './assets/file-pptx.svg'
@@ -99,6 +100,16 @@ const DRAG_PATHS_MIME = 'application/x-teleoffice-paths'
 const DRAG_EXPAND_DELAY_MS = 600
 /** expanded folders survive a home reload; the selection is per session */
 const TREE_STATE_KEY = 'home.folderTree'
+
+/**
+ * Width of the viewport that `position: fixed` elements anchor to. The layout
+ * engine owns this coordinate system, so documentElement's client rect is the
+ * value to compute menu offsets from; window.innerWidth can disagree on scaled
+ * Linux desktops, which pushed row menus past the window's left edge (#1946).
+ */
+function fixedViewportWidth(): number {
+  return document.documentElement.clientWidth
+}
 
 function FileBadge({ ext, size }: { ext: string; size: number }) {
   const icon = FILE_ICONS[ext]
@@ -886,6 +897,8 @@ export function Home() {
   const [navCounts, setNavCounts] = useState({ recent: 0, starred: 0 })
   const [loadingMore, setLoadingMore] = useState(false)
   const [view, setView] = useState<'recent' | 'starred'>('recent')
+  // the knowledge-base ask panel takes over the content area
+  const [askMode, setAskMode] = useState(false)
   const [filter, setFilter] = useState('all')
   // ── File search (names + indexed content); active while the box has text ──
   const [searchQuery, setSearchQuery] = useState('')
@@ -1325,6 +1338,7 @@ export function Home() {
   const changeView = (next: 'recent' | 'starred') => {
     setView(next)
     setSelectedFolder(null)
+    setAskMode(false)
     setSelected(new Set())
     setRowMenu(null)
   }
@@ -1337,6 +1351,7 @@ export function Home() {
 
   const selectFolder = (dir: string) => {
     setSelectedFolder(dir)
+    setAskMode(false)
     setSelected(new Set())
     setRowMenu(null)
     setFolderMenu(null)
@@ -1935,7 +1950,7 @@ export function Home() {
             path: entry.path,
             where: 'tree',
             top: rect.bottom + 4,
-            right: window.innerWidth - rect.right,
+            right: fixedViewportWidth() - rect.right,
           })
         }}
       >
@@ -2065,7 +2080,7 @@ export function Home() {
               path: entry.path,
               where: 'tree',
               top: e.clientY + 2,
-              right: window.innerWidth - e.clientX,
+              right: fixedViewportWidth() - e.clientX,
             })
           }}
           draggable={!isRoot && !isRenaming}
@@ -2401,7 +2416,7 @@ export function Home() {
               path: entry.path,
               where: 'table',
               top: e.clientY + 2,
-              right: window.innerWidth - e.clientX,
+              right: fixedViewportWidth() - e.clientX,
             })
           }}
         >
@@ -2453,7 +2468,7 @@ export function Home() {
                   path: entry.path,
                   where: 'table',
                   top: rect.bottom + 4,
-                  right: window.innerWidth - rect.right,
+                  right: fixedViewportWidth() - rect.right,
                 })
               }}
             >
@@ -2690,7 +2705,7 @@ export function Home() {
       <div className="recents-heading">
         {rerankApplied && (
           <span className="search-rerank-badge" title={t('searchRerankedBy')}>
-            Jev
+            AI
           </span>
         )}
         <span className="file-count">
@@ -2949,7 +2964,7 @@ export function Home() {
         </div>
         <nav className="sidebar-nav">
           <button
-            className={`nav-item${view === 'recent' && !selectedFolder ? ' active' : ''}`}
+            className={`nav-item${view === 'recent' && !selectedFolder && !askMode ? ' active' : ''}`}
             onClick={() => changeView('recent')}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -2965,7 +2980,7 @@ export function Home() {
             <span className="nav-count">{navCounts.recent}</span>
           </button>
           <button
-            className={`nav-item${view === 'starred' && !selectedFolder ? ' active' : ''}`}
+            className={`nav-item${view === 'starred' && !selectedFolder && !askMode ? ' active' : ''}`}
             onClick={() => changeView('starred')}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -2979,6 +2994,44 @@ export function Home() {
             <span className="nav-label">{t('navStarred')}</span>
             <span className="nav-count">{navCounts.starred}</span>
           </button>
+          <button
+            className={`nav-item${askMode && !selectedFolder ? ' active' : ''}`}
+            onClick={() => {
+              setAskMode(true)
+              setSelectedFolder(null)
+              setSelected(new Set())
+              setRowMenu(null)
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M14 10.5c0 .9-.7 1.6-1.6 1.6H5.4L2 14.5V3.6C2 2.7 2.7 2 3.6 2h8.8c.9 0 1.6.7 1.6 1.6z"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M5 6.2h6M5 8.6h4"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+              />
+            </svg>
+            <span className="nav-label">{t('navAsk')}</span>
+          </button>
+          <button className="nav-item" onClick={() => void window.aiOffice.openHelp()}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M6.05 6.4a2.06 2.06 0 1 1 2.9 1.88c-.58.29-.95.89-.95 1.54v.28"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+              />
+              <circle cx="8" cy="12.6" r="0.85" fill="currentColor" />
+              <circle cx="8" cy="8" r="6.6" stroke="currentColor" strokeWidth="1.2" />
+            </svg>
+            <span className="nav-label">{t('navUserGuide')}</span>
+          </button>
         </nav>
         <div className="sidebar-divider" />
         {renderFolderPanel()}
@@ -2987,9 +3040,16 @@ export function Home() {
           openRequest={settingsRequest}
         />
       </aside>
-      {selectedFolder && rootOf(selectedFolder, roots)?.readable
-        ? renderFolderContent()
-        : renderGlobalContent()}
+      {selectedFolder && rootOf(selectedFolder, roots)?.readable ? (
+        renderFolderContent()
+      ) : askMode ? (
+        <KbAskPanel
+          onOpenPath={(path) => void window.aiOffice.openPath(path)}
+          onGoToRecents={() => changeView('recent')}
+        />
+      ) : (
+        renderGlobalContent()
+      )}
       {confirmDelete && (
         <div className="modal-overlay" onClick={() => setConfirmDelete(null)}>
           <div

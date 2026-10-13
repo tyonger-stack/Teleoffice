@@ -3,7 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { buildTemplateDeck, inspectTemplate, parseTemplateDeckSpec } from '../src/slides/template'
 import { toEngineParagraphs } from '../src/slides/page-spec'
 import { parseOutline } from '../src/slides/outline'
-import { PackageArchive, getSlideNotes, openPptx } from '@teleoffice/pptx-engine'
+import {
+  PackageArchive,
+  getSlideNotes,
+  openPptx,
+  parseTheme,
+  resolveFontRef,
+} from '@teleoffice/pptx-engine'
 import { makeTwoMasterTemplate } from './template-fixture'
 
 const PNG_1PX = Uint8Array.from(
@@ -41,14 +47,28 @@ describe('inspectTemplate on a synthetic two-master template', () => {
   })
 
   it('resolves theme colors and fonts, inherited boxes and decorations', async () => {
-    const info = await inspectTemplate(await makeTwoMasterTemplate())
+    const bytes = await makeTwoMasterTemplate()
+    const info = await inspectTemplate(bytes)
     const office = info.masters[0]!.theme
     expect(office.name).toBe('Office')
     expect(office.colors.accent1).toBe('#C43E1C')
     expect(office.colors.dk1).toBe('#000000')
     expect(office.colors.lt1).toBe('#FFFFFF')
     expect(office.fonts.major.latin).toBe('Calibri Light')
-    expect(office.fonts.minor.ea).toBe('Microsoft YaHei')
+    // Blank theme (#1941): <a:ea> is empty. East Asian text resolves per script
+    // (Hans/Hant/Jpan/Hang) instead of a Windows-only Microsoft YaHei pin.
+    expect(office.fonts.major.ea).toBe('')
+    expect(office.fonts.minor.ea).toBe('')
+    const themeXml = (await openPptx(bytes)).archive.readText(office.path ?? 'ppt/theme/theme1.xml')
+    const theme = parseTheme(themeXml ?? '')
+    expect(theme.minorEaFont).toBeUndefined()
+    expect(theme.majorEaFont).toBeUndefined()
+    expect(resolveFontRef('+mn-ea', theme, 'sc')).toBe('等线')
+    expect(resolveFontRef('+mn-ea', theme, 'tc')).toBe('新細明體')
+    expect(resolveFontRef('+mn-ea', theme, 'ja')).toBe('ＭＳ Ｐゴシック')
+    expect(resolveFontRef('+mn-ea', theme, 'ko')).toBe('맑은 고딕')
+    expect(resolveFontRef('+mj-ea', theme, 'sc')).toBe('等线')
+    expect(resolveFontRef('+mj-ea', theme, 'ja')).toBe('ＭＳ ゴシック')
     expect(info.masters[1]!.theme.colors.accent1).toBe('#C00000')
     const byName = new Map(info.masters.flatMap((m) => m.layouts).map((l) => [l.index, l]))
     // layout 1 has its own title box; layout 2 inherits the master title box
