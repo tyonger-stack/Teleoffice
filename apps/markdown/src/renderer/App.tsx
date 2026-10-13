@@ -37,6 +37,7 @@ import { buildSlashItems } from './editor/slashCommand'
 import type { SlashController, SlashMenuState } from './editor/slashCommand'
 import { dirOf, setImageBaseDir, VIEW_IMAGE_EVENT } from './editor/localImage'
 import { Ribbon } from './components/Ribbon'
+import { RedactMenu } from './components/RedactMenu'
 import { OutlinePane } from './components/OutlinePane'
 import { SlashMenu, type SlashMenuHandle } from './components/SlashMenu'
 import { ToastHost } from './components/toast'
@@ -152,6 +153,11 @@ export default function App() {
   )
   const [spellcheck, setSpellcheck] = useState(
     () => localStorage.getItem('mdapp.spellcheck') !== '0',
+  )
+  // off by default: it takes over the editor's right-click menu, and a reader
+  // should opt into that rather than discover it
+  const [redactEnabled, setRedactEnabled] = useState(
+    () => localStorage.getItem('mdapp.redact') === '1',
   )
   const [viewImage, setViewImage] = useState<string | null>(null)
   useEffect(() => {
@@ -834,6 +840,11 @@ export default function App() {
         hasOutline={outlineItems.length > 0}
         spellcheck={spellcheck}
         onToggleSpellcheck={() => setSpellcheck((v) => !v)}
+        redactEnabled={redactEnabled}
+        onToggleRedact={(on) => {
+          setRedactEnabled(on)
+          localStorage.setItem('mdapp.redact', on ? '1' : '0')
+        }}
         aiOpen={aiOpen}
         onToggleAi={() => setAiOpen((v) => !v)}
         onAiPreset={(text) => {
@@ -940,6 +951,7 @@ export default function App() {
         </div>
       </div>
       <SlashMenu ref={slashMenuRef} state={slashState} onDismiss={() => setSlashState(null)} />
+      <RedactMenu editor={editor} enabled={redactEnabled} />
       <ToastHost />
       {viewImage && (
         <ImageViewer

@@ -130,3 +130,5 @@ export {
   notchStep,
   type ZoomWheelIntent,
 } from './wheel-zoom'
+export { useRedactLabelField } from './use-redact-label'
+export type { RedactLabelField } from './use-redact-label'
