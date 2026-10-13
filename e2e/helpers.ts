@@ -162,6 +162,29 @@ export async function closeAndSaveVideo(
   } finally {
     clearTimeout(killTimer)
   }
+  // close() can return while the process still holds the single-instance lock.
+  // The next launch would then quit immediately and never open its document.
+  if (child.exitCode === null && child.signalCode === null) {
+    await new Promise<void>((resolve) => {
+      let settled = false
+      const done = () => {
+        if (settled) return
+        settled = true
+        resolve()
+      }
+      child.once('exit', done)
+      setTimeout(() => {
+        if (child.exitCode === null && child.signalCode === null) {
+          try {
+            child.kill('SIGKILL')
+          } catch {
+            // already exited between the check and the signal
+          }
+        }
+      }, 2_000)
+      setTimeout(done, 5_000)
+    })
+  }
   if (!video) return undefined
   const target = join(ARTIFACTS_DIR, 'videos', `${name}.webm`)
   try {
@@ -187,15 +210,35 @@ export async function waitForPageWithUrl(
   timeoutMs = 30_000,
 ): Promise<Page> {
   const deadline = Date.now() + timeoutMs
+  const seen = new Set<string>()
   for (;;) {
-    for (const candidate of app.windows()) {
-      if (candidate.url().includes(urlPart)) return candidate
-      // page.url() stays empty when attach raced navigation; ask the document
-      const href = await candidate.evaluate(() => window.location.href).catch(() => '')
+    const pages = app.windows()
+    // Synchronous URLs first. A wedged CDP session leaves page.url() empty and
+    // makes evaluate hang for the Playwright timeout, which used to hide an
+    // editor view that was already open behind the shell window.
+    for (const candidate of pages) {
+      const url = candidate.url()
+      if (url) seen.add(url)
+      if (url.includes(urlPart)) return candidate
+    }
+    for (const candidate of pages) {
+      if (candidate.url()) continue
+      const href = await Promise.race([
+        candidate.evaluate(() => window.location.href).catch(() => ''),
+        new Promise<string>((resolve) => setTimeout(() => resolve(''), 400)),
+      ])
+      if (href) seen.add(href)
       if (href.includes(urlPart)) return candidate
     }
+    const mainUrls = await app
+      .evaluate(({ webContents }) => webContents.getAllWebContents().map((wc) => wc.getURL()))
+      .catch(() => [] as string[])
+    for (const url of mainUrls) if (url) seen.add(url)
     const remaining = deadline - Date.now()
-    if (remaining <= 0) throw new Error(`No window with URL containing "${urlPart}"`)
+    if (remaining <= 0) {
+      const listed = [...seen].filter(Boolean).join(' | ') || 'none'
+      throw new Error(`No window with URL containing "${urlPart}" (saw ${listed})`)
+    }
     await app.waitForEvent('window', { timeout: Math.min(remaining, 1_000) }).catch(() => {})
   }
 }

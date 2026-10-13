@@ -108,7 +108,7 @@ test.describe('sheets: filter criteria survive save and reopen', () => {
     })
     try {
       const { app } = relaunched
-      const sheets = await waitForPageWithUrl(app, '://sheets/')
+      const sheets = await waitForPageWithUrl(app, '://sheets/', 45_000)
       await sheets.waitForFunction(() => document.body.textContent?.includes('Sheet1'), null, {
         timeout: 30_000,
       })
