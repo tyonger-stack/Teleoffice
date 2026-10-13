@@ -31,10 +31,13 @@ function matchNav(navs: readonly MarkdownNav[], href: string): MarkdownNav | und
 // arrive as sheetnav://Data%20(2)!B2), so the href cannot simply stop at ')'.
 const HREF = /(?:[^\s()]|\([^\s()]*\))+/.source
 const INLINE_RE = new RegExp(
-  `(\`[^\`\\n]+\`|\\*\\*[^*\\n]+?\\*\\*|\\*[^*\\n]+?\\*|\\[[^\\]\\n]+\\]\\(${HREF}\\))`,
+  `(\`[^\`\\n]+\`|\\*\\*[^*\\n]+?\\*\\*|\\*[^*\\n]+?\\*|!\\[[^\\]\\n]*\\]\\(${HREF}\\)|\\[[^\\]\\n]+\\]\\(${HREF}\\))`,
   'g',
 )
 const LINK_RE = new RegExp(`^\\[([^\\]]+)\\]\\((${HREF})\\)$`)
+const IMG_RE = new RegExp(`^!\\[([^\\]]*)\\]\\((${HREF})\\)$`)
+/** a whole line that is nothing but an image, the manual's figure syntax */
+const IMG_LINE_RE = new RegExp(`^\\s*!\\[([^\\]]*)\\]\\((${HREF})\\)$`)
 
 function renderInline(
   text: string,
@@ -50,7 +53,15 @@ function renderInline(
     const tok = m[0] ?? ''
     if (tok.startsWith('`')) out.push(<code key={key++}>{tok.slice(1, -1)}</code>)
     else if (tok.startsWith('**')) out.push(<strong key={key++}>{tok.slice(2, -2)}</strong>)
-    else if (tok.startsWith('[')) {
+    else if (tok.startsWith('![')) {
+      const img = IMG_RE.exec(tok)
+      const src = img ? images?.resolve?.(img[2] ?? '') : undefined
+      if (img && src) {
+        out.push(
+          <img key={key++} className="ai-md-img" src={src} alt={img[1] ?? ''} loading="lazy" />,
+        )
+      } else out.push(tok)
+    } else if (tok.startsWith('[')) {
       const link = LINK_RE.exec(tok)
       const href = link?.[2] ?? ''
       const hit = link ? matchNav(navs, href) : undefined
@@ -85,6 +96,7 @@ type MdBlock =
   | { kind: 'ul'; items: string[] }
   | { kind: 'ol'; items: string[] }
   | { kind: 'h'; text: string; level: number }
+  | { kind: 'img'; alt: string; href: string }
   | { kind: 'table'; align: CellAlign[]; head: string[]; rows: string[][] }
   | { kind: 'code'; lines: string[] }
 
@@ -149,6 +161,12 @@ function parseBlocks(text: string): MdBlock[] {
     }
     if (!line.trim()) {
       flush()
+      continue
+    }
+    const img = IMG_LINE_RE.exec(line)
+    if (img) {
+      flush()
+      blocks.push({ kind: 'img', alt: img[1] ?? '', href: img[2] ?? '' })
       continue
     }
     if (FENCE_RE.test(line)) {
@@ -235,6 +253,11 @@ export function Markdown({
               {renderInline(b.text, navList, images)}
             </p>
           )
+        }
+        if (b.kind === 'img') {
+          const src = images?.resolve?.(b.href)
+          if (!src) return <p key={i}>{`![${b.alt}](${b.href})`}</p>
+          return <img key={i} className="ai-md-img" src={src} alt={b.alt} loading="lazy" />
         }
         if (b.kind === 'ul' || b.kind === 'ol') {
           const items = b.items.map((it, j) => <li key={j}>{renderInline(it, navList, images)}</li>)
