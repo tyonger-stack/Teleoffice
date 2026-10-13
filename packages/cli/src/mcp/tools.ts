@@ -99,7 +99,7 @@ export const TOOLS: ToolSpec[] = [
     name: 'convert',
     command: 'convert',
     description:
-      'Convert a document to another format with the TeleOffice engines (pdf, docx, xlsx, pptx, md, html, csv; the `to` description lists the routes). Targets that need layout (to pdf, docx to html, html to docx) start a hidden TeleOffice process for 1-6 s. Output defaults to the input name with the new extension.',
+      'Convert a document with the TeleOffice engines (pdf, docx, xlsx, pptx, md, html, csv; `to` lists the routes). Layout targets (pdf, docx to html, html to docx) start a hidden TeleOffice process for 1-6 s. Output defaults to the input name with the new extension.',
     positionals: [{ key: 'file', description: 'path of the source document' }],
     options: ['to', 'out', 'force', 'password', 'sheet'],
   },
@@ -165,7 +165,7 @@ export const TOOLS: ToolSpec[] = [
     command: 'create',
     images: true,
     description:
-      'Create a .pptx in one call from ops on a blank one-slide deck, or from a deck spec (pages of px-positioned text, shapes and images on a 1280x720 canvas; guide slides spec). A deck spec uses the configured default template when no explicit template is named and its layout names fit; pages without layout prefer sample-used title layouts with fewer slots, then decorated titles. Set no_template=true to keep ordinary spec generation. Ops never use the default template. This is the path for a short deck (up to about 5 slides) and whenever the user gives concrete content and no design brief: write the ops or the spec directly, then slides_render to look. Set render=true to get the slide PNGs back in the same call and audit=true for the geometry findings; otherwise run slides_render and slides_audit after. The staged deck_start / deck_page / deck_build flow is for longer or design-sensitive presentations a person will present. Give exactly one of ops or spec.',
+      'Create a .pptx from ops on a blank deck, or from a spec of px-positioned text, shapes and images on a 1280x720 canvas (guide slides spec). A spec uses the default template when none is named and its layout names fit; pages without a layout prefer sample-used title layouts with fewer slots, then decorated titles. no_template=true keeps ordinary spec generation. Ops never use the default template. For a short deck (~5 slides) or concrete content with no design brief, write the ops or spec, then slides_render. render=true returns slide PNGs here; audit=true adds geometry findings. deck_start / deck_page / deck_build is for longer or design-sensitive decks. Give exactly one of ops or spec.',
     fixed: ['--type', 'pptx'],
     options: [
       {

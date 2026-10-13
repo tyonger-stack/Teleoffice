@@ -114,14 +114,17 @@ async function serperWebSearch(
         if (!resp.ok) return null
         const data = asRecord(await resp.json())
         const organic: unknown[] = Array.isArray(data.organic) ? data.organic : []
-        const results: WebSearchResult[] = organic.slice(0, maxResults).map((item) => {
+        const results: WebSearchResult[] = []
+        for (const item of organic) {
           const o = asRecord(item)
-          return {
+          if (typeof o.link !== 'string' || !/^https?:\/\//i.test(o.link)) continue
+          results.push({
             title: String(o.title ?? ''),
-            url: String(o.link ?? ''),
+            url: o.link,
             snippet: String(o.snippet ?? ''),
-          }
-        })
+          })
+          if (results.length >= maxResults) break
+        }
         const answerBox = asRecord(data.answerBox)
         const answerRaw =
           answerBox.answer || answerBox.snippet || asRecord(data.knowledgeGraph).description
@@ -198,14 +201,17 @@ async function tavilyWebSearch(
         if (!resp.ok) return null
         const data = asRecord(await resp.json())
         const raw: unknown[] = Array.isArray(data.results) ? data.results : []
-        const results: WebSearchResult[] = raw.slice(0, maxResults).map((item) => {
+        const results: WebSearchResult[] = []
+        for (const item of raw) {
           const o = asRecord(item)
-          return {
+          if (typeof o.url !== 'string' || !/^https?:\/\//i.test(o.url)) continue
+          results.push({
             title: String(o.title ?? ''),
-            url: String(o.url ?? ''),
+            url: o.url,
             snippet: String(o.content ?? ''),
-          }
-        })
+          })
+          if (results.length >= maxResults) break
+        }
         const answerRaw = data.answer
         const answer = typeof answerRaw === 'string' && answerRaw ? answerRaw : undefined
         if (!results.length) return null
@@ -696,7 +702,7 @@ async function duckImageSearch(query: string, maxResults: number): Promise<Image
   )
   const list: unknown[] = Array.isArray(data.results) ? data.results : []
   const out: ImageSearchResult[] = []
-  for (const item of list.slice(0, maxResults)) {
+  for (const item of list) {
     const img = asRecord(item)
     const imageUrl = String(img.image ?? '')
     if (!imageUrl || isCopyrightHost(imageUrl)) continue
@@ -709,6 +715,7 @@ async function duckImageSearch(query: string, maxResults: number): Promise<Image
     if (typeof img.width === 'number') entry.width = img.width
     if (typeof img.height === 'number') entry.height = img.height
     out.push(entry)
+    if (out.length >= maxResults) break
   }
   return out
 }

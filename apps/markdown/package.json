@@ -59,6 +59,7 @@
     "json5": "^2.2.3",
     "mermaid": "^11.17.2",
     "wavedrom": "^3.7.0",
-    "pdfjs-dist": "^6.2.108"
+    "pdfjs-dist": "^6.2.108",
+    "@teleoffice/agent-core": "*"
   }
 }

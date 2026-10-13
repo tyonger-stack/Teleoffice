@@ -11,7 +11,7 @@ import {
   jsonBodyInsteadOfSse,
   readCappedResponseText,
   sseErrorText,
-  sseLines,
+  sseDataEvents,
   throwIfCreditsNotice,
   throwIfToolCountOverBudget,
   usageCount,
@@ -250,14 +250,11 @@ async function geminiTurn(
   let emitted = false
   let toolCallCount = 0
   const turnUsage: AiTokenUsage = {}
-  for await (const line of sseLines(response.body, onBytes)) {
-    if (!line.startsWith('data:')) continue
-    const payload = line.slice(5).trim()
-    if (!payload) continue
+  for await (const payload of sseDataEvents(response.body, onBytes)) {
     // A truncated frame or a non-JSON keep-alive from a proxy should skip
     // that event, not kill the entire AI turn with a parser error.
-    // usageMetadata rides on the same events. Joined SSE frames land with
-    // the later upstream parser; this tree still splits on data lines.
+    // usageMetadata rides on the same events, including ones sseDataEvents
+    // reassembles from a data line that was split across TCP frames.
     let event
     try {
       event = JSON.parse(payload) as {

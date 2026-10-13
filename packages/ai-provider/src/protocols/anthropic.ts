@@ -10,7 +10,7 @@ import {
   parseToolInput,
   readCappedResponseText,
   sseErrorText,
-  sseLines,
+  sseDataEvents,
   throwIfCreditsNotice,
   throwIfToolCountOverBudget,
   throwIfToolJsonOverBudget,
@@ -214,15 +214,11 @@ async function anthropicTurn(
   let stopReason: string | undefined
   let emitted = false
   const turnUsage: AiTokenUsage = {}
-  for await (const line of sseLines(response.body, onBytes)) {
-    if (!line.startsWith('data:')) continue
-    const payload = line.slice(5).trim()
-    if (!payload) continue
+  for await (const payload of sseDataEvents(response.body, onBytes)) {
     // A truncated frame or a non-JSON keep-alive from a proxy should skip
     // that event, not kill the entire AI turn with a parser error.
-    // Usage is read off the same JSON events. The joined-frame parser
-    // (upstream sseDataEvents) is not on this branch yet, so each data line
-    // is one event, matching the parser this tree already ships.
+    // Usage is read off the same JSON events, including ones sseDataEvents
+    // reassembles from a data line that was split across TCP frames.
     let event
     try {
       event = JSON.parse(payload) as {
