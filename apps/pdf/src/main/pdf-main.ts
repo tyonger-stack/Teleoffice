@@ -29,7 +29,7 @@ import {
   rendererUrl,
 } from '@teleoffice/electron-utils'
 import { createI18n, getUiLang } from '@teleoffice/i18n'
-import { generateImageTool } from '@teleoffice/ai-search'
+import { generateImageTool, documentMediaRoots } from '@teleoffice/ai-search'
 import { PDF_CHANNELS } from '../shared/ipc'
 import { buildExportImagePaths, hasValidExportPageNumbers } from './export-images'
 import type {
@@ -1756,13 +1756,21 @@ function registerPdfIpc(): void {
 
   // pdf-owned (unlike ai:image-search / ai:fetch-image, which the shell registers app-wide):
   // slides' ai:generate-image is only registered once a slides view exists, so pdf needs its own
-  ipcMain.handle(
-    PDF_CHANNELS.generateImage,
-    (_e, op: { prompt?: unknown; aspectRatio?: unknown }) =>
-      generateImageTool(join(app.getPath('userData'), 'ai-settings.json'), {
+  ipcMain.handle(PDF_CHANNELS.generateImage, (e, op: { prompt?: unknown; aspectRatio?: unknown }) =>
+    generateImageTool(
+      join(app.getPath('userData'), 'ai-settings.json'),
+      {
         prompt: String(op?.prompt ?? ''),
         aspectRatio: op?.aspectRatio ? String(op.aspectRatio) : undefined,
-      }),
+      },
+      {
+        // pdf keeps its media (exported/edited images) beside the open file
+        mediaRoots: documentMediaRoots(
+          openPathByWc.get(e.sender.id),
+          join(app.getPath('temp'), 'teleoffice-pasted'),
+        ),
+      },
+    ),
   )
 
   // ── Certificate (digital) signatures ──
