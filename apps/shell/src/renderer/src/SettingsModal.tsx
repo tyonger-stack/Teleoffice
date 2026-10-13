@@ -7,16 +7,9 @@ import {
   Dropdown,
   aiPanelFontPx,
   clampAiCustomFontSize,
-<<<<<<< HEAD
 } from '@teleoffice/ui'
 import type { AiFontSize, AiPanelPrefs, AiPanelSide } from '@teleoffice/ui'
-import type { DefaultAppStatus, FileSearchSettings, JevEndpoint } from '../../shared/home-api'
-=======
-} from '@genoffice/ui'
-import type { AiFontSize, AiPanelPrefs, AiPanelSide } from '@genoffice/ui'
 import type { DecisionEndpoint, DefaultAppStatus, FileSearchSettings } from '../../shared/home-api'
-import type { UpdateUiState } from '../../shared/update-api'
->>>>>>> 2490e20d (shell: decision-model search reranking — seven switchable System One endpoints (renames Jev reranking) (#1874))
 import {
   DEFAULT_MAX_OUTPUT_TOKENS,
   MAX_MAX_OUTPUT_TOKENS,
