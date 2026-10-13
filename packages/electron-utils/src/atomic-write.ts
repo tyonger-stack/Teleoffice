@@ -68,27 +68,38 @@ function syncFileBestEffortSync(path: string): void {
  * Same-dir temp file, best-effort fsync, then rename, so neither a crash
  * mid-write nor a power loss right after the rename can leave the target
  * truncated. Rename-over-existing fails transiently on Windows under
- * Defender/indexer locks: retry with backoff, then fall back to an in-place
- * write — losing atomicity for that one save beats failing a save the previous
- * plain writeFileSync would have completed.
+ * Defender/indexer locks (retry with backoff), and permanently on network
+ * mounts — a gvfs SMB share refuses it with EEXIST, outside the retry set.
+ * Either way the save publishes through an in-place fallback write: losing
+ * atomicity for that one save beats failing a save the previous plain
+ * writeFileSync would have completed.
  */
 export async function atomicWriteFile(filePath: string, data: Buffer): Promise<void> {
   const tmp = tempPathBeside(filePath)
   try {
     await writeFile(tmp, data)
     await syncFileBestEffort(tmp)
-    await renameWithRetry(tmp, filePath)
   } catch (error) {
-    if (isRetryableRename(error)) {
-      // Keep the completed temp until the fallback lands: if that write fails
-      // or the process dies, the new bytes still exist somewhere on disk.
-      await writeFile(filePath, data)
-      await unlink(tmp).catch(() => {})
-      return
-    }
     await unlink(tmp).catch(() => {})
     throw error
   }
+  try {
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        await rename(tmp, filePath)
+        return
+      } catch (error) {
+        if (!isRetryableRename(error) || attempt >= RENAME_RETRY_DELAYS_MS.length) throw error
+        await sleep(RENAME_RETRY_DELAYS_MS[attempt] ?? 0)
+      }
+    }
+  } catch {
+    // any publish failure lands on the in-place fallback below
+  }
+  // Keep the completed temp until the fallback lands: if that write fails
+  // or the process dies, the new bytes still exist somewhere on disk.
+  await writeFile(filePath, data)
+  await unlink(tmp).catch(() => {})
 }
 
 /** Publish a completed temp file over the target, retrying the transient
