@@ -82,7 +82,27 @@ teleoffice convert report.pdf --to docx --out report-from-pdf.docx
 
 首页还会给文件夹里的文档建本机全文索引（SQLite，支持中文），可以按正文搜索；需要时可把前 20 条命中片段交给 TypeSafe Jev 重排（默认关闭）。
 
-<!-- 界面截图：应用图标替换后重新录制，再放回本节（布局与图注见维护说明）。 -->
+### 使用截图
+
+以下截图均在 Linux（xvfb）上实际运行 TeleOffice 0.12.0 截取，示例文件由 `teleoffice create` 生成。
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/assets/screenshots/home.webp" alt="首页：一键新建 AI 文档、表格、演示、PDF，下方列出最近文件并可按正文搜索"><br><sub>首页：一键新建 AI 文档、表格、演示、PDF，下方列出最近文件并可按正文搜索</sub></td>
+    <td width="50%"><img src="docs/assets/screenshots/docs-editor.webp" alt="Docs：打开 .docx 直接编辑，左侧 AI 面板可总结、润色、续写"><br><sub>Docs：打开 .docx 直接编辑，左侧 AI 面板可总结、润色、续写</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/assets/screenshots/sheets-editor.webp" alt="Sheets：打开 .xlsx，公式实时重算，AI 可分析或修改工作簿"><br><sub>Sheets：打开 .xlsx，公式实时重算，AI 可分析或修改工作簿</sub></td>
+    <td width="50%"><img src="docs/assets/screenshots/slides-editor.webp" alt="Slides：编辑 .pptx，带缩略图、演讲者备注和 AI 美化、配图"><br><sub>Slides：编辑 .pptx，带缩略图、演讲者备注和 AI 美化、配图</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/assets/screenshots/pdf-viewer.webp" alt="PDF：阅读、批注、页内改字，AI 可总结全文、提取要点"><br><sub>PDF：阅读、批注、页内改字，AI 可总结全文、提取要点</sub></td>
+    <td width="50%"><img src="docs/assets/screenshots/pdf-convert.webp" alt="格式转换：PDF 在本机转 Word、Excel 或 PPT"><br><sub>格式转换：PDF 在本机转 Word、Excel 或 PPT</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/assets/screenshots/cli-convert.webp" alt="命令行"><br><sub>命令行：<code>teleoffice</code> 从 Markdown 生成 Word、转 PDF、查看表格信息、PDF 转回 Word</sub></td>
+  </tr>
+</table>
 
 ## 命令速查
 
