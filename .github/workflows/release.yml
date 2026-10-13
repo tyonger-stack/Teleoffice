@@ -1,0 +1,162 @@
+name: Release
+
+# Builds the desktop installers for every supported platform and attaches them
+# to a DRAFT GitHub release. Nothing here ever publishes the release: a
+# maintainer reviews the draft and publishes it by hand.
+#
+# Triggers: pushing a v* tag, or a manual run naming an existing tag (used to
+# rebuild after a fix without moving the tag).
+#
+# Signing is optional. Without certificates the mac app is ad-hoc signed and
+# not notarized, and the Windows installer is unsigned. Adding the MAC_CSC_LINK
+# / MAC_CSC_KEY_PASSWORD and APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD /
+# APPLE_TEAM_ID secrets turns mac signing and notarization on.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to build (for example v0.12.0)
+        required: true
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Resolve version
+        id: version
+        run: |
+          case "$TAG" in
+            v[0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "tag '$TAG' is not vX.Y.Z" >&2; exit 1 ;;
+          esac
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure a draft release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$TAG" --json isDraft --jq .isDraft > is_draft.txt 2>/dev/null; then
+            if [ "$(cat is_draft.txt)" != "true" ]; then
+              echo "release $TAG is already published; refusing to modify it" >&2
+              exit 1
+            fi
+            echo "draft release $TAG already exists"
+          else
+            gh release create "$TAG" --draft --verify-tag --title "TeleOffice $TAG" --notes "Draft: release notes pending."
+          fi
+
+  build:
+    needs: draft
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            platform: mac
+          - os: windows-latest
+            platform: win
+          - os: ubuntu-22.04
+            platform: linux
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.draft.outputs.version }}
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable branch, 2026-07
+        with:
+          toolchain: stable
+          targets: ${{ matrix.platform == 'win' && 'x86_64-pc-windows-msvc' || '' }}
+
+      - name: Cache cargo (xlsx-sidecar)
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: apps/sheets/native/xlsx-engine
+
+      - name: Install Linux packaging tools
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends rpm xz-utils
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build apps
+        shell: bash
+        run: |
+          npm run notices
+          npm run build:all
+
+      - name: Build xlsx sidecar (mac, linux)
+        if: matrix.platform != 'win'
+        run: npm run native:build -w @teleoffice/sheets
+
+      - name: Build xlsx sidecar (win)
+        if: matrix.platform == 'win'
+        shell: bash
+        working-directory: apps/sheets
+        run: >-
+          cargo build --release --target x86_64-pc-windows-msvc
+          --manifest-path native/xlsx-engine/Cargo.toml
+          --config native/xlsx-engine/.cargo/config.toml
+
+      - name: Package
+        shell: bash
+        working-directory: apps/shell
+        env:
+          CSC_LINK: ${{ matrix.platform == 'mac' && secrets.MAC_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ matrix.platform == 'mac' && secrets.MAC_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -z "$CSC_LINK" ]; then unset CSC_LINK CSC_KEY_PASSWORD; fi
+          npx electron-builder --${{ matrix.platform }} --publish never \
+            -c.extraMetadata.version="$VERSION"
+
+      - name: Upload to the draft release
+        shell: bash
+        working-directory: apps/shell/release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          shopt -s nullglob
+          files=(*.dmg *.zip *.exe *.AppImage *.deb *.rpm)
+          if [ ${#files[@]} -eq 0 ]; then echo "no installers produced" >&2; exit 1; fi
+          ls -l "${files[@]}"
+          [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "true" ] || { echo "release is not a draft" >&2; exit 1; }
+          gh release upload "$TAG" "${files[@]}" --clobber

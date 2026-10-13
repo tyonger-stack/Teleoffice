@@ -13,6 +13,10 @@ exports.default = function (result) {
   if (process.platform !== 'darwin') return []
   const { APPLE_KEYCHAIN_PROFILE, APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID } =
     process.env
+  if (!(process.env.CSC_LINK || process.env.CSC_NAME) || process.env.TELEOFFICE_MAC_NOTARIZE === '0') {
+    console.warn('[notarize] unsigned build or notarization disabled — dmg left un-notarized')
+    return []
+  }
   let credArgs
   if (APPLE_KEYCHAIN_PROFILE) {
     credArgs = ['--keychain-profile', APPLE_KEYCHAIN_PROFILE]
