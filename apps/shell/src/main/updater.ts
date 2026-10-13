@@ -20,22 +20,21 @@ import {
 } from './update-window'
 
 /**
- * Full-package auto-update over the generic provider (Azure CDN).
+ * Full-package auto-update from GitHub Releases (or a generic URL override).
  *
- * The release pipeline publishes `latest.yml` + the versioned installer to
- * the update channel prefix (production builds only). The packaged app reads
- * that URL from resources/app-update.yml, which electron-builder bakes in
- * from the `publish` config in apps/shell/electron-builder.cjs — the URL
- * itself is injected at build time via the TELEOFFICE_UPDATE_URL env var and
- * is intentionally not committed to the repo.
+ * electron-builder bakes resources/app-update.yml from the `publish` config
+ * in apps/shell/electron-builder.cjs. With no TELEOFFICE_UPDATE_URL that file
+ * names the GitHub provider (tyonger-stack/Teleoffice). Setting the env var
+ * switches the baked feed to the generic provider and keeps that override.
  *
  * UX is the strong-guidance modal card (update-window.ts), not a native
- * dialog. Windows updates through the NSIS installer (latest.yml); macOS
- * through the zip target (latest-mac.yml); Linux through the AppImage
- * target (latest-linux.yml) — all published by the internal release
- * pipeline. On Linux only AppImage runs self-update (electron-updater
- * replaces the .AppImage file in place, no root needed); deb installs have
- * no updater — users upgrade via `apt install ./<new>.deb`.
+ * dialog. Windows updates through the NSIS installer (latest.yml). Linux
+ * AppImage replaces itself in place; a deb install (resources/package-type
+ * == "deb") installs the new package through the package manager. rpm stays
+ * out of the feed and out of this updater. Signed macOS builds apply the zip
+ * through Squirrel.Mac. Ad-hoc mac builds (no Developer ID) cannot: they
+ * still check the feed, then open the existing manual-download notice, which
+ * links to the GitHub release page, and never call download or quitAndInstall.
  *
  * Dev preview: TELEOFFICE_FAKE_UPDATE=<version> in an unpacked run opens the
  * window with a simulated download so the UI can be exercised end to end.
@@ -411,9 +410,41 @@ const MANUAL_FALLBACK_AFTER = 2
 // feed (see manualDownloadUrlFor), which matches channel, track, and arch.
 const DOWNLOAD_PAGE_URL = 'https://github.com/tyonger-stack/Teleoffice/releases/latest'
 
+function packagedText(name: string): string | null {
+  try {
+    return readFileSync(path.join(process.resourcesPath, name), 'utf8')
+  } catch {
+    return null
+  }
+}
+
+/// "deb" / "rpm" / "pacman" when electron-builder wrote resources/package-type.
+/// AppImage builds do not ship that file.
+function linuxPackageType(): string | null {
+  if (process.platform !== 'linux') return null
+  const text = packagedText('package-type')
+  const kind = text?.trim()
+  return kind ? kind : null
+}
+
+/// Ad-hoc mac packages set this in extraMetadata. Squirrel.Mac cannot apply
+/// an update to an ad-hoc signature, so those builds only show the notice.
+function macAdHocManualOnly(): boolean {
+  if (process.platform !== 'darwin' || !app.isPackaged) return false
+  try {
+    const pkg = JSON.parse(readFileSync(path.join(app.getAppPath(), 'package.json'), 'utf8')) as {
+      teleofficeMacManualUpdate?: unknown
+    }
+    return pkg.teleofficeMacManualUpdate === true
+  } catch {
+    return false
+  }
+}
+
 /// Trusted HTTPS base URL baked into resources/app-update.yml. Manual download
 /// links are always rebuilt from this base rather than trusting URLs supplied
-/// by remotely fetched update metadata.
+/// by remotely fetched update metadata. The GitHub provider's app-update.yml
+/// has no url field; those builds fall back to the release page.
 function updateFeedBaseUrl(): string | null {
   try {
     const yml = readFileSync(path.join(process.resourcesPath, 'app-update.yml'), 'utf8')
@@ -459,6 +490,8 @@ function manualDownloadUrlFor(info: UpdateInfo): string | null {
     const arm = pick((name) => name.endsWith('-arm64.exe'))
     const x64 = pick((name) => name.endsWith('.exe') && !name.endsWith('-arm64.exe'))
     chosen = process.arch === 'arm64' ? (arm ?? x64) : (x64 ?? arm)
+  } else if (linuxPackageType() === 'deb') {
+    chosen = pick((name) => name.endsWith('.deb'))
   } else {
     chosen = pick((name) => name.endsWith('.AppImage'))
   }
@@ -531,7 +564,7 @@ export function applyUpdateChannel(channel: UpdateChannel): void {
  * feedback: an available update opens the standard update window (even a
  * version dismissed with "later" this session — the user just asked for it),
  * up-to-date and failure each get a dialog, and installs with no self-update
- * mechanism (dev runs, Linux .deb) are pointed at the download page instead
+ * mechanism (dev runs, Linux rpm) are pointed at the download page instead
  * of being told they're current. */
 export async function checkForUpdatesNow(): Promise<void> {
   if (manualCheckInFlight) return
@@ -599,16 +632,24 @@ export function initAutoUpdater(
     initFakeUpdate(getWindow, process.env.TELEOFFICE_FAKE_UPDATE)
     return
   }
-  // Unpacked runs have no app-update.yml and must not hit the CDN with a
-  // dev version. Windows updates via NSIS (latest.yml), macOS via the zip
-  // target + latest-mac.yml (Squirrel.Mac requires a signed, notarized app
-  // — dmg is first-install only), Linux via the AppImage target +
-  // latest-linux.yml. On Linux the updater only works for AppImage runs
-  // (electron-updater's AppImageUpdater needs the APPIMAGE env var the
-  // AppImage runtime sets); deb installs update manually via apt.
+  // Unpacked runs have no app-update.yml and must not hit the feed with a
+  // dev version. Windows updates via NSIS (latest.yml). Linux AppImage uses
+  // the APPIMAGE env var electron-updater's AppImageUpdater requires. Linux
+  // deb uses DebUpdater, which electron-updater selects from
+  // resources/package-type. rpm (and any other linux package) stays manual.
+  // Signed mac applies the zip through Squirrel.Mac; ad-hoc mac only notifies.
   if (!app.isPackaged) return
-  const isLinuxAppImage = process.platform === 'linux' && Boolean(process.env.APPIMAGE)
-  if (process.platform !== 'win32' && process.platform !== 'darwin' && !isLinuxAppImage) return
+  const linuxAppImage = process.platform === 'linux' && Boolean(process.env.APPIMAGE)
+  const linuxDeb = process.platform === 'linux' && !linuxAppImage && linuxPackageType() === 'deb'
+  const manualOnly = macAdHocManualOnly()
+  if (
+    process.platform !== 'win32' &&
+    process.platform !== 'darwin' &&
+    !linuxAppImage &&
+    !linuxDeb
+  ) {
+    return
+  }
 
   updaterActive = true
   autoUpdater.channel = CHANNEL_FEED[initialChannel]
@@ -616,10 +657,11 @@ export function initAutoUpdater(
   // back off since a beta user switching to stable must not downgrade
   autoUpdater.allowDowngrade = false
   autoUpdater.autoDownload = false
-  // if the user picked "later" after download, install on normal quit
-  autoUpdater.autoInstallOnAppQuit = true
-  // full-package policy: never attempt blockmap differential downloads
-  // (CI does not publish .blockmap files)
+  // if the user picked "later" after download, install on normal quit.
+  // Ad-hoc mac never downloads, so quit must not try to apply a Squirrel update.
+  autoUpdater.autoInstallOnAppQuit = !manualOnly
+  // full-package policy: the client always downloads the whole installer.
+  // Release jobs still upload blockmaps next to the feed metadata.
   autoUpdater.disableDifferentialDownload = true
   // Range-resumable installer downloads: a dropped connection restarts from
   // the .part bytes instead of byte 0 (falls back to the stock download on
@@ -639,7 +681,7 @@ export function initAutoUpdater(
   // where latestSeenVersion got to, so re-opening the window for the same
   // version (a manual check after "later") resumes there instead of offering
   // "Update Now" over a download that is running or already finished
-  let phase: UpdatePhase = 'available'
+  let phase: UpdatePhase = manualOnly ? 'manual' : 'available'
   let percent = 0
 
   const setPhase = (patch: { phase: UpdatePhase; percent?: number }): void => {
@@ -657,6 +699,10 @@ export function initAutoUpdater(
 
   const actions = {
     onDownload: () => {
+      if (manualOnly) {
+        void shell.openExternal(manualDownloadUrl ?? DOWNLOAD_PAGE_URL)
+        return
+      }
       if (phase === 'downloading' || phase === 'downloaded') return
       downloadInFlight = true
       setPhase({ phase: 'downloading', percent: 0 })
@@ -666,6 +712,7 @@ export function initAutoUpdater(
       })
     },
     onInstall: () => {
+      if (manualOnly) return
       closeUpdateWindow()
       // let the window fully close before tearing the app down
       setImmediate(() => autoUpdater.quitAndInstall(true, true))
@@ -705,7 +752,7 @@ export function initAutoUpdater(
     }
     if (!sameVersionRecheck) {
       failedAttempts = 0
-      phase = 'available'
+      phase = manualOnly ? 'manual' : 'available'
       percent = 0
     }
     latestSeenVersion = info.version

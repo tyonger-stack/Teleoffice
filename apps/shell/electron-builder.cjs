@@ -3,15 +3,16 @@
  * auto-update feed URL can be injected at build time instead of living in
  * the repo).
  *
- * TELEOFFICE_UPDATE_URL — public base URL of the update channel (the generic
- * provider prefix that serves latest.yml / latest-mac.yml). Required for
- * release builds; CI provides it as a repository secret. For local release
- * builds put it in apps/shell/electron-builder.env (gitignored) — the
- * electron-builder CLI loads that file automatically.
+ * TELEOFFICE_UPDATE_URL — optional generic-provider base URL (the prefix that
+ * serves latest.yml / latest-mac.yml / latest-linux.yml). When set, it
+ * overrides the default feed. For local release builds put it in
+ * apps/shell/electron-builder.env (gitignored) — the electron-builder CLI
+ * loads that file automatically.
  *
- * When the variable is unset (forks, PR smoke builds, plain local packaging)
- * the publish config is omitted: electron-builder then bakes no
- * app-update.yml into the app and in-app auto-update stays disabled.
+ * When the variable is unset, publish targets the GitHub Releases of
+ * tyonger-stack/Teleoffice, so electron-builder bakes an app-update.yml with
+ * provider "github". The rpm target sets publish: null and stays out of
+ * latest-linux.yml either way.
  *
  * TELEOFFICE_FONT_CDN_URL — base URL for the curated downloadable-font catalog.
  * Official release jobs inject it through extraMetadata so the endpoint stays
@@ -36,7 +37,7 @@ function normalizeHttpsBaseUrl(name, value) {
   }
 }
 
-const updateUrl = process.env.TELEOFFICE_UPDATE_URL
+const updateUrl = process.env.TELEOFFICE_UPDATE_URL?.trim()
 const fontCdnUrl = normalizeHttpsBaseUrl(
   'TELEOFFICE_FONT_CDN_URL',
   process.env.TELEOFFICE_FONT_CDN_URL,
@@ -634,10 +635,9 @@ const config = {
   // upgrade with `dnf install ./<new>.rpm`. Packaging needs rpmbuild on the
   // build host (the `rpm` apt package on Ubuntu; CI installs it).
   //
-  // publish: null (explicit) keeps the rpm out of the electron-updater feed
-  // and off the CDN entirely: the rpm is a GitHub-Release download only, so
-  // latest-linux.yml keeps listing exactly what the CDN pipeline uploads
-  // (AppImage + deb) and the promote workflow needs no rpm alias.
+  // publish: null (explicit) keeps the rpm out of the electron-updater feed.
+  // The rpm is still uploaded to the GitHub Release as a manual download, but
+  // latest-linux.yml lists only AppImage + deb.
   rpm: {
     artifactName: 'teleoffice-${version}.${arch}.rpm',
     packageName: 'teleoffice',
@@ -711,6 +711,9 @@ if (winSignMode) {
   }
 }
 
+// Default feed is this repo's GitHub Releases. TELEOFFICE_UPDATE_URL keeps the
+// generic-provider override (a private mirror or CDN) working for forks and
+// internal builds. rpm.publish stays null above, so the rpm never enters the feed.
 if (updateUrl) {
   config.publish = [
     {
@@ -719,12 +722,24 @@ if (updateUrl) {
       channel: 'latest',
     },
   ]
+} else {
+  config.publish = [
+    {
+      provider: 'github',
+      owner: 'tyonger-stack',
+      repo: 'Teleoffice',
+    },
+  ]
 }
 
 // CI's "-c.extraMetadata.version=..." CLI override deep-merges with this block,
 // so the version and all injected feature settings survive together.
+// Ad-hoc mac builds (no Developer ID) cannot apply a Squirrel.Mac update.
+// The flag is baked only into mac packages so the packaged updater shows the
+// download-page notice instead of calling quitAndInstall.
 const extraMetadata = {}
 if (fontCdnUrl) extraMetadata.teleofficeFontCdn = { baseUrl: fontCdnUrl }
+if (process.platform === 'darwin' && !macSigned) extraMetadata.teleofficeMacManualUpdate = true
 if (Object.keys(extraMetadata).length) config.extraMetadata = extraMetadata
 
 module.exports = config

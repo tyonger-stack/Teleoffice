@@ -7,7 +7,7 @@ import type { UpdateUiState } from '../src/shared/update-api'
  * Install / Later actions come back through update-window.ts callbacks.
  */
 
-const appState = { isPackaged: true }
+const appState = { isPackaged: true, appPath: '/app' }
 
 const openExternal = vi.hoisted(() => vi.fn())
 const showMessageBox = vi.hoisted(() =>
@@ -21,6 +21,7 @@ vi.mock('electron', () => ({
       return appState.isPackaged
     },
     getVersion: () => '0.1.0',
+    getAppPath: () => appState.appPath,
   },
   shell: {
     openExternal: (url: string) => openExternal(url),
@@ -137,6 +138,7 @@ beforeEach(() => {
   vi.useFakeTimers()
   appState.isPackaged = true
   delete process.env.TELEOFFICE_FAKE_UPDATE
+  delete process.env.APPIMAGE
   updaterState.listeners.clear()
   updaterState.autoDownload = true
   updaterState.autoInstallOnAppQuit = false
@@ -165,6 +167,7 @@ afterEach(() => {
   platformSpy?.restore()
   platformSpy = null
   delete process.env.TELEOFFICE_FAKE_UPDATE
+  delete process.env.APPIMAGE
 })
 
 describe('initAutoUpdater', () => {
@@ -178,7 +181,7 @@ describe('initAutoUpdater', () => {
     expect(showUpdateWindow).not.toHaveBeenCalled()
   })
 
-  it('does nothing on unsupported platforms', async () => {
+  it('does nothing on linux without AppImage or a deb package-type', async () => {
     platformSpy?.restore()
     setPlatform('linux')
     const { initAutoUpdater } = await loadUpdater()
@@ -186,6 +189,72 @@ describe('initAutoUpdater', () => {
     vi.advanceTimersByTime(FIRST_CHECK_DELAY_MS)
     expect(updaterState.listeners.size).toBe(0)
     expect(checkForUpdates).not.toHaveBeenCalled()
+  })
+
+  it('does nothing for an rpm install', async () => {
+    platformSpy?.restore()
+    setPlatform('linux')
+    Object.defineProperty(process, 'resourcesPath', { value: '/res', configurable: true })
+    readFileSyncMock.mockImplementation((file: unknown) => {
+      if (String(file).endsWith('package-type')) return 'rpm\n'
+      throw new Error('missing')
+    })
+    const { initAutoUpdater } = await loadUpdater()
+    initAutoUpdater(() => null)
+    vi.advanceTimersByTime(FIRST_CHECK_DELAY_MS)
+    expect(checkForUpdates).not.toHaveBeenCalled()
+  })
+
+  it('checks for updates on an AppImage install', async () => {
+    platformSpy?.restore()
+    setPlatform('linux')
+    process.env.APPIMAGE = '/home/user/TeleOffice.AppImage'
+    const { initAutoUpdater } = await loadUpdater()
+    initAutoUpdater(() => null)
+    expect(updaterState.autoDownload).toBe(false)
+    expect(updaterState.autoInstallOnAppQuit).toBe(true)
+    vi.advanceTimersByTime(FIRST_CHECK_DELAY_MS)
+    expect(checkForUpdates).toHaveBeenCalledTimes(1)
+  })
+
+  it('checks for updates on a deb install', async () => {
+    platformSpy?.restore()
+    setPlatform('linux')
+    Object.defineProperty(process, 'resourcesPath', { value: '/res', configurable: true })
+    readFileSyncMock.mockImplementation((file: unknown) => {
+      if (String(file).endsWith('package-type')) return 'deb\n'
+      throw new Error('missing')
+    })
+    const { initAutoUpdater } = await loadUpdater()
+    initAutoUpdater(() => null)
+    expect(updaterState.autoInstallOnAppQuit).toBe(true)
+    vi.advanceTimersByTime(FIRST_CHECK_DELAY_MS)
+    expect(checkForUpdates).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the release-page notice for an ad-hoc mac build and does not install', async () => {
+    readFileSyncMock.mockImplementation((file: unknown) => {
+      if (String(file).endsWith('package.json')) {
+        return JSON.stringify({ teleofficeMacManualUpdate: true })
+      }
+      throw new Error('no app-update.yml')
+    })
+    const { initAutoUpdater } = await loadUpdater()
+    initAutoUpdater(() => null)
+    expect(updaterState.autoInstallOnAppQuit).toBe(false)
+    expect(updaterState.autoDownload).toBe(false)
+    vi.advanceTimersByTime(FIRST_CHECK_DELAY_MS)
+    expect(checkForUpdates).toHaveBeenCalledTimes(1)
+    updaterState.listeners.get('update-available')!({ version: '0.2.0', files: [] })
+    expect(lastShownState().phase).toBe('manual')
+    lastShownActions().onDownload()
+    expect(downloadUpdate).not.toHaveBeenCalled()
+    lastShownActions().onInstall()
+    expect(quitAndInstall).not.toHaveBeenCalled()
+    lastShownActions().onOpenDownload()
+    expect(openExternal).toHaveBeenCalledWith(
+      'https://github.com/tyonger-stack/Teleoffice/releases/latest',
+    )
   })
 
   it('configures manual full-package download and checks after the initial delay', async () => {
@@ -378,6 +447,24 @@ describe('manual download fallback', () => {
     } finally {
       restoreArch()
     }
+  })
+
+  it('picks the deb artifact for a deb install', async () => {
+    platformSpy?.restore()
+    setPlatform('linux')
+    Object.defineProperty(process, 'resourcesPath', { value: '/res', configurable: true })
+    readFileSyncMock.mockImplementation((file: unknown) => {
+      if (String(file).endsWith('package-type')) return 'deb\n'
+      return 'url: https://cdn.example.com/linux/\n'
+    })
+    const actions = await failTwiceIntoManual([
+      { url: 'TeleOffice.AppImage' },
+      { url: 'teleoffice_0.2.0_amd64.deb' },
+    ])
+    actions.onOpenDownload()
+    expect(openExternal).toHaveBeenCalledWith(
+      'https://cdn.example.com/linux/teleoffice_0.2.0_amd64.deb',
+    )
   })
 
   it('picks the arch-less dmg for x64 installs', async () => {
