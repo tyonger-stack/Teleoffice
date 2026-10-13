@@ -42,15 +42,15 @@ upstream error envelopes).
 
 ## Knobs (environment variables)
 
-| variable                                  | default   | meaning                                                                                                                                          |
-| ----------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `TELEOFFICE_INPUT_DIR`                     | `/data`   | input volume                                                                                                                                     |
-| `TELEOFFICE_OUTPUT_DIR`                    | `/output` | output volume                                                                                                                                    |
-| `TELEOFFICE_TO`                            | `pdf`     | export target — `pdf` is the only one upstream's headless export ships today; anything else is rejected with exit 1 rather than silently ignored |
-| `TELEOFFICE_PARALLEL`                      | `1`       | concurrent conversions (each is its own Electron process; 2-4 helps on large hosts)                                                              |
+| variable                                    | default   | meaning                                                                                                                                          |
+| ------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `TELEOFFICE_INPUT_DIR`                      | `/data`   | input volume                                                                                                                                     |
+| `TELEOFFICE_OUTPUT_DIR`                     | `/output` | output volume                                                                                                                                    |
+| `TELEOFFICE_TO`                             | `pdf`     | export target — `pdf` is the only one upstream's headless export ships today; anything else is rejected with exit 1 rather than silently ignored |
+| `TELEOFFICE_PARALLEL`                       | `1`       | concurrent conversions (each is its own Electron process; 2-4 helps on large hosts)                                                              |
 | `TELEOFFICE_INCLUDE` / `TELEOFFICE_EXCLUDE` | —         | optional `grep -E` filters on `/data`-relative paths                                                                                             |
-| `TELEOFFICE_FLAGS`                         | —         | extra flags passed through to `--headless-export`                                                                                                |
-| `TELEOFFICE_XVFB`                          | `1`       | set `0` when you provide the display yourself (e.g. wrap with `xvfb-run`)                                                                        |
+| `TELEOFFICE_FLAGS`                          | —         | extra flags passed through to `--headless-export`                                                                                                |
+| `TELEOFFICE_XVFB`                           | `1`       | set `0` when you provide the display yourself (e.g. wrap with `xvfb-run`)                                                                        |
 
 Examples:
 
