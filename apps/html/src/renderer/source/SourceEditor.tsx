@@ -12,12 +12,8 @@ import { redo, redoDepth, undo, undoDepth } from '@codemirror/commands'
 import { External, buildExtensions } from './cm-setup'
 import { addAiRanges, clearAiRanges } from './cm-highlight'
 import { cmFindTarget } from './find-target'
-<<<<<<< HEAD
-import type { FindTarget } from '@teleoffice/ui'
-=======
 import { useI18n } from '../i18n/locale'
 import type { FindTarget } from '@teleoffice/ui'
->>>>>>> ab53f5bd (feat(html): hide a selection from the model (#1886))
 import type { Patch } from '../document/patch'
 
 /** a source range and the text it covers, as the reader sees it */
