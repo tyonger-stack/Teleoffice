@@ -51,6 +51,21 @@ const fontCdnUrl = normalizeHttpsBaseUrl(
 // switch.
 const includeMacX64 = process.env.TELEOFFICE_MAC_X64 === '1'
 
+// macOS signing/notarization switch. A Developer ID certificate (CSC_LINK or
+// CSC_NAME) turns on real signing; notarization additionally needs the Apple
+// ID trio. Without a certificate the app is ad-hoc signed ("-") so arm64
+// builds still launch after the user approves them in Gatekeeper, and the
+// dmg itself is left unsigned. TELEOFFICE_MAC_NOTARIZE=0 forces notarization
+// off even when credentials are present.
+const macSigned = Boolean(process.env.CSC_LINK || process.env.CSC_NAME)
+const macNotarize =
+  macSigned &&
+  process.env.TELEOFFICE_MAC_NOTARIZE !== '0' &&
+  Boolean(
+    process.env.APPLE_KEYCHAIN_PROFILE ||
+    (process.env.APPLE_ID && process.env.APPLE_APP_SPECIFIC_PASSWORD && process.env.APPLE_TEAM_ID),
+  )
+
 // TELEOFFICE_WIN_ARM64=1 — package the Windows ARM64 installer instead of x64.
 // CI runs it as a second electron-builder pass (own BUILD_DIR) after the
 // unchanged x64 pass, so the two never share an output dir or a sidecar path:
@@ -65,7 +80,7 @@ if (winArm64 && !process.env.ELECTRON_BUILDER_7Z_FILTER) {
   process.env.ELECTRON_BUILDER_7Z_FILTER = 'BCJ'
 }
 const winArch = winArm64 ? 'arm64' : 'x64'
-const winSidecarTarget = winArm64 ? 'aarch64-pc-windows-msvc' : 'x86_64-pc-windows-gnu'
+const winSidecarTarget = winArm64 ? 'aarch64-pc-windows-msvc' : 'x86_64-pc-windows-msvc'
 const WIN_SIDECAR = `../sheets/native/xlsx-engine/target/${winSidecarTarget}/release/xlsx-sidecar.exe`
 
 function assertExtraResourceSources() {
@@ -515,7 +530,8 @@ const config = {
     gatekeeperAssess: false,
     entitlements: 'build/entitlements.mac.plist',
     entitlementsInherit: 'build/entitlements.mac.plist',
-    notarize: true,
+    notarize: macNotarize,
+    ...(macSigned ? {} : { identity: '-' }),
     extraResources: [
       {
         from: '../sheets/native/xlsx-engine/target/release/xlsx-sidecar',
@@ -655,7 +671,7 @@ const config = {
     }
   },
   dmg: {
-    sign: true,
+    sign: macSigned,
   },
   afterAllArtifactBuild: 'build/notarize-dmg.js',
 }
