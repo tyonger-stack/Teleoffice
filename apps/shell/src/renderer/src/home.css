@@ -575,26 +575,12 @@ body.vib .home {
   padding: 8px 11px;
   font-size: 12px;
   line-height: 1.4;
-  color: #664d03;
-  background: #fff3cd;
-  border: 1px solid #ffecb5;
+  color: var(--warning);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
   border-radius: 8px;
   white-space: normal;
   overflow-wrap: anywhere;
-}
-
-[data-theme='dark'] .template-warning {
-  color: #ffda6a;
-  background: #332701;
-  border-color: #664d03;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']):not([data-theme='dark']) .template-warning {
-    color: #ffda6a;
-    background: #332701;
-    border-color: #664d03;
-  }
 }
 
 @media (max-width: 1100px) {
