@@ -126,7 +126,13 @@ function masterXml(name: string, shapes: string, layoutIds: string): string {
   )
 }
 
-function themeXml(name: string, accent1: string, latin: string, ea: string): string {
+function themeXml(
+  name: string,
+  accent1: string,
+  latin: string,
+  ea: string,
+  scriptFonts = '',
+): string {
   return (
     XMLDECL +
     '<a:theme xmlns:a="' +
@@ -160,12 +166,16 @@ function themeXml(name: string, accent1: string, latin: string, ea: string): str
     latin +
     '"/><a:ea typeface="' +
     ea +
-    '"/><a:cs typeface=""/></a:majorFont>' +
+    '"/><a:cs typeface=""/>' +
+    scriptFonts +
+    '</a:majorFont>' +
     '<a:minorFont><a:latin typeface="' +
     latin +
     '"/><a:ea typeface="' +
     ea +
-    '"/><a:cs typeface=""/></a:minorFont>' +
+    '"/><a:cs typeface=""/>' +
+    scriptFonts +
+    '</a:minorFont>' +
     '</a:fontScheme>' +
     '</a:themeElements></a:theme>'
   )
@@ -175,7 +185,15 @@ function themeXml(name: string, accent1: string, latin: string, ea: string): str
 // master 0 (MasterOne, Office theme) layouts Blank(0, inherited empty), TitleAndContent(1), TitleOnly(2, inherits title box);
 // master 1 (MasterTwo, Custom theme) layouts TitleAndContent(3, same name), Cover(4, no placeholders).
 // Sample slides: slide1 on Blank, plus slide2 on layout 3 and slide3 on layout 4.
-export async function makeTwoMasterTemplate(): Promise<Uint8Array> {
+// opts.coverName renames the Cover layout (e.g. "1", a name that reads as an index);
+// opts.scriptFonts adds per-script Hans/Hant fonts (SimSun, PMingLiU by their
+// Chinese names) to theme2,
+// as Office-made company templates carry them.
+// opts.explicitFonts adds a text box to Cover whose run names Calibri / SimSun
+// outright (plus a theme-ref cs and a Wingdings sym), like a company slide-number field.
+export async function makeTwoMasterTemplate(
+  opts: { coverName?: string; scriptFonts?: boolean; explicitFonts?: boolean } = {},
+): Promise<Uint8Array> {
   const opened = await openPptx(await createBlankPptx())
   const archive = opened.archive
   const set = (path: string, xml: string): void => {
@@ -241,7 +259,20 @@ export async function makeTwoMasterTemplate(): Promise<Uint8Array> {
       '" Target="../slideMasters/slideMaster1.xml"/>' +
       '</Relationships>',
   )
-  set('ppt/theme/theme2.xml', themeXml('Custom', 'C00000', 'Arial', 'SimSun'))
+  set(
+    'ppt/theme/theme2.xml',
+    themeXml(
+      'Custom',
+      'C00000',
+      'Arial',
+      'SimSun',
+      opts.scriptFonts
+        ? '<a:font script="Jpan" typeface="Yu Gothic"/>' +
+            '<a:font script="Hans" typeface="宋体"/>' +
+            '<a:font script="Hant" typeface="新細明體"/>'
+        : '',
+    ),
+  )
   set(
     'ppt/slideMasters/slideMaster2.xml',
     masterXml(
@@ -284,7 +315,22 @@ export async function makeTwoMasterTemplate(): Promise<Uint8Array> {
   )
   set(
     'ppt/slideLayouts/slideLayout5.xml',
-    layoutXml('Cover', 'custom', decoration(9, 'Logo') + decoration(10, 'Band')),
+    layoutXml(
+      opts.coverName ?? 'Cover',
+      'custom',
+      decoration(9, 'Logo') +
+        decoration(10, 'Band') +
+        (opts.explicitFonts
+          ? '<p:sp><p:nvSpPr><p:cNvPr id="11" name="Number"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>' +
+            '<p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="914400" cy="457200"/></a:xfrm>' +
+            '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr>' +
+            '<p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="zh-CN">' +
+            '<a:latin typeface="Calibri" panose="020F0502020204030204"/>' +
+            '<a:ea typeface="宋体" panose="02010600030101010101" pitchFamily="2" charset="-122"/>' +
+            '<a:cs typeface="+mn-cs"/><a:sym typeface="Wingdings"/>' +
+            '</a:rPr><a:t>1</a:t></a:r></a:p></p:txBody></p:sp>'
+          : ''),
+    ),
   )
   set(
     'ppt/slideLayouts/_rels/slideLayout5.xml.rels',

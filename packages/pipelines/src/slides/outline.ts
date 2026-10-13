@@ -159,6 +159,8 @@ function normalizePage(
       else {
         err('"layout" is missing; pick one of ' + opts.templateLayouts.join(', '))
       }
+    } else if (opts.templateLayouts.includes(layout)) {
+      // an exact layout name wins, even when the name is all digits
     } else if (/^\d+$/.test(layout)) {
       if (opts.templateLayoutCount !== undefined) {
         const n = Number(layout)
@@ -174,7 +176,7 @@ function normalizePage(
           )
         }
       }
-    } else if (!opts.templateLayouts.includes(layout)) {
+    } else {
       err(
         '"layout" ' +
           layout +

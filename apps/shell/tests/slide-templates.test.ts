@@ -12,6 +12,7 @@ import {
   listSlideTemplates,
   pickStartLayout,
   setDefaultSlideTemplate,
+  slideTemplateRegistryWarning,
 } from '../src/main/slide-templates'
 
 const tempDirs: string[] = []
@@ -220,6 +221,28 @@ describe('slide-templates', () => {
     )
   })
 
+  it('reports no warning for a missing or healthy registry', async () => {
+    const { env } = freshEnv()
+    // Missing templates.json means a healthy empty state.
+    expect(slideTemplateRegistryWarning(env)).toBeNull()
+    const srcDir = mkdtempSync(join(tmpdir(), 'shell-tmpl-src-'))
+    trackTemp(srcDir)
+    const src = await writeTemplateFile(srcDir, 'Board.pptx')
+    importSlideTemplate(src, env)
+    // A readable registry has no warning.
+    expect(slideTemplateRegistryWarning(env)).toBeNull()
+  })
+
+  it('warns on a corrupt templates.json but still lists without throwing', () => {
+    const { env, dir } = freshEnv()
+    writeFileSync(join(dir, 'templates.json'), '{not json')
+    const warning = slideTemplateRegistryWarning(env)
+    expect(typeof warning).toBe('string')
+    expect(warning).toContain('templates.json')
+    // Listing stays fail-open so file-based templates still resolve.
+    expect(() => listSlideTemplates(env)).not.toThrow()
+  })
+
   it('pickStartLayout prefers a sample-used layout on the registry master, then decorated title layouts', () => {
     const lay = (
       index: number,
@@ -273,5 +296,15 @@ describe('slide-templates', () => {
     expect(pickStartLayout(info, { master: 1, startLayout: 'Gone' }).name).toBe('2_标题页')
     const noSamples = { ...(info as object), slides: [] } as never
     expect(pickStartLayout(noSamples, { master: 1 }).name).toBe('仅标题')
+    // a layout literally named "1" wins over flat index 1; other digits stay indexes
+    const digits = {
+      ...(info as object),
+      masters: [
+        { index: 0, layouts: m0 },
+        { index: 1, layouts: [...m1.slice(0, 2), lay(3, 1, '1', true, 2)] },
+      ],
+    } as never
+    expect(pickStartLayout(digits, { startLayout: '1' }).index).toBe(3)
+    expect(pickStartLayout(digits, { startLayout: '2' }).name).toBe('2_标题页')
   })
 })

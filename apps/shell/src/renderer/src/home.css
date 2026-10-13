@@ -505,6 +505,7 @@ body.vib .home {
 
 .template-menu > button,
 .template-menu > .template-empty,
+.template-menu > .template-warning,
 .template-menu > .row-menu-divider {
   flex-shrink: 0;
 }
@@ -567,6 +568,19 @@ body.vib .home {
   font-size: 13px;
   color: var(--text-muted);
   white-space: normal;
+}
+
+.template-warning {
+  margin: 8px 8px 0;
+  padding: 8px 11px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--warning);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: 8px;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 1100px) {

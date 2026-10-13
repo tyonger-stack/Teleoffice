@@ -8,12 +8,13 @@ import {
   clearDefaultTemplate,
   getDefaultTemplate,
   listTemplates,
+  registryReadError,
   removeTemplate,
   setDefaultTemplate,
   templatesDir,
 } from '@teleoffice/pipelines/slides/templates'
 import type { CommandContext, CommandDef } from '../registry'
-import { CliError, EXIT } from '../result'
+import { CliError, EXIT, type Warning } from '../result'
 
 export const templateCommand: CommandDef = {
   name: 'template',
@@ -113,10 +114,17 @@ export async function inspectTemplateFile(
   }
 }
 
-function list(ctx: CommandContext): { summary: string; detail: Record<string, unknown> } {
+function list(ctx: CommandContext): {
+  summary: string
+  detail: Record<string, unknown>
+  warnings?: Warning[]
+} {
   const dir = templatesDir(ctx.env)
   const templates = listTemplates(ctx.env)
   const defaultTemplate = getDefaultTemplate(ctx.env)
+  // A corrupt templates.json lists as an empty registry; say so instead of
+  // letting the registered entries silently disappear.
+  const registryError = registryReadError(ctx.env)
   return {
     summary:
       templates.length === 0
@@ -129,6 +137,17 @@ function list(ctx: CommandContext): { summary: string; detail: Record<string, un
             .map((template) => template.name + (template.isDefault ? ' (default)' : ''))
             .join(', '),
     detail: { dir, default: defaultTemplate ?? null, templates },
+    ...(registryError
+      ? {
+          warnings: [
+            {
+              code: 'template_registry_corrupt',
+              message: registryError,
+              suggestion: 'registered templates are hidden until templates.json is fixed',
+            },
+          ],
+        }
+      : {}),
   }
 }
 
@@ -271,6 +290,13 @@ async function assertStartLayout(
   const fail = (message: string): never => {
     throw new CliError(EXIT.usage, message, undefined, { reason: 'invalid_argument' })
   }
+  // A layout name wins over the "<master>:<name>" and numeric readings, so a
+  // layout literally named "1" is accepted by name (on --master when given).
+  const namePool =
+    master !== undefined
+      ? (info.masters[master]?.layouts ?? [])
+      : info.masters.flatMap((m) => m.layouts)
+  if (namePool.some((l) => l.name === raw || l.name.toLowerCase() === raw.toLowerCase())) return
   const scoped = /^(\d+)\s*:\s*(.+)$/.exec(raw)
   if (scoped) {
     const scope = Number(scoped[1])
