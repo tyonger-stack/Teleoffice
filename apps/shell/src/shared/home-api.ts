@@ -42,6 +42,13 @@ export type UiLanguage =
 /** UI theme preference */
 export type UiTheme = 'light' | 'dark' | 'system'
 
+/**
+ * Document page theme preference (#1811): what the editors' canvas/paper does
+ * relative to the UI theme. 'follow' reproduces the previous single-theme
+ * behavior; 'light'/'dark' pin the paper regardless of the UI theme.
+ */
+export type DocTheme = 'follow' | 'light' | 'dark'
+
 /** shell-wide AutoSave default for every editor; updatedAt is 0 until first set */
 export interface AutoSaveDefault {
   on: boolean
@@ -159,6 +166,8 @@ export interface DefaultAppStatus {
   manualOnly: boolean
 }
 
+import type { UpdateUiState } from './update-api'
+
 export interface HomeApi {
   /** unified recents across document types, newest first (paged) */
   recents(query?: RecentQuery): Promise<RecentPage>
@@ -273,6 +282,11 @@ export interface HomeApi {
   setUpdateChannel(channel: UpdateChannel): Promise<void>
   /** app version (from package.json / electron app.getVersion) */
   getAppVersion(): Promise<string>
+  /** live updater state (null until an update was first seen); Settings → About */
+  getUpdateState(): Promise<UpdateUiState | null>
+  /** re-open the (minimized) update dialog; a not-yet-started download also starts */
+  openUpdateDialog(): Promise<boolean>
+  onUpdateStateChanged(handler: (state: UpdateUiState) => void): () => void
   /** whether the first-run onboarding has been completed or skipped (persisted in userData/app-settings.json) */
   onboardingSeen(): Promise<boolean>
   /** mark onboarding done */
@@ -281,6 +295,10 @@ export interface HomeApi {
   getTheme(): Promise<UiTheme>
   /** switch + persist the UI theme; broadcasts 'app:theme-changed' to all web contents */
   setTheme(theme: UiTheme): Promise<void>
+  /** current document page theme preference (#1811, persisted in userData/app-settings.json) */
+  getDocumentTheme(): Promise<DocTheme>
+  /** switch + persist the document page theme; broadcasts 'app:document-theme-changed' to all web contents */
+  setDocumentTheme(theme: DocTheme): Promise<void>
   /** AutoSave default applied by every editor window (persisted in userData/app-settings.json) */
   getAutoSaveDefault(): Promise<AutoSaveDefault>
   /** persist the AutoSave default; broadcasts 'app:auto-save-default-changed' to all web contents */
@@ -314,6 +332,8 @@ export interface HomeApi {
   setDefaultApp(): Promise<DefaultAppStatus>
   /** theme switched anywhere (broadcast from the main process) */
   onThemeChanged(handler: (theme: UiTheme) => void): () => void
+  /** document page theme switched anywhere (broadcast from the main process) */
+  onDocumentThemeChanged(handler: (theme: DocTheme) => void): () => void
   /** open the GenTeam community page in the default browser */
   openGenTeam(): Promise<void>
   /** open the public GitHub repository in the default browser */
@@ -515,6 +535,8 @@ export const HOME_CHANNELS = {
   setOnboardingSeen: 'home:set-onboarding-seen',
   getTheme: 'home:get-theme',
   setTheme: 'home:set-theme',
+  getDocumentTheme: 'home:get-document-theme',
+  setDocumentTheme: 'home:set-document-theme',
   getAutoSaveDefault: 'home:get-auto-save-default',
   setAutoSaveDefault: 'home:set-auto-save-default',
   getMcpStatus: 'home:get-mcp-status',
