@@ -438,6 +438,7 @@ export const pt = {
   appParaSpecialFirstLine: 'Primeira linha',
   appParaSpecialHanging: 'Deslocamento',
   appParaBy: 'Por',
+  appParaUnitChars: 'Caracteres',
   appInsertEquation: 'Inserir equação',
   appLatexPlaceholder: 'ex.: x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}',
   appLatexPreviewHint: 'Digite LaTeX para ver uma prévia',
