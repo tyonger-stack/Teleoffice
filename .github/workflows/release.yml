@@ -157,10 +157,24 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          PLATFORM: ${{ matrix.platform }}
         run: |
           shopt -s nullglob
-          files=(*.dmg *.zip *.exe *.AppImage *.deb *.rpm)
-          if [ ${#files[@]} -eq 0 ]; then echo "no installers produced" >&2; exit 1; fi
+          installers=(*.dmg *.zip *.exe *.AppImage *.deb *.rpm)
+          blockmaps=(*.blockmap)
+          case "$PLATFORM" in
+            win) meta=latest.yml ;;
+            mac) meta=latest-mac.yml ;;
+            linux) meta=latest-linux.yml ;;
+            *) echo "unknown platform $PLATFORM" >&2; exit 1 ;;
+          esac
+          if [ ${#installers[@]} -eq 0 ]; then echo "no installers produced" >&2; exit 1; fi
+          if [ ! -f "$meta" ]; then echo "missing update metadata $meta" >&2; exit 1; fi
+          if [ ${#blockmaps[@]} -eq 0 ]; then echo "no blockmap files produced" >&2; exit 1; fi
+          # rpm is uploaded as an installer but stays out of latest-linux.yml
+          # (electron-builder rpm.publish is null). Metadata stays on the draft
+          # until a maintainer publishes the release by hand.
+          files=("${installers[@]}" "$meta" "${blockmaps[@]}")
           ls -l "${files[@]}"
           [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "true" ] || { echo "release is not a draft" >&2; exit 1; }
           gh release upload "$TAG" "${files[@]}" --clobber
