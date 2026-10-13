@@ -655,6 +655,10 @@ const config = {
   nsis: {
     oneClick: false,
     allowToChangeInstallationDirectory: true,
+    // Spaces break the update feed: electron-builder writes hyphens into
+    // latest.yml, and `gh release upload` stores the same file with dots.
+    // This name matches the GitHub asset and the url inside latest.yml.
+    artifactName: 'TeleOffice.Setup.${version}.${ext}',
   },
   beforePack: async (context) => {
     ensurePlatformHelpers()

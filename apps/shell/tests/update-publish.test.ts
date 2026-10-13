@@ -18,6 +18,7 @@ interface BuilderConfig {
   publish?: PublishTarget[]
   extraMetadata?: { teleofficeMacManualUpdate?: boolean }
   rpm?: { publish?: null }
+  nsis?: { artifactName?: string }
 }
 
 function loadBuilder(env: Record<string, string | undefined>, platform: string): BuilderConfig {
@@ -40,6 +41,8 @@ describe('update publish config', () => {
     ])
     expect(config.rpm?.publish).toBeNull()
     expect(config.extraMetadata?.teleofficeMacManualUpdate).toBeUndefined()
+    expect(config.nsis?.artifactName).toBe('TeleOffice.Setup.${version}.${ext}')
+    expect(config.nsis?.artifactName).not.toMatch(/\s/)
   })
 
   it('keeps a generic feed when TELEOFFICE_UPDATE_URL is set', () => {
