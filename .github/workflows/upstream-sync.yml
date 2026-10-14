@@ -44,6 +44,8 @@ jobs:
             appendFileSync(out, `pending=${report.pending.length}\n`)
             appendFileSync(out, `marker=${report.marker}\n`)
             appendFileSync(out, `upstream_tip=${report.upstreamTip}\n`)
+            // The run page always carries the report, even if the issue step below cannot write.
+            if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, report.markdown)
           '
 
       - name: Open or update the tracking issue
@@ -56,10 +58,16 @@ jobs:
         run: |
           title="Upstream sync: ${PENDING} commits on genspark-ai/genoffice since ${MARKER:0:10}"
           body="$(node --input-type=module -e 'import { readFileSync } from "node:fs"; process.stdout.write(JSON.parse(readFileSync("/tmp/upstream-sync.json","utf8")).markdown)')"
-          existing="$(gh issue list --state open --limit 20 --search 'Upstream sync in:title' --json number,title --jq '[.[] | select(.title | startswith("Upstream sync:")) | .number] | first // empty')"
+          # The token may be refused issue writes (seen as "Resource not accessible by
+          # integration (createIssue)"). The report is already in the job summary, so warn
+          # instead of failing the scheduled run.
+          warn() {
+            echo "::warning title=Upstream sync::Could not $1 the tracking issue with GITHUB_TOKEN. The report is in this run's job summary. Check Settings > Actions > General > Workflow permissions."
+          }
+          existing="$(gh issue list --state open --limit 20 --search 'Upstream sync in:title' --json number,title --jq '[.[] | select(.title | startswith("Upstream sync:")) | .number] | first // empty')" || { warn read; exit 0; }
           if [ -n "$existing" ]; then
-            gh issue edit "$existing" --title "$title" --body "$body"
-            gh issue comment "$existing" --body "Refreshed against upstream \`${UPSTREAM_TIP}\`. ${PENDING} commits still need a review."
+            gh issue edit "$existing" --title "$title" --body "$body" || { warn update; exit 0; }
+            gh issue comment "$existing" --body "Refreshed against upstream \`${UPSTREAM_TIP}\`. ${PENDING} commits still need a review." || warn comment
           else
-            gh issue create --title "$title" --body "$body"
+            gh issue create --title "$title" --body "$body" || warn create
           fi
