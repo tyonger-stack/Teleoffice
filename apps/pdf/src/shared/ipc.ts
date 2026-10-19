@@ -150,6 +150,8 @@ export type CertificateErrorCode =
   | 'cert-not-exportable'
   | 'cert-store-locked'
   | 'cert-store-tool-missing'
+  /** The system store is not supported on this platform (macOS for now) */
+  | 'cert-store-unsupported'
 
 /** A signing identity found in the operating system's certificate store */
 export interface SystemCertificateInfo {
@@ -163,7 +165,7 @@ export interface SystemCertificateInfo {
   expired: boolean
 }
 
-export type SystemStoreIssue = 'nss-tools-missing' | 'store-locked'
+export type SystemStoreIssue = 'nss-tools-missing' | 'store-locked' | 'platform-unsupported'
 
 export interface ListSystemCertificatesResult {
   certs: SystemCertificateInfo[]
@@ -181,6 +183,8 @@ export interface SignWithCertificateRequest {
   /** Opaque id returned by pickCertificate for this view */
   certId: string
   password: string
+  /** Unlocks a locked system store (NSS) when the identity has to be exported again */
+  storePassword?: string
   reason?: string
   location?: string
   contactInfo?: string
@@ -907,7 +911,7 @@ export interface PdfApi {
   /** Open the OS file picker for a PKCS#12 certificate (.p12/.pfx); the file is referenced by the returned opaque id */
   pickCertificate(): Promise<{ certId: string; fileName: string } | null>
   /** Decrypt the picked certificate with its password and describe the signer (nothing is signed) */
-  /** Signing identities in the OS certificate store (NSS on Linux, personal store on Windows, keychain on macOS) */
+  /** Signing identities in the OS certificate store (NSS on Linux, personal store on Windows; macOS signs from .p12/.pfx files) */
   listSystemCertificates(storePassword?: string): Promise<ListSystemCertificatesResult>
   /** Forget a certificate id and any key material the main process still holds for it */
   releaseCertificate(certId: string): void

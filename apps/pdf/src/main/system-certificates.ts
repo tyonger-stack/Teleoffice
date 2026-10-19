@@ -5,20 +5,26 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { CertificateErrorCode } from '../shared/ipc'
+import type { ExternalSigner } from './pdf-sign'
 import { describeCertificate } from './pdf-signatures'
 
 /**
  * Certificates that live in the operating system's own stores (the NSS database Chrome and
- * Firefox use on Linux, the Windows personal store, the macOS keychain). Private keys cannot be
- * read in place, so a chosen identity is exported through the platform's own tool into a
- * PKCS#12 that is protected by a random one-time password and kept in memory only; the signer
- * then treats it like any other .p12. Keys the store refuses to export are not supported.
+ * Firefox use on Linux, the Windows personal store). Private keys cannot be read in place, so a
+ * chosen identity is exported through the platform's own tool into a PKCS#12 that is protected
+ * by a random one-time password and kept in memory only; the signer then treats it like any
+ * other .p12. Keys the store refuses to export are not supported there.
+ *
+ * Windows never exports: the personal store signs in place (CNG/CryptoAPI `SignHash`), so keys
+ * flagged non-exportable, and keys on smart cards, work the same way they do in Adobe Reader.
+ *
+ * macOS is not offered: `security export` can only dump every identity of a keychain, prompts
+ * per key and fails on any non-exportable one. The follow-up is a per-identity SecItemExport
+ * path (native addon); until then Mac users sign from a .p12/.pfx file.
  */
 
 export type SystemCertificateRef =
-  | { source: 'nss'; dir: string; nickname: string }
-  | { source: 'windows'; thumbprint: string }
-  | { source: 'macos'; sha1: string }
+  { source: 'nss'; dir: string; nickname: string } | { source: 'windows'; thumbprint: string }
 
 export interface SystemCertificate {
   ref: SystemCertificateRef
@@ -31,7 +37,7 @@ export interface SystemCertificate {
 }
 
 /** Why part of a store could not be read, so the UI can say what to do about it */
-export type SystemStoreIssue = 'nss-tools-missing' | 'store-locked'
+export type SystemStoreIssue = 'nss-tools-missing' | 'store-locked' | 'platform-unsupported'
 
 export interface SystemCertificateListing {
   certs: SystemCertificate[]
@@ -41,9 +47,11 @@ export interface SystemCertificateListing {
 export interface ExportedIdentity {
   p12: Uint8Array
   password: string
-  /** Lower-case SHA-1 of the wanted certificate, when the export holds more than one identity */
-  sha1?: string
 }
+
+/** What a chosen system identity signs with: an exported PKCS#12, or the OS store itself */
+export type SystemIdentity =
+  ({ kind: 'p12' } & ExportedIdentity) | { kind: 'in-place'; signer: ExternalSigner }
 
 export class SystemStoreError extends Error {
   constructor(readonly code: CertificateErrorCode) {
@@ -110,7 +118,7 @@ const defaultEnv = (): SystemStoreEnv => ({
 
 /** Scratch directory readable by this user only, removed when `work` settles */
 async function withPrivateDir<T>(work: (dir: string) => Promise<T>): Promise<T> {
-  const dir = await mkdtemp(join(tmpdir(), 'genoffice-cert-'))
+  const dir = await mkdtemp(join(tmpdir(), 'teleoffice-cert-'))
   try {
     return await work(dir)
   } finally {
@@ -254,12 +262,28 @@ export const WINDOWS_LIST_SCRIPT =
   '@(Get-ChildItem Cert:\\CurrentUser\\My | Where-Object { $_.HasPrivateKey } | ForEach-Object { [pscustomobject]@{ ' +
   'Thumbprint = $_.Thumbprint; Subject = $_.Subject; Der = ([Convert]::ToBase64String($_.RawData)) } }) | ConvertTo-Json -Compress'
 
-export const WINDOWS_EXPORT_SCRIPT =
-  // Without 'Stop' a refused export is only a printed error and the process still exits 0
+/** Signer first, then the rest of the chain Windows can build; no revocation lookups */
+export const WINDOWS_CHAIN_SCRIPT =
+  POWERSHELL_UTF8 +
   "$ErrorActionPreference = 'Stop'; " +
-  '$pw = ConvertTo-SecureString -String $env:TELEOFFICE_PFX_PASSWORD -AsPlainText -Force; ' +
-  "Export-PfxCertificate -Cert ('Cert:\\CurrentUser\\My\\' + $env:TELEOFFICE_THUMBPRINT) " +
-  '-FilePath $env:TELEOFFICE_PFX_PATH -Password $pw -ChainOption BuildChain | Out-Null'
+  "$c = Get-Item ('Cert:\\CurrentUser\\My\\' + $env:TELEOFFICE_THUMBPRINT); " +
+  '$chain = New-Object System.Security.Cryptography.X509Certificates.X509Chain; ' +
+  "$chain.ChainPolicy.RevocationMode = 'NoCheck'; [void]$chain.Build($c); " +
+  '$certs = @($c) + @($chain.ChainElements | ForEach-Object { $_.Certificate } | Select-Object -Skip 1); ' +
+  '@($certs | ForEach-Object { [Convert]::ToBase64String($_.RawData) }) | ConvertTo-Json -Compress'
+
+/** The private key stays in the store: Windows signs the digest and returns only the signature */
+export const WINDOWS_SIGN_SCRIPT =
+  "$ErrorActionPreference = 'Stop'; " +
+  "$c = Get-Item ('Cert:\\CurrentUser\\My\\' + $env:TELEOFFICE_THUMBPRINT); " +
+  '$rsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($c); ' +
+  "if (-not $rsa) { throw 'no RSA private key' } " +
+  '$hex = $env:TELEOFFICE_DIGEST; ' +
+  '$hash = [byte[]]::new($hex.Length / 2); ' +
+  'for ($i = 0; $i -lt $hash.Length; $i++) { $hash[$i] = [Convert]::ToByte($hex.Substring(2 * $i, 2), 16) } ' +
+  '[Convert]::ToBase64String($rsa.SignHash($hash, ' +
+  '[System.Security.Cryptography.HashAlgorithmName]::SHA256, ' +
+  '[System.Security.Cryptography.RSASignaturePadding]::Pkcs1))'
 
 const THUMBPRINT = /^[0-9A-Fa-f]{40}$/
 
@@ -310,103 +334,54 @@ async function listWindows(env: SystemStoreEnv): Promise<SystemCertificateListin
   return out
 }
 
-async function exportWindows(
+export function parseWindowsChain(json: string): Buffer[] {
+  const text = json.replace(/^\uFEFF/, '').trim()
+  if (!text) return []
+  const parsed: unknown = JSON.parse(text)
+  const rows = Array.isArray(parsed) ? parsed : [parsed]
+  return rows
+    .filter((row): row is string => typeof row === 'string')
+    .map((b64) => Buffer.from(b64, 'base64'))
+}
+
+async function openWindowsSigner(
   env: SystemStoreEnv,
   ref: Extract<SystemCertificateRef, { source: 'windows' }>,
-): Promise<ExportedIdentity> {
+): Promise<SystemIdentity> {
   if (!THUMBPRINT.test(ref.thumbprint)) throw new SystemStoreError('cert-invalid')
-  const password = newPassword()
-  return withPrivateDir(async (scratch) => {
-    const out = join(scratch, 'identity.pfx')
-    const result = await env.run(
-      'powershell.exe',
-      ['-NoProfile', '-NonInteractive', '-Command', WINDOWS_EXPORT_SCRIPT],
-      {
-        env: {
-          TELEOFFICE_PFX_PASSWORD: password,
-          TELEOFFICE_THUMBPRINT: ref.thumbprint,
-          TELEOFFICE_PFX_PATH: out,
-        },
-      },
-    )
-    if (result.missing) throw new SystemStoreError('cert-store-tool-missing')
-    if (result.code !== 0) throw new SystemStoreError('cert-not-exportable')
-    try {
-      return { p12: new Uint8Array(await readFile(out)), password }
-    } catch {
-      // A zero exit with no file still means the store kept the key
-      throw new SystemStoreError('cert-not-exportable')
-    }
-  })
-}
-
-// ── macOS: keychain ──────────────────────────────────────────────────────────
-
-/** `security find-identity -v` lines: `  1) <SHA-1> "name"` */
-export function parseMacIdentities(output: string): { sha1: string; name: string }[] {
-  const out: { sha1: string; name: string }[] = []
-  for (const line of output.split('\n')) {
-    const match = /^\s*\d+\)\s+([0-9A-Fa-f]{40})\s+"(.*)"/.exec(line)
-    if (match) out.push({ sha1: match[1]!.toLowerCase(), name: match[2]! })
-  }
-  return out
-}
-
-/** `security find-certificate -a -Z -p`: a `SHA-1 hash:` line precedes each PEM block */
-export function parseMacCertificates(output: string): Map<string, string> {
-  const byHash = new Map<string, string>()
-  const pattern =
-    /SHA-1 hash:\s*([0-9A-Fa-f]{40})[\s\S]*?(-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----)/g
-  for (const match of output.matchAll(pattern)) byHash.set(match[1]!.toLowerCase(), match[2]!)
-  return byHash
-}
-
-async function listMac(env: SystemStoreEnv): Promise<SystemCertificateListing> {
-  const out: SystemCertificateListing = { certs: [], issues: [] }
-  const identities = await env.run('security', ['find-identity', '-v'])
-  if (identities.code !== 0) return out
-  const pems = parseMacCertificates(
-    (await env.run('security', ['find-certificate', '-a', '-Z', '-p'])).stdout,
+  const thumbprintEnv = { TELEOFFICE_THUMBPRINT: ref.thumbprint }
+  const result = await env.run(
+    'powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-Command', WINDOWS_CHAIN_SCRIPT],
+    { env: thumbprintEnv },
   )
-  for (const identity of parseMacIdentities(identities.stdout)) {
-    const pem = pems.get(identity.sha1)
-    if (!pem) continue
-    try {
-      const cert = new X509Certificate(pem)
-      if (cert.publicKey.asymmetricKeyType !== 'rsa') continue
-      out.certs.push(
-        toListed({ source: 'macos', sha1: identity.sha1 }, identity.name, cert, env.now()),
-      )
-    } catch {
-      /* skip */
-    }
+  if (result.missing) throw new SystemStoreError('cert-store-tool-missing')
+  if (result.code !== 0) throw new SystemStoreError('cert-invalid')
+  let chainDer: Buffer[]
+  try {
+    chainDer = parseWindowsChain(result.stdout)
+  } catch {
+    throw new SystemStoreError('cert-invalid')
   }
-  return out
-}
-
-async function exportMac(
-  env: SystemStoreEnv,
-  ref: Extract<SystemCertificateRef, { source: 'macos' }>,
-): Promise<ExportedIdentity> {
-  const password = newPassword()
-  return withPrivateDir(async (scratch) => {
-    const out = join(scratch, 'identities.p12')
-    // `security` can only export every identity of a keychain; the signer picks ours by SHA-1
-    const result = await env.run('security', [
-      'export',
-      '-t',
-      'identities',
-      '-f',
-      'pkcs12',
-      '-P',
-      password,
-      '-o',
-      out,
-    ])
-    if (result.missing) throw new SystemStoreError('cert-store-tool-missing')
-    if (result.code !== 0) throw new SystemStoreError('cert-not-exportable')
-    return { p12: new Uint8Array(await readFile(out)), password, sha1: ref.sha1 }
-  })
+  if (chainDer.length === 0) throw new SystemStoreError('cert-invalid')
+  return {
+    kind: 'in-place',
+    signer: {
+      chainDer,
+      async signDigest(digest) {
+        const signed = await env.run(
+          'powershell.exe',
+          ['-NoProfile', '-NonInteractive', '-Command', WINDOWS_SIGN_SCRIPT],
+          { env: { ...thumbprintEnv, TELEOFFICE_DIGEST: Buffer.from(digest).toString('hex') } },
+        )
+        if (signed.missing) throw new SystemStoreError('cert-store-tool-missing')
+        const signature = Buffer.from(signed.stdout.trim(), 'base64')
+        if (signed.code !== 0 || signature.length === 0)
+          throw new SystemStoreError('cert-not-exportable')
+        return signature
+      },
+    },
+  }
 }
 
 // ── entry points ─────────────────────────────────────────────────────────────
@@ -415,29 +390,25 @@ export async function listSystemCertificates(
   storePassword?: string,
   env: SystemStoreEnv = defaultEnv(),
 ): Promise<SystemCertificateListing> {
+  if (env.platform === 'darwin') return { certs: [], issues: ['platform-unsupported'] }
   const listing =
-    env.platform === 'win32'
-      ? await listWindows(env)
-      : env.platform === 'darwin'
-        ? await listMac(env)
-        : await listNss(env, storePassword)
+    env.platform === 'win32' ? await listWindows(env) : await listNss(env, storePassword)
   listing.certs.sort(
     (a, b) => Number(a.expired) - Number(b.expired) || a.label.localeCompare(b.label),
   )
   return listing
 }
 
-export async function exportSystemCertificate(
+export async function openSystemSigner(
   ref: SystemCertificateRef,
   storePassword?: string,
   env: SystemStoreEnv = defaultEnv(),
-): Promise<ExportedIdentity> {
+): Promise<SystemIdentity> {
+  if (env.platform === 'darwin') throw new SystemStoreError('cert-store-unsupported')
   switch (ref.source) {
     case 'nss':
-      return exportNss(env, ref, storePassword)
+      return { kind: 'p12', ...(await exportNss(env, ref, storePassword)) }
     case 'windows':
-      return exportWindows(env, ref)
-    case 'macos':
-      return exportMac(env, ref)
+      return openWindowsSigner(env, ref)
   }
 }

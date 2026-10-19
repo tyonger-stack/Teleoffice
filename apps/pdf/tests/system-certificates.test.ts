@@ -6,14 +6,12 @@ import { join } from 'node:path'
 import forge from 'node-forge'
 import { PDFDocument } from 'pdf-lib'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { signPdf } from '../src/main/pdf-sign'
+import { openExternalCertificate, signPdf } from '../src/main/pdf-sign'
 import { readPdfSignatures } from '../src/main/pdf-signatures'
 import {
   SystemStoreError,
-  exportSystemCertificate,
+  openSystemSigner,
   listSystemCertificates,
-  parseMacCertificates,
-  parseMacIdentities,
   parseNssKeyList,
   parseWindowsCertificates,
   runCommand,
@@ -65,17 +63,6 @@ describe('store output parsers', () => {
     expect(parseWindowsCertificates(many).map((c) => c.thumbprint)).toEqual(['A'.repeat(40)])
     expect(parseWindowsCertificates('')).toEqual([])
   })
-
-  it('reads keychain identities and pairs certificates with their SHA-1', () => {
-    expect(
-      parseMacIdentities(
-        '  1) ' + 'AB'.repeat(20) + ' "Alice (Work)"\n     1 valid identities found\n',
-      ),
-    ).toEqual([{ sha1: 'ab'.repeat(20), name: 'Alice (Work)' }])
-    const pem = '-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----'
-    const found = parseMacCertificates(`SHA-1 hash: ${'CD'.repeat(20)}\nkeychain: x\n${pem}\n`)
-    expect(found.get('cd'.repeat(20))).toBe(pem)
-  })
 })
 
 describe('listing and exporting with a stubbed platform', () => {
@@ -112,9 +99,51 @@ describe('listing and exporting with a stubbed platform', () => {
       now: () => new Date(),
     }
     await expect(
-      exportSystemCertificate({ source: 'windows', thumbprint: '1"; calc; "' }, undefined, env),
+      openSystemSigner({ source: 'windows', thumbprint: '1"; calc; "' }, undefined, env),
     ).rejects.toMatchObject({ code: 'cert-invalid' })
   })
+
+  it('signs with a Windows key that cannot be exported, without ever reading the key', async () => {
+    const made = selfSigned('Non Exportable', new Date(Date.now() + 86_400_000))
+    const der = forge.asn1.toDer(forge.pki.certificateToAsn1(made.cert)).getBytes()
+    const thumbprint = forge.md.sha1.create().update(der).digest().toHex().toUpperCase()
+    const scripts: string[] = []
+    const env: SystemStoreEnv = {
+      platform: 'win32',
+      home: '/h',
+      now: () => new Date(),
+      run: async (_file, args, options) => {
+        const script = args[args.length - 1]!
+        scripts.push(script)
+        expect(script).not.toContain('Export-PfxCertificate')
+        expect(options?.env?.TELEOFFICE_THUMBPRINT).toBe(thumbprint)
+        if (script.includes('X509Chain')) {
+          return ok(JSON.stringify([Buffer.from(der, 'binary').toString('base64')]))
+        }
+        // Stand-in for CNG: sign the SHA-256 digest with PKCS#1 v1.5
+        const digest = Buffer.from(options!.env!.TELEOFFICE_DIGEST!, 'hex')
+        const fakeMd = {
+          algorithm: 'sha256',
+          digest: () => forge.util.createBuffer(digest.toString('binary')),
+        }
+        const raw = made.keys.privateKey.sign(fakeMd as never)
+        return ok(Buffer.from(raw, 'binary').toString('base64'))
+      },
+    }
+    const identity = await openSystemSigner({ source: 'windows', thumbprint }, undefined, env)
+    if (identity.kind !== 'in-place') throw new Error('Windows signs in place')
+    const opened = openExternalCertificate(identity.signer)
+    if (!opened.ok) throw new Error(opened.error)
+    const pdf = await PDFDocument.create()
+    pdf.addPage([200, 200])
+    const signed = await signPdf(await pdf.save(), {
+      external: { signer: identity.signer, loaded: opened.loaded },
+    })
+    const [sig] = await readPdfSignatures(signed)
+    expect(sig!.signer?.commonName).toBe('Non Exportable')
+    expect(sig!.problems).toEqual(['self-signed'])
+    expect(scripts.length).toBeGreaterThanOrEqual(2)
+  }, 60_000)
 
   it('maps a tool that is not installed and a store that will not export', async () => {
     const missing: RunResult = { code: 1, stdout: '', stderr: '', missing: true }
@@ -131,13 +160,32 @@ describe('listing and exporting with a stubbed platform', () => {
       now: () => new Date(),
     })
     const ref = { source: 'nss' as const, dir: '/h/.pki/nssdb', nickname: 'x' }
-    await expect(exportSystemCertificate(ref, undefined, make(missing))).rejects.toMatchObject({
+    await expect(openSystemSigner(ref, undefined, make(missing))).rejects.toMatchObject({
       code: 'cert-store-tool-missing',
     })
-    await expect(exportSystemCertificate(ref, undefined, make(refused))).rejects.toMatchObject({
+    await expect(openSystemSigner(ref, undefined, make(refused))).rejects.toMatchObject({
       code: 'cert-not-exportable',
     })
     expect(new SystemStoreError('cert-store-locked').code).toBe('cert-store-locked')
+  })
+
+  it('offers no system store on macOS', async () => {
+    const env: SystemStoreEnv = {
+      platform: 'darwin',
+      home: '/h',
+      run: async () => {
+        throw new Error('no tool may run')
+      },
+      now: () => new Date(),
+    }
+    expect(await listSystemCertificates(undefined, env)).toEqual({
+      certs: [],
+      issues: ['platform-unsupported'],
+    })
+    const ref = { source: 'nss' as const, dir: '/h/.pki/nssdb', nickname: 'x' }
+    await expect(openSystemSigner(ref, undefined, env)).rejects.toMatchObject({
+      code: 'cert-store-unsupported',
+    })
   })
 })
 
@@ -152,7 +200,7 @@ describe.skipIf(!hasNss || process.platform !== 'linux')('against a real NSS dat
   const PASSWORD = 'import-pw'
 
   beforeAll(() => {
-    const made = selfSigned('测试 NSS User', new Date(Date.now() + 86_400_000))
+    const made = selfSigned('\u6d4b\u8bd5 NSS User', new Date(Date.now() + 86_400_000))
     mkdirSync(db, { recursive: true })
     const p12 = join(home, 'in.p12')
     const asn1 = forge.pkcs12.toPkcs12Asn1(made.keys.privateKey, [made.cert], PASSWORD, {
@@ -177,18 +225,18 @@ describe.skipIf(!hasNss || process.platform !== 'linux')('against a real NSS dat
     const listing = await listSystemCertificates(undefined, env())
     expect(listing.issues).toEqual([])
     expect(listing.certs).toHaveLength(1)
-    expect(listing.certs[0]!.commonName).toBe('测试 NSS User')
+    expect(listing.certs[0]!.commonName).toBe('\u6d4b\u8bd5 NSS User')
 
-    const identity = await exportSystemCertificate(listing.certs[0]!.ref, undefined, env())
+    const identity = await openSystemSigner(listing.certs[0]!.ref, undefined, env())
+    if (identity.kind !== 'p12') throw new Error('NSS identities are exported')
     const pdf = await PDFDocument.create()
     pdf.addPage([200, 200])
     const signed = await signPdf(await pdf.save(), {
       p12: identity.p12,
       password: identity.password,
-      signerSha1: identity.sha1,
     })
     const [sig] = await readPdfSignatures(signed)
-    expect(sig!.signer?.commonName).toBe('测试 NSS User')
+    expect(sig!.signer?.commonName).toBe('\u6d4b\u8bd5 NSS User')
     expect(sig!.problems).toEqual(['self-signed'])
   }, 60_000)
 
@@ -199,7 +247,7 @@ describe.skipIf(!hasNss || process.platform !== 'linux')('against a real NSS dat
         .filter((n) => n.startsWith('teleoffice-cert-')),
     )
     const listing = await listSystemCertificates(undefined, env())
-    await exportSystemCertificate(listing.certs[0]!.ref, undefined, env())
+    await openSystemSigner(listing.certs[0]!.ref, undefined, env())
     const after = (await import('node:fs'))
       .readdirSync(tmpdir())
       .filter((n) => n.startsWith('teleoffice-cert-') && !before.has(n))
