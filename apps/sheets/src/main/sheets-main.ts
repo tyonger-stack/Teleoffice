@@ -57,6 +57,7 @@ import {
   rendererUrl,
   writeJsonAtomic,
 } from '@teleoffice/electron-utils'
+import { createMainProcessProxyDispatcher } from '@teleoffice/electron-utils/main-proxy'
 import { createI18n, getUiLang, type Lang, normalizeLang, setUiLang } from '@teleoffice/i18n'
 import { ProjectStore } from '@teleoffice/project-store'
 
@@ -4584,12 +4585,14 @@ async function applyMainProcessProxy(): Promise<void> {
     // dispatcher below — forward the proxy to them via env
     setGskProxyUrl(proxyUrl)
     try {
-      const { ProxyAgent, setGlobalDispatcher } = await import('undici')
-      setGlobalDispatcher(new ProxyAgent(proxyUrl))
+      const { setGlobalDispatcher } = await import('undici')
+      // loopback stays direct: a Custom provider on 127.0.0.1 must not ride
+      // the proxy as an absolute-form request (#2084)
+      setGlobalDispatcher(await createMainProcessProxyDispatcher(proxyUrl))
       // strip user:pass credentials before logging
       console.log('[proxy] main-process fetch via', proxyUrl.replace(/\/\/[^@/]*@/, '//***@'))
     } catch (e) {
-      console.warn('[proxy] failed to set ProxyAgent:', e)
+      console.warn('[proxy] failed to set proxy dispatcher:', e)
     }
   }
   const envProxy =

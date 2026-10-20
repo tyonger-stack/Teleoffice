@@ -11,6 +11,7 @@
     "./drop-open": "./src/drop-open.ts",
     "./generated-images": "./src/generated-images.ts",
     "./headless-export": "./src/headless-export.ts",
+    "./main-proxy": "./src/main-proxy.ts",
     "./remote-image": "./src/remote-image.ts",
     "./renderer-protocol": "./src/renderer-protocol.ts",
     "./renderer-scheme": "./src/renderer-scheme.ts",
