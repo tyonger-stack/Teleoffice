@@ -1,7 +1,7 @@
 {
   "name": "@teleoffice/shell",
   "productName": "TeleOffice",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "license": "Apache-2.0",
   "homepage": "https://github.com/tyonger-stack/Teleoffice",
   "private": true,
