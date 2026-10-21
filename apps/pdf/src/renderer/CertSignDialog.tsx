@@ -37,6 +37,8 @@ export function certErrorKey(error: FailedResult['error']): Parameters<TFunc>[0]
       return 'certErrNotExportable'
     case 'cert-store-locked':
       return 'certErrStoreLocked'
+    case 'cert-store-unsupported':
+      return 'certStoreUnsupported'
     case 'cert-store-tool-missing':
       return 'certErrNoTools'
     case 'pdf-encrypted':
@@ -179,6 +181,7 @@ export function CertSignDialog({
         path: filePath,
         certId: activeId,
         password: source === 'file' ? password : '',
+        storePassword: source === 'system' && storePassword ? storePassword : undefined,
         reason: reason.trim() || undefined,
         location: location.trim() || undefined,
         contactInfo: contact.trim() || undefined,
@@ -260,6 +263,9 @@ export function CertSignDialog({
             </div>
             {!listing && systemCerts.length === 0 && issues.length === 0 && (
               <div className="pdf-modal-hint">{t('certSystemEmpty')}</div>
+            )}
+            {issues.includes('platform-unsupported') && (
+              <div className="pdf-modal-hint">{t('certStoreUnsupported')}</div>
             )}
             {issues.includes('nss-tools-missing') && (
               <div className="pdf-modal-hint">{t('certStoreNoTools')}</div>
