@@ -51,7 +51,7 @@ jobs:
       - name: Open or update the tracking issue
         if: steps.compare.outputs.pending != '0'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN || github.token }}
           PENDING: ${{ steps.compare.outputs.pending }}
           MARKER: ${{ steps.compare.outputs.marker }}
           UPSTREAM_TIP: ${{ steps.compare.outputs.upstream_tip }}
