@@ -10,7 +10,7 @@
 import { describe, expect, it } from 'vitest'
 import { Editor } from '@tiptap/core'
 import JSZip from 'jszip'
-import { buildBlankDocx, parseDocx, saveDocx } from '@genoffice/docx-engine'
+import { buildBlankDocx, parseDocx, saveDocx } from '@teleoffice/docx-engine'
 import { blocksToPmDoc, pmDocToSavePlan, type PmNode } from '../src/renderer/editor/convert'
 import { editorExtensions } from '../src/renderer/editor/extensions'
 
