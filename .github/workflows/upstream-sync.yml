@@ -58,16 +58,20 @@ jobs:
         run: |
           title="Upstream sync: ${PENDING} commits on genspark-ai/genoffice since ${MARKER:0:10}"
           body="$(node --input-type=module -e 'import { readFileSync } from "node:fs"; process.stdout.write(JSON.parse(readFileSync("/tmp/upstream-sync.json","utf8")).markdown)')"
-          # The token may be refused issue writes (seen as "Resource not accessible by
-          # integration (createIssue)"). The report is already in the job summary, so warn
-          # instead of failing the scheduled run.
+          # gh issue create/edit/comment use GraphQL (createIssue / updateIssue / addComment).
+          # GITHUB_TOKEN in Actions returns "Resource not accessible by integration" for those
+          # mutations even with issues: write. The REST issue routes accept that permission.
+          # The report is already in the job summary, so warn instead of failing the scheduled run.
           warn() {
             echo "::warning title=Upstream sync::Could not $1 the tracking issue with GITHUB_TOKEN. The report is in this run's job summary. Check Settings > Actions > General > Workflow permissions."
           }
-          existing="$(gh issue list --state open --limit 20 --search 'Upstream sync in:title' --json number,title --jq '[.[] | select(.title | startswith("Upstream sync:")) | .number] | first // empty')" || { warn read; exit 0; }
+          # List open issues over REST and keep the first number whose title starts with "Upstream sync:".
+          # Pull requests share this endpoint, so skip anything with a pull_request object.
+          existing="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/issues?state=open&per_page=100" --jq '.[] | select(.pull_request == null and (.title | startswith("Upstream sync:"))) | .number')" || { warn read; exit 0; }
+          existing="${existing%%$'\n'*}"
           if [ -n "$existing" ]; then
-            gh issue edit "$existing" --title "$title" --body "$body" || { warn update; exit 0; }
-            gh issue comment "$existing" --body "Refreshed against upstream \`${UPSTREAM_TIP}\`. ${PENDING} commits still need a review." || warn comment
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${existing}" -f title="$title" -f body="$body" || { warn update; exit 0; }
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/${existing}/comments" -f body="Refreshed against upstream \`${UPSTREAM_TIP}\`. ${PENDING} commits still need a review." || warn comment
           else
-            gh issue create --title "$title" --body "$body" || warn create
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues" -f title="$title" -f body="$body" || warn create
           fi
