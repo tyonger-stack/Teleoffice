@@ -91,6 +91,7 @@ export const he = {
   alignLeft: 'יישור לשמאל',
   alignCenter: 'מרכז',
   alignRight: 'יישור לימין',
+  alignJustify: 'יישור לשני הצדדים',
   fontSizeDec: 'הקטן גודל גופן',
   fontSizeInc: 'הגדל גודל גופן',
   typography: 'טיפוגרפיה',
