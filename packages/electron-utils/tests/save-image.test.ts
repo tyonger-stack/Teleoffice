@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { decodeDataUrl, isSavableImageUrl, suggestImageFileName } from '../src/index'
+import { MAX_REMOTE_IMAGE_BYTES } from '../src/remote-image'
 
 describe('isSavableImageUrl', () => {
   it('accepts data, http(s) and app asset schemes', () => {
@@ -43,6 +44,8 @@ describe('decodeDataUrl', () => {
   })
   it('rejects malformed input', () => {
     expect(decodeDataUrl('data:nope')).toBeNull()
+    // a lone `%` in a non-base64 payload must yield null, not a URIError
+    expect(decodeDataUrl('data:text/plain,100%done')).toBeNull()
   })
 
   it('parses every parameter run a real data URL can carry', () => {
@@ -55,6 +58,14 @@ describe('decodeDataUrl', () => {
     expect(charset?.mime).toBe('image/svg+xml')
     expect(charset?.bytes.toString()).toBe('<svg/>')
     expect(decodeDataUrl('data:,hello')?.bytes.toString()).toBe('hello')
+  })
+
+  it('refuses payloads past the remote image budget before decoding', () => {
+    const url =
+      'data:image/png;base64,' + 'A'.repeat(Math.ceil((MAX_REMOTE_IMAGE_BYTES * 4) / 3) + 4)
+    const started = performance.now()
+    expect(decodeDataUrl(url)).toBeNull()
+    expect(performance.now() - started).toBeLessThan(1_000)
   })
 
   it('is not exponential on a comma-less data URL', () => {
