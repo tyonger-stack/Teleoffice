@@ -106,4 +106,4 @@ export {
   type RendererHost,
 } from './renderer-scheme'
 export { installRendererProtocol, registerRendererScheme } from './renderer-protocol'
-export { atomicWriteFile, writeJsonAtomic } from './atomic-write'
+export { atomicWriteFile, atomicWriteVia, writeJsonAtomic } from './atomic-write'
