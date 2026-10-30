@@ -23,15 +23,35 @@ export function blockRangePositions(
 
 const hasDelMark = (node: ProseMirrorNode) => node.marks.some((m) => m.type.name === 'del')
 
-/** block text as it reads once pending tracked deletions are applied (textContent minus del runs) */
-export function liveText(node: ProseMirrorNode): string {
+/** Block text after pending tracked deletions are removed. */
+export function liveText(
+  node: ProseMirrorNode,
+  options: {
+    // Insert between textblocks inside the node, matching textBetween's
+    // blockSeparator behavior for word-count statistics.
+    blockSeparator?: string
+    // Text contributed by atomic inline leaves such as math and ruby.
+    leafText?: (leaf: ProseMirrorNode) => string
+  } = {},
+): string {
   if ((node.attrs?.blockRevision as { kind?: string } | null)?.kind === 'del') return ''
+  const leafText =
+    options.leafText ?? ((leaf: ProseMirrorNode) => leaf.type.spec.leafText?.(leaf) ?? '')
   let out = ''
+  let firstTextblock = true
   const walk = (child: ProseMirrorNode): void => {
     if (hasDelMark(child)) return
     if (child.isText) out += child.text ?? ''
-    else if (child.isLeaf) out += child.type.spec.leafText?.(child) ?? ''
-    else child.forEach(walk)
+    else if (child.isLeaf) out += leafText(child)
+    else {
+      // Containers such as table rows and cells sit between a table and its
+      // paragraphs, so add separators only when we reach textblocks.
+      if (child.isTextblock) {
+        if (options.blockSeparator !== undefined && !firstTextblock) out += options.blockSeparator
+        firstTextblock = false
+      }
+      child.forEach(walk)
+    }
   }
   node.forEach(walk)
   return out
