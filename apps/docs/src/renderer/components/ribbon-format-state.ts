@@ -303,9 +303,15 @@ export function computeFormatState(
     canSplitCell: inTable && !!splitCell(tableState),
     canSplitTable,
     imageSelected,
-    imageDataUrl: imageSelected ? str(protAttrs.imageDataUrl) : null,
-    imageWrap:
-      Array.isArray(protAttrs.textboxes) && protAttrs.textboxes.length > 0
+    inlinePicture: !!inlinePic,
+    imageDataUrl: inlinePic
+      ? str(inlinePic.dataUrl)
+      : imageSelected
+        ? str(protAttrs.imageDataUrl)
+        : null,
+    imageWrap: inlinePic
+      ? str(inlinePic.wrap)
+      : Array.isArray(protAttrs.textboxes) && protAttrs.textboxes.length > 0
         ? shapeWrapOf(protAttrs.textboxes[0] as TextboxDisplay)
         : str(protAttrs.imageWrap),
     imageAlign: str(protAttrs.imageAlign),
@@ -364,4 +370,12 @@ export function computeFormatState(
     spaceBefore: Number(mainPara.spaceBefore) || 0,
     spaceAfter: Number(mainPara.spaceAfter) || 0,
   }
+}
+
+/** attrs of the run picture (in line or floating) under a node selection (rules excluded) */
+function inlinePictureOf(ed: Editor): Record<string, unknown> | null {
+  const sel = ed.state.selection
+  if (!(sel instanceof NodeSelection) || sel.node.type.name !== 'docInlineImage') return null
+  const attrs = sel.node.attrs
+  return attrs.rule || !attrs.dataUrl ? null : attrs
 }

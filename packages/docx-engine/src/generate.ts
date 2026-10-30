@@ -344,26 +344,35 @@ export function applyShapeWrapAt(
   } else if (!hasAnchor) {
     next = applyImageWrap(drawing, wrap, undefined, undefined, zOrder)
   } else {
-    const behind = wrap === 'behind' ? '1' : '0'
-    const wrapElement =
-      wrap === 'front' || wrap === 'behind'
-        ? '<wp:wrapNone/>'
-        : wrap === 'topBottom'
-          ? '<wp:wrapTopAndBottom/>'
-          : '<wp:wrapSquare wrapText="bothSides"/>'
-    next = drawing
-      .replace(WRAP_ELEMENT_RE, '')
-      .replace(/<wp:anchor[^>]*>/, (tag) =>
-        tag.includes('behindDoc=')
-          ? tag.replace(/behindDoc="[^"]*"/, `behindDoc="${behind}"`)
-          : tag.replace(/<wp:anchor/, `<wp:anchor behindDoc="${behind}"`),
-      )
-    if (zOrder !== undefined) next = setAnchorRank(next, zOrder)
-    next = /<wp:docPr/.test(next)
-      ? next.replace(/<wp:docPr/, `${wrapElement}<wp:docPr`)
-      : next.replace(/<a:graphic[\s>]/, (m) => `${wrapElement}${m}`)
+    next = swapAnchorWrap(drawing, wrap, zOrder)
   }
   return paragraphXml.slice(0, seg.start) + next + paragraphXml.slice(seg.end)
+}
+
+/**
+ * Switch the wrap mode of an existing wp:anchor drawing in place: only the
+ * wrap element, behindDoc and (when given) relativeHeight change, so the
+ * positionH/V bytes keep the object where it was.
+ */
+export function swapAnchorWrap(drawingXml: string, wrap: ImageWrap, zOrder?: number): string {
+  const behind = wrap === 'behind' ? '1' : '0'
+  const wrapElement =
+    wrap === 'front' || wrap === 'behind'
+      ? '<wp:wrapNone/>'
+      : wrap === 'topBottom'
+        ? '<wp:wrapTopAndBottom/>'
+        : '<wp:wrapSquare wrapText="bothSides"/>'
+  let next = drawingXml
+    .replace(WRAP_ELEMENT_RE, '')
+    .replace(/<wp:anchor[^>]*>/, (tag) =>
+      tag.includes('behindDoc=')
+        ? tag.replace(/behindDoc="[^"]*"/, `behindDoc="${behind}"`)
+        : tag.replace(/<wp:anchor/, `<wp:anchor behindDoc="${behind}"`),
+    )
+  if (zOrder !== undefined) next = setAnchorRank(next, zOrder)
+  return /<wp:docPr/.test(next)
+    ? next.replace(/<wp:docPr/, `${wrapElement}<wp:docPr`)
+    : next.replace(/<a:graphic[\s>]/, (m) => `${wrapElement}${m}`)
 }
 
 // ---- protected field / formula token patching ----
@@ -2434,6 +2443,86 @@ export function generateTableModelXml(model: TableModel, originalTableXml?: stri
     )
   }
   return `<w:tbl>${tblPr}${grid}${rows}</w:tbl>`
+}
+
+/** rId / docPr placeholder of a picture inserted by the editor; saveDocx resolves
+ *  it against SaveOptions.newPictures once the bytes land as a media part */
+export const NEW_PICTURE_TOKEN_PREFIX = 'aidocs-new-pic-'
+
+export interface InlinePictureXmlOptions {
+  rId: string
+  /** wp:docPr / pic:cNvPr id (a placeholder token until the save mints a real one) */
+  docPrId: string | number
+  widthPx: number
+  heightPx: number
+  altText?: string
+  rotDeg?: number
+  flipH?: boolean
+  flipV?: boolean
+}
+
+/** The drawing re-sized to widthPx x heightPx: wp:extent and the picture's own
+ *  a:ext follow (effectExtent is left alone). Unchanged when the extent already
+ *  reads these sizes, so an untouched picture saves byte-identical. */
+export function resizeInlinePictureXml(xml: string, widthPx: number, heightPx: number): string {
+  if (!/<wp:inline[\s>]/.test(xml)) return xml
+  return resizeDrawingExtents(xml, widthPx, heightPx)
+}
+
+/** resizeInlinePictureXml for a floating (wp:anchor) run picture; only a lone
+ *  picture: a group's extent does not follow its first picture */
+export function resizeAnchoredPictureXml(xml: string, widthPx: number, heightPx: number): string {
+  if (!/<wp:anchor[\s>]/.test(xml) || /<wpg:/.test(xml)) return xml
+  if ((xml.match(/<pic:pic[\s>]/g) ?? []).length !== 1) return xml
+  return resizeDrawingExtents(xml, widthPx, heightPx)
+}
+
+function resizeDrawingExtents(xml: string, widthPx: number, heightPx: number): string {
+  if (!(widthPx > 0) || !(heightPx > 0)) return xml
+  const cx = Math.max(1, Math.round(widthPx * EMU_PER_PX))
+  const cy = Math.max(1, Math.round(heightPx * EMU_PER_PX))
+  const extent = /<wp:extent\b[^>]*\bcx="(\d+)"[^>]*\bcy="(\d+)"/.exec(xml)
+  if (!extent) return xml
+  const samePx = (emu: string, px: number) =>
+    Math.round((Number(emu) / EMU_PER_PX) * 100) / 100 === px
+  if (samePx(extent[1], widthPx) && samePx(extent[2], heightPx)) return xml
+  const ext = (tag: string) =>
+    tag.replace(/\bcx="\d+"/, `cx="${cx}"`).replace(/\bcy="\d+"/, `cy="${cy}"`)
+  let out = xml.replace(/<wp:extent\b[^>]*>/, ext)
+  const pic = /<pic:spPr[\s>][\s\S]*?<\/pic:spPr>/.exec(out)
+  if (pic) out = out.replace(pic[0], pic[0].replace(/<a:ext\b[^>]*>/, ext))
+  return out
+}
+
+/** `<w:drawing>` of an inline picture (wp:inline + pic:pic), the run and paragraph excluded */
+export function inlinePictureDrawingXml(o: InlinePictureXmlOptions): string {
+  const cx = Math.max(1, Math.round(o.widthPx * EMU_PER_PX))
+  const cy = Math.max(1, Math.round(o.heightPx * EMU_PER_PX))
+  // Word lays the drawing out against the unrotated wp:extent plus
+  // wp:effectExtent: a rotated non-square picture needs the bounding-box
+  // overflow recorded there (same math as patchImageParagraphXml)
+  const rot = o.rotDeg ? ((Math.round(o.rotDeg) % 360) + 360) % 360 : 0
+  const rad = (rot * Math.PI) / 180
+  const bw = Math.abs(cx * Math.cos(rad)) + Math.abs(cy * Math.sin(rad))
+  const bh = Math.abs(cx * Math.sin(rad)) + Math.abs(cy * Math.cos(rad))
+  const eeX = Math.max(0, Math.round((bw - cx) / 2))
+  const eeY = Math.max(0, Math.round((bh - cy) / 2))
+  const id = String(o.docPrId)
+  const name = `Picture ${id}`
+  return (
+    '<w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">' +
+    `<wp:extent cx="${cx}" cy="${cy}"/>` +
+    `<wp:effectExtent l="${eeX}" t="${eeY}" r="${eeX}" b="${eeY}"/>` +
+    `<wp:docPr id="${id}" name="${name}"${o.altText ? ` descr="${escapeXmlAttr(o.altText)}"` : ''}/>` +
+    '<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">' +
+    '<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
+    '<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
+    `<pic:nvPicPr><pic:cNvPr id="${id}" name="${name}"/><pic:cNvPicPr/></pic:nvPicPr>` +
+    `<pic:blipFill><a:blip r:embed="${o.rId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
+    `<pic:spPr><a:xfrm${rot ? ` rot="${rot * 60000}"` : ''}${o.flipH ? ' flipH="1"' : ''}${o.flipV ? ' flipV="1"' : ''}><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>` +
+    '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>' +
+    '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>'
+  )
 }
 
 /**

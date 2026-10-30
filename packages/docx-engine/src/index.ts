@@ -94,6 +94,7 @@ export {
   ommlToLatex,
   ommlToMathML,
 } from './math'
+export { patchRunPictureXml, type RunPictureGeometry } from './run-picture'
 export { scanBody, type BodyElement, type BodyScan } from './scan'
 export {
   BLANK_BULLET_NUM_ID,
