@@ -1500,6 +1500,7 @@ export function runsToInline(runs: Run[]): PmNode[] {
           kind: run.noteRef.kind,
           id: run.noteRef.id,
           num: parseInt(run.text, 10) || 1,
+          rawRPr: run.rawRPr ?? null,
         },
       })
       continue
@@ -3178,12 +3179,14 @@ export function inlineToRuns(content: PmNode[]): Run[] {
       continue
     }
     if (node.type === 'docNoteRef') {
+      const markerRawRPr = node.attrs?.rawRPr
       runs.push({
         text: String(node.attrs?.num ?? 1),
         noteRef: {
           kind: (node.attrs?.kind as 'footnote' | 'endnote') ?? 'footnote',
           id: String(node.attrs?.id ?? ''),
         },
+        ...(typeof markerRawRPr === 'string' && markerRawRPr ? { rawRPr: markerRawRPr } : {}),
       })
       continue
     }
