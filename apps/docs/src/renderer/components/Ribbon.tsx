@@ -2363,68 +2363,31 @@ function RibbonInner({
                     <span>{t('ribbonFlipV')}</span>
                   </button>
                 </div>
-              </div>
-              <div className="ribbon-group-label">{t('ribbonGroupAdjust')}</div>
-            </div>
-            <div className="ribbon-sep" />
-            {/* ---- Arrange: wrap text / align ---- */}
-            <div className="table-tool-group">
-              <div className="table-tool-row">
-                <Dropdown
-                  className="rb-wrap-dd"
-                  disabled={!canEdit}
-                  tip={t('ribbonWrapText')}
-                  value={fs.imageWrap ?? ''}
-                  options={WRAP_OPTIONS.map((opt) => ({
-                    value: opt.value ?? '',
-                    label: t(opt.labelKey),
-                  }))}
-                  onPick={(v) => {
-                    if (!canEdit) return
-                    editor
-                      .chain()
-                      .focus()
-                      .updateAttributes('docProtected', { imageWrap: v || null })
-                      .run()
-                  }}
-                />
-              </div>
-              <div className="table-tool-row">
-                {(
-                  [
-                    ['left', <IconAlignLeft key="l" />, t('ribbonAlignLeftTip')],
-                    ['center', <IconAlignCenter key="c" />, t('ribbonAlignCenterTip')],
-                    ['right', <IconAlignRight key="r" />, t('ribbonAlignRightTip')],
-                  ] as const
-                ).map(([value, icon, label]) => (
-                  <button
-                    key={value}
-                    className={
-                      (fs.imageAlign ?? 'left') === value
-                        ? 'table-tool-button active'
-                        : 'table-tool-button'
-                    }
-                    disabled={!canEdit}
-                    data-tip={label}
-                    aria-label={label}
-                    onClick={() => {
-                      if (!canEdit) return
-                      editor
-                        .chain()
-                        .focus()
-                        .updateAttributes('docProtected', {
-                          imageAlign: value === 'left' ? null : value,
-                        })
-                        .run()
-                    }}
-                  >
-                    {icon}
-                  </button>
-                ))}
-              </div>
-              <div className="ribbon-group-label">{t('ribbonGroupArrange')}</div>
-            </div>
-            <div className="ribbon-sep" />
+                <div className="ribbon-sep" />
+              </>
+            )}
+            {fs.inlinePicture && (
+              <>
+                {/* ---- Arrange: wrap text of a run picture (its own node) ---- */}
+                <div className="table-tool-group">
+                  <div className="table-tool-row">
+                    <Dropdown
+                      className="rb-wrap-dd"
+                      disabled={!canEdit}
+                      tip={t('ribbonWrapText')}
+                      value={fs.imageWrap ?? ''}
+                      options={WRAP_OPTIONS.map((opt) => ({
+                        value: opt.value ?? '',
+                        label: t(opt.labelKey),
+                      }))}
+                      onPick={(v) => canEdit && setFloatingWrap(ed, v || null)}
+                    />
+                  </div>
+                  <div className="ribbon-group-label">{t('ribbonGroupArrange')}</div>
+                </div>
+                <div className="ribbon-sep" />
+              </>
+            )}
             {/* ---- Size: height/width in the measurement unit, aspect lock, reset ---- */}
             <div className="table-tool-group">
               <div className="table-tool-row table-size-inputs" key={fs.imageKey ?? 'nosel'}>

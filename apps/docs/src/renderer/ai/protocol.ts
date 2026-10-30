@@ -12,7 +12,7 @@ import { pmTableToModel, tableModelToPmNode, type PmMark, type PmNode } from '..
 import { equationBlockJson, inlineEquationNodeJson } from '../editor/equation'
 import { inheritFrom, inheritTableFormatting, sameBlockRole } from './inherit-formatting'
 import { TRACK_IGNORE, type RevisionRange } from '../editor/revisions'
-import { countWords } from '../word-count'
+import { countWords, documentTextForWordCount, leafTextForWordCount } from '../word-count'
 import { blockRangePositions, isTrackedDeleted, liveText } from './doc-utils'
 import { opSignatures } from './ops'
 import { pageSetupContextLines, type AiSectionState } from './page-setup'
@@ -164,7 +164,7 @@ export const AGENT_SYSTEM_PROMPT = [
   OPS_GUIDE,
 ].join('\n')
 
-export { countWords }
+export { countWords, documentTextForWordCount }
 
 // ---- selection scope ----
 
@@ -522,6 +522,12 @@ export function buildDocumentContext(
   let index = 0
   let fullText = ''
   let hasPendingDeletions = false
+  // textBetween's blockSeparator: between block units, never leading or trailing
+  let fullTextFirst = true
+  const appendFullText = (text: string) => {
+    fullText += fullTextFirst ? text : ` ${text}`
+    fullTextFirst = false
+  }
   editor.state.doc.forEach((node) => {
     let type: string
     let preview: string
@@ -538,14 +544,23 @@ export function buildDocumentContext(
         preview = `(picture, no text — use analyze_media with blockIndex ${index} to see it)`
       }
       if (deleted) hasPendingDeletions = true
-      else fullText += node.textContent
+      else if (node.textContent !== '') appendFullText(node.textContent)
     } else {
       deleted = isTrackedDeleted(node)
       const live = liveText(node)
       // deleted blocks show their struck text so the model can talk about the
       // revision, but that text never counts as current content
       preview = deleted ? node.textContent : live
-      if (!deleted) fullText += live
+      // the stats text follows the status bar's word-count rules — blocks are
+      // separated (or their words merge) and inline formulas/ruby carry text —
+      // while still excluding tracked deletions
+      if (!deleted)
+        appendFullText(
+          liveText(node, {
+            blockSeparator: ' ',
+            leafText: leafTextForWordCount,
+          }),
+        )
       if (deleted || live !== node.textContent) hasPendingDeletions = true
       if (node.type.name === 'docHeading') {
         type = `h${Math.min(Math.max(Number(node.attrs.level) || 1, 1), 6)}`

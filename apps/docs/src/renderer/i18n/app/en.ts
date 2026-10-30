@@ -222,6 +222,7 @@ export const en = {
   appPageOf: 'Page {current} of {total}',
   appWordCountTitle: 'Word Count',
   appWordCountN: '{n} words',
+  appWordCountSelection: '{selected} of {total} words',
   appTrackChangesOn: 'Track Changes: On',
   appTrackChangesOff: 'Track Changes: Off',
   appAcTitle: 'AutoCorrect Options',

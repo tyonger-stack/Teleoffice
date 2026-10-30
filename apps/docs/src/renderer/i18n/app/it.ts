@@ -233,6 +233,7 @@ export const it = {
   appPageOf: 'Pagina {current} di {total}',
   appWordCountTitle: 'Conteggio parole',
   appWordCountN: '{n} parole',
+  appWordCountSelection: '{selected} di {total} parole selezionate',
   appTrackChangesOn: 'Revisioni: attive',
   appTrackChangesOff: 'Revisioni: disattivate',
   appAcTitle: 'Opzioni correzione automatica',

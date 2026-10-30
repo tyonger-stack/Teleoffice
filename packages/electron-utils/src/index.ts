@@ -99,10 +99,11 @@ export {
 export {
   RENDERER_SCHEME,
   DOCX_MEDIA_SCHEME_PRIVILEGE,
+  SLIDE_MEDIA_SCHEME_PRIVILEGE,
   RENDERER_SCHEME_PRIVILEGE,
   rendererUrl,
   resolveRendererFile,
   type RendererHost,
 } from './renderer-scheme'
 export { installRendererProtocol, registerRendererScheme } from './renderer-protocol'
-export { atomicWriteFile, writeJsonAtomic } from './atomic-write'
+export { atomicWriteFile, atomicWriteVia, writeJsonAtomic } from './atomic-write'
