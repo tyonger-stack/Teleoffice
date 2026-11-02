@@ -1013,6 +1013,7 @@ export const DocInlineImage = Node.create({
       offsetXEmu: { default: null as number | null },
       offsetYEmu: { default: null as number | null },
       relV: { default: null as string | null },
+      relH: { default: null as string | null },
       wrapDistTopEmu: { default: null as number | null },
       wrapDistBottomEmu: { default: null as number | null },
       wrapDistLeftEmu: { default: null as number | null },
@@ -1131,12 +1132,16 @@ export const DocInlineImage = Node.create({
     // path: X measures from the column start; right floats convert it to a
     // right-edge inset so the picture is not stuck flush against the margin
     const tx = node.attrs.offsetXEmu != null ? Number(node.attrs.offsetXEmu) / EMU_PER_PX : null
+    // positionH page: the offset measures from the paper edge, one left margin before the column
+    const pageX = node.attrs.relH === 'page' ? ' - var(--doc-margin-left,0px)' : ''
     if (tx != null && wrap) {
       if (wrap.endsWith('-right') && w > 0) {
-        margin.right = `calc(100% - ${px(tx + w)})`
+        margin.right = pageX
+          ? `calc(100% - ${px(tx + w)} + var(--doc-margin-left,0px))`
+          : `calc(100% - ${px(tx + w)})`
         styles.push('max-width:none')
       } else if (wrap.endsWith('-left')) {
-        margin.left = px(tx)
+        margin.left = pageX ? `calc(${px(tx)}${pageX})` : px(tx)
         styles.push('max-width:none')
       } else if (wrap === 'topBottom') {
         // an explicit X leaves the centred slot, like the block-picture path

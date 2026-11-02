@@ -138,7 +138,7 @@ import {
 } from '@teleoffice/pptx-render'
 // From its own electron-utils subpath rather than the package barrel: the
 // barrel drags Electron-only modules into headless bundles.
-import { atomicWriteFile, atomicWriteVia } from '@teleoffice/electron-utils/atomic-write'
+import { atomicWriteVia } from '@teleoffice/electron-utils/atomic-write'
 import { DEFAULT_PICTURE_DPI, pictureFrame } from './picture-frame'
 import { refineComplexWidths, shapedMetricsReady } from './shaped-metrics'
 import { cfbKind, isCfbHeader } from './cfb-sniff'

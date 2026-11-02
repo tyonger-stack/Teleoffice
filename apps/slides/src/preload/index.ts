@@ -1,7 +1,6 @@
 import type { AiPanelPrefs } from '@teleoffice/ui'
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import type { IpcRendererEvent } from 'electron'
-import type { RenderSlide } from '@teleoffice/pptx-render'
 import type { ProjectApi } from '@teleoffice/project-store'
 import { installDropOpenBridge } from '@teleoffice/electron-utils/drop-open'
 import type {

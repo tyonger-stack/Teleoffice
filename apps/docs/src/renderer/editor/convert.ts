@@ -3157,6 +3157,42 @@ function nodeBookmarks(
   return Array.isArray(value) && value.length > 0 ? value : undefined
 }
 
+
+/** pictures the editor placed in cells this save: placeholder token -> bytes (see SaveOptions.newPictures) */
+const newPictures = new Map<string, { base64: string; mime: NewImage['mime'] }>()
+let newPictureSeq = 0
+// the same node is converted more than once per save (signatures, text, save)
+const newPictureTokenOf = new WeakMap<PmNode, string>()
+
+function newPictureBytes(dataUrl: string): { base64: string; mime: NewImage['mime'] } | null {
+  const m = /^data:(image\/(?:png|jpeg|gif));base64,(.+)$/s.exec(dataUrl)
+  return m ? { base64: m[2], mime: m[1] as NewImage['mime'] } : null
+}
+
+/** a cell picture inserted by the editor has bytes but no drawing yet: emit one
+ *  around a placeholder the save resolves once the media part exists */
+function newPictureXml(node: PmNode): string {
+  const widthPx = Number(node.attrs?.widthPx)
+  const heightPx = Number(node.attrs?.heightPx)
+  const bytes = newPictureBytes(String(node.attrs?.dataUrl ?? ''))
+  if (!bytes || !(widthPx > 0) || !(heightPx > 0)) return ''
+  let token = newPictureTokenOf.get(node)
+  if (!token) {
+    token = `${NEW_PICTURE_TOKEN_PREFIX}${++newPictureSeq}`
+    newPictureTokenOf.set(node, token)
+  }
+  newPictures.set(token, bytes)
+  return inlinePictureDrawingXml({
+    rId: token,
+    docPrId: token,
+    widthPx,
+    heightPx,
+    rotDeg: node.attrs?.rotDeg ? Number(node.attrs.rotDeg) : undefined,
+    flipH: !!node.attrs?.flipH,
+    flipV: !!node.attrs?.flipV,
+  })
+}
+
 export function inlineToRuns(content: PmNode[]): Run[] {
   const runs: Run[] = []
   for (const node of content) {

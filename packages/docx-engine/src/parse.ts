@@ -6930,6 +6930,7 @@ type ImageMeta = Pick<
   | 'imageOffsetXEmu'
   | 'imageOffsetYEmu'
   | 'imageRelV'
+  | 'imageRelH'
   | 'imageAnchorLocked'
   | 'imagePosH'
   | 'imagePosV'
@@ -7049,7 +7050,7 @@ export function runPictureAnchorOf(drawingXml: string): RunPictureAnchor {
   return anchor
 }
 
-function imageMeta(xml: string, ctx?: BuildContext): ImageMeta {
+function imageMeta(xml: string): ImageMeta {
   const meta: ImageMeta = {}
   const drawingAt = xml.search(/<w:(?:drawing|pict)[\s>]/)
   if (drawingAt >= 0 && /^<w:p[\s>]/.test(xml)) {

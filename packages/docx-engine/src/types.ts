@@ -220,6 +220,8 @@ export interface Run {
     offsetYEmu?: number
     /** wp:positionV relativeFrom page/margin with a posOffset: offsetYEmu is a page position, not a paragraph offset */
     relV?: 'page' | 'margin'
+    /** wp:positionH relativeFrom page/margin with a posOffset: offsetXEmu is a page/margin position */
+    relH?: 'page' | 'margin'
     /** wp:anchor text-wrap distances (EMU; display-only) */
     wrapDistTopEmu?: number
     wrapDistBottomEmu?: number
@@ -1579,6 +1581,8 @@ export interface Block {
   imageOffsetYEmu?: number
   /** wp:positionV relativeFrom page/margin with a posOffset: imageOffsetYEmu is a page position */
   imageRelV?: 'page' | 'margin'
+  /** wp:positionH relativeFrom page/margin with a posOffset: imageOffsetXEmu is a page/margin position */
+  imageRelH?: 'page' | 'margin'
   /** wp:anchor locked="1": moving the picture must not change its anchor paragraph */
   imageAnchorLocked?: boolean
   /** margin-relative wp:align of a floating image (Word position-gallery presets) */
