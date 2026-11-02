@@ -2291,77 +2291,140 @@ function RibbonInner({
           </div>
         ) : tab === 'pictureFormat' && inImage ? (
           <div className="table-ribbon-body">
-            {/* ---- Adjust: remove background / crop / replace picture ---- */}
-            <div className="ribbon-group">
-              <div className="ribbon-group-items">
-                <button
-                  className="rb-big"
-                  disabled={!canEdit}
-                  data-tip={t('ribbonRemoveBgTip')}
-                  onClick={() => setPictureDialog('cutout')}
-                >
-                  <span className="rb-big-icon">
-                    <IconRemoveBg size={28} />
-                  </span>
-                  <span>{t('ribbonRemoveBg')}</span>
-                </button>
-                <button
-                  className="rb-big"
-                  disabled={!canEdit}
-                  data-tip={t('ribbonCropTip')}
-                  onClick={() => setPictureDialog('crop')}
-                >
-                  <span className="rb-big-icon">
-                    <IconCrop size={28} />
-                  </span>
-                  <span>{t('ribbonCrop')}</span>
-                </button>
-                <button
-                  className="rb-big"
-                  disabled={!canEdit}
-                  data-tip={t('ribbonReplacePictureTip')}
-                  onClick={() => void replacePicture()}
-                >
-                  <span className="rb-big-icon">
-                    <IconReplacePicture size={28} />
-                  </span>
-                  <span>{t('ribbonReplacePicture')}</span>
-                </button>
-                <div className="rb-col">
-                  <button
-                    className="rb-small"
-                    disabled={!canEdit}
-                    onClick={() => rotatePicture(90)}
-                  >
-                    <IconRotateRight size={18} />
-                    <span>{t('ribbonRotateRight')}</span>
-                  </button>
-                  <button
-                    className="rb-small"
-                    disabled={!canEdit}
-                    onClick={() => rotatePicture(-90)}
-                  >
-                    <IconRotateLeft size={18} />
-                    <span>{t('ribbonRotateLeft')}</span>
-                  </button>
+            {!fs.inlinePicture && (
+              <>
+                {/* ---- Adjust: remove background / crop / replace picture ---- */}
+                <div className="ribbon-group">
+                  <div className="ribbon-group-items">
+                    <button
+                      className="rb-big"
+                      disabled={!canEdit}
+                      data-tip={t('ribbonRemoveBgTip')}
+                      onClick={() => setPictureDialog('cutout')}
+                    >
+                      <span className="rb-big-icon">
+                        <IconRemoveBg size={28} />
+                      </span>
+                      <span>{t('ribbonRemoveBg')}</span>
+                    </button>
+                    <button
+                      className="rb-big"
+                      disabled={!canEdit}
+                      data-tip={t('ribbonCropTip')}
+                      onClick={() => setPictureDialog('crop')}
+                    >
+                      <span className="rb-big-icon">
+                        <IconCrop size={28} />
+                      </span>
+                      <span>{t('ribbonCrop')}</span>
+                    </button>
+                    <button
+                      className="rb-big"
+                      disabled={!canEdit}
+                      data-tip={t('ribbonReplacePictureTip')}
+                      onClick={() => void replacePicture()}
+                    >
+                      <span className="rb-big-icon">
+                        <IconReplacePicture size={28} />
+                      </span>
+                      <span>{t('ribbonReplacePicture')}</span>
+                    </button>
+                    <div className="rb-col">
+                      <button
+                        className="rb-small"
+                        disabled={!canEdit}
+                        onClick={() => rotatePicture(90)}
+                      >
+                        <IconRotateRight size={18} />
+                        <span>{t('ribbonRotateRight')}</span>
+                      </button>
+                      <button
+                        className="rb-small"
+                        disabled={!canEdit}
+                        onClick={() => rotatePicture(-90)}
+                      >
+                        <IconRotateLeft size={18} />
+                        <span>{t('ribbonRotateLeft')}</span>
+                      </button>
+                    </div>
+                    <div className="rb-col">
+                      <button
+                        className={fs.imageFlipH ? 'rb-small active' : 'rb-small'}
+                        disabled={!canEdit}
+                        onClick={() => flipPicture('h')}
+                      >
+                        <IconFlipH size={18} />
+                        <span>{t('ribbonFlipH')}</span>
+                      </button>
+                      <button
+                        className={fs.imageFlipV ? 'rb-small active' : 'rb-small'}
+                        disabled={!canEdit}
+                        onClick={() => flipPicture('v')}
+                      >
+                        <IconFlipV size={18} />
+                        <span>{t('ribbonFlipV')}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="ribbon-group-label">{t('ribbonGroupAdjust')}</div>
                 </div>
-                <div className="rb-col">
-                  <button
-                    className={fs.imageFlipH ? 'rb-small active' : 'rb-small'}
-                    disabled={!canEdit}
-                    onClick={() => flipPicture('h')}
-                  >
-                    <IconFlipH size={18} />
-                    <span>{t('ribbonFlipH')}</span>
-                  </button>
-                  <button
-                    className={fs.imageFlipV ? 'rb-small active' : 'rb-small'}
-                    disabled={!canEdit}
-                    onClick={() => flipPicture('v')}
-                  >
-                    <IconFlipV size={18} />
-                    <span>{t('ribbonFlipV')}</span>
-                  </button>
+                <div className="ribbon-sep" />
+                {/* ---- Arrange: wrap text / align ---- */}
+                <div className="table-tool-group">
+                  <div className="table-tool-row">
+                    <Dropdown
+                      className="rb-wrap-dd"
+                      disabled={!canEdit}
+                      tip={t('ribbonWrapText')}
+                      value={fs.imageWrap ?? ''}
+                      options={WRAP_OPTIONS.map((opt) => ({
+                        value: opt.value ?? '',
+                        label: t(opt.labelKey),
+                      }))}
+                      onPick={(v) => {
+                        if (!canEdit) return
+                        editor
+                          .chain()
+                          .focus()
+                          .updateAttributes('docProtected', { imageWrap: v || null })
+                          .run()
+                      }}
+                    />
+                  </div>
+                  <div className="table-tool-row">
+                    {(
+                      [
+                        ['left', <IconAlignLeft key="l" />, t('ribbonAlignLeftTip')],
+                        ['center', <IconAlignCenter key="c" />, t('ribbonAlignCenterTip')],
+                        ['right', <IconAlignRight key="r" />, t('ribbonAlignRightTip')],
+                      ] as const
+                    ).map(([value, icon, label]) => (
+                      <button
+                        key={value}
+                        className={
+                          (fs.imageAlign ?? 'left') === value
+                            ? 'table-tool-button active'
+                            : 'table-tool-button'
+                        }
+                        disabled={!canEdit}
+                        data-tip={label}
+                        aria-label={label}
+                        onClick={() => {
+                          if (!canEdit) return
+                          editor
+                            .chain()
+                            .focus()
+                            .updateAttributes('docProtected', {
+                              imageAlign: value === 'left' ? null : value,
+                            })
+                            .run()
+                        }}
+                      >
+                        {icon}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="ribbon-group-label">{t('ribbonGroupArrange')}</div>
                 </div>
                 <div className="ribbon-sep" />
               </>

@@ -861,7 +861,7 @@ fn vm_without_rich_data_parts_keeps_the_cached_error() {
     }));
 }
 
-fn open_fixture(entries: &[(&str, &str)]) -> (tempfile::TempDir, PathBuf) {
+pub(crate) fn open_fixture(entries: &[(&str, &str)]) -> (tempfile::TempDir, PathBuf) {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("fixture.xlsx");
     let mut writer = zip::ZipWriter::new(File::create(&path).unwrap());

@@ -685,30 +685,6 @@ export function EditorContextMenu({
           </div>
         )}
       </div>
-      {/* Withholding a span. No AI badge: the item spends the words rather
-          than using the model, and the badge would read "Uses AI".
-          Text only, deliberately. A picture alone in a paragraph is a *block*
-          node (docProtected), which takes no marks at all, and a picture
-          beside text is an inline atom whose mark is dropped by the docx save
-          (convert.ts reads the run's node attrs, never the node's marks) — so
-          offering it for a picture would hide it for one session and then lose
-          the decision on the next save, with nothing to tell the reader. */}
-      {onRedact &&
-        item(t('redactMenuLabel'), {
-          disabled: !canEdit || !hasSelection,
-          onClick: run(onRedact),
-        })}
-      {/* The other half of the item above, and its mirror: offered only when the
-          selection really carries the mark. Without this the sole way to stop
-          withholding a span was to delete the words, which loses the reader's
-          own text to undo a decision they made in the editor. Same reason as
-          the item beside it for no AI badge — this one only moves a mark. */}
-      {onUnredact &&
-        isRedactedSelection &&
-        item(t('redactShowLabel'), {
-          disabled: !canEdit,
-          onClick: run(onUnredact),
-        })}
       {(isFloating || runPicture) && (
         <>
           <div className="ctx-sep" />

@@ -313,6 +313,7 @@ import { installArrowCollapse } from './arrow-collapse-fix'
 import { installCtrlDragFill } from './ctrl-drag-fill'
 import { installContextSubmenuReopenFix } from './context-submenu-reopen-fix'
 import { installMenuInputEnter } from './menu-input-enter'
+import { installNumberFormatContextMenu } from './number-format-context-menu'
 import { installClipboardAnchorTile } from './clipboard-anchor-tile'
 import { installSelectionWrapGuard } from './selection-wrap-fix'
 import { sharedFormulaResolverFor } from './shared-formula-journal'
@@ -1865,6 +1866,10 @@ export function App({
     // Enter in a context-menu count box (insert N rows/columns, column
     // width) runs the row's action instead of only committing the number.
     installMenuInputEnter(runtime)
+    // Excel-parity Number Format ▸ on the cell menu (minimal; full
+    // cell-context-menu port is not on this release branch). Gives the
+    // #2045 mixed-theme e2e a stable canary label to probe.
+    const numberFormatMenuDisposable = installNumberFormatContextMenu(runtime)
     // Pasting into an anchor-shaped target (rows a multiple, columns
     // narrower than the copy — or vice versa) repeats like Excel.
     installClipboardAnchorTile(runtime)
@@ -3076,6 +3081,7 @@ export function App({
       arrowCollapseDisposable.dispose()
       ctrlDragFillDisposable.dispose()
       contextSubmenuReopenDisposable.dispose()
+      numberFormatMenuDisposable.dispose()
       multiRowAutofitDisposable.dispose()
       formatPainterDisposable.dispose()
       cfFormulaFoldDisposable.dispose()

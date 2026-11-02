@@ -6930,6 +6930,7 @@ type ImageMeta = Pick<
   | 'imageOffsetXEmu'
   | 'imageOffsetYEmu'
   | 'imageRelV'
+  | 'imageRelH'
   | 'imageAnchorLocked'
   | 'imagePosH'
   | 'imagePosV'
@@ -7049,7 +7050,7 @@ export function runPictureAnchorOf(drawingXml: string): RunPictureAnchor {
   return anchor
 }
 
-function imageMeta(xml: string, ctx?: BuildContext): ImageMeta {
+function imageMeta(xml: string): ImageMeta {
   const meta: ImageMeta = {}
   const drawingAt = xml.search(/<w:(?:drawing|pict)[\s>]/)
   if (drawingAt >= 0 && /^<w:p[\s>]/.test(xml)) {
@@ -7228,6 +7229,8 @@ function imageMeta(xml: string, ctx?: BuildContext): ImageMeta {
     const alignV = /<wp:align>(top|center|bottom)<\/wp:align>/.exec(posVBody)?.[1]
     if ((posVFrom === 'page' || posVFrom === 'margin') && offsetY !== undefined && !alignV)
       meta.imageRelV = posVFrom
+    if ((posHFrom === 'page' || posHFrom === 'margin') && offsetX !== undefined && !alignH)
+      meta.imageRelH = posHFrom
     if (posHFrom === 'margin' && posVFrom === 'margin' && alignH && alignV) {
       meta.imagePosH = alignH as ImageMeta['imagePosH']
       meta.imagePosV = alignV as ImageMeta['imagePosV']

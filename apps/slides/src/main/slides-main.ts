@@ -959,7 +959,7 @@ async function saveDraftAfterGenerate(
       draftPath = pickDraftPath(draftsDir, deckName)
     }
 
-    await writeFile(draftPath, Buffer.from(bytes))
+    await atomicWriteFile(draftPath, Buffer.from(bytes))
     session.path = draftPath
     await pushRecent(draftPath)
     slidesOpenedHook?.(wc, draftPath)

@@ -71,6 +71,10 @@ export {
   type ImagePatch,
   type TextboxParaPatch,
   type TextboxParasPatchSet,
+  inlinePictureDrawingXml,
+  resizeInlinePictureXml,
+  NEW_PICTURE_TOKEN_PREFIX,
+  type InlinePictureXmlOptions,
   type TableGenOptions,
   type TocEntry,
 } from './generate'

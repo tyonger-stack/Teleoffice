@@ -72,6 +72,12 @@ export interface Session {
   metaRev?: number
   /** Transform preview gesture in progress (the first preview already pushed an undo snapshot; later previews/final commit do not) */
   transformPreview?: boolean
+  /**
+   * Snapshots parked while a live transform preview is open: redo was cleared
+   * when the preview began (so Esc can restore the pre-preview deck), and these
+   * entries go back onto redoStack if the preview is cancelled.
+   */
+  previewRedo?: HistorySnapshot[]
   /** The part currently edited in master view (exception to the fidelity rule: only that part is written back) */
   masterEdit?: { partPath: string; slide: Slide } | null
   /** A history-state notification is already queued for this session (coalesces per task) */
