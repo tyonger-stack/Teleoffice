@@ -162,13 +162,20 @@ describe('resumable installer download', () => {
   it('a mid-stream network failure keeps the .part for the next attempt', async () => {
     const dest = destOf()
     const { executor } = makeUpdater()
-    // a body stream that errors halfway through
-    // a real socket hang-up errors the stream after the prefix was delivered
-    // (a synchronous error would void the queued chunk — Node web streams)
+    // a body stream that errors after the prefix was delivered. Node web streams
+    // void a queued chunk when the stream errors before the consumer reads it
+    // (sync/microtask/error-on-next-pull), and a short start()+setTimeout races
+    // vitest cold start / CI load — so deliver via pull, then defer the error.
+    let pulls = 0
     const stream = new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.enqueue(new Uint8Array(FULL.subarray(0, 4)))
-        setTimeout(() => controller.error(new Error('socket hang up')), 5)
+      async pull(controller) {
+        pulls += 1
+        if (pulls === 1) {
+          controller.enqueue(new Uint8Array(FULL.subarray(0, 4)))
+          return
+        }
+        await new Promise((r) => setTimeout(r, 1))
+        controller.error(new Error('socket hang up'))
       },
     })
     globalThis.fetch = vi.fn(
