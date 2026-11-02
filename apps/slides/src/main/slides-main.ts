@@ -138,7 +138,7 @@ import {
 } from '@teleoffice/pptx-render'
 // From its own electron-utils subpath rather than the package barrel: the
 // barrel drags Electron-only modules into headless bundles.
-import { atomicWriteVia } from '@teleoffice/electron-utils/atomic-write'
+import { atomicWriteFile, atomicWriteVia } from '@teleoffice/electron-utils/atomic-write'
 import { DEFAULT_PICTURE_DPI, pictureFrame } from './picture-frame'
 import { refineComplexWidths, shapedMetricsReady } from './shaped-metrics'
 import { cfbKind, isCfbHeader } from './cfb-sniff'
@@ -959,7 +959,7 @@ async function saveDraftAfterGenerate(
       draftPath = pickDraftPath(draftsDir, deckName)
     }
 
-    await writeFile(draftPath, Buffer.from(bytes))
+    await atomicWriteFile(draftPath, Buffer.from(bytes))
     session.path = draftPath
     await pushRecent(draftPath)
     slidesOpenedHook?.(wc, draftPath)
