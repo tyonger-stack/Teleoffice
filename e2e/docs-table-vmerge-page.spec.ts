@@ -138,7 +138,7 @@ test.describe('a vertically merged table crossing pages', () => {
             ],
           },
         ]
-        for (let i = 1; i <= 30; i++) {
+        for (let i = 1; i <= 50; i++) {
           const desc =
             i % 3 === 0
               ? [
@@ -177,7 +177,8 @@ test.describe('a vertically merged table crossing pages', () => {
       expect(tallest).toBeLessThan(900)
 
       // the table spans several pages, so groups do cross page boundaries —
-      // the shape the bug needs — and no row may be left page-tall by the fill
+      // the shape the bug needs. Fixture grown to 50 rows so content-height
+      // pagination (no page-tall inflation) still clears >2 pages on CI fonts.
       const pages = await page.evaluate(() => {
         const gaps = document.querySelectorAll(
           '.page-gap:not(.page-gap-carry):not(.page-cut-overlay), .page-gap-cut:not(.page-cut-overlay)',
