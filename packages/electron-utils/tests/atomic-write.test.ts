@@ -25,6 +25,7 @@ vi.mock('node:fs/promises', async (importOriginal) => {
     rename: vi.fn(actual.rename),
     open: vi.fn(actual.open),
     writeFile: vi.fn(actual.writeFile),
+    copyFile: vi.fn(actual.copyFile),
   }
 })
 
