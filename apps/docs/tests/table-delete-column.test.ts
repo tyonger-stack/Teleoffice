@@ -77,7 +77,7 @@ afterEach(() => {
   editors.clear()
 })
 
-function createEditor(content: JsonNode[]): Editor {
+function createEditor(content: JsonNode): Editor {
   const editor = new Editor({
     element: document.createElement('div'),
     extensions: editorExtensions,
@@ -127,7 +127,7 @@ const pctRounded = (editor: Editor): number[] =>
 
 describe('table delete column keeps the width grid', () => {
   it('deleting the leftmost column keeps the surviving px widths and shrinks the table', () => {
-    const editor = createEditor([table()])
+    const editor = createEditor(table())
     deleteColumnOf(editor, 'A2')
     expect(rowTexts(editor)).toEqual([
       ['B1', 'C1'],
@@ -142,7 +142,7 @@ describe('table delete column keeps the width grid', () => {
   })
 
   it('deleting a middle column splices that column out of the grid', () => {
-    const editor = createEditor([table()])
+    const editor = createEditor(table())
     deleteColumnOf(editor, 'B2')
     expect(rowTexts(editor)).toEqual([
       ['A1', 'C1'],
@@ -156,7 +156,7 @@ describe('table delete column keeps the width grid', () => {
   })
 
   it('a merged cell spanning the deleted column shrinks to the surviving grid', () => {
-    const editor = createEditor([mergedTable()])
+    const editor = createEditor(mergedTable())
     // caret delete (no column selection): with the merge in the first row a
     // column selection would span both grid columns, which deletes wider
     caretInto(editor, 'B2')
@@ -173,7 +173,7 @@ describe('table delete column keeps the width grid', () => {
   })
 
   it('a percentage grid renormalizes onto the survivors', () => {
-    const editor = createEditor([pctTable()])
+    const editor = createEditor(pctTable())
     deleteColumnOf(editor, 'A2')
     expect(rowTexts(editor)).toEqual([
       ['B1', 'C1'],
