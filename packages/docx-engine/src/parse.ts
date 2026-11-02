@@ -7229,6 +7229,8 @@ function imageMeta(xml: string): ImageMeta {
     const alignV = /<wp:align>(top|center|bottom)<\/wp:align>/.exec(posVBody)?.[1]
     if ((posVFrom === 'page' || posVFrom === 'margin') && offsetY !== undefined && !alignV)
       meta.imageRelV = posVFrom
+    if ((posHFrom === 'page' || posHFrom === 'margin') && offsetX !== undefined && !alignH)
+      meta.imageRelH = posHFrom
     if (posHFrom === 'margin' && posVFrom === 'margin' && alignH && alignV) {
       meta.imagePosH = alignH as ImageMeta['imagePosH']
       meta.imagePosV = alignV as ImageMeta['imagePosV']
