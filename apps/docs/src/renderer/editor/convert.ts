@@ -3157,7 +3157,6 @@ function nodeBookmarks(
   return Array.isArray(value) && value.length > 0 ? value : undefined
 }
 
-
 /** pictures the editor placed in cells this save: placeholder token -> bytes (see SaveOptions.newPictures) */
 const newPictures = new Map<string, { base64: string; mime: NewImage['mime'] }>()
 let newPictureSeq = 0
