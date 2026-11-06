@@ -214,10 +214,16 @@ test.describe('docs selection bar and format painter', () => {
       expect(await boldText(editor)).toEqual(['beta'])
       const painter = editor.getByRole('button', { name: /^Format Painter/ })
       // ProseMirror syncs a pointer-placed caret on a deferred selectionchange;
-      // wait for it so the next chord reads the clicked position
+      // wait for it so the next chord reads the clicked position. A click on an
+      // already-selected word can leave the range selected — collapse then.
       const clickWord = async (word: string) => {
         const c = await wordCenter(editor, word)
         await editor.mouse.click(c.x, c.y)
+        await editor.evaluate(() => {
+          const ed = (window as unknown as AidocsWindow).__aidocs!.editor as any
+          const s = ed.state.selection
+          if (s.from !== s.to) ed.chain().setTextSelection(s.from).run()
+        })
         await expect.poll(async () => (await selection(editor)).text).toBe('')
         await editor.waitForTimeout(50)
       }

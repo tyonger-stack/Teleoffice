@@ -175,8 +175,23 @@ test.describe('html editor', () => {
       const editorPage = await waitForPageWithUrl(app, '://html/')
       await expect(editorPage.locator('.ribbon-body')).toBeVisible()
       await editorPage.locator('.rb-view', { hasText: /Source/ }).click()
-      await editorPage.locator('.source-editor .cm-content').click()
-      await editorPage.keyboard.press('ControlOrMeta+s')
+      const sourcePane = editorPage.locator('.source-editor .cm-content')
+      await expect(sourcePane).toBeVisible()
+      await sourcePane.click()
+      // Menu Save short-circuits when !dirty (html-main requestHtmlSave) and
+      // never reaches the renderer, so Ctrl+S from Playwright can no-op. Fire
+      // the same capture-phase keydown App.tsx handles so doSave still runs.
+      await editorPage.evaluate(() => {
+        window.dispatchEvent(
+          new KeyboardEvent('keydown', {
+            key: 's',
+            code: 'KeyS',
+            ctrlKey: true,
+            bubbles: true,
+            cancelable: true,
+          }),
+        )
+      })
       await expect(editorPage.locator('.status-save')).toHaveText(/Saved/)
       expect(await readFile(htmlPath, 'utf8')).toBe(source)
     } finally {
